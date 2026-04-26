@@ -1,5 +1,7 @@
-## What the script automates (0 manual configuration)
+## Para usarlo, no hace falta descargarlo:
+curl -s https://raw.githubusercontent.com/eneekoruiz/helen/main/helen.sh | bash
 
+## What the script automates (0 manual configuration)
 ### BLOCK 1 — Dependencies
 - [x] `zod` — Runtime type validation
 - [x] `isomorphic-dompurify` — XSS sanitization
