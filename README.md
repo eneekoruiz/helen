@@ -1,5 +1,5 @@
 ## Para usarlo, no hace falta descargarlo:
-curl -s https://raw.githubusercontent.com/eneekoruiz/helen/main/helen.sh | bash
+curl -O https://raw.githubusercontent.com/eneekoruiz/eneekoruiz/main/helen.sh && chmod +x helen.sh && ./helen.sh
 
 ## What the script automates (0 manual configuration)
 ### BLOCK 1 — Dependencies
