@@ -1,5 +1,7 @@
-## Para usarlo, no hace falta descargarlo:
-curl -O https://raw.githubusercontent.com/eneekoruiz/eneekoruiz/main/helen.sh && chmod +x helen.sh && ./helen.sh
+## Instalación y Uso Instantáneo
+No necesitas clonar el repo completo para empezar a usarlo. Entra en la raíz de tu proyecto Vite y ejecuta:
+
+curl -O https://raw.githubusercontent.com/eneekoruiz/helen-cli/main/helen.sh && chmod +x helen.sh && ./helen.sh
 
 ## What the script automates (0 manual configuration)
 ### BLOCK 1 — Dependencies
@@ -107,7 +109,48 @@ curl -O https://raw.githubusercontent.com/eneekoruiz/eneekoruiz/main/helen.sh &&
 - [x] `.env.example` — Documented template for all `VITE_` variables
 - [x] `.gitignore` — Guards against committing `.env*` files
 
----
+### BLOCK 15 — Estado & Data Fetching
+- [x] `Zustand` — Estado global con persistencia automática (`sessionStorage`).
+- [x] `TanStack Query` (React Query) — Gestión de caché profesional, reintentos y asincronía.
+
+### BLOCK 16 — API Client (Axios)
+- [x] `axios` — Cliente HTTP centralizado.
+- [x] Interceptores de seguridad e inyección automática de tokens (`Authorization: Bearer`).
+- [x] Lógica de reintentos (ej. 429 Too Many Requests) y redirección por 401.
+
+### BLOCK 17 — i18n Masivo
+- [x] `react-i18next` + `i18next-browser-languagedetector` — Internacionalización completa.
+- [x] Soporte base preparado para más de 15 idiomas.
+- [x] Soporte dinámico para idiomas de lectura de derecha a izquierda (RTL) como el Árabe.
+
+### BLOCK 18 — Testing Suite
+- [x] `Vitest` + `Testing Library` + `jsdom` — Entorno de pruebas súper rápido.
+- [x] Mocks globales pre-configurados (`matchMedia`, `ResizeObserver`).
+- [x] Componente de ejemplo (`Button.test.tsx`) con buenas prácticas.
+
+### BLOCK 19 — Calidad de Código
+- [x] `ESLint` estricto — Reglas avanzadas de `@typescript-eslint`, seguridad y accesibilidad (`jsx-a11y`).
+- [x] `Prettier` — Formateo automático sincronizado para evitar conflictos de equipo.
+- [x] `TypeScript` — Archivo `tsconfig.json` con todas las flags de `strict` activadas al máximo.
+
+### BLOCK 20 — Infraestructura & Docker
+- [x] Dockerfile Multi-stage — Construcción con Node y despliegue con Nginx (imagen final < 50MB).
+- [x] `nginx.conf` optimizado — Fallback para SPA, caché inmutable de 1 año para assets y compresión gzip.
+- [x] `docker-compose.yml` — Entorno de desarrollo levantado en un comando.
+
+### BLOCK 21 — CI/CD Pipeline
+- [x] GitHub Actions — Workflows pre-configurados para PRs y despliegues.
+- [x] Pipeline de Calidad: `Install -> Type-check -> Lint -> Audit -> Gitleaks -> Test -> Build`.
+- [x] Despliegue automatizado directo a Vercel (`deploy.yml`).
+
+### BLOCK 22 — Clean Architecture
+- [x] Estructura generada por dominios: `features/`, `core/`, `infra/`, `shared/`.
+- [x] `README.md` de arquitectura interno — Documenta las reglas de dependencias del proyecto para nuevos devs.
+
+### BLOCK 23 — DX (Developer Experience)
+- [x] Configuración VS Code — Generación de `.vscode/settings.json` (auto-fix on save) y `extensions.json`.
+- [x] `.env.example` — Plantilla generada con todas las variables necesarias documentadas.
+- [x] `README.md` técnico — Generado con badges de CI, instrucciones de setup, lista de scripts y stack tecnológico.
 
 ## What you still configure per project
 
