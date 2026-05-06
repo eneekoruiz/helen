@@ -19,6 +19,7 @@ const meta = {
     nextSteps: ['Wrap your app with <ThemeProvider>', 'Add ThemeToggle to your navbar'],
     riskLevel: 'low',
     recommendedLevel: 'beginner',
+    status: 'stable',
 };
 async function execute(ctx) {
     const result = createEmptyResult(meta.id, meta.name);

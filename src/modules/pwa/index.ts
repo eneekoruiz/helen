@@ -25,6 +25,7 @@ const meta: HelenModule['meta'] = {
   ],
   riskLevel: 'medium',
   recommendedLevel: 'intermediate',
+  status: 'stable',
   compatibleFrameworks: ['vite'],
 };
 

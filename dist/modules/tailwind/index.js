@@ -19,6 +19,7 @@ const meta = {
     nextSteps: ['Start using utility classes in your components'],
     riskLevel: 'low',
     recommendedLevel: 'beginner',
+    status: 'planned',
 };
 async function execute(ctx) {
     const result = createEmptyResult(meta.id, meta.name);

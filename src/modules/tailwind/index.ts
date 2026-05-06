@@ -22,6 +22,7 @@ const meta: HelenModule['meta'] = {
   nextSteps: ['Start using utility classes in your components'],
   riskLevel: 'low',
   recommendedLevel: 'beginner',
+  status: 'planned',
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {

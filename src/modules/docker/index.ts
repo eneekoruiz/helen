@@ -26,6 +26,7 @@ const meta: HelenModule['meta'] = {
   nextSteps: ['Run docker compose up to test locally', 'Customize nginx.conf if needed'],
   riskLevel: 'low',
   recommendedLevel: 'intermediate',
+  status: 'stable',
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {

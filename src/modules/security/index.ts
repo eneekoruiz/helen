@@ -22,6 +22,7 @@ const meta: HelenModule['meta'] = {
   nextSteps: ['Fill in your .env.local with real values', 'Review security headers for your deploy target'],
   riskLevel: 'medium',
   recommendedLevel: 'intermediate',
+  status: 'stable',
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {

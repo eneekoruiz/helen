@@ -1,0 +1,6 @@
+node_modules
+dist
+.helenrc
+.helenrc.corrupt
+*.log
+.DS_Store

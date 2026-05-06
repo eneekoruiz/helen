@@ -21,6 +21,7 @@ const meta = {
     nextSteps: ['Run docker compose up to test locally', 'Customize nginx.conf if needed'],
     riskLevel: 'low',
     recommendedLevel: 'intermediate',
+    status: 'stable',
 };
 async function execute(ctx) {
     const result = createEmptyResult(meta.id, meta.name);

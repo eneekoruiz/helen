@@ -26,6 +26,7 @@ const meta: HelenModule['meta'] = {
   nextSteps: ['Run npm run test to verify setup', 'Write your first real test'],
   riskLevel: 'low',
   recommendedLevel: 'beginner',
+  status: 'stable',
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {

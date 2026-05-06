@@ -1,6 +1,6 @@
 import * as p from '@clack/prompts';
 import pc from 'picocolors';
-import { getAllModules, getModulesByCategory } from '../modules/registry.js';
+import { getAllModules, getStableModules, getModulesByCategory } from '../modules/registry.js';
 import type { HelenModule } from '../modules/types.js';
 
 /**
@@ -24,10 +24,19 @@ export async function showMainMenu(): Promise<string | symbol> {
 }
 
 /**
- * Show module selector. Returns selected module IDs.
+ * Show module selector. Returns selected module IDs (stable modules only).
  */
 export async function showModuleSelector(): Promise<string[] | symbol> {
-  const categories = getModulesByCategory();
+  const stableModules = getStableModules();
+  const categories = new Map<string, HelenModule[]>();
+  
+  for (const mod of stableModules) {
+    const cat = mod.meta.category;
+    const list = categories.get(cat) ?? [];
+    list.push(mod);
+    categories.set(cat, list);
+  }
+
   const options: { value: string; label: string; hint: string }[] = [];
 
   for (const [category, mods] of categories) {
@@ -73,8 +82,11 @@ export async function showExplainSelector(): Promise<string | symbol> {
 export function printModuleExplanation(mod: HelenModule): void {
   const { meta } = mod;
 
+  const statusColor = meta.status === 'stable' ? pc.green : meta.status === 'experimental' ? pc.yellow : pc.gray;
+  const statusLabel = statusColor(meta.status);
+
   console.log('');
-  console.log(`  ${pc.bold(pc.cyan(meta.name))} ${pc.dim(`(${meta.id})`)}`);
+  console.log(`  ${pc.bold(pc.cyan(meta.name))} ${pc.dim(`(${meta.id})`)} ${pc.dim(statusLabel)}`);
   console.log(`  ${pc.dim('Category:')} ${meta.category}`);
   console.log(`  ${pc.dim('Risk:')} ${meta.riskLevel} | ${pc.dim('Level:')} ${meta.recommendedLevel}`);
   console.log('');
@@ -157,8 +169,9 @@ export function printModuleList(): void {
         : mod.meta.riskLevel === 'medium'
           ? pc.yellow(mod.meta.riskLevel)
           : pc.green(mod.meta.riskLevel);
+      const status = mod.meta.status === 'stable' ? pc.green('✓') : mod.meta.status === 'experimental' ? pc.yellow('⚡') : pc.gray('◯');
       console.log(
-        `  ${pc.bold(pc.cyan(mod.meta.id.padEnd(12)))} ${mod.meta.name.padEnd(20)} ${pc.dim(mod.meta.summary)} ${pc.dim(`[${risk}]`)}`,
+        `  ${status} ${pc.bold(pc.cyan(mod.meta.id.padEnd(12)))} ${mod.meta.name.padEnd(20)} ${pc.dim(mod.meta.summary)} ${pc.dim(`[${risk}]`)}`,
       );
     }
     console.log('');

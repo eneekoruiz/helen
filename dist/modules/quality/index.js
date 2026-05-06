@@ -25,6 +25,7 @@ const meta = {
     nextSteps: ['Run npm run lint to check', 'Run npm run format to auto-fix'],
     riskLevel: 'low',
     recommendedLevel: 'beginner',
+    status: 'stable',
 };
 async function execute(ctx) {
     const result = createEmptyResult(meta.id, meta.name);

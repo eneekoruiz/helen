@@ -26,6 +26,7 @@ const meta = {
     ],
     riskLevel: 'low',
     recommendedLevel: 'beginner',
+    status: 'stable',
 };
 async function execute(ctx) {
     const result = createEmptyResult(meta.id, meta.name);

@@ -22,6 +22,7 @@ const meta = {
     ],
     riskLevel: 'medium',
     recommendedLevel: 'intermediate',
+    status: 'stable',
     compatibleFrameworks: ['vite'],
 };
 async function execute(ctx) {

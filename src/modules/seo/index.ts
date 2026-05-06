@@ -22,6 +22,7 @@ const meta: HelenModule['meta'] = {
   nextSteps: ['Customize robots.txt for your domain', 'Add og-image.png to public/'],
   riskLevel: 'low',
   recommendedLevel: 'beginner',
+  status: 'stable',
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {

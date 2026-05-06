@@ -22,6 +22,7 @@ const meta: HelenModule['meta'] = {
   nextSteps: ['Push to GitHub to trigger the workflow'],
   riskLevel: 'low',
   recommendedLevel: 'beginner',
+  status: 'stable',
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {

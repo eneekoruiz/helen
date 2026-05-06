@@ -46,10 +46,28 @@ export function getAllModules() {
     return Array.from(modules.values());
 }
 /**
+ * Get all stable modules (status: 'stable').
+ */
+export function getStableModules() {
+    return Array.from(modules.values()).filter(mod => mod.meta.status === 'stable');
+}
+/**
+ * Get modules by status.
+ */
+export function getModulesByStatus(status) {
+    return Array.from(modules.values()).filter(mod => mod.meta.status === status);
+}
+/**
  * Get all module ids.
  */
 export function getAllModuleIds() {
     return Array.from(modules.keys());
+}
+/**
+ * Get stable module ids only.
+ */
+export function getStableModuleIds() {
+    return getStableModules().map(mod => mod.meta.id);
 }
 /**
  * Get modules grouped by category.
@@ -64,13 +82,12 @@ export function getModulesByCategory() {
     return categories;
 }
 /**
- * Placeholder module ids for future versions.
+ * Modules that are planned but not yet registered.
+ * These are future ideas or experimental modules not ready for public use.
  */
 export const PLANNED_MODULES = [
-    'gdpr',
-    'pwa',
-    'i18n',
-    'sentry',
+    'tailwind',
+    'shadcn',
     'analytics',
     'bundle-analyzer',
     'lighthouse',

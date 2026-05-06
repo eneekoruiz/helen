@@ -30,6 +30,7 @@ const meta: HelenModule['meta'] = {
   nextSteps: ['Run npm run lint to check', 'Run npm run format to auto-fix'],
   riskLevel: 'low',
   recommendedLevel: 'beginner',
+  status: 'stable',
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {

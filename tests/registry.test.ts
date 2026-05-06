@@ -61,6 +61,7 @@ describe('Module Registry', () => {
       expect(meta.whenNotToUse).toBeTruthy();
       expect(meta.riskLevel).toMatch(/^(low|medium|high)$/);
       expect(meta.recommendedLevel).toMatch(/^(beginner|intermediate|advanced)$/);
+      expect(meta.status).toMatch(/^(stable|experimental|planned|deprecated)$/);
       expect(typeof mod.execute).toBe('function');
     }
   });

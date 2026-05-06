@@ -5,7 +5,7 @@ import type { HelenModule } from '../modules/types.js';
  */
 export declare function showMainMenu(): Promise<string | symbol>;
 /**
- * Show module selector. Returns selected module IDs.
+ * Show module selector. Returns selected module IDs (stable modules only).
  */
 export declare function showModuleSelector(): Promise<string[] | symbol>;
 /**

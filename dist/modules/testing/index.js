@@ -21,6 +21,7 @@ const meta = {
     nextSteps: ['Run npm run test to verify setup', 'Write your first real test'],
     riskLevel: 'low',
     recommendedLevel: 'beginner',
+    status: 'stable',
 };
 async function execute(ctx) {
     const result = createEmptyResult(meta.id, meta.name);

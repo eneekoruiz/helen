@@ -19,6 +19,7 @@ const meta = {
     nextSteps: ['Run "npx shadcn-ui@latest add button" to add your first component'],
     riskLevel: 'low',
     recommendedLevel: 'intermediate',
+    status: 'planned',
 };
 async function execute(ctx) {
     const result = createEmptyResult(meta.id, meta.name);

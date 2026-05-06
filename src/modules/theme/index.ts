@@ -22,6 +22,7 @@ const meta: HelenModule['meta'] = {
   nextSteps: ['Wrap your app with <ThemeProvider>', 'Add ThemeToggle to your navbar'],
   riskLevel: 'low',
   recommendedLevel: 'beginner',
+  status: 'stable',
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {

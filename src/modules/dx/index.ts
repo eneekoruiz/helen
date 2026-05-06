@@ -22,6 +22,7 @@ const meta: HelenModule['meta'] = {
   nextSteps: ['Copy .env.example to .env.local and fill values'],
   riskLevel: 'low',
   recommendedLevel: 'beginner',
+  status: 'stable',
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {

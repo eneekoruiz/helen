@@ -8,6 +8,10 @@ export type RiskLevel = 'low' | 'medium' | 'high';
  */
 export type SkillLevel = 'beginner' | 'intermediate' | 'advanced';
 /**
+ * Module lifecycle status.
+ */
+export type ModuleStatus = 'stable' | 'experimental' | 'planned' | 'deprecated';
+/**
  * Full metadata for a HELEN module.
  */
 export interface ModuleMeta {
@@ -28,6 +32,7 @@ export interface ModuleMeta {
     nextSteps: string[];
     riskLevel: RiskLevel;
     recommendedLevel: SkillLevel;
+    status: ModuleStatus;
     /** IDs of modules this module depends on */
     dependencies?: string[];
     /** Optional: specific frameworks this module is compatible with */
