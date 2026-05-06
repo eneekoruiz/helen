@@ -1,6 +1,12 @@
-node_modules
-dist
-.helenrc
-.helenrc.corrupt
+node_modules/
+dist/
+coverage/
+.turbo/
+.cache/
 *.log
 .DS_Store
+.helenrc
+.helenrc.corrupt
+.env.local
+.env
+.vscode/settings.local.json
