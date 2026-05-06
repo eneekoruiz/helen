@@ -11,8 +11,7 @@ import { gdprModule } from './gdpr/index.js';
 import { pwaModule } from './pwa/index.js';
 import { i18nModule } from './i18n/index.js';
 import { sentryModule } from './sentry/index.js';
-import { tailwindModule } from './tailwind/index.js';
-import { shadcnModule } from './shadcn/index.js';
+// Note: `tailwind` and `shadcn` are not registered by default yet.
 
 /**
  * All registered modules, keyed by their id.
@@ -36,8 +35,8 @@ register(gdprModule);
 register(pwaModule);
 register(i18nModule);
 register(sentryModule);
-register(tailwindModule);
-register(shadcnModule);
+// Do not register Tailwind / Shadcn here to keep the stable set of modules
+// registered by default. They can be added later when promoted from planned.
 
 
 /**
