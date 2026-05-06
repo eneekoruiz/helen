@@ -1,0 +1,32 @@
+name: Smoke Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build HELEN
+        run: npm run build
+
+      - name: Create temp project and run HELEN init --dry-run
+        run: |
+          set -e
+          TMPDIR=$(mktemp -d)
+          cd $TMPDIR
+          CI=true npx create-vite@latest . --template react-ts --yes
+          cd $TMPDIR
+          node $GITHUB_WORKSPACE/dist/cli.js init --dry-run
