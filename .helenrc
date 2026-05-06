@@ -1,0 +1,11 @@
+{
+  "projectName": "helen-cli",
+  "framework": "unknown",
+  "packageManager": "npm",
+  "installedModules": [
+    "gdpr"
+  ],
+  "createdAt": "2026-05-06T13:22:31.974Z",
+  "updatedAt": "2026-05-06T13:22:31.976Z",
+  "settings": {}
+}
