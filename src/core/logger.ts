@@ -2,16 +2,16 @@ import pc from 'picocolors';
 
 export const logger = {
   info(msg: string): void {
-    console.log(`${pc.cyan('ℹ')} ${msg}`);
+    console.log(`[ HELEN ] ${msg}`);
   },
   success(msg: string): void {
-    console.log(`${pc.green('✓')} ${msg}`);
+    console.log(`[ HELEN ] ${msg}`);
   },
   warn(msg: string): void {
-    console.log(`${pc.yellow('⚠')} ${msg}`);
+    console.log(`[ HELEN ] ${msg}`);
   },
   error(msg: string): void {
-    console.error(`${pc.red('✖')} ${msg}`);
+    console.error(`[ HELEN ] ${msg}`);
   },
   step(msg: string): void {
     console.log(`  ${pc.dim('→')} ${msg}`);

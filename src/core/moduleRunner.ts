@@ -76,17 +76,17 @@ function printResult(result: ModuleResult): void {
   const { created, modified, skipped, warnings, nextSteps } = result;
 
   if (created.length > 0) {
-    console.log(`  ${pc.green('✓')} Created:  ${created.length} file(s)`);
+    logger.success(`Created:  ${created.length} file(s)`);
   }
   if (modified.length > 0) {
-    console.log(`  ${pc.blue('~')} Modified: ${modified.length} file(s)`);
+    logger.info(`Modified: ${modified.length} file(s)`);
   }
   if (skipped.length > 0) {
-    console.log(`  ${pc.yellow('○')} Skipped:  ${skipped.length} file(s)`);
+    logger.warn(`Skipped:  ${skipped.length} file(s)`);
   }
   if (warnings.length > 0) {
     for (const w of warnings) {
-      console.log(`  ${pc.yellow('⚠')} ${w}`);
+      logger.warn(w);
     }
   }
   if (nextSteps.length > 0) {
@@ -147,9 +147,9 @@ export function printSummary(results: ModuleResult[]): void {
   const totalModified = results.reduce((a, r) => a + r.modified.length, 0);
   const totalSkipped = results.reduce((a, r) => a + r.skipped.length, 0);
 
-  console.log(`  ${pc.green('✓')} Created:  ${totalCreated} file(s)`);
-  console.log(`  ${pc.blue('~')} Modified: ${totalModified} file(s)`);
-  console.log(`  ${pc.yellow('○')} Skipped:  ${totalSkipped} file(s)`);
+  logger.success(`Created:  ${totalCreated} file(s)`);
+  logger.info(`Modified: ${totalModified} file(s)`);
+  logger.warn(`Skipped:  ${totalSkipped} file(s)`);
 
   const allNextSteps = results.flatMap((r) => r.nextSteps);
   if (allNextSteps.length > 0) {
