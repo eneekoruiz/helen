@@ -1,19 +1,19 @@
 import pc from 'picocolors';
 export const logger = {
     info(msg) {
-        console.log(`${pc.cyan('[ HELEN ]')} ${msg}`);
+        console.log(`${pc.cyan('ℹ')} ${msg}`);
     },
     success(msg) {
-        console.log(`${pc.green('[ HELEN ]')} ${msg}`);
+        console.log(`${pc.green('✓')} ${msg}`);
     },
     warn(msg) {
-        console.log(`${pc.yellow('[ HELEN ]')} ${msg}`);
+        console.log(`${pc.yellow('⚠')} ${msg}`);
     },
     error(msg) {
-        console.error(`${pc.red('[ HELEN ]')} ${msg}`);
+        console.error(`${pc.red('✖')} ${msg}`);
     },
     step(msg) {
-        console.log(`  ${pc.dim('->')} ${msg}`);
+        console.log(`  ${pc.dim('→')} ${msg}`);
     },
     section(title) {
         console.log('');

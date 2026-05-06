@@ -97,7 +97,10 @@ export function createProgram(): Command {
       logger.banner();
       const cwd = process.cwd();
       const ctx = buildContext(cwd, opts);
-      logger.info(`Initializing all modules${opts.dryRun ? ' (DRY-RUN)' : ''}...`);
+      if (opts.dryRun) {
+        logger.warn('DRY-RUN mode: previewing changes without writing files');
+      }
+      logger.info(`Installing all modules...`);
       const results = await runModules(getAllModuleIds(), ctx);
       printSummary(results);
     });
@@ -171,6 +174,10 @@ export function createProgram(): Command {
       logger.banner();
       const cwd = process.cwd();
       const ctx = buildContext(cwd, opts);
+      if (opts.dryRun) {
+        logger.warn('DRY-RUN mode: previewing changes without writing files');
+      }
+      logger.info(`Installing ${moduleIds.length} module(s)...`);
       const results = await runModules(moduleIds, ctx);
       
       if (!opts.dryRun && results.length > 0) {
