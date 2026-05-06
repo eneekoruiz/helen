@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { writeFileSafe, fileExists, patchPackageJson, readJson, detectConflict } from '../src/core/fs.js';
+import { writeFileSafe, patchPackageJson, readJson, detectConflict } from '../src/core/fs.js';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'fs-extra';
