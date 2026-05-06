@@ -4,7 +4,8 @@ HELEN is a modular CLI to scaffold and maintain React + Vite + TypeScript projec
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Type: TypeScript](https://img.shields.io/badge/Language-TypeScript-blue.svg)
-![Tests: Passing](https://img.shields.io/badge/Tests-Passing-brightgreen.svg)
+![CI](https://github.com/eneekoruiz/helen/actions/workflows/ci.yml/badge.svg)
+![Smoke Test](https://github.com/eneekoruiz/helen/actions/workflows/smoke-test.yml/badge.svg)
 
 ---
 
