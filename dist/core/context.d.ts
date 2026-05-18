@@ -14,6 +14,8 @@ export interface HelenContext {
     force: boolean;
     /** Verbose output */
     verbose: boolean;
+    /** Optional key-value settings parsed from CLI or interactive questions */
+    settings?: Record<string, any>;
 }
 export interface ModuleResult {
     moduleId: string;

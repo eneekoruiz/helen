@@ -16,6 +16,7 @@ export async function showMainMenu(): Promise<string | symbol> {
       { value: 'doctor', label: '🩺 Doctor', hint: 'Check project health' },
       { value: 'explain', label: '📖 Explain module', hint: 'Learn about a specific module' },
       { value: 'docs', label: '📚 Documentation', hint: 'View module documentation' },
+      { value: 'easter-egg', label: '✨ Run Eneko Ruiz Easter Egg', hint: 'Execute the vibrant truecolor terminal animation' },
       { value: 'exit', label: '👋 Exit' },
     ],
   });

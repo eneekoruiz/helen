@@ -3,9 +3,11 @@
   "framework": "unknown",
   "packageManager": "npm",
   "installedModules": [
-    "gdpr"
+    "gdpr",
+    "security",
+    "dx"
   ],
   "createdAt": "2026-05-06T13:22:31.974Z",
-  "updatedAt": "2026-05-06T13:22:31.976Z",
+  "updatedAt": "2026-05-18T19:58:21.886Z",
   "settings": {}
 }

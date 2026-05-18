@@ -144,4 +144,44 @@ describe('Module Hardening - Idempotency & Dry-Run', () => {
       }
     });
   });
+
+  describe('Security levels (Simple vs Strict)', () => {
+    it('should scaffold simple security files by default', async () => {
+      const mod = getModule('security');
+      if (!mod) throw new Error('security module not found');
+
+      const simpleCtx = { ...ctx, settings: { securityLevel: 'simple' } };
+      const result = await mod.execute(simpleCtx);
+      
+      expect(result.created).toContain('src/lib/env.ts');
+      expect(result.created).toContain('src/lib/sanitize.ts');
+      expect(result.created).not.toContain('src/lib/security.ts');
+
+      const envContent = fs.readFileSync(path.join(tmpDir, 'src/lib/env.ts'), 'utf-8');
+      expect(envContent).toContain('VITE_APP_URL');
+      expect(envContent).not.toContain('NODE_ENV');
+    });
+
+    it('should scaffold strict security files, including cryptography and strict CSP guidelines', async () => {
+      const mod = getModule('security');
+      if (!mod) throw new Error('security module not found');
+
+      const strictCtx = { ...ctx, settings: { securityLevel: 'strict' } };
+      const result = await mod.execute(strictCtx);
+      
+      expect(result.created).toContain('src/lib/env.ts');
+      expect(result.created).toContain('src/lib/sanitize.ts');
+      expect(result.created).toContain('src/lib/security.ts');
+
+      const envContent = fs.readFileSync(path.join(tmpDir, 'src/lib/env.ts'), 'utf-8');
+      expect(envContent).toContain('NODE_ENV');
+      expect(envContent).toContain('Security Violation: VITE_APP_URL must resolve');
+
+      const cryptoContent = fs.readFileSync(path.join(tmpDir, 'src/lib/security.ts'), 'utf-8');
+      expect(cryptoContent).toContain('encryptAES');
+      expect(cryptoContent).toContain('decryptAES');
+      expect(cryptoContent).toContain('hashData');
+      expect(cryptoContent).toContain('generateSecureToken');
+    });
+  });
 });

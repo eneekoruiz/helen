@@ -20,6 +20,7 @@ function buildContext(cwd, opts) {
         dryRun: opts.dryRun ?? false,
         force: opts.force ?? false,
         verbose: false,
+        settings: opts.securityLevel ? { securityLevel: opts.securityLevel } : {},
     };
 }
 export function createProgram() {
@@ -49,12 +50,30 @@ export function createProgram() {
                     const selected = await showModuleSelector();
                     if (p.isCancel(selected))
                         break;
+                    let securityLevel = undefined;
+                    if (selected.includes('security')) {
+                        const level = await p.select({
+                            message: 'Choose a cybersecurity level for your boilerplate:',
+                            options: [
+                                { value: 'simple', label: 'Simple', hint: 'Standard Zod env, basic HTML escaping' },
+                                { value: 'strict', label: 'Strict (Robust)', hint: 'Fail-fast Zod, strict sanitizers, Web Crypto AES-GCM ciphers, SHA-256 hashing, strict CSP setup' }
+                            ]
+                        });
+                        if (p.isCancel(level))
+                            break;
+                        securityLevel = level;
+                    }
                     const dryRunOpt = await p.confirm({ message: 'Dry-run mode? (preview without writing)', initialValue: false });
                     if (p.isCancel(dryRunOpt))
                         break;
-                    const ctx = buildContext(cwd, { dryRun: dryRunOpt });
+                    const ctx = buildContext(cwd, { dryRun: dryRunOpt, securityLevel });
                     const results = await runModules(selected, ctx);
                     printSummary(results);
+                    break;
+                }
+                case 'easter-egg': {
+                    const { runEasterEgg } = await import('./core/easterEgg.js');
+                    await runEasterEgg();
                     break;
                 }
                 case 'modules':
@@ -86,6 +105,7 @@ export function createProgram() {
         .description('Initialize all modules (or use --dry-run to preview)')
         .option('--dry-run', 'Preview changes without writing files', false)
         .option('--force', 'Overwrite existing files', false)
+        .option('--security-level <level>', 'Cybersecurity level (simple or strict)', 'simple')
         .action(async (opts) => {
         logger.banner();
         const cwd = process.cwd();
@@ -156,6 +176,7 @@ export function createProgram() {
         .description('Add one or more modules to the project')
         .option('--dry-run', 'Preview changes without writing files', false)
         .option('--force', 'Overwrite existing files', false)
+        .option('--security-level <level>', 'Cybersecurity level (simple or strict)', 'simple')
         .action(async (moduleIds, opts) => {
         logger.banner();
         const cwd = process.cwd();
@@ -244,6 +265,25 @@ export function createProgram() {
             printModuleExplanation(mod);
             console.log('─'.repeat(70));
         }
+    });
+    // helen scripts
+    const scripts = program
+        .command('scripts')
+        .description('Manage and run utility scripts');
+    scripts
+        .command('easter-egg')
+        .description('Run the vibrant 24-bit Truecolor console Easter Egg animation')
+        .action(async () => {
+        const { runEasterEgg } = await import('./core/easterEgg.js');
+        await runEasterEgg();
+    });
+    // helen easter-egg (convenience alias)
+    program
+        .command('easter-egg')
+        .description('Run the vibrant 24-bit Truecolor console Easter Egg animation')
+        .action(async () => {
+        const { runEasterEgg } = await import('./core/easterEgg.js');
+        await runEasterEgg();
     });
     return program;
 }
