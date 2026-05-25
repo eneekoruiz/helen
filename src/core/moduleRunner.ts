@@ -153,6 +153,12 @@ export async function ejectModule(
   
   if (ctx.dryRun) {
     logger.info(`[DRY-RUN] Would remove files: ${mod.meta.filesCreated.join(', ')}`);
+    for (const file of mod.meta.filesModified) {
+      const backupPath = path.join(ctx.cwd, `${file}.helen-backup`);
+      if (fs.existsSync(backupPath)) {
+        logger.info(`[DRY-RUN] Would restore backup for: ${file}`);
+      }
+    }
     return true;
   }
 
@@ -165,8 +171,52 @@ export async function ejectModule(
     }
   }
 
-  // Note: Reverting package.json and complex file modifications is omitted 
-  // for safety in this version.
+  // Restore modified files if no other installed modules use them
+  const { readConfig, getConfigPath } = await import('./config.js');
+  const config = readConfig(ctx.cwd);
+  const otherInstalled = (config?.installedModules || []).filter(id => id !== moduleId);
+
+  for (const file of mod.meta.filesModified) {
+    const backupPath = path.join(ctx.cwd, `${file}.helen-backup`);
+    if (fs.existsSync(backupPath)) {
+      const otherModifies = otherInstalled.some(id => {
+        const other = getModule(id);
+        return other?.meta.filesModified.includes(file) || other?.meta.filesCreated.includes(file);
+      });
+
+      if (!otherModifies) {
+        fs.copySync(backupPath, path.join(ctx.cwd, file), { overwrite: true });
+        fs.removeSync(backupPath);
+        logger.step(`Restored backup: ${file}`);
+      } else {
+        logger.warn(`Skipped restoring backup for ${file} because other installed modules modify/create it.`);
+      }
+    }
+  }
+
+  // Update .helenrc
+  if (config) {
+    const updatedModules = config.installedModules.filter(id => id !== moduleId);
+    const updatedCreatedFiles = (config.createdFiles || []).filter(f => !mod.meta.filesCreated.includes(f));
+
+    if (updatedModules.length === 0) {
+      const configPath = getConfigPath(ctx.cwd);
+      if (fs.existsSync(configPath)) {
+        fs.removeSync(configPath);
+        logger.step(`Removed configuration file: .helenrc`);
+      }
+    } else {
+      const configPath = getConfigPath(ctx.cwd);
+      const updatedConfig = {
+        ...config,
+        installedModules: updatedModules,
+        createdFiles: updatedCreatedFiles,
+        updatedAt: new Date().toISOString(),
+      };
+      fs.writeJsonSync(configPath, updatedConfig, { spaces: 2 });
+      logger.step(`Updated configuration file: .helenrc`);
+    }
+  }
   
   logger.success(`Module ${mod.meta.name} ejected.`);
   return true;

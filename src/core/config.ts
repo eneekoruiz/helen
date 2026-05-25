@@ -8,6 +8,7 @@ export interface HelenConfig {
   framework: string;
   packageManager: string;
   installedModules: string[];
+  createdFiles?: string[];
   createdAt: string;
   updatedAt: string;
   settings: Record<string, any>;
@@ -53,6 +54,7 @@ export function updateConfig(cwd: string, updates: Partial<HelenConfig>): void {
     framework: 'unknown',
     packageManager: 'npm',
     installedModules: [],
+    createdFiles: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     settings: {},
@@ -63,6 +65,11 @@ export function updateConfig(cwd: string, updates: Partial<HelenConfig>): void {
     ...updates,
     updatedAt: new Date().toISOString(),
     installedModules: Array.from(new Set([...existing.installedModules, ...(updates.installedModules || [])])),
+    createdFiles: Array.from(new Set([...(existing.createdFiles || []), ...(updates.createdFiles || [])])),
+    settings: {
+      ...(existing.settings || {}),
+      ...(updates.settings || {}),
+    },
   };
 
   patchJson(configPath, newConfig as any);

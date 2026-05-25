@@ -13,6 +13,7 @@ import { scaffoldProject } from './core/scaffold.js';
 import { generateEntity } from './core/generator.js';
 import type { HelenContext } from './core/context.js';
 import { getInstallCommand } from './core/packageManager.js';
+import { runRollback } from './core/rollback.js';
 
 
 
@@ -63,6 +64,18 @@ async function handleAutoInstall(results: any[], ctx: HelenContext, isInteractiv
   }
 }
 
+function persistResults(results: any[], ctx: HelenContext): void {
+  if (ctx.dryRun || results.length === 0) return;
+  const createdFiles = results.flatMap(r => r.created);
+  updateConfig(ctx.cwd, {
+    projectName: ctx.project.name,
+    framework: ctx.project.framework,
+    packageManager: ctx.project.packageManager,
+    installedModules: results.map(r => r.moduleId),
+    createdFiles: createdFiles,
+  });
+}
+
 export function createProgram(): Command {
   const program = new Command();
 
@@ -111,8 +124,30 @@ export function createProgram(): Command {
             if (p.isCancel(dryRunOpt)) break;
             const ctx = buildContext(cwd, { dryRun: dryRunOpt as boolean, securityLevel });
             const results = await runModules(selected as string[], ctx);
+            persistResults(results, ctx);
             printSummary(results, ctx);
             await handleAutoInstall(results, ctx, true);
+            break;
+          }
+          case 'rollback': {
+            const confirm = await p.confirm({
+              message: 'Are you sure you want to rollback all modifications and remove HELEN-created files?',
+              initialValue: false,
+            });
+            if (p.isCancel(confirm) || !confirm) break;
+
+            const dryRunOpt = await p.confirm({
+              message: 'Dry-run mode? (preview rollback without making changes)',
+              initialValue: false,
+            });
+            if (p.isCancel(dryRunOpt)) break;
+
+            const rollbackResult = await runRollback(cwd, { dryRun: dryRunOpt as boolean });
+            if (rollbackResult.restored.length === 0 && rollbackResult.removed.length === 0) {
+              logger.info('No backups or created files found to rollback.');
+            } else {
+              logger.success(`Rollback completed: restored ${rollbackResult.restored.length} files, removed ${rollbackResult.removed.length} files.`);
+            }
             break;
           }
           case 'easter-egg': {
@@ -159,6 +194,7 @@ export function createProgram(): Command {
       }
       logger.info(`Installing all modules...`);
       const results = await runModules(getAllModuleIds(), ctx);
+      persistResults(results, ctx);
       printSummary(results, ctx);
       if (opts.install) {
         await handleAutoInstall(results, ctx, false);
@@ -248,14 +284,7 @@ export function createProgram(): Command {
       logger.info(`Installing ${moduleIds.length} module(s)...`);
       const results = await runModules(moduleIds, ctx);
       
-      if (!opts.dryRun && results.length > 0) {
-        updateConfig(cwd, {
-          projectName: ctx.project.name,
-          framework: ctx.project.framework,
-          packageManager: ctx.project.packageManager,
-          installedModules: results.map(r => r.moduleId)
-        });
-      }
+      persistResults(results, ctx);
       
       printSummary(results, ctx);
       if (opts.install) {
@@ -320,6 +349,26 @@ export function createProgram(): Command {
       await generateModuleDocs(cwd);
     });
 
+
+  // helen rollback
+  program
+    .command('rollback')
+    .alias('restore')
+    .description('Rollback all HELEN-created changes and restore original files from backups')
+    .option('--dry-run', 'Preview the rollback actions without applying them', false)
+    .action(async (opts: { dryRun: boolean }) => {
+      logger.banner();
+      const cwd = process.cwd();
+      if (opts.dryRun) {
+        logger.warn('DRY-RUN mode: previewing rollback actions without modifying files.');
+      }
+      const rollbackResult = await runRollback(cwd, opts);
+      if (rollbackResult.restored.length === 0 && rollbackResult.removed.length === 0) {
+        logger.info('No backups or created files found to rollback.');
+      } else {
+        logger.success(`Rollback completed: restored ${rollbackResult.restored.length} files, removed ${rollbackResult.removed.length} files.`);
+      }
+    });
 
   // helen doctor
   program

@@ -33,14 +33,16 @@ describe('Config System (.helenrc)', () => {
     fs.removeSync(tmpDir);
   });
 
-  it('should persist settings', () => {
+  it('should deep merge settings and accumulate createdFiles', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'helen-config-'));
     
-    updateConfig(tmpDir, { settings: { theme: 'dark' } });
-    updateConfig(tmpDir, { settings: { language: 'en' } }); // Note: this currently overwrites if not merged manually in updateConfig logic or deepMerged
+    updateConfig(tmpDir, { settings: { theme: 'dark' }, createdFiles: ['file1.ts'] });
+    updateConfig(tmpDir, { settings: { language: 'en' }, createdFiles: ['file1.ts', 'file2.ts'] });
     
     const config = readConfig(tmpDir);
+    expect(config!.settings.theme).toBe('dark');
     expect(config!.settings.language).toBe('en');
+    expect(config!.createdFiles).toEqual(['file1.ts', 'file2.ts']);
     
     fs.removeSync(tmpDir);
   });
