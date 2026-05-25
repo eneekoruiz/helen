@@ -1,31 +1,30 @@
-# 🌌 HELEN CLI — Premium Modular Scaffolding Engine
+# 🌌 HELEN CLI — Premium Scaffolding & Hardening Engine
 
-HELEN is an enterprise-grade, modular developer CLI designed to scaffold, harden, and maintain React + Vite + TypeScript projects with production-ready patterns. It delivers top-tier developer experience (DX), robust cybersecurity presets, and automated workspace configs.
+HELEN is a modular developer CLI designed to scaffold, harden, and maintain **React + Vite + TypeScript** projects with production-ready patterns. It delivers top-tier developer experience (DX), automated environment safety configurations, and modular code injection presets.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg?style=flat-square)](LICENSE)
 [![Language: TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg?style=flat-square)](https://www.typescriptlang.org)
 [![Tested: Vitest](https://img.shields.io/badge/Tested%20with-Vitest-orange.svg?style=flat-square)](https://vitest.dev)
-[![Cybersecurity: Strict](https://img.shields.io/badge/Cybersecurity-Strict-crimson.svg?style=flat-square)](#-security-utilities-security)
 
 ---
 
 ## ✨ Features & Architecture
 
-HELEN is engineered to be **safe-by-default**, **idempotent**, and **fully interactive**. It helps teams avoid repetitive configuration cycles:
+HELEN is engineered to be **safe-by-default**, **idempotent**, and **interactive**.
 
 *   **⚡ Zero-Clone Execution**: Run HELEN directly on any project using standard package runners (`npx`). No cloning or local compiling required.
-*   **🛡️ Dual-Tier Cybersecurity**: Choose between `simple` and `strict` modes. Includes environment validation powered by Zod, secure URL/HTML sanitization, cryptographically secure tokens, AES-256-GCM encryption, and automated Content Security Policy (CSP) configurations.
+*   **🛡️ Dual-Tier Cybersecurity**: Choose between `simple` and `strict` modes for environment validation (Zod), input sanitizers, and Web Crypto APIs (AES-256-GCM symmetric encryption/decryption, SHA-256 secure digests, and Content Security Policy).
 *   **🌌 Dynamic Truecolor Animations**: Contains a premium 24-bit Truecolor terminal loader and interactive diagnostic system with a HSL diagonal spectrum cycle, pluggable into any TypeScript project.
-*   **🧩 Modular Hardening**: Add features on-demand (`init`, `add`). HELEN reads your workspace configuration, detects package managers, merges `package.json` scripts, and prevents module duplication or file overwrites.
+*   **🧩 Modular Hardening**: Add features on-demand (`init`, `add`). HELEN reads your workspace configuration, detects package managers, merges `package.json` dependencies/scripts, and prevents file duplication.
 
 ---
 
 ## 🚀 Running Without Cloning (Quick Execution)
 
-You can launch and utilize HELEN instantly inside any new or existing project directory **without cloning the repository**!
+You can launch and utilize HELEN instantly inside any Vite React TS directory **without cloning the repository**!
 
 ```bash
-# 1. Initialize recommended modules in any active directory
+# 1. Initialize recommended stable modules in any project directory
 npx helen-cli init
 
 # 2. Add specific modules interactively or directly
@@ -44,77 +43,75 @@ helen init
 
 ---
 
-## 🛠️ Local Development & CLI Setup
+## 🛠️ CLI Reference
 
-If you are developing or contributing to the HELEN codebase locally, set up your workspace as follows:
+### Stable Commands (Fully Implemented & Verified)
+*   `helen` (Default interactive menu)
+*   `helen init [--dry-run] [--force] [--security-level <simple|strict>]` — Initializes all modules in the project.
+*   `helen add <modules...> [--dry-run] [--force] [--security-level <simple|strict>]` — Adds one or more specific modules.
+*   `helen modules` — Lists all registered modules.
+*   `helen explain <module>` — Explains what a specific module does and outputs its technical metadata.
+*   `helen doctor` — Evaluates project setup health, directories, configs, and lock files.
+*   `helen scripts easter-egg` — Runs the diagonal Truecolor console brand animation.
+*   `helen docs` — Outputs full registry explanations for all modules.
 
-### 1. Clone & Build
-```bash
-# Clone the repository
-git clone https://github.com/eneekoruiz/helen.git
-cd helen
-
-# Install developer dependencies cleanly
-npm ci
-
-# Compile TypeScript codebase to JavaScript (dist/)
-npm run build
-```
-
-### 2. Local CLI Testing
-To test the CLI locally, link it to your global node package list:
-```bash
-# Link the local build globally
-npm link
-
-# Use the globally linked executable in any workspace directory
-helen doctor
-helen scripts easter-egg
-```
-
-### 3. Verification & QA Scripts
-```bash
-npm run build       # Compile TypeScript outputs to dist/
-npm run test        # Execute the Vitest unit test suite (40+ assertions)
-npm run format      # Auto-format codebase with Prettier
-npm run lint        # Check code quality and style constraints
-```
+### Experimental / In Development Commands
+*   `helen create <name> [--next]` — Scaffolds a new project folder (Vite-React-TS or Next-TS).
+*   `helen generate <type> <name>` (alias: `g`) — Generates component, hook, page, or entity templates.
+*   `helen update [--dry-run]` — Updates installed modules to the latest presets.
+*   `helen eject <module> [--dry-run]` — Removes files created by a module.
 
 ---
 
-## 📦 Current Active Modules Registry
+## 📦 Modules Registry
 
-HELEN offers a catalog of **10 highly cohesive modules** that can be injected on-demand into your codebase:
+HELEN structures features into three distinct lifecycle tiers:
+
+### 🟢 Stable Modules (Production-Ready & Fully Tested)
+
+These modules are covered by integration tests, compile cleanly, and support auto-dependency injection into `package.json`.
 
 | Module | Identifier | Scaffolds & Enhances |
 | :--- | :--- | :--- |
-| **Security Utilities** | `security` | Enforces environment validation via Zod, URL filters, HTML sanitizers. **Strict mode** appends AES-256-GCM encryption wrappers, SHA-256 secure digests, and CSP configurations. |
+| **Code Quality** | `quality` | ESLint + Prettier + strict TypeScript config. Adds `lint`, `format`, and `typecheck` scripts. |
+| **Testing Setup** | `testing` | Vitest + Testing Library + jsdom environment, helper mock utilities, and example test files. |
+| **Security Utilities** | `security` | Enforces environment validation via Zod, URL filters, HTML sanitizers. **Strict mode** appends AES-256-GCM encryption wrappers, SHA-256 secure digests, and strict CSP configuration headers. |
+| **Docker Setup** | `docker` | Optimized multi-stage `Dockerfile` (development & production) and `docker-compose.yml` setups. |
+| **CI/CD Pipeline** | `ci` | Preconfigured GitHub Actions workflows for automated typechecking, linting, testing, and production packaging. |
+| **SEO Basics** | `seo` | Reusable React SEO metadata header component (Helmet), robots.txt, and site manifest.json. |
 | **Developer Experience** | `dx` | Configures `.vscode/settings.json`, recommended extensions, and outputs `scripts/easter-egg.ts` to run truecolor animations in your own projects. |
 | **Theme System** | `theme` | Injectable React `<ThemeProvider>`, custom `useTheme` hook, and dark-mode toggle components. |
-| **Sentry Error Tracking** | `sentry` | `@sentry/react` setup with session replay, user feedback, and security-hardened data redaction configurations. |
-| **Docker Environment** | `docker` | Optimized multi-stage `Dockerfile` (development & production) and `docker-compose.yml` setups. |
-| **GDPR Compliance** | `gdpr` | Fully interactive React cookie consent banners, policies, and context hooks. |
-| **CI/CD Pipeline** | `ci` | Preconfigured GitHub Actions workflows for automated typechecking, linting, testing, and production packaging. |
-| **SEO Basics** | `seo` | Dynamic React SEO metadata header component, robots.txt, and site manifest configurations. |
-| **Internationalization** | `i18n` | High-quality `react-i18next` engine with modular English and Spanish translation structures. |
-| **Progressive Web App** | `pwa` | Progressive offline-first asset configurations via `vite-plugin-pwa`. |
+
+### 🟡 Experimental Modules (Functional but In-Development)
+
+These modules are registered but undergo rapid iteration and require manual configuration checks.
+
+*   **GDPR Compliance (`gdpr`)** — React cookie consent banners, legal terms, and cookie policies.
+*   **Progressive Web App (`pwa`)** — Progressive offline-first asset configurations via `vite-plugin-pwa`.
+*   **Internationalization (`i18n`)** — Multi-language `react-i18next` configuration and base translation structures.
+*   **Sentry Error Tracking (`sentry`)** — Error logging setup with Session Replay and PII data sanitizers.
+
+### 🔴 Planned Modules (Future Roadmap)
+
+*   **Tailwind CSS (`tailwind`)** — Utility-first CSS presets.
+*   **Shadcn UI (`shadcn`)** — Fully accessible component primitives setup.
 
 ---
 
-## 🤝 Contributing
+## 🧪 Testing & Validation
 
-Contributions are highly valued. To maintain pristine code quality, follow these steps:
-
-1. Fork the repository and create a feature branch (`git checkout -b feature/cool-addition`).
-2. Run `npm ci` and compile cleanly with `npm run build`.
-3. Add Vitest coverage for your behavior under the `tests/` folder.
-4. Run `npm run test` to verify all tests pass seamlessly.
-5. Format code by running `npm run format`.
-6. Open a clean Pull Request detailing your changes.
-
-To initialize local ESLint checks in your editor, configure it by running:
+### 1. Unit & Integration Tests (Vitest)
+Unit tests cover file safety, project detection, package manager discovery, registry unique mapping, and planned execution locks.
 ```bash
-npm init @eslint/config
+npm ci
+npm run test
+```
+
+### 2. Sandbox Integration Tests (QA Labs)
+The sandbox suite performs end-to-end dry-runs, full module applications, package.json parsing validations, and build verification against React + Vite sandboxes.
+```bash
+# Execute local sandbox QA checks
+node sandbox-qa.js
 ```
 
 ---

@@ -18,8 +18,15 @@ import { sentryModule } from './sentry/index.js';
  */
 const modules: Map<string, HelenModule> = new Map();
 
-function register(mod: HelenModule): void {
+export function register(mod: HelenModule): void {
+  if (modules.has(mod.meta.id)) {
+    throw new Error(`Duplicate module ID: ${mod.meta.id}`);
+  }
   modules.set(mod.meta.id, mod);
+}
+
+export function unregisterForTesting(id: string): void {
+  modules.delete(id);
 }
 
 // Register all modules

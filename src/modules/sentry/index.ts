@@ -25,7 +25,7 @@ const meta: HelenModule['meta'] = {
   ],
   riskLevel: 'medium',
   recommendedLevel: 'intermediate',
-  status: 'stable',
+  status: 'experimental',
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {

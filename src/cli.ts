@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 import { createProgram } from './index.js';
 import { logger } from './core/logger.js';
 

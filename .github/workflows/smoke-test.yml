@@ -3,14 +3,19 @@ name: Smoke Test
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
 
 jobs:
   smoke:
+    name: CLI Sandbox Integration Smoke Test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -19,14 +24,49 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build HELEN
+      - name: Build HELEN CLI
         run: npm run build
 
-      - name: Create temp project and run HELEN init --dry-run
+      - name: Create Sandbox Project and verify HELEN CLI
         run: |
           set -e
-          TMPDIR=$(mktemp -d)
-          cd $TMPDIR
-          CI=true npx create-vite@latest . --template react-ts --yes
-          cd $TMPDIR
+          
+          # Create a temporary directory outside the repo
+          TMP_DIR=$(mktemp -d)
+          echo "Created temp sandbox project folder: $TMP_DIR"
+          
+          # Initialize Vite + React + TS project
+          cd $TMP_DIR
+          npm create vite@latest . -- --template react-ts --yes
+          npm install
+          
+          # Run CLI health checks
+          echo "Verifying CLI diagnostics and commands..."
+          node $GITHUB_WORKSPACE/dist/cli.js doctor
+          node $GITHUB_WORKSPACE/dist/cli.js modules
+          node $GITHUB_WORKSPACE/dist/cli.js explain docker
           node $GITHUB_WORKSPACE/dist/cli.js init --dry-run
+          
+          # Test dry-runs on stable modules individually
+          echo "Verifying individual stable module dry-runs..."
+          node $GITHUB_WORKSPACE/dist/cli.js add quality --dry-run
+          node $GITHUB_WORKSPACE/dist/cli.js add testing --dry-run
+          node $GITHUB_WORKSPACE/dist/cli.js add docker --dry-run
+          node $GITHUB_WORKSPACE/dist/cli.js add ci --dry-run
+          node $GITHUB_WORKSPACE/dist/cli.js add seo --dry-run
+          node $GITHUB_WORKSPACE/dist/cli.js add security --dry-run
+          node $GITHUB_WORKSPACE/dist/cli.js add dx --dry-run
+          node $GITHUB_WORKSPACE/dist/cli.js add theme --dry-run
+          
+          # Apply stable modules for real
+          echo "Applying all stable modules..."
+          node $GITHUB_WORKSPACE/dist/cli.js add quality testing docker ci seo security dx theme --force
+          
+          # Verify package.json remains valid JSON after modifications
+          echo "Validating sandbox package.json structure..."
+          node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8')); console.log('package.json is valid JSON!')"
+          
+          # Verify the sandbox project still installs and compiles
+          echo "Verifying sandbox project compilation..."
+          npm install
+          npm run build

@@ -1,9 +1,12 @@
 import type { HelenContext, ModuleResult } from '../core/context.js';
 
+export type { ModuleResult };
+
 /**
  * Risk level for a module.
  */
-export type RiskLevel = 'low' | 'medium' | 'high';
+export type ModuleRisk = 'low' | 'medium' | 'high';
+export type RiskLevel = ModuleRisk;
 
 /**
  * Recommended skill level for using this module.
@@ -34,7 +37,7 @@ export interface ModuleMeta {
   requirements: string[];
   risks: string[];
   nextSteps: string[];
-  riskLevel: RiskLevel;
+  riskLevel: ModuleRisk;
   recommendedLevel: SkillLevel;
   status: ModuleStatus;
   /** IDs of modules this module depends on */

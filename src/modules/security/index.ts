@@ -41,7 +41,7 @@ const envSchema = z.object({
   // Enforced production environment vs local development fallback
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   VITE_APP_URL: z.string().url().refine((url) => {
-    const isProd = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'production');
+    const isProd = (typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process.env && (globalThis as any).process.env.NODE_ENV === 'production');
     if (isProd) {
       return url.startsWith('https://');
     }
@@ -63,7 +63,7 @@ export type Env = z.infer<typeof envSchema>;
 
 function validateEnv(): Env {
   const metaEnv = (import.meta as any).env || {};
-  const processEnv = typeof process !== 'undefined' ? process.env : {};
+  const processEnv = typeof (globalThis as any).process !== 'undefined' ? (globalThis as any).process.env : {};
   const parsed = envSchema.safeParse({ ...metaEnv, ...processEnv });
 
   if (!parsed.success) {
@@ -98,7 +98,7 @@ export type Env = z.infer<typeof envSchema>;
 
 function validateEnv(): Env {
   const metaEnv = (import.meta as any).env || {};
-  const processEnv = typeof process !== 'undefined' ? process.env : {};
+  const processEnv = typeof (globalThis as any).process !== 'undefined' ? (globalThis as any).process.env : {};
   const parsed = envSchema.safeParse({ ...metaEnv, ...processEnv });
 
   if (!parsed.success) {
