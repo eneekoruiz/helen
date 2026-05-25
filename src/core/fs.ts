@@ -66,9 +66,12 @@ export function writeFileSafe(
       return exists ? 'overwritten' : 'created';
     }
 
-    if (exists && !options.force) {
-      logger.warn(`File exists, skipping: ${filePath}`);
-      return 'skipped';
+    if (exists) {
+      if (!options.force) {
+        logger.warn(`File exists, skipping: ${filePath}`);
+        return 'skipped';
+      }
+      backupFile(absolutePath);
     }
 
     ensureDir(path.dirname(absolutePath));
@@ -126,12 +129,17 @@ export function patchJson(
     return fileExists(filePath) ? 'modified' : 'created';
   }
 
+  const exists = fileExists(filePath);
+  if (exists) {
+    backupFile(filePath);
+  }
+
   const existing = readJson(filePath) ?? {};
   const merged = deepMerge(existing as Record<string, unknown>, patches);
   ensureDir(path.dirname(filePath));
   fs.writeJsonSync(filePath, merged, { spaces: 2 });
   logger.step(`Patched: ${filePath}`);
-  return fileExists(filePath) ? 'modified' : 'created';
+  return exists ? 'modified' : 'created';
 }
 
 /**
@@ -147,12 +155,14 @@ export function patchPackageJson(
 
 /**
  * Create a backup of a file before modifying it.
+ * Preserves the initial file state by avoiding overwrites if a backup already exists.
  */
 export function backupFile(filePath: string): string | null {
   if (!fileExists(filePath)) return null;
   const backupPath = `${filePath}.helen-backup`;
+  if (fileExists(backupPath)) return backupPath;
   fs.copySync(filePath, backupPath);
-  logger.step(`Backup: ${backupPath}`);
+  logger.step(`Backup created: ${backupPath}`);
   return backupPath;
 }
 
@@ -182,6 +192,7 @@ export function appendOnce(
     return 'skipped';
   }
 
+  backupFile(filePath);
   fs.appendFileSync(filePath, `\n${content}`, 'utf-8');
   logger.step(`Appended to: ${filePath}`);
   return 'modified';
