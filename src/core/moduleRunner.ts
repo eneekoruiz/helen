@@ -2,6 +2,7 @@ import type { HelenContext, ModuleResult } from './context.js';
 import { getModule } from '../modules/registry.js';
 import { logger } from './logger.js';
 import { patchPackageJson } from './fs.js';
+import { getInstallCommand, getRunCommand } from './packageManager.js';
 import pc from 'picocolors';
 import ora from 'ora';
 import fs from 'fs-extra';
@@ -69,7 +70,7 @@ export async function runModule(
     }
 
     spinner.succeed(`Module ${pc.bold(mod.meta.name)} installed.`);
-    printResult(result);
+    printResult(result, ctx);
     return result;
   } catch (err) {
     spinner.fail(`Module ${pc.bold(mod.meta.name)} failed.`);
@@ -104,7 +105,7 @@ export async function runModules(
 /**
  * Print a module result summary.
  */
-function printResult(result: ModuleResult): void {
+function printResult(result: ModuleResult, ctx?: HelenContext): void {
   const { created, modified, skipped, warnings, nextSteps } = result;
 
   if (created.length > 0) {
@@ -124,7 +125,11 @@ function printResult(result: ModuleResult): void {
   if (nextSteps.length > 0) {
     console.log(`\n  ${pc.bold('Next steps:')}`);
     for (const step of nextSteps) {
-      console.log(`    ${pc.dim('→')} ${step}`);
+      const pm = ctx?.project.packageManager ?? 'npm';
+      const formattedStep = step
+        .replace(/npm run (\w+)/g, (_, script) => getRunCommand(pm, script))
+        .replace(/npm install/g, () => getInstallCommand(pm));
+      console.log(`    ${pc.dim('→')} ${formattedStep}`);
     }
   }
 
@@ -169,10 +174,7 @@ export async function ejectModule(
 
 
 
-/**
- * Print a final summary of all module results.
- */
-export function printSummary(results: ModuleResult[]): void {
+export function printSummary(results: ModuleResult[], ctx?: HelenContext): void {
   logger.section('Summary');
 
   const totalCreated = results.reduce((a, r) => a + r.created.length, 0);
@@ -187,7 +189,11 @@ export function printSummary(results: ModuleResult[]): void {
   if (allNextSteps.length > 0) {
     console.log(`\n  ${pc.bold('Next steps:')}`);
     for (const step of allNextSteps) {
-      console.log(`    ${pc.dim('→')} ${step}`);
+      const pm = ctx?.project.packageManager ?? 'npm';
+      const formattedStep = step
+        .replace(/npm run (\w+)/g, (_, script) => getRunCommand(pm, script))
+        .replace(/npm install/g, () => getInstallCommand(pm));
+      console.log(`    ${pc.dim('→')} ${formattedStep}`);
     }
   }
 

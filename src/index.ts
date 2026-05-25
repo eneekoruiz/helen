@@ -12,6 +12,7 @@ import { readConfig, updateConfig } from './core/config.js';
 import { scaffoldProject } from './core/scaffold.js';
 import { generateEntity } from './core/generator.js';
 import type { HelenContext } from './core/context.js';
+import { getInstallCommand } from './core/packageManager.js';
 
 
 
@@ -27,6 +28,39 @@ function buildContext(cwd: string, opts: { dryRun?: boolean; force?: boolean; se
     verbose: false,
     settings: opts.securityLevel ? { securityLevel: opts.securityLevel } : {},
   };
+}
+
+async function handleAutoInstall(results: any[], ctx: HelenContext, isInteractive: boolean): Promise<void> {
+  if (ctx.dryRun) return;
+  const packageJsonModified = results.some(r => r.modified.includes('package.json'));
+  if (!packageJsonModified) return;
+
+  const pm = ctx.project.packageManager;
+  const installCmd = getInstallCommand(pm);
+
+  if (isInteractive) {
+    const shouldInstall = await p.confirm({
+      message: `Dependencies have changed in package.json. Would you like to run "${installCmd}" automatically?`,
+      initialValue: true,
+    });
+    
+    if (p.isCancel(shouldInstall) || !shouldInstall) {
+      return;
+    }
+
+    const spinner = p.spinner();
+    spinner.start(`Installing dependencies via ${pm}...`);
+    try {
+      const { execSync } = await import('node:child_process');
+      execSync(installCmd, { cwd: ctx.cwd, stdio: 'ignore' });
+      spinner.stop(`Dependencies installed successfully via ${pm}!`);
+    } catch (err) {
+      spinner.stop(`Failed to install dependencies: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  } else {
+    logger.blank();
+    logger.info(`Remember to run "${installCmd}" to install newly added dependencies.`);
+  }
 }
 
 export function createProgram(): Command {
@@ -77,7 +111,8 @@ export function createProgram(): Command {
             if (p.isCancel(dryRunOpt)) break;
             const ctx = buildContext(cwd, { dryRun: dryRunOpt as boolean, securityLevel });
             const results = await runModules(selected as string[], ctx);
-            printSummary(results);
+            printSummary(results, ctx);
+            await handleAutoInstall(results, ctx, true);
             break;
           }
           case 'easter-egg': {
@@ -114,7 +149,8 @@ export function createProgram(): Command {
     .option('--dry-run', 'Preview changes without writing files', false)
     .option('--force', 'Overwrite existing files', false)
     .option('--security-level <level>', 'Cybersecurity level (simple or strict)', 'simple')
-    .action(async (opts: { dryRun: boolean; force: boolean; securityLevel: string }) => {
+    .option('--install', 'Automatically install dependencies after changes', false)
+    .action(async (opts: { dryRun: boolean; force: boolean; securityLevel: string; install: boolean }) => {
       logger.banner();
       const cwd = process.cwd();
       const ctx = buildContext(cwd, opts);
@@ -123,7 +159,16 @@ export function createProgram(): Command {
       }
       logger.info(`Installing all modules...`);
       const results = await runModules(getAllModuleIds(), ctx);
-      printSummary(results);
+      printSummary(results, ctx);
+      if (opts.install) {
+        await handleAutoInstall(results, ctx, false);
+      } else {
+        const packageJsonModified = results.some(r => r.modified.includes('package.json'));
+        if (packageJsonModified && !opts.dryRun) {
+          logger.blank();
+          logger.info(`Remember to run "${getInstallCommand(ctx.project.packageManager)}" to install new dependencies.`);
+        }
+      }
     });
 
   // helen create <name>
@@ -192,7 +237,8 @@ export function createProgram(): Command {
     .option('--dry-run', 'Preview changes without writing files', false)
     .option('--force', 'Overwrite existing files', false)
     .option('--security-level <level>', 'Cybersecurity level (simple or strict)', 'simple')
-    .action(async (moduleIds: string[], opts: { dryRun: boolean; force: boolean; securityLevel: string }) => {
+    .option('--install', 'Automatically install dependencies after changes', false)
+    .action(async (moduleIds: string[], opts: { dryRun: boolean; force: boolean; securityLevel: string; install: boolean }) => {
       logger.banner();
       const cwd = process.cwd();
       const ctx = buildContext(cwd, opts);
@@ -211,7 +257,16 @@ export function createProgram(): Command {
         });
       }
       
-      printSummary(results);
+      printSummary(results, ctx);
+      if (opts.install) {
+        await handleAutoInstall(results, ctx, false);
+      } else {
+        const packageJsonModified = results.some(r => r.modified.includes('package.json'));
+        if (packageJsonModified && !opts.dryRun) {
+          logger.blank();
+          logger.info(`Remember to run "${getInstallCommand(ctx.project.packageManager)}" to install new dependencies.`);
+        }
+      }
     });
 
   // helen update
@@ -219,7 +274,8 @@ export function createProgram(): Command {
     .command('update')
     .description('Update all installed modules to latest templates')
     .option('--dry-run', 'Preview changes without writing files', false)
-    .action(async (opts: { dryRun: boolean }) => {
+    .option('--install', 'Automatically install dependencies after changes', false)
+    .action(async (opts: { dryRun: boolean; install: boolean }) => {
       logger.banner();
       const cwd = process.cwd();
       const config = readConfig(cwd);
@@ -230,7 +286,16 @@ export function createProgram(): Command {
       const ctx = buildContext(cwd, { ...opts, force: true });
       logger.info(`Updating ${config.installedModules.length} modules...`);
       const results = await runModules(config.installedModules, ctx);
-      printSummary(results);
+      printSummary(results, ctx);
+      if (opts.install) {
+        await handleAutoInstall(results, ctx, false);
+      } else {
+        const packageJsonModified = results.some(r => r.modified.includes('package.json'));
+        if (packageJsonModified && !opts.dryRun) {
+          logger.blank();
+          logger.info(`Remember to run "${getInstallCommand(ctx.project.packageManager)}" to install new dependencies.`);
+        }
+      }
     });
 
 
@@ -277,7 +342,7 @@ export function createProgram(): Command {
       const ctx = buildContext(cwd, { dryRun: true });
       logger.info('DRY-RUN: previewing all modules...');
       const results = await runModules(getAllModuleIds(), ctx);
-      printSummary(results);
+      printSummary(results, ctx);
     });
 
   // helen docs
