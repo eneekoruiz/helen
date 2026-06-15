@@ -27,6 +27,16 @@ npx helen-cli modules
 - `helen scripts easter-egg`
 - `helen docs`
 
+## Project Quality Prompts
+
+This boilerplate also includes reusable final-pass prompts in [docs/prompts](docs/prompts) to help close projects cleanly, not just start them fast.
+
+- [Public presentation pass](docs/prompts/final-public-presentation-pass.md) for README, screenshots, DeepWiki, social preview, and GitHub presentation.
+- [Code quality audit](docs/prompts/final-code-quality-audit.md) for final technical review without unnecessary rewrites.
+- [i18n audit](docs/prompts/final-i18n-audit.md) for multilingual consistency, formatting, accessibility, and fallbacks.
+- [GitHub repository audit](docs/prompts/final-github-repository-audit.md) for repo trust, metadata, docs, and public-facing polish.
+- [Release checklist](docs/prompts/final-release-checklist.md) for a short release-readiness pass before publishing or archiving.
+
 ## Links
 
 - DeepWiki: https://deepwiki.com/eneekoruiz/helen
