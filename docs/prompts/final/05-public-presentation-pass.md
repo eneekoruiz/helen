@@ -1,5 +1,9 @@
 # Final Public Presentation Pass
 
+Deep audit only. This prompt is intentionally detailed and should not be shortened if the project may appear in public.
+
+Purpose: judge whether the project genuinely deserves public exposure and whether its external presentation matches reality.
+
 Use this prompt when a project is functionally complete and is about to be shown publicly.
 
 Use after:
@@ -12,6 +16,12 @@ Skip if:
 
 - the project is intentionally private,
 - the code and docs are still unstable enough that public presentation is premature.
+
+Expected output:
+
+- public-facing blockers,
+- visual and showcase gaps,
+- a hard `PASS`, `PASS WITH CAVEATS`, or `FAIL`.
 
 ## Prompt
 

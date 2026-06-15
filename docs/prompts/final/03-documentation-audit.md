@@ -1,5 +1,9 @@
 # Final Documentation Audit
 
+Deep audit only. This prompt is intentionally detailed and should not be shortened if the documentation will be used for handoff or public trust.
+
+Purpose: judge whether the documentation is accurate enough to support onboarding, reuse, release, and public credibility.
+
 Use this prompt when a project is nearly complete and its documentation needs a strict final audit.
 
 Use after:
@@ -12,6 +16,12 @@ Skip if:
 
 - the project is tiny and only needs a small README,
 - there is no real documentation surface beyond a basic setup note.
+
+Expected output:
+
+- documentation defects that damage trust,
+- minimal doc fixes before release or handoff,
+- a hard `PASS`, `PASS WITH CAVEATS`, or `FAIL`.
 
 ## Prompt
 

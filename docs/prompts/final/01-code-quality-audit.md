@@ -1,5 +1,9 @@
 # Final Code Quality Audit
 
+Deep audit only. This prompt is intentionally detailed and should not be shortened if you want a trustworthy result.
+
+Purpose: judge whether the codebase is technically safe enough to stabilize, ship, or stop touching.
+
 Use this prompt for the final technical audit before considering a project stable or closed.
 
 Use after:
@@ -12,6 +16,12 @@ Skip if:
 
 - the project is still changing heavily every day,
 - the architecture is still in active flux.
+
+Expected output:
+
+- severity-ordered findings,
+- smallest credible fixes,
+- a hard `PASS`, `PASS WITH CAVEATS`, or `FAIL`.
 
 ## Prompt
 

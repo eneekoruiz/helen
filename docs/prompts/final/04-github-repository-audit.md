@@ -1,5 +1,9 @@
 # Final GitHub Repository Audit
 
+Deep audit only. This prompt is intentionally detailed and should not be shortened if the repository will represent the project publicly.
+
+Purpose: judge whether the repository itself is credible, legible, and worth sharing as a public artifact.
+
 Use this prompt when the code is mostly done and the repository itself needs a strict final audit before being shared publicly.
 
 Use after:
@@ -12,6 +16,12 @@ Skip if:
 
 - the project is still private and not close to being reviewed by anyone else,
 - the code is still changing too fast for repository polish to be meaningful.
+
+Expected output:
+
+- repository-level trust problems,
+- metadata and presentation fixes,
+- a hard `PASS`, `PASS WITH CAVEATS`, or `FAIL`.
 
 ## Prompt
 

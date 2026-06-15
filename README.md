@@ -31,14 +31,16 @@ npx helen-cli modules
 
 This boilerplate also includes reusable end-of-project prompts in [docs/prompts](docs/prompts) to help close projects cleanly, not just start them fast.
 
-Start with the index in [docs/prompts/README.md](docs/prompts/README.md). It explains what each prompt is for, when to use it, and the recommended order.
+Start with [docs/prompts/README.md](docs/prompts/README.md), then go to [docs/prompts/final/README.md](docs/prompts/final/README.md). Those two files explain the purpose, moment of use, sequence, and closeout flow.
 
-- [Final code quality audit](docs/prompts/final-code-quality-audit.md)
-- [Final i18n audit](docs/prompts/final-i18n-audit.md)
-- [Final documentation audit](docs/prompts/final-documentation-audit.md)
-- [Final GitHub repository audit](docs/prompts/final-github-repository-audit.md)
-- [Final public presentation pass](docs/prompts/final-public-presentation-pass.md)
-- [Final release checklist](docs/prompts/final-release-checklist.md)
+Active final-stage prompt set:
+
+- [01 Code Quality Audit](docs/prompts/final/01-code-quality-audit.md)
+- [02 i18n Audit](docs/prompts/final/02-i18n-audit.md)
+- [03 Documentation Audit](docs/prompts/final/03-documentation-audit.md)
+- [04 GitHub Repository Audit](docs/prompts/final/04-github-repository-audit.md)
+- [05 Public Presentation Pass](docs/prompts/final/05-public-presentation-pass.md)
+- [06 Release Checklist](docs/prompts/final/06-release-checklist.md)
 
 ## Links
 

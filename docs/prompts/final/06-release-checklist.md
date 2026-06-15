@@ -1,5 +1,9 @@
 # Final Release Checklist
 
+Final gate only. This checklist is intentionally compact, but it is not a substitute for the deeper audits in this folder.
+
+Purpose: confirm that all earlier audit layers are resolved before the project is marked finished.
+
 Use this checklist as a hard release gate at the very end of a project.
 
 Use after:
@@ -12,6 +16,11 @@ Skip if:
 
 - major audit findings are still unresolved,
 - the project is not yet at release or archive stage.
+
+Expected output:
+
+- a compact closeout decision,
+- a clear stop signal if the project should not be marked finished yet.
 
 ## Checklist
 

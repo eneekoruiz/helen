@@ -1,5 +1,9 @@
 # Final i18n Audit
 
+Deep audit only. This prompt is intentionally detailed and should not be shortened if multilingual quality matters.
+
+Purpose: judge whether multilingual support is real enough to release and honest enough to claim publicly.
+
 Use this prompt when a project supports multiple languages or intends to present itself as multilingual.
 
 Use after:
@@ -12,6 +16,12 @@ Skip if:
 
 - the project is single-language,
 - multilingual support is explicitly out of scope.
+
+Expected output:
+
+- release-blocking locale issues,
+- translation and fallback defects,
+- a hard `PASS`, `PASS WITH CAVEATS`, or `FAIL`.
 
 ## Prompt
 
