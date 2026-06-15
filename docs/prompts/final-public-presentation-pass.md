@@ -2,6 +2,17 @@
 
 Use this prompt when a project is functionally complete and is about to be shown publicly.
 
+Use after:
+
+- the product already works,
+- the repository has survived the deeper technical and documentation audits,
+- you are deciding whether to present it outside your own machine.
+
+Skip if:
+
+- the project is intentionally private,
+- the code and docs are still unstable enough that public presentation is premature.
+
 ## Prompt
 
 Review this project as a strict senior engineer preparing it for public presentation.

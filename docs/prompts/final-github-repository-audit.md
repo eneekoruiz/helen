@@ -2,6 +2,17 @@
 
 Use this prompt when the code is mostly done and the repository itself needs a strict final audit before being shared publicly.
 
+Use after:
+
+- the repository structure is mostly settled,
+- the README already exists,
+- you want the repo itself to be credible before sharing it.
+
+Skip if:
+
+- the project is still private and not close to being reviewed by anyone else,
+- the code is still changing too fast for repository polish to be meaningful.
+
 ## Prompt
 
 Review this repository as a strict senior engineer preparing it for a credible GitHub presentation.

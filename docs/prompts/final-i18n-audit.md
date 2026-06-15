@@ -2,6 +2,17 @@
 
 Use this prompt when a project supports multiple languages or intends to present itself as multilingual.
 
+Use after:
+
+- the target locales are already chosen,
+- the main translated screens exist,
+- you need to verify release honesty around multilingual support.
+
+Skip if:
+
+- the project is single-language,
+- multilingual support is explicitly out of scope.
+
 ## Prompt
 
 Review this project as a strict senior engineer performing a final internationalization audit.

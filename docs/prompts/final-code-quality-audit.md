@@ -2,6 +2,17 @@
 
 Use this prompt for the final technical audit before considering a project stable or closed.
 
+Use after:
+
+- the main feature scope is already implemented,
+- broad refactors are no longer desirable,
+- you need a hard technical go or no-go decision.
+
+Skip if:
+
+- the project is still changing heavily every day,
+- the architecture is still in active flux.
+
 ## Prompt
 
 Review this codebase as a strict senior engineer performing a final code quality audit.

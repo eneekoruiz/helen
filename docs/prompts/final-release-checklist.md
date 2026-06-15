@@ -2,6 +2,17 @@
 
 Use this checklist as a hard release gate at the very end of a project.
 
+Use after:
+
+- the deep audits are already done,
+- the fixes from those audits are already applied,
+- you need a final compact closeout decision.
+
+Skip if:
+
+- major audit findings are still unresolved,
+- the project is not yet at release or archive stage.
+
 ## Checklist
 
 - The project works locally from a reasonably clean setup, not just the original developer machine.
