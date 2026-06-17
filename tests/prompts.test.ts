@@ -9,6 +9,7 @@ describe('Prompt Library', () => {
     expect(flows).toContain('full-polish');
     expect(flows).toContain('release-candidate');
     expect(flows).toContain('client-delivery');
+    expect(flows).toContain('prompt-library-maintenance');
   });
 
   it('resolves the master prompt', () => {
@@ -21,9 +22,11 @@ describe('Prompt Library', () => {
   it('exposes taxonomy and coverage guides', () => {
     const taxonomy = resolvePromptEntry('taxonomy');
     const coverage = readPrompt('coverage');
+    const standards = readPrompt('standards');
 
     expect(taxonomy.kind).toBe('guide');
     expect(coverage).toContain('Canonical Prompt Coverage Map');
+    expect(standards).toContain('Prompt Standards');
   });
 
   it('resolves exact flow ids before basename matches', () => {

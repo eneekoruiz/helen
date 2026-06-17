@@ -36,6 +36,9 @@ helen prompts show coverage
 - [COVERAGE.md](COVERAGE.md)
   Mapa canónico de intenciones. Antes de crear un prompt nuevo, revisa aquí si ya existe una entrada oficial.
 
+- [STANDARDS.md](STANDARDS.md)
+  Contrato de calidad para prompts atómicos, flujos, checkpoints, nombres, fusiones y mantenimiento.
+
 - [registry.json](registry.json)
   Registro machine-readable de familias, flujos y guías para que el CLI pueda descubrirlos.
 
@@ -57,6 +60,7 @@ Usa flows cuando quieras que la IA trabaje de principio a fin:
 - `awwwards-soty-design-review`: diseño visual, interacción y craft tipo Awwwards/SOTY.
 - `cms-editable-content-conversion`: convertir textos en `EditableField` e imágenes en `EditableImage`.
 - `last-mile-client-site-delivery`: última revisión visible antes de demo/cliente: copy, CMS, links, forms, CTAs, assets y smoke test de navegador.
+- `prompt-library-maintenance`: mantenimiento de la propia biblioteca de prompts: duplicados, cobertura, nombres, registry, docs y tests.
 - `security-hardening`: mitigación de riesgos de seguridad.
 - `github-repo-polish`: presentación profesional del repositorio.
 - `i18n-final-audit`: auditoría final de internacionalización.
@@ -136,6 +140,16 @@ O pide:
 ```text
 Lee docs/prompts/orchestration/00-prompt-router.md y dime qué flujo ejecutar para este repo.
 ```
+
+### 1.1 Quiero mejorar la biblioteca de prompts
+
+Usa:
+
+```text
+flows/prompt-library-maintenance.md
+```
+
+Este flujo revisa `STANDARDS.md`, `TAXONOMY.md`, `COVERAGE.md`, `registry.json`, README, prompts, flujos y tests para evitar duplicados y mantener calidad de sistema.
 
 ### 2. Quiero descubrir puntos ciegos
 
@@ -286,7 +300,9 @@ helen prompts list --kind prompt
 helen prompts list --kind guide
 helen prompts show coverage
 helen prompts show taxonomy
+helen prompts show standards
 helen prompts flow full-polish
+helen prompts flow prompt-library-maintenance
 helen prompts path release-candidate
 ```
 

@@ -11,6 +11,8 @@ If a new request fits one of these canonical intentions, improve the existing pr
 | Intention | Canonical Entry |
 |---|---|
 | Decide which prompt or flow to run | `orchestration/00-prompt-router.md` |
+| Maintain and audit the prompt library itself | `flows/prompt-library-maintenance.md` |
+| Audit prompt library integrity, coverage, duplication, and naming | `agent-quality/02-prompt-library-integrity-and-coverage-audit.md` |
 | Execute a complete guided polish | `flows/full-polish.md` |
 | Audit clean code and architecture together | `flows/clean-code-architecture-audit.md` |
 | Audit Staff-level architecture only | `steps/architecture/staff-architecture-audit.md` |
@@ -41,6 +43,7 @@ If a new request fits one of these canonical intentions, improve the existing pr
 | Prepare release candidate | `flows/release-candidate.md` |
 | Polish GitHub repository presentation | `steps/github/github-repository-presentation-polish.md` |
 | Audit the prompt system itself | `agent-quality/01-agent-workflow-and-prompt-quality-audit.md` |
+| Understand prompt quality standards | `STANDARDS.md` |
 
 ## Known Merge Decisions
 

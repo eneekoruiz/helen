@@ -17,17 +17,18 @@ Run guided automation with judgment: inspect, execute, validate, fix, summarize,
 1. Read the requested flow file completely.
 2. Read every atomic step prompt referenced by the flow before executing the first step.
 3. Read every checkpoint referenced by the flow before reaching that checkpoint.
-4. Execute one step at a time.
-5. After each step, produce a short phase summary for yourself and preserve the important findings.
-6. Run the required checkpoint before moving to the next phase.
-7. If a blocking checkpoint fails, stop, fix the issue if it is in scope, and repeat the checkpoint.
-8. If the fix is high risk, broad, destructive, or changes product behavior, ask for confirmation before applying it.
-9. Do not rewrite large parts of the project unless the current design is itself the problem.
-10. Preserve existing behavior unless the flow explicitly asks to change it.
-11. Do not add dependencies unless the benefit is clear and the repository has no simpler existing option.
-12. Avoid repeating expensive audits if a recent step already produced sufficient evidence.
-13. Keep traceability: record what was checked, changed, skipped, failed, and deferred.
-14. At the end, provide a final summary with completed steps, failed checks, changes made, remaining risks, and recommended next flow.
+4. When modifying the prompt library itself, also read `STANDARDS.md`, `TAXONOMY.md`, and `COVERAGE.md`.
+5. Execute one step at a time.
+6. After each step, produce a short phase summary for yourself and preserve the important findings.
+7. Run the required checkpoint before moving to the next phase.
+8. If a blocking checkpoint fails, stop, fix the issue if it is in scope, and repeat the checkpoint.
+9. If the fix is high risk, broad, destructive, or changes product behavior, ask for confirmation before applying it.
+10. Do not rewrite large parts of the project unless the current design is itself the problem.
+11. Preserve existing behavior unless the flow explicitly asks to change it.
+12. Do not add dependencies unless the benefit is clear and the repository has no simpler existing option.
+13. Avoid repeating expensive audits if a recent step already produced sufficient evidence.
+14. Keep traceability: record what was checked, changed, skipped, failed, and deferred.
+15. At the end, provide a final summary with completed steps, failed checks, changes made, remaining risks, and recommended next flow.
 
 ## Safety Rules
 

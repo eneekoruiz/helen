@@ -17,6 +17,7 @@ Regla: antes de ejecutar un flujo, lee [../MASTER.md](../MASTER.md), el flujo co
 - [awwwards-soty-design-review.md](awwwards-soty-design-review.md)
 - [cms-editable-content-conversion.md](cms-editable-content-conversion.md)
 - [last-mile-client-site-delivery.md](last-mile-client-site-delivery.md)
+- [prompt-library-maintenance.md](prompt-library-maintenance.md)
 - [security-hardening.md](security-hardening.md)
 - [github-repo-polish.md](github-repo-polish.md)
 - [i18n-final-audit.md](i18n-final-audit.md)

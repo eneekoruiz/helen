@@ -22,7 +22,14 @@ interface RegistryFlow {
   stage?: string;
 }
 
+interface RegistryGuide {
+  id: string;
+  path: string;
+  purpose?: string;
+}
+
 interface PromptRegistry {
+  guides?: RegistryGuide[];
   executableFlows?: RegistryFlow[];
 }
 
@@ -116,21 +123,18 @@ export function listPromptEntries(): PromptEntry[] {
       relativePath: toPosix(path.relative(process.cwd(), path.join(PROMPTS_ROOT, 'MASTER.md'))),
       absolutePath: path.join(PROMPTS_ROOT, 'MASTER.md'),
     },
-    {
-      id: 'taxonomy',
-      kind: 'guide',
-      title: 'Prompt Taxonomy',
-      relativePath: toPosix(path.relative(process.cwd(), path.join(PROMPTS_ROOT, 'TAXONOMY.md'))),
-      absolutePath: path.join(PROMPTS_ROOT, 'TAXONOMY.md'),
-    },
-    {
-      id: 'coverage',
-      kind: 'guide',
-      title: 'Canonical Prompt Coverage Map',
-      relativePath: toPosix(path.relative(process.cwd(), path.join(PROMPTS_ROOT, 'COVERAGE.md'))),
-      absolutePath: path.join(PROMPTS_ROOT, 'COVERAGE.md'),
-    },
   ];
+
+  for (const guide of registry.guides ?? []) {
+    const absolutePath = path.resolve(PROMPTS_ROOT, path.relative('docs/prompts', guide.path));
+    entries.push({
+      id: guide.id,
+      kind: 'guide',
+      title: titleFromId(guide.id),
+      relativePath: toPosix(path.relative(process.cwd(), absolutePath)),
+      absolutePath,
+    });
+  }
 
   for (const flow of registry.executableFlows ?? []) {
     const absolutePath = path.resolve(PROMPTS_ROOT, path.relative('docs/prompts', flow.path));

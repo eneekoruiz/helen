@@ -15,13 +15,18 @@
       "id": "coverage",
       "path": "docs/prompts/COVERAGE.md",
       "purpose": "Canonical map of prompt intentions and their official entries."
+    },
+    {
+      "id": "standards",
+      "path": "docs/prompts/STANDARDS.md",
+      "purpose": "Quality contract for prompt structure, naming, merge decisions, flows, and checkpoints."
     }
   ],
   "families": [
     {
       "id": "agent-quality",
       "phase": "meta",
-      "purpose": "Audit the prompt library and agent workflows for clarity, safety, orchestration, and repeatability.",
+      "purpose": "Audit the prompt library, prompt integrity, and agent workflows for clarity, safety, orchestration, and repeatability.",
       "entrypoint": "docs/prompts/agent-quality/01-agent-workflow-and-prompt-quality-audit.md"
     },
     {
@@ -219,6 +224,12 @@
       "path": "docs/prompts/flows/last-mile-client-site-delivery.md",
       "repeatable": true,
       "stage": "delivery"
+    },
+    {
+      "id": "prompt-library-maintenance",
+      "path": "docs/prompts/flows/prompt-library-maintenance.md",
+      "repeatable": true,
+      "stage": "meta"
     },
     {
       "id": "security-hardening",
