@@ -56,6 +56,7 @@ Usa flows cuando quieras que la IA trabaje de principio a fin:
 - `clean-code-architecture-audit`: clean code + arquitectura con estándar Staff.
 - `awwwards-soty-design-review`: diseño visual, interacción y craft tipo Awwwards/SOTY.
 - `cms-editable-content-conversion`: convertir textos en `EditableField` e imágenes en `EditableImage`.
+- `last-mile-client-site-delivery`: última revisión visible antes de demo/cliente: copy, CMS, links, forms, CTAs, assets y smoke test de navegador.
 - `security-hardening`: mitigación de riesgos de seguridad.
 - `github-repo-polish`: presentación profesional del repositorio.
 - `i18n-final-audit`: auditoría final de internacionalización.
@@ -111,6 +112,7 @@ Estas carpetas contienen auditorías expertas por dominio:
 - [final/](final/README.md): auditorías finales de código, docs, i18n, GitHub, presentación y release.
 - [growth/](growth/README.md): activación, retención, conversión y SEO programático.
 - [integrations/](integrations/README.md): APIs, contratos, webhooks, SDKs e integraciones.
+- [last-mile/](last-mile/README.md): copy final, claims, links, formularios, CTAs, assets y demo readiness.
 - [observability/](observability/README.md): logs, métricas, tracing, alertas y analytics.
 - [operations/](operations/README.md): backups, recovery, migraciones, import/export y lock-in.
 - [orchestration/](orchestration/README.md): router, briefs para agentes y síntesis de auditorías.
@@ -212,10 +214,13 @@ Este flujo revisa todos los textos e imágenes de contenido y guía la conversi�
 Usa:
 
 ```text
+flows/last-mile-client-site-delivery.md
 flows/client-delivery.md
 ```
 
-Este flujo revisa reproducibilidad, docs, seguridad, repo polish, release notes y handoff.
+El flujo `last-mile-client-site-delivery` revisa lo visible antes de enseñar una web: copy, CMS editable, links, formularios, CTAs, assets, responsive, accesibilidad y smoke test de navegador.
+
+El flujo `client-delivery` revisa reproducibilidad, docs, seguridad, repo polish, release notes y handoff.
 
 ### 9. Quiero preparar GitHub o portfolio
 
@@ -254,10 +259,11 @@ integrations/01-api-integration-and-contract-audit.md
 4. `flows/clean-code-architecture-audit.md`
 5. `flows/ux-visual-pass.md` si hay UI.
 6. `flows/cms-editable-content-conversion.md` si hay entrega editable/CMS.
-7. `privacy`, `data`, `integrations`, `operations` según aplique.
-8. `flows/prefinal-hardening.md`
-9. `flows/release-candidate.md`
-10. `flows/client-delivery.md` si hay entrega externa.
+7. `flows/last-mile-client-site-delivery.md` si hay web pública, demo o entrega a cliente.
+8. `privacy`, `data`, `integrations`, `operations` según aplique.
+9. `flows/prefinal-hardening.md`
+10. `flows/release-candidate.md`
+11. `flows/client-delivery.md` si hay entrega externa.
 
 ## Reglas de Seguridad
 

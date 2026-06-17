@@ -167,6 +167,7 @@ export function listPromptEntries(): PromptEntry[] {
     'dx',
     'final',
     'growth',
+    'last-mile',
     'observability',
     'operations',
     'orchestration',

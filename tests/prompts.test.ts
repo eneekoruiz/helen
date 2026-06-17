@@ -53,12 +53,14 @@ describe('Prompt Library', () => {
     const data = resolvePromptEntry('data/01-data-model-and-domain-integrity-audit');
     const design = resolvePromptEntry('design/01-product-design-and-awards-visual-excellence-audit');
     const cms = resolvePromptEntry('cms/01-static-content-to-editable-cms-fields');
+    const lastMile = resolvePromptEntry('last-mile/04-browser-smoke-test-and-demo-readiness-audit');
     const agentQuality = readPrompt('agent-quality/01-agent-workflow-and-prompt-quality-audit');
 
     expect(privacy.kind).toBe('prompt');
     expect(data.kind).toBe('prompt');
     expect(design.kind).toBe('prompt');
     expect(cms.kind).toBe('prompt');
+    expect(lastMile.kind).toBe('prompt');
     expect(agentQuality).toContain('Agent Workflow and Prompt Quality Audit');
   });
 });

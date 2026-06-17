@@ -49,6 +49,12 @@
       "entrypoint": "docs/prompts/cms/01-static-content-to-editable-cms-fields.md"
     },
     {
+      "id": "last-mile",
+      "phase": "delivery",
+      "purpose": "Audit final visible delivery quality: copy, claims, links, forms, CTAs, media assets, browser smoke tests, and demo readiness.",
+      "entrypoint": "docs/prompts/last-mile/01-content-copy-brand-and-claims-audit.md"
+    },
+    {
       "id": "strategy",
       "phase": "planning",
       "purpose": "Benchmark competitors and prioritize roadmap work by leverage, ROI, and differentiation.",
@@ -205,6 +211,12 @@
     {
       "id": "cms-editable-content-conversion",
       "path": "docs/prompts/flows/cms-editable-content-conversion.md",
+      "repeatable": true,
+      "stage": "delivery"
+    },
+    {
+      "id": "last-mile-client-site-delivery",
+      "path": "docs/prompts/flows/last-mile-client-site-delivery.md",
       "repeatable": true,
       "stage": "delivery"
     },

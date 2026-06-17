@@ -19,6 +19,11 @@ If a new request fits one of these canonical intentions, improve the existing pr
 | Execute an awards-level design review flow | `flows/awwwards-soty-design-review.md` |
 | Convert static page text and images into CMS editable content | `flows/cms-editable-content-conversion.md` |
 | Audit editable content model and editorial workflow | `cms/02-content-model-and-editorial-workflow-audit.md` |
+| Run last-mile client website delivery checks | `flows/last-mile-client-site-delivery.md` |
+| Audit copy, brand tone, and unsupported claims | `last-mile/01-content-copy-brand-and-claims-audit.md` |
+| Audit links, forms, CTAs, and conversion paths | `last-mile/02-links-forms-ctas-and-conversion-paths-audit.md` |
+| Audit media assets, alt text, and asset performance | `last-mile/03-media-assets-alt-text-and-performance-audit.md` |
+| Run browser smoke test and demo readiness | `last-mile/04-browser-smoke-test-and-demo-readiness-audit.md` |
 | Audit primary UX and user journey | `steps/ux/primary-user-experience-audit.md` |
 | Audit loading, error, empty, and state design | `steps/ux/loading-error-empty-states.md` |
 | Polish visual details after UX is sound | `steps/visual/premium-visual-polish-pass.md` |
