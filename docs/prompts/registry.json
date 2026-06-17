@@ -1,0 +1,206 @@
+{
+  "version": 1,
+  "purpose": "Prompt orchestration registry for repository-level quality workflows.",
+  "master": "docs/prompts/MASTER.md",
+  "flowsRoot": "docs/prompts/flows",
+  "stepsRoot": "docs/prompts/steps",
+  "checkpointsRoot": "docs/prompts/checkpoints",
+  "families": [
+    {
+      "id": "agent-quality",
+      "phase": "meta",
+      "purpose": "Audit the prompt library and agent workflows for clarity, safety, orchestration, and repeatability.",
+      "entrypoint": "docs/prompts/agent-quality/01-agent-workflow-and-prompt-quality-audit.md"
+    },
+    {
+      "id": "orchestration",
+      "phase": "meta",
+      "purpose": "Route prompts, build agent briefs, synthesize audits, and design quality operating systems.",
+      "entrypoint": "docs/prompts/orchestration/00-prompt-router.md"
+    },
+    {
+      "id": "discovery",
+      "phase": "early",
+      "purpose": "Find blind spots in methodology, product, UX, architecture, operations, and risk.",
+      "entrypoint": "docs/prompts/discovery/01-methodology-and-blind-spots-audit.md"
+    },
+    {
+      "id": "design",
+      "phase": "experience",
+      "purpose": "Review general design quality and awards-level visual excellence for public-facing products.",
+      "entrypoint": "docs/prompts/design/01-general-design-improvement-audit.md"
+    },
+    {
+      "id": "strategy",
+      "phase": "planning",
+      "purpose": "Benchmark competitors and prioritize roadmap work by leverage, ROI, and differentiation.",
+      "entrypoint": "docs/prompts/strategy/01-competitive-benchmark.md"
+    },
+    {
+      "id": "data",
+      "phase": "architecture",
+      "purpose": "Review data models, domain invariants, schema drift, ownership, and data integrity.",
+      "entrypoint": "docs/prompts/data/01-data-model-and-domain-integrity-audit.md"
+    },
+    {
+      "id": "integrations",
+      "phase": "architecture",
+      "purpose": "Review APIs, integrations, SDKs, webhooks, contracts, compatibility, and external boundaries.",
+      "entrypoint": "docs/prompts/integrations/01-api-integration-and-contract-audit.md"
+    },
+    {
+      "id": "product",
+      "phase": "experience",
+      "purpose": "Improve onboarding, activation, microcopy, empty states, and premium product feel.",
+      "entrypoint": "docs/prompts/product/01-onboarding-activation-audit.md"
+    },
+    {
+      "id": "growth",
+      "phase": "growth",
+      "purpose": "Review acquisition, activation, retention, conversion, SEO, and growth instrumentation.",
+      "entrypoint": "docs/prompts/growth/01-growth-model-audit.md"
+    },
+    {
+      "id": "dx",
+      "phase": "engineering",
+      "purpose": "Improve developer onboarding, automation, scripts, and maintainability.",
+      "entrypoint": "docs/prompts/dx/01-developer-onboarding-audit.md"
+    },
+    {
+      "id": "quality",
+      "phase": "verification",
+      "purpose": "Find edge cases, stress risks, regression gaps, scale bottlenecks, and cost issues.",
+      "entrypoint": "docs/prompts/quality/01-adversarial-qa-and-edge-cases.md"
+    },
+    {
+      "id": "operations",
+      "phase": "resilience",
+      "purpose": "Audit backups, recovery, import/export, migrations, lock-in, and data lifecycle.",
+      "entrypoint": "docs/prompts/operations/01-data-lifecycle-backup-and-recovery.md"
+    },
+    {
+      "id": "privacy",
+      "phase": "trust",
+      "purpose": "Audit privacy, legal, compliance, consent, retention, data minimization, and trust posture.",
+      "entrypoint": "docs/prompts/privacy/01-privacy-legal-and-compliance-audit.md"
+    },
+    {
+      "id": "observability",
+      "phase": "operations",
+      "purpose": "Review logs, metrics, tracing, alerts, analytics, and debugging paths.",
+      "entrypoint": "docs/prompts/observability/01-observability-instrumentation-audit.md"
+    },
+    {
+      "id": "delivery",
+      "phase": "handoff",
+      "purpose": "Prepare handoff, support readiness, release notes, changelog, demo assets, and launch narrative.",
+      "entrypoint": "docs/prompts/delivery/01-client-handoff-and-support-readiness.md"
+    },
+    {
+      "id": "final",
+      "phase": "closeout",
+      "purpose": "Run final technical, documentation, repository, presentation, i18n, and release gates.",
+      "entrypoint": "docs/prompts/final/01-code-quality-audit.md"
+    }
+  ],
+  "workflows": [
+    {
+      "id": "total-audit",
+      "path": "docs/prompts/workflows/README.md#auditoria-total"
+    },
+    {
+      "id": "public-launch",
+      "path": "docs/prompts/workflows/README.md#launch-publico"
+    },
+    {
+      "id": "saas-product",
+      "path": "docs/prompts/workflows/README.md#saas-o-producto-con-usuarios"
+    },
+    {
+      "id": "open-source",
+      "path": "docs/prompts/workflows/README.md#open-source"
+    },
+    {
+      "id": "handoff",
+      "path": "docs/prompts/workflows/README.md#handoff-a-cliente-o-equipo"
+    },
+    {
+      "id": "recovery",
+      "path": "docs/prompts/workflows/README.md#recuperacion-de-proyecto-desordenado"
+    }
+  ],
+  "executableFlows": [
+    {
+      "id": "full-polish",
+      "path": "docs/prompts/flows/full-polish.md",
+      "repeatable": true,
+      "stage": "polish"
+    },
+    {
+      "id": "prefinal-hardening",
+      "path": "docs/prompts/flows/prefinal-hardening.md",
+      "repeatable": true,
+      "stage": "prefinal"
+    },
+    {
+      "id": "release-candidate",
+      "path": "docs/prompts/flows/release-candidate.md",
+      "repeatable": false,
+      "stage": "final"
+    },
+    {
+      "id": "client-delivery",
+      "path": "docs/prompts/flows/client-delivery.md",
+      "repeatable": false,
+      "stage": "delivery"
+    },
+    {
+      "id": "market-analysis",
+      "path": "docs/prompts/flows/market-analysis.md",
+      "repeatable": true,
+      "stage": "strategy"
+    },
+    {
+      "id": "ux-visual-pass",
+      "path": "docs/prompts/flows/ux-visual-pass.md",
+      "repeatable": true,
+      "stage": "polish"
+    },
+    {
+      "id": "clean-code-pass",
+      "path": "docs/prompts/flows/clean-code-pass.md",
+      "repeatable": true,
+      "stage": "hardening"
+    },
+    {
+      "id": "clean-code-architecture-audit",
+      "path": "docs/prompts/flows/clean-code-architecture-audit.md",
+      "repeatable": true,
+      "stage": "hardening"
+    },
+    {
+      "id": "awwwards-soty-design-review",
+      "path": "docs/prompts/flows/awwwards-soty-design-review.md",
+      "repeatable": true,
+      "stage": "polish"
+    },
+    {
+      "id": "security-hardening",
+      "path": "docs/prompts/flows/security-hardening.md",
+      "repeatable": true,
+      "stage": "hardening"
+    },
+    {
+      "id": "github-repo-polish",
+      "path": "docs/prompts/flows/github-repo-polish.md",
+      "repeatable": true,
+      "stage": "presentation"
+    },
+    {
+      "id": "i18n-final-audit",
+      "path": "docs/prompts/flows/i18n-final-audit.md",
+      "repeatable": false,
+      "stage": "final"
+    }
+  ]
+}

@@ -1,81 +1,99 @@
-# Final Closeout Runbook
+# Runbook de Cierre Final
 
-Use this runbook when you want the prompt collection to behave like a process rather than a pile of files.
+Usa este runbook cuando quieras que la biblioteca funcione como un proceso de decisión, no como una carpeta de textos.
 
-## Step 1: Establish truth
+## Paso 0: Descubrir Puntos Ciegos
 
-Run:
+Antes del cierre de un proyecto importante, ejecuta:
+
+1. [../discovery/01-methodology-and-blind-spots-audit.md](../discovery/01-methodology-and-blind-spots-audit.md)
+2. [../discovery/02-product-ux-and-premium-quality-audit.md](../discovery/02-product-ux-and-premium-quality-audit.md)
+3. [../discovery/03-architecture-operations-and-risk-audit.md](../discovery/03-architecture-operations-and-risk-audit.md)
+
+Objetivo:
+
+- descubrir categorías que faltan;
+- detectar deuda invisible;
+- cuestionar estructura, producto, UX, arquitectura, operación y estrategia;
+- evitar que el cierre solo valide lo que ya sabíamos mirar.
+
+Este paso puede omitirse en proyectos pequeños, pero no debería omitirse en proyectos que se van a publicar, entregar o usar como portfolio.
+
+## Paso 1: Establecer Verdad Técnica
+
+Ejecuta:
 
 1. [01-code-quality-audit.md](01-code-quality-audit.md)
-2. [02-i18n-audit.md](02-i18n-audit.md) if applicable
+2. [02-i18n-audit.md](02-i18n-audit.md) si aplica
 
-Purpose:
+Objetivo:
 
-- find hard engineering defects,
-- expose false confidence,
-- stop the closeout flow early if the product is still unstable.
+- encontrar defectos reales;
+- exponer falsa confianza;
+- comprobar que el producto no se sostiene solo en el camino feliz.
 
-Do not continue to presentation work if this stage fails.
+No avances a presentación si esta capa falla.
 
-## Step 2: Make the repository honest
+## Paso 2: Hacer Honesto el Repositorio
 
-Run:
+Ejecuta:
 
 1. [03-documentation-audit.md](03-documentation-audit.md)
 2. [04-github-repository-audit.md](04-github-repository-audit.md)
 
-Purpose:
+Objetivo:
 
-- make README and docs truthful,
-- clean up repository metadata,
-- remove presentation debt that damages trust.
+- alinear README, docs, scripts y realidad del código;
+- limpiar metadata y soporte público;
+- eliminar deuda de presentación que erosiona confianza.
 
-Do not continue to public showcase work if the repository still misrepresents the project.
+## Paso 3: Decidir Si Merece Exposición
 
-## Step 3: Decide whether it deserves exposure
-
-Run:
+Ejecuta:
 
 1. [05-public-presentation-pass.md](05-public-presentation-pass.md)
 
-Purpose:
+Objetivo:
 
-- decide whether the project is genuinely worth showing publicly,
-- verify screenshots, social preview, Open Graph, and external presentation quality.
+- decidir si el proyecto merece mostrarse públicamente;
+- revisar capturas, social preview, Open Graph, narrativa, posicionamiento y señales de calidad.
 
-This step is optional only if the project will remain private.
+Este paso es opcional solo si el proyecto seguirá privado.
 
-## Step 4: Close the project
+## Paso 4: Cerrar
 
-Run:
+Ejecuta:
 
 1. [06-release-checklist.md](06-release-checklist.md)
 
-Purpose:
+Objetivo:
 
-- perform the final release or archive gate,
-- confirm that all earlier findings were actually resolved.
+- confirmar que los hallazgos anteriores se resolvieron;
+- bloquear cierres prematuros;
+- emitir una decisión compacta.
 
 ## Decision Rules
 
-- If `01` fails, the project is not technically closeable.
-- If `03` fails, the repository is not trustworthy yet.
-- If `04` fails, the repo should not be used as a public reference.
-- If `05` fails, the project may still be useful internally but should not be showcased.
-- If `06` fails, do not mark the project as finished.
+- Si `01` falla, el proyecto no es técnicamente cerrable.
+- Si `03` falla, el repositorio no es confiable.
+- Si `04` falla, el repo no debería usarse como artefacto público.
+- Si `05` falla, puede ser útil internamente pero no debería promocionarse.
+- Si `06` falla, no marques el proyecto como terminado.
 
-## Recommended Usage Pattern
+## Patrón de Uso
 
-- Run one prompt.
-- Resolve findings.
-- Re-run the same prompt.
-- Only move forward once the previous layer is honest.
+1. Ejecuta un prompt.
+2. Corrige hallazgos.
+3. Reejecuta el mismo prompt.
+4. Avanza solo cuando la capa anterior sea honesta.
 
-## Anti-Patterns
+## Anti Patrones
 
-Do not:
+No:
 
-- run the final checklist first,
-- polish screenshots before fixing misleading docs,
-- improve GitHub metadata while the code still fails basic verification,
-- keep adding prompts instead of using the existing ones properly.
+- ejecutar la checklist final primero;
+- pulir screenshots antes de corregir docs falsas;
+- mejorar metadata de GitHub mientras los flujos principales fallan;
+- tratar los prompts como formularios;
+- aceptar una respuesta que no haya inspeccionado el repositorio completo;
+- confundir iniciativa con refactor arbitrario.

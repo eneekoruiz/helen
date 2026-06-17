@@ -1,107 +1,92 @@
 # Final i18n Audit
 
-Deep audit only. This prompt is intentionally detailed and should not be shortened if multilingual quality matters.
+Deep audit only. Use this prompt when a project supports multiple languages or claims that it does.
 
-Purpose: judge whether multilingual support is real enough to release and honest enough to claim publicly.
-
-Use this prompt when a project supports multiple languages or intends to present itself as multilingual.
-
-Use after:
-
-- the target locales are already chosen,
-- the main translated screens exist,
-- you need to verify release honesty around multilingual support.
-
-Skip if:
-
-- the project is single-language,
-- multilingual support is explicitly out of scope.
+Purpose: decide whether multilingual support is complete, coherent, accessible, maintainable, and honest enough to release or market.
 
 Expected output:
 
-- release-blocking locale issues,
-- translation and fallback defects,
+- release-blocking locale issues;
+- translation and fallback defects;
+- additional internationalization opportunities;
 - a hard `PASS`, `PASS WITH CAVEATS`, or `FAIL`.
 
 ## Prompt
 
-Review this project as a strict senior engineer performing a final internationalization audit.
+Review this project as a strict senior engineer and localization-quality reviewer performing a final internationalization audit.
 
-Goal: determine whether the multilingual experience is complete, coherent, accessible, and safe to ship without inflating the product's real maturity.
+Goal: determine whether the multilingual experience is real, coherent, accessible, resilient, and safe to claim publicly.
 
 Audit posture:
 
 - Be strict about user-visible inconsistency.
+- Inspect UI, docs, metadata, errors, tests, config, routes, generated content, and public claims.
 - Treat mixed-language output, broken fallbacks, and locale mistakes as release-quality defects.
-- Do not recommend expanding scope into unnecessary languages, frameworks, or SEO work.
-- Fail the audit if multilingual support is being claimed more strongly than it is implemented.
+- Do not recommend unnecessary languages, frameworks, or SEO work.
 
-Non-negotiable rules:
+## Requisitos mínimos obligatorios
 
-- Do not accept "mostly translated" if critical paths still leak the wrong language.
-- Do not accept locale-aware claims without checking actual formatting behavior.
-- Do not let a language selector pass if it is inaccessible, confusing, or non-persistent.
-- Do not let the project present itself as multilingual if the second language is clearly incomplete.
-
-Audit these areas:
+Audit these areas at minimum:
 
 1. Hardcoded user-facing text
-- Find strings outside the translation system across UI, forms, errors, toasts, loaders, empty states, metadata, emails, PDFs, legal text, and admin flows if present.
-- Check dynamic strings and interpolated values, not just obvious labels.
+- Find strings outside the translation system across UI, forms, errors, toasts, loaders, empty states, metadata, emails, PDFs, legal text, admin flows, and docs where relevant.
+- Check dynamic and interpolated strings, not just obvious labels.
 
 2. Translation completeness
 - Identify missing keys, raw key leakage, fallback leakage, partial screens, untranslated validation messages, and inconsistent terminology.
-- Compare equivalent flows across locales, not just individual files.
-- Check whether feature flags, rarely used settings pages, and destructive flows are translated too.
+- Compare equivalent flows across locales.
+- Check rare settings, destructive flows, feature-flagged areas, and onboarding.
 
 3. Language consistency
-- Review whether each locale reads as one coherent language rather than a mix of borrowed English and partial translations.
-- Check product naming, technical vocabulary, button labels, error tone, and legal wording for consistency.
-- Flag cases where the same concept has multiple translations without a good reason.
+- Review whether each locale reads as one coherent language.
+- Check product naming, technical vocabulary, button labels, error tone, marketing copy, legal wording, and support text.
 
 4. Locale-sensitive formatting
-- Verify date, time, relative time, currency, number, decimal, thousands separator, pluralization, and list formatting behavior.
-- Check whether formatting truly follows the active locale rather than the developer's default locale.
-- Review time zone assumptions where relevant.
+- Verify date, time, relative time, currency, numbers, decimals, thousands separators, pluralization, list formatting, names, addresses, and time zones when applicable.
+- Check that formatting follows the active locale, not the developer default.
 
 5. Accessibility of language switching
-- Check whether the language switcher is keyboard accessible, clearly labeled, visually understandable, and announces the current language appropriately.
+- Check whether the language switcher is keyboard accessible, clearly labeled, visually understandable, and announces current language correctly.
 - Confirm language choice persists across navigation and reloads when expected.
-- Verify that switching language does not silently drop user state unless unavoidable.
+- Verify switching language does not silently drop user state.
 
 6. Routing and navigation
-- Review localized routes, locale prefixes, route generation, internal links, breadcrumbs, and redirects if the app uses language-specific URLs.
-- Check whether deep links survive language changes sensibly.
-- Flag broken canonical behavior or duplicate content risks if routing is localized.
+- Review localized routes, locale prefixes, route generation, internal links, breadcrumbs, redirects, canonicals, and deep links if language-specific URLs exist.
 
-7. SEO for multilingual public projects
-- If the project is public and intended for indexing, review translated metadata, `hreflang`, canonical rules, sitemap behavior, and indexability per locale.
-- Check whether metadata stays in sync with the selected locale.
-- Skip this section only if search visibility is explicitly out of scope.
+7. Multilingual SEO for public projects
+- If search visibility matters, review translated metadata, `hreflang`, canonical rules, sitemap behavior, indexability, Open Graph locale tags, and localized social previews.
 
 8. Fallback behavior and resilience
-- Confirm the default locale, fallback chain, and missing-key behavior.
-- Check what happens when translation bundles fail to load or a locale is unsupported.
-- Flag any behavior that exposes raw keys, empty text, or broken UI.
+- Confirm default locale, fallback chain, missing-key behavior, unsupported-locale behavior, and translation bundle failure behavior.
+- Flag raw keys, blank text, broken pages, or silent fallback that misleads users.
 
 9. Developer maintainability
-- Review whether locale files are organized, named consistently, and easy to maintain.
-- Flag unused keys, duplicate keys, and structures that make future drift likely.
-- Check whether the project has a sane process for adding or updating translations.
+- Review locale file organization, naming, duplicate keys, unused keys, translation ownership, review process, and drift risk.
 
-Automatic fail conditions:
+## Más allá de estos criterios
+
+Act like a senior localization engineer, product designer, and international growth reviewer.
+
+Look for cultural awkwardness, tone mismatch, inconsistent product vocabulary, layout breakage from longer text, unsupported assumptions about names or regions, accessibility gaps, SEO opportunity, and places where the product technically translates but does not feel native.
+
+You may recommend simplification, better locale boundaries, improved copy systems, stronger fallbacks, or removal of inflated multilingual claims.
+
+Do not expand language scope unless there is a clear product reason.
+
+## Automatic fail conditions
 
 - Critical user flows contain mixed-language output.
-- Missing translation keys are visible in the UI.
+- Missing translation keys are visible.
 - Locale formatting ignores the selected language in important screens.
 - The language switcher is inaccessible, misleading, or not functional.
-- The repo claims multilingual support but one supported locale is clearly incomplete.
+- The repo claims multilingual support while a supported locale is clearly incomplete.
 - Fallback behavior exposes raw keys, blank strings, or broken pages.
 
-Output format:
+## Output format
 
-- Start with blocking issues that make the multilingual experience unfit for release.
-- Then list consistency and maintainability risks.
-- Then give only the smallest justified fixes needed before release.
-- End with a verdict of `PASS`, `PASS WITH CAVEATS`, or `FAIL`.
-- Include one sentence stating whether the project can honestly market itself as multilingual today.
+1. Start with blocking issues that make multilingual release unsafe.
+2. Then list consistency and maintainability risks.
+3. Then list "Más allá de estos criterios" opportunities.
+4. Give only the smallest justified fixes needed before release.
+5. End with `PASS`, `PASS WITH CAVEATS`, or `FAIL`.
+6. Include one sentence stating whether the project can honestly market itself as multilingual today.

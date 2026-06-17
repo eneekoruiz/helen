@@ -1,81 +1,70 @@
-# Final Project Prompts
+# Prompts Finales de Proyecto
 
-This folder contains the end-of-project prompt set.
+Esta carpeta contiene prompts de cierre. Sirven cuando el proyecto ya funciona razonablemente y necesitas decidir si se puede estabilizar, publicar, archivar, presentar o entregar.
 
-Use this collection when the project mostly works and you need a serious closeout process before you call it done, ship it, archive it, or attach it to your public profile.
+Estos prompts no son checklists pasivas. Cada uno define requisitos mínimos, pero también exige juicio experto y búsqueda activa de problemas no previstos.
 
-## What This Folder Is For
-
-These prompts are for:
-
-- hard technical audits,
-- final documentation truth checks,
-- GitHub and presentation readiness,
-- final closeout decisions.
-
-These prompts are not for:
-
-- project ideation,
-- early architecture planning,
-- feature brainstorming,
-- cosmetic polishing before the fundamentals are sound.
-
-## Sequence
-
-Run the prompts in this order:
+## Secuencia
 
 1. [01-code-quality-audit.md](01-code-quality-audit.md)
-2. [02-i18n-audit.md](02-i18n-audit.md) if the project is multilingual
-3. [03-documentation-audit.md](03-documentation-audit.md) if the repo has meaningful docs
+2. [02-i18n-audit.md](02-i18n-audit.md) si el proyecto es multilingüe o lo afirma
+3. [03-documentation-audit.md](03-documentation-audit.md)
 4. [04-github-repository-audit.md](04-github-repository-audit.md)
-5. [05-public-presentation-pass.md](05-public-presentation-pass.md) if the project may be shown publicly
+5. [05-public-presentation-pass.md](05-public-presentation-pass.md) si el proyecto será público
 6. [06-release-checklist.md](06-release-checklist.md)
 
-## Minimum Useful Path
+## Ruta Mínima Seria
 
-If the project is small, the minimum serious path is:
+Si el proyecto es pequeño:
 
 1. [01-code-quality-audit.md](01-code-quality-audit.md)
 2. [03-documentation-audit.md](03-documentation-audit.md)
 3. [06-release-checklist.md](06-release-checklist.md)
 
-## Prompt Map
+## Ruta Profunda Recomendada
+
+Antes de cerrar un proyecto importante, ejecuta también los prompts de [../discovery/](../discovery/README.md). Esos prompts buscan categorías enteras que pueden faltar: producto, UX, arquitectura, seguridad, operación, estrategia, crecimiento y deuda organizativa.
+
+## Mapa de Prompts
 
 - [01-code-quality-audit.md](01-code-quality-audit.md)
-  Purpose: decide whether the code is technically safe enough to leave alone.
-  Use when: feature work is largely done and you want a hard engineering judgment.
+  Decide si el código es técnicamente seguro para estabilizar.
 
 - [02-i18n-audit.md](02-i18n-audit.md)
-  Purpose: verify that multilingual support is real, coherent, and releasable.
-  Use when: the repo supports more than one locale or claims that it does.
+  Verifica si el soporte multilingüe es real, coherente y honesto.
 
 - [03-documentation-audit.md](03-documentation-audit.md)
-  Purpose: verify that README, setup, examples, and supporting docs tell the truth.
-  Use when: documentation could drift from code or from real setup steps.
+  Comprueba si README, setup, ejemplos y docs dicen la verdad.
 
 - [04-github-repository-audit.md](04-github-repository-audit.md)
-  Purpose: verify that the repository itself is credible, discoverable, and professionally presented.
-  Use when: you are about to share the repo or rely on it as a public artifact.
+  Evalúa si el repositorio es creíble, descubrible y presentable.
 
 - [05-public-presentation-pass.md](05-public-presentation-pass.md)
-  Purpose: decide whether the project is genuinely good enough to show publicly.
-  Use when: the repo may appear in a portfolio, LinkedIn post, client demo, or showcase list.
+  Decide si el proyecto merece exposición pública.
 
 - [06-release-checklist.md](06-release-checklist.md)
-  Purpose: act as the final gate after deeper audits are already done.
-  Use when: you want a compact yes or no decision before closing the project.
+  Puerta final después de que las auditorías profundas ya estén resueltas.
 
-## Operating Rules
+## Reglas Operativas
 
-- Never start with presentation if the code and docs are still lying.
-- If a deeper audit fails, do not treat later prompts as a substitute.
-- `PASS WITH CAVEATS` means the project is not clean yet.
-- If more than one prompt fails, fix in this order:
-  1. code truth,
-  2. documentation truth,
-  3. repository presentation,
-  4. public showcase polish.
+- No empieces por presentación si código y docs todavía mienten.
+- Si una auditoría profunda falla, no uses prompts posteriores como sustituto.
+- `PASS WITH CAVEATS` significa que todavía hay riesgo explícito.
+- La IA debe inspeccionar el repositorio completo cuando el entorno se lo permita.
+- La IA debe distinguir entre mínimo obligatorio, criterio experto adicional y gusto personal.
+
+## Orden de Corrección
+
+Si fallan varias capas, corrige en este orden:
+
+1. verdad técnica;
+2. seguridad y datos;
+3. experiencia de usuario;
+4. documentación;
+5. operación y mantenimiento;
+6. presentación pública;
+7. polish premium.
 
 ## Runbook
 
-For the practical closeout flow, use [RUNBOOK.md](RUNBOOK.md).
+Para usar esta carpeta como proceso, consulta [RUNBOOK.md](RUNBOOK.md).

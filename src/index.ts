@@ -7,6 +7,7 @@ import { runModules, printSummary } from './core/moduleRunner.js';
 import { getAllModuleIds, getModule, getAllModules } from './modules/registry.js';
 import { showMainMenu, showModuleSelector, showExplainSelector, printModuleExplanation, printModuleList } from './menu/mainMenu.js';
 import { generateModuleDocs } from './core/docs.js';
+import { printPromptContent, printPromptList, printPromptPath, type PromptKind } from './core/prompts.js';
 import { ejectModule } from './core/moduleRunner.js';
 import { readConfig, updateConfig } from './core/config.js';
 import { scaffoldProject } from './core/scaffold.js';
@@ -172,6 +173,9 @@ export function createProgram(): Command {
           }
           case 'docs':
             printModuleList();
+            break;
+          case 'prompts':
+            printPromptList();
             break;
         }
       }
@@ -403,6 +407,58 @@ export function createProgram(): Command {
       for (const mod of modules) {
         printModuleExplanation(mod);
         console.log('─'.repeat(70));
+      }
+    });
+
+  // helen prompts
+  const prompts = program
+    .command('prompts')
+    .description('Browse reusable project prompts, atomic steps, checkpoints, and executable flows')
+    .action(() => {
+      printPromptList();
+    });
+
+  prompts
+    .command('list')
+    .description('List available prompts and flows')
+    .option('--kind <kind>', 'Filter by kind: master, flow, step, checkpoint, prompt')
+    .action((opts: { kind?: PromptKind }) => {
+      printPromptList(opts.kind);
+    });
+
+  prompts
+    .command('show <prompt>')
+    .description('Print a prompt, step, checkpoint, or flow')
+    .action((prompt: string) => {
+      try {
+        printPromptContent(prompt);
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  prompts
+    .command('path <prompt>')
+    .description('Print the absolute path to a prompt, step, checkpoint, or flow')
+    .action((prompt: string) => {
+      try {
+        printPromptPath(prompt);
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  prompts
+    .command('flow <flow>')
+    .description('Print an executable flow such as full-polish, release-candidate, or client-delivery')
+    .action((flow: string) => {
+      try {
+        printPromptContent(flow);
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
       }
     });
 
