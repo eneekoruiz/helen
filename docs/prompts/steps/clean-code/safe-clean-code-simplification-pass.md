@@ -1,4 +1,4 @@
-# Clean Code Pass
+# Safe Clean Code Simplification Pass
 
 ## Objetivo
 

@@ -10,12 +10,11 @@ Cuando el producto ya funciona y se quiere elevar una web pública, landing, por
 
 ## Prompts Incluidos
 
-1. `../design/01-general-design-improvement-audit.md`
-2. `../design/02-awwwards-soty-visual-excellence-audit.md`
-3. `../steps/visual/premium-visual-pass.md`
-4. `../steps/visual/responsive-pass.md`
-5. `../steps/accessibility/basic-accessibility-pass.md`
-6. `../steps/performance/basic-performance-pass.md`
+1. `../design/01-product-design-and-awards-visual-excellence-audit.md`
+2. `../steps/visual/premium-visual-polish-pass.md`
+3. `../steps/visual/responsive-pass.md`
+4. `../steps/accessibility/basic-accessibility-pass.md`
+5. `../steps/performance/basic-performance-pass.md`
 
 ## Checkpoints Entre Pasos
 

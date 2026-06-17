@@ -18,6 +18,14 @@ describe('Prompt Library', () => {
     expect(entry.absolutePath.endsWith('MASTER.md')).toBe(true);
   });
 
+  it('exposes taxonomy and coverage guides', () => {
+    const taxonomy = resolvePromptEntry('taxonomy');
+    const coverage = readPrompt('coverage');
+
+    expect(taxonomy.kind).toBe('guide');
+    expect(coverage).toContain('Canonical Prompt Coverage Map');
+  });
+
   it('resolves exact flow ids before basename matches', () => {
     const entry = resolvePromptEntry('security-hardening');
 
@@ -43,12 +51,14 @@ describe('Prompt Library', () => {
   it('exposes advanced blind-spot prompt families', () => {
     const privacy = resolvePromptEntry('privacy/01-privacy-legal-and-compliance-audit');
     const data = resolvePromptEntry('data/01-data-model-and-domain-integrity-audit');
-    const design = resolvePromptEntry('design/02-awwwards-soty-visual-excellence-audit');
+    const design = resolvePromptEntry('design/01-product-design-and-awards-visual-excellence-audit');
+    const cms = resolvePromptEntry('cms/01-static-content-to-editable-cms-fields');
     const agentQuality = readPrompt('agent-quality/01-agent-workflow-and-prompt-quality-audit');
 
     expect(privacy.kind).toBe('prompt');
     expect(data.kind).toBe('prompt');
     expect(design.kind).toBe('prompt');
+    expect(cms.kind).toBe('prompt');
     expect(agentQuality).toContain('Agent Workflow and Prompt Quality Audit');
   });
 });

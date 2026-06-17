@@ -1,4 +1,4 @@
-# Premium Visual Pass
+# Premium Visual Polish Pass
 
 ## Objetivo
 

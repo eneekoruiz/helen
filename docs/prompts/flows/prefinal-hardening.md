@@ -10,8 +10,8 @@ Después de full polish y antes de release candidate.
 
 ## Prompts Incluidos
 
-1. `../steps/testing/fast-verification.md`
-2. `../steps/clean-code/clean-code-pass.md`
+1. `../steps/testing/fast-build-test-verification.md`
+2. `../steps/clean-code/safe-clean-code-simplification-pass.md`
 3. `../steps/security/security-hardening.md`
 4. `../steps/performance/basic-performance-pass.md`
 5. `../steps/accessibility/basic-accessibility-pass.md`

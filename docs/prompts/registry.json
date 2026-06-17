@@ -5,6 +5,18 @@
   "flowsRoot": "docs/prompts/flows",
   "stepsRoot": "docs/prompts/steps",
   "checkpointsRoot": "docs/prompts/checkpoints",
+  "guides": [
+    {
+      "id": "taxonomy",
+      "path": "docs/prompts/TAXONOMY.md",
+      "purpose": "Rules for adding, merging, naming, and preventing duplicate prompts."
+    },
+    {
+      "id": "coverage",
+      "path": "docs/prompts/COVERAGE.md",
+      "purpose": "Canonical map of prompt intentions and their official entries."
+    }
+  ],
   "families": [
     {
       "id": "agent-quality",
@@ -28,7 +40,13 @@
       "id": "design",
       "phase": "experience",
       "purpose": "Review general design quality and awards-level visual excellence for public-facing products.",
-      "entrypoint": "docs/prompts/design/01-general-design-improvement-audit.md"
+      "entrypoint": "docs/prompts/design/01-product-design-and-awards-visual-excellence-audit.md"
+    },
+    {
+      "id": "cms",
+      "phase": "delivery",
+      "purpose": "Convert static page content into editable CMS fields and audit editorial workflow readiness.",
+      "entrypoint": "docs/prompts/cms/01-static-content-to-editable-cms-fields.md"
     },
     {
       "id": "strategy",
@@ -183,6 +201,12 @@
       "path": "docs/prompts/flows/awwwards-soty-design-review.md",
       "repeatable": true,
       "stage": "polish"
+    },
+    {
+      "id": "cms-editable-content-conversion",
+      "path": "docs/prompts/flows/cms-editable-content-conversion.md",
+      "repeatable": true,
+      "stage": "delivery"
     },
     {
       "id": "security-hardening",

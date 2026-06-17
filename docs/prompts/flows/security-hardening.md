@@ -11,7 +11,7 @@ Prefinal o release candidate.
 ## Prompts Incluidos
 
 1. `../steps/security/security-hardening.md`
-2. `../steps/testing/fast-verification.md`
+2. `../steps/testing/fast-build-test-verification.md`
 
 ## Checkpoints Entre Pasos
 

@@ -421,7 +421,7 @@ export function createProgram(): Command {
   prompts
     .command('list')
     .description('List available prompts and flows')
-    .option('--kind <kind>', 'Filter by kind: master, flow, step, checkpoint, prompt')
+    .option('--kind <kind>', 'Filter by kind: master, guide, flow, step, checkpoint, prompt')
     .action((opts: { kind?: PromptKind }) => {
       printPromptList(opts.kind);
     });

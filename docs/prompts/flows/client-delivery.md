@@ -10,10 +10,10 @@ Después de que el producto funcione y antes del handoff.
 
 ## Prompts Incluidos
 
-1. `../steps/testing/fast-verification.md`
+1. `../steps/testing/fast-build-test-verification.md`
 2. `../steps/delivery/client-delivery-readiness.md`
 3. `../steps/security/security-hardening.md`
-4. `../steps/github/repo-polish.md`
+4. `../steps/github/github-repository-presentation-polish.md`
 5. `../steps/release/release-notes-and-checklist.md`
 
 ## Checkpoints Entre Pasos

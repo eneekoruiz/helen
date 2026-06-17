@@ -10,7 +10,7 @@ Después de que build/docs básicos sean correctos.
 
 ## Prompts Incluidos
 
-1. `../steps/github/repo-polish.md`
+1. `../steps/github/github-repository-presentation-polish.md`
 2. `../steps/release/release-notes-and-checklist.md`
 
 ## Checkpoints Entre Pasos

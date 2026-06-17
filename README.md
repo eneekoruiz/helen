@@ -27,7 +27,7 @@ npx helen-cli modules
 - `helen scripts easter-egg`
 - `helen docs`
 - `helen prompts`
-- `helen prompts list [--kind <master|flow|step|checkpoint|prompt>]`
+- `helen prompts list [--kind <master|guide|flow|step|checkpoint|prompt>]`
 - `helen prompts show <id>`
 - `helen prompts path <id>`
 - `helen prompts flow <id>`

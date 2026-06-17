@@ -10,15 +10,15 @@ Después de feature-complete básico y antes de prefinal hardening.
 
 ## Prompts Incluidos
 
-1. `../steps/audit/quick-project-audit.md`
-2. `../steps/ux/general-ux-audit.md`
-3. `../steps/visual/premium-visual-pass.md`
+1. `../steps/audit/initial-project-risk-scan.md`
+2. `../steps/ux/primary-user-experience-audit.md`
+3. `../steps/visual/premium-visual-polish-pass.md`
 4. `../steps/visual/responsive-pass.md`
 5. `../steps/ux/loading-error-empty-states.md`
-6. `../steps/clean-code/clean-code-pass.md`
+6. `../steps/clean-code/safe-clean-code-simplification-pass.md`
 7. `../steps/performance/basic-performance-pass.md`
 8. `../steps/accessibility/basic-accessibility-pass.md`
-9. `../steps/testing/fast-verification.md`
+9. `../steps/testing/fast-build-test-verification.md`
 
 ## Orden Exacto
 

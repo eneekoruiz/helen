@@ -1,8 +1,9 @@
 # Diseño, UI Premium y Awards-Level
 
-Prompts para mejora general de diseño, UI premium y revisión exigente tipo Awwwards/Site of the Year.
+Prompt canónico para mejora general de diseño, UI premium y revisión exigente tipo Awwwards/Site of the Year.
+
+No se separa "diseño general" de "Awwwards/SOTY" en prompts distintos porque ambos evalúan la misma superficie: calidad visual e interacción. La diferencia vive dentro del prompt como nivel de ambición.
 
 ## Prompts
 
-1. [01-general-design-improvement-audit.md](01-general-design-improvement-audit.md)
-2. [02-awwwards-soty-visual-excellence-audit.md](02-awwwards-soty-visual-excellence-audit.md)
+1. [01-product-design-and-awards-visual-excellence-audit.md](01-product-design-and-awards-visual-excellence-audit.md)

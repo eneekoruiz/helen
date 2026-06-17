@@ -15,6 +15,7 @@ Regla: antes de ejecutar un flujo, lee [../MASTER.md](../MASTER.md), el flujo co
 - [clean-code-pass.md](clean-code-pass.md)
 - [clean-code-architecture-audit.md](clean-code-architecture-audit.md)
 - [awwwards-soty-design-review.md](awwwards-soty-design-review.md)
+- [cms-editable-content-conversion.md](cms-editable-content-conversion.md)
 - [security-hardening.md](security-hardening.md)
 - [github-repo-polish.md](github-repo-polish.md)
 - [i18n-final-audit.md](i18n-final-audit.md)

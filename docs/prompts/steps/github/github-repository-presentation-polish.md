@@ -1,4 +1,4 @@
-# GitHub Repo Polish
+# GitHub Repository Presentation Polish
 
 ## Objetivo
 

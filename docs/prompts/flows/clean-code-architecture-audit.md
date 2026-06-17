@@ -10,10 +10,10 @@ Después de que el proyecto funcione y antes de hardening o release candidate.
 
 ## Prompts Incluidos
 
-1. `../steps/audit/quick-project-audit.md`
+1. `../steps/audit/initial-project-risk-scan.md`
 2. `../steps/architecture/staff-architecture-audit.md`
-3. `../steps/clean-code/clean-code-pass.md`
-4. `../steps/testing/fast-verification.md`
+3. `../steps/clean-code/safe-clean-code-simplification-pass.md`
+4. `../steps/testing/fast-build-test-verification.md`
 
 ## Checkpoints Entre Pasos
 

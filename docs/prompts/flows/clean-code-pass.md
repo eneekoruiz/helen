@@ -10,9 +10,9 @@ Después de funcionalidad estable y antes de hardening final.
 
 ## Prompts Incluidos
 
-1. `../steps/audit/quick-project-audit.md`
-2. `../steps/clean-code/clean-code-pass.md`
-3. `../steps/testing/fast-verification.md`
+1. `../steps/audit/initial-project-risk-scan.md`
+2. `../steps/clean-code/safe-clean-code-simplification-pass.md`
+3. `../steps/testing/fast-build-test-verification.md`
 
 ## Checkpoints Entre Pasos
 

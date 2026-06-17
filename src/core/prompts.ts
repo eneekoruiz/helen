@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pc from 'picocolors';
 
-export type PromptKind = 'master' | 'flow' | 'step' | 'checkpoint' | 'prompt';
+export type PromptKind = 'master' | 'guide' | 'flow' | 'step' | 'checkpoint' | 'prompt';
 
 export interface PromptEntry {
   id: string;
@@ -116,6 +116,20 @@ export function listPromptEntries(): PromptEntry[] {
       relativePath: toPosix(path.relative(process.cwd(), path.join(PROMPTS_ROOT, 'MASTER.md'))),
       absolutePath: path.join(PROMPTS_ROOT, 'MASTER.md'),
     },
+    {
+      id: 'taxonomy',
+      kind: 'guide',
+      title: 'Prompt Taxonomy',
+      relativePath: toPosix(path.relative(process.cwd(), path.join(PROMPTS_ROOT, 'TAXONOMY.md'))),
+      absolutePath: path.join(PROMPTS_ROOT, 'TAXONOMY.md'),
+    },
+    {
+      id: 'coverage',
+      kind: 'guide',
+      title: 'Canonical Prompt Coverage Map',
+      relativePath: toPosix(path.relative(process.cwd(), path.join(PROMPTS_ROOT, 'COVERAGE.md'))),
+      absolutePath: path.join(PROMPTS_ROOT, 'COVERAGE.md'),
+    },
   ];
 
   for (const flow of registry.executableFlows ?? []) {
@@ -145,6 +159,7 @@ export function listPromptEntries(): PromptEntry[] {
 
   const standalonePromptDirs = [
     'agent-quality',
+    'cms',
     'data',
     'delivery',
     'design',

@@ -10,9 +10,9 @@ Después de que el flujo principal funcione.
 
 ## Prompts Incluidos
 
-1. `../steps/ux/general-ux-audit.md`
+1. `../steps/ux/primary-user-experience-audit.md`
 2. `../steps/ux/loading-error-empty-states.md`
-3. `../steps/visual/premium-visual-pass.md`
+3. `../steps/visual/premium-visual-polish-pass.md`
 4. `../steps/visual/responsive-pass.md`
 5. `../steps/accessibility/basic-accessibility-pass.md`
 

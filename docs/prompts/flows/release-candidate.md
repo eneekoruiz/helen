@@ -10,11 +10,11 @@ Final del proyecto, después de prefinal hardening.
 
 ## Prompts Incluidos
 
-1. `../steps/testing/fast-verification.md`
+1. `../steps/testing/fast-build-test-verification.md`
 2. `../steps/security/security-hardening.md`
 3. `../steps/i18n/final-i18n-audit.md`
 4. `../steps/seo/final-seo-audit.md`
-5. `../steps/github/repo-polish.md`
+5. `../steps/github/github-repository-presentation-polish.md`
 6. `../steps/release/release-notes-and-checklist.md`
 
 ## Checkpoints Entre Pasos
