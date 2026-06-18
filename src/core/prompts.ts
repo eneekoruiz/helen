@@ -81,34 +81,6 @@ function walkMarkdownFiles(dir: string): string[] {
   return files;
 }
 
-function entryFromFile(kind: PromptKind, filePath: string, baseDir: string): PromptEntry {
-  const relativeFromBase = toPosix(path.relative(baseDir, filePath));
-  const id = stripMarkdownExt(relativeFromBase);
-  const relativePath = toPosix(path.relative(process.cwd(), filePath));
-
-  return {
-    id,
-    kind,
-    title: titleFromId(id),
-    relativePath,
-    absolutePath: filePath,
-  };
-}
-
-function promptEntryFromRoot(filePath: string): PromptEntry {
-  const relativeFromRoot = toPosix(path.relative(PROMPTS_ROOT, filePath));
-  const id = stripMarkdownExt(relativeFromRoot);
-  const relativePath = toPosix(path.relative(process.cwd(), filePath));
-
-  return {
-    id,
-    kind: 'prompt',
-    title: titleFromId(id),
-    relativePath,
-    absolutePath: filePath,
-  };
-}
-
 export function getPromptsRoot(): string {
   return PROMPTS_ROOT;
 }
@@ -136,61 +108,48 @@ export function listPromptEntries(): PromptEntry[] {
     });
   }
 
-  for (const flow of registry.executableFlows ?? []) {
-    const absolutePath = path.resolve(PROMPTS_ROOT, path.relative('docs/prompts', flow.path));
-    entries.push({
-      id: flow.id,
-      kind: 'flow',
-      title: titleFromId(flow.id),
-      relativePath: toPosix(path.relative(process.cwd(), absolutePath)),
-      absolutePath,
-      repeatable: flow.repeatable,
-      stage: flow.stage,
-    });
-  }
+  // Scan phase subdirectories dynamically
+  const phaseDirs = fs.existsSync(PROMPTS_ROOT)
+    ? fs.readdirSync(PROMPTS_ROOT, { withFileTypes: true })
+        .filter(entry => entry.isDirectory() && /^\d{2}-/.test(entry.name))
+        .map(entry => entry.name)
+    : [];
 
-  const scanTargets: Array<{ kind: PromptKind; dir: string }> = [
-    { kind: 'step', dir: 'steps' },
-    { kind: 'checkpoint', dir: 'checkpoints' },
-  ];
-
-  for (const target of scanTargets) {
-    const baseDir = path.join(PROMPTS_ROOT, target.dir);
+  for (const dir of phaseDirs) {
+    const baseDir = path.join(PROMPTS_ROOT, dir);
     for (const filePath of walkMarkdownFiles(baseDir)) {
-      entries.push(entryFromFile(target.kind, filePath, baseDir));
-    }
-  }
-
-  const standalonePromptDirs = [
-    'agent-quality',
-    'cms',
-    'data',
-    'delivery',
-    'design',
-    'discovery',
-    'dx',
-    'final',
-    'growth',
-    'last-mile',
-    'observability',
-    'operations',
-    'orchestration',
-    'integrations',
-    'product',
-    'privacy',
-    'quality',
-    'strategy',
-    'workflows',
-  ];
-
-  for (const dir of standalonePromptDirs) {
-    for (const filePath of walkMarkdownFiles(path.join(PROMPTS_ROOT, dir))) {
       const relativeFromRoot = toPosix(path.relative(PROMPTS_ROOT, filePath));
-      if (relativeFromRoot === 'final/RUNBOOK.md') {
-        entries.push(promptEntryFromRoot(filePath));
-        continue;
+      const id = stripMarkdownExt(relativeFromRoot);
+      const relativePath = toPosix(path.relative(process.cwd(), filePath));
+      const fileName = path.basename(filePath);
+
+      let kind: PromptKind = 'prompt';
+      if (fileName.endsWith('-flow.md')) {
+        kind = 'flow';
+      } else if (fileName.endsWith('-checkpoint.md')) {
+        kind = 'checkpoint';
       }
-      entries.push(promptEntryFromRoot(filePath));
+
+      const entry: PromptEntry = {
+        id,
+        kind,
+        title: titleFromId(id),
+        relativePath,
+        absolutePath: filePath,
+      };
+
+      if (kind === 'flow') {
+        const flowMeta = registry.executableFlows?.find(f => {
+          const regRel = toPosix(f.path.replace(/^docs\/prompts\//, ''));
+          return relativeFromRoot === regRel || f.id === id || path.basename(f.path, '.md') === path.basename(filePath, '.md');
+        });
+        if (flowMeta) {
+          entry.repeatable = flowMeta.repeatable;
+          entry.stage = flowMeta.stage;
+        }
+      }
+
+      entries.push(entry);
     }
   }
 

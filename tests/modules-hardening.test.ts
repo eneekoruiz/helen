@@ -184,4 +184,44 @@ describe('Module Hardening - Idempotency & Dry-Run', () => {
       expect(cryptoContent).toContain('generateSecureToken');
     });
   });
+
+  describe('Visual CMS (i18n Adaptability)', () => {
+    it('should scaffold non-i18n CMS files by default when no i18n is detected', async () => {
+      const mod = getModule('cms');
+      if (!mod) throw new Error('cms module not found');
+
+      const result = await mod.execute(ctx);
+      expect(result.created).toContain('src/cms/content.json');
+      expect(result.created).toContain('src/context/CMSContext.tsx');
+      expect(result.created).toContain('src/components/CMS/EditableText.tsx');
+
+      const contextContent = fs.readFileSync(path.join(tmpDir, 'src/context/CMSContext.tsx'), 'utf-8');
+      expect(contextContent).not.toContain('react-i18next');
+      expect(contextContent).not.toContain('useTranslation');
+
+      const contentJson = JSON.parse(fs.readFileSync(path.join(tmpDir, 'src/cms/content.json'), 'utf-8'));
+      expect(contentJson.translatable).toBeUndefined();
+      expect(contentJson.welcome).toBeDefined();
+    });
+
+    it('should scaffold i18n CMS files when i18n configuration is detected', async () => {
+      const mod = getModule('cms');
+      if (!mod) throw new Error('cms module not found');
+
+      // Simulate i18n project
+      fs.ensureDirSync(path.join(tmpDir, 'src/i18n'));
+      fs.writeFileSync(path.join(tmpDir, 'src/i18n/config.ts'), 'export default {}');
+
+      const result = await mod.execute(ctx);
+      expect(result.created).toContain('src/context/CMSContext.tsx');
+
+      const contextContent = fs.readFileSync(path.join(tmpDir, 'src/context/CMSContext.tsx'), 'utf-8');
+      expect(contextContent).toContain('react-i18next');
+      expect(contextContent).toContain('useTranslation');
+
+      const contentJson = JSON.parse(fs.readFileSync(path.join(tmpDir, 'src/cms/content.json'), 'utf-8'));
+      expect(contentJson.translatable).toBeDefined();
+      expect(contentJson.universal).toBeDefined();
+    });
+  });
 });

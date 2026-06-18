@@ -1,313 +1,49 @@
 # HELEN Prompt System
 
-Esta carpeta contiene la biblioteca de prompts de HELEN.
+Esta carpeta contiene la biblioteca de prompts de HELEN, reestructurada en torno al ciclo de vida real del desarrollo ("momentos del proyecto") para minimizar la fricción y optimizar la mantenibilidad.
 
-No es solo una colección de prompts sueltos. Es un sistema para que una IA integrada en un editor pueda auditar, mejorar, pulir, endurecer y preparar un proyecto siguiendo fases, criterios, checkpoints y reglas de seguridad.
+El sistema se orquesta a través del prompt maestro interactivo: **[MASTER.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/MASTER.md)**.
 
-## Cómo Usarlo
+---
 
-Si quieres ejecutar un flujo completo, dile a la IA:
+## 🧭 Momentos del Proyecto (Estructura de Carpetas)
 
-```text
-Lee docs/prompts/MASTER.md.
-Luego lee docs/prompts/flows/full-polish.md.
-Ejecuta el flujo paso a paso, leyendo cada prompt atómico y checkpoint referenciado.
-No avances si un checkpoint bloqueante falla.
-```
+Los prompts se organizan por la fase en la que se encuentra el proyecto, no por categorías técnicas. Cada carpeta incluye su propio `README.md` con objetivos y checklists bloqueantes para avanzar de fase:
 
-Si no sabes qué flujo usar:
+1. **[01-start-project](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/README.md)** (Inicio): Diagnóstico rápido de riesgos, benchmark de competidores y priorización del roadmap.
+2. **[02-building](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/README.md)** (Desarrollo): Clean code local, consistencia de datos, contratos de API y checkpoints de compilación/lint.
+3. **[03-finish-features](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/README.md)** (Refinamiento): Usabilidad (UX), diseño visual premium, responsive, accesibilidad y regresiones visuales.
+4. **[04-before-production](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/README.md)** (Pre-Producción): QA adversarial, límites de escala, costes, privacidad (GDPR) e instrumentación de observabilidad.
+5. **[05-final-audit](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/README.md)** (Auditoría): Veredictos técnicos exigentes de código, internacionalización (i18n), documentación e higiene del repositorio.
+6. **[06-release](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/06-release/README.md)** (Publicación): Empaquetado estable, changelogs, release notes y gates de versión.
+7. **[07-client-handoff](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/07-client-handoff/README.md)** (Entrega): Comprobaciones de última milla (formularios, links, CTAs) y paquete de entrega.
+8. **[08-maintenance](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/README.md)** (Mantenimiento): Copias de seguridad, migraciones, portabilidad, briefs de tareas e integridad del propio sistema.
+
+---
+
+## ⚡ Métodos de Acceso y Uso de los Prompts
+
+Existen múltiples formas de utilizar y consumir esta biblioteca de prompts en tu flujo diario de desarrollo asistido por IA:
+
+| Método | Cómo Funciona | Ventajas | Inconvenientes |
+|---|---|---|---|
+| **1. Archivos Locales / MCP (Recomendado)** | Utilizar un editor con soporte MCP de acceso a ficheros o referenciar directamente la ruta local del archivo markdown. | - Acceso instantáneo.<br>- Contexto completo actualizado al segundo.<br>- Cero fricción. | Requiere que el editor tenga permisos de lectura en la carpeta. |
+| **2. Copiar y Pegar** | Copiar el contenido de los archivos markdown directamente en el chat de la IA. | - Funciona en cualquier chat web externo (ChatGPT, Claude, Gemini). | - Proceso manual lento.<br>- Consume tokens de forma ineficiente. |
+| **3. URLs Raw de GitHub / curl** | Consumir los prompts directamente desde el repositorio remoto (ej. `curl -s https://raw.githubusercontent.com/username/repo/main/docs/prompts/...`). | - No requiere clonar el repositorio.<br>- Prompts siempre actualizados a la última versión. | - Requiere conexión a internet.<br>- Inseguro en entornos sin red. |
+| **4. Submódulos de Git / Subtrees** | Incrustar la biblioteca como un submódulo de Git dentro de otros proyectos de la organización. | - Prompts compartidos entre múltiples repositorios.<br>- Control de versiones independiente. | - Complejidad de Git.<br>- Requiere sincronizar cambios. |
+
+> [!TIP]
+> **Opción Recomendada**: Utiliza **Archivos Locales** a través de integraciones MCP o referencias directas en editores integrados (como Cursor, VS Code con Gemini/Claude, Windsurf). Esto permite a la IA leer autónomamente la fase y los prompts necesarios sin intervención manual.
+
+---
+
+## 🛠️ CLI de HELEN
+
+La herramienta de CLI de HELEN te permite interactuar con esta biblioteca directamente desde la terminal:
 
 ```bash
-helen prompts
-helen prompts list --kind flow
-helen prompts list --kind prompt
-helen prompts path full-polish
-helen prompts show coverage
+helen prompts list                # Lista todos los prompts cargados por fases
+helen prompts show master         # Muestra el prompt MASTER orchestrator
+helen prompts show full-polish    # Busca y muestra un prompt por su nombre base
+helen prompts path full-polish    # Devuelve la ruta absoluta del archivo
 ```
-
-## Archivos Principales
-
-- [MASTER.md](MASTER.md)
-  Reglas maestras para agentes: cómo leer flujos, cuándo avanzar, cuándo parar, cuándo corregir y cuándo pedir confirmación.
-
-- [TAXONOMY.md](TAXONOMY.md)
-  Reglas para evitar prompts duplicados, decidir si algo debe ser prompt, step, checkpoint o flow, y nombrarlo bien.
-
-- [COVERAGE.md](COVERAGE.md)
-  Mapa canónico de intenciones. Antes de crear un prompt nuevo, revisa aquí si ya existe una entrada oficial.
-
-- [STANDARDS.md](STANDARDS.md)
-  Contrato de calidad para prompts atómicos, flujos, checkpoints, nombres, fusiones y mantenimiento.
-
-- [registry.json](registry.json)
-  Registro machine-readable de familias, flujos y guías para que el CLI pueda descubrirlos.
-
-## Qué Hay Dentro
-
-### Flows
-
-[flows/](flows/README.md) contiene flujos compuestos. Son instrucciones ejecutables por un agente.
-
-Usa flows cuando quieras que la IA trabaje de principio a fin:
-
-- `full-polish`: mejora general antes del endurecimiento final.
-- `prefinal-hardening`: endurecimiento previo a release.
-- `release-candidate`: validación final para candidato de release.
-- `client-delivery`: preparación para entrega a cliente/equipo.
-- `market-analysis`: benchmark, posicionamiento y roadmap.
-- `ux-visual-pass`: UX, visual, responsive y accesibilidad básica.
-- `clean-code-architecture-audit`: clean code + arquitectura con estándar Staff.
-- `awwwards-soty-design-review`: diseño visual, interacción y craft tipo Awwwards/SOTY.
-- `cms-editable-content-conversion`: convertir textos en `EditableField` e imágenes en `EditableImage`.
-- `last-mile-client-site-delivery`: última revisión visible antes de demo/cliente: copy, CMS, links, forms, CTAs, assets y smoke test de navegador.
-- `prompt-library-maintenance`: mantenimiento de la propia biblioteca de prompts: duplicados, cobertura, nombres, registry, docs y tests.
-- `security-hardening`: mitigación de riesgos de seguridad.
-- `github-repo-polish`: presentación profesional del repositorio.
-- `i18n-final-audit`: auditoría final de internacionalización.
-
-### Steps
-
-[steps/](steps/) contiene prompts atómicos y reutilizables.
-
-Usa steps cuando quieras ejecutar una tarea concreta dentro de un flujo:
-
-- `audit/initial-project-risk-scan`
-- `ux/primary-user-experience-audit`
-- `ux/loading-error-empty-states`
-- `visual/premium-visual-polish-pass`
-- `visual/responsive-pass`
-- `clean-code/safe-clean-code-simplification-pass`
-- `architecture/staff-architecture-audit`
-- `testing/fast-build-test-verification`
-- `accessibility/basic-accessibility-pass`
-- `performance/basic-performance-pass`
-- `security/security-hardening`
-- `seo/final-seo-audit`
-- `i18n/final-i18n-audit`
-- `github/github-repository-presentation-polish`
-- `release/release-notes-and-checklist`
-- `market/competitive-scan`
-- `delivery/client-delivery-readiness`
-
-### Checkpoints
-
-[checkpoints/](checkpoints/README.md) contiene puertas entre fases.
-
-Un checkpoint no es una auditoría larga; decide si se puede avanzar.
-
-- `build-and-compile-checkpoint`
-- `test-suite-checkpoint`
-- `lint-and-typecheck`
-- `visual-ux-regression-checkpoint`
-- `security-risk-checkpoint`
-- `release-readiness-checkpoint`
-
-### Prompt Families
-
-Estas carpetas contienen auditorías expertas por dominio:
-
-- [agent-quality/](agent-quality/README.md): calidad del propio sistema de prompts y agentes.
-- [cms/](cms/README.md): conversión de contenido estático a CMS editable y workflow editorial.
-- [data/](data/README.md): modelo de dominio, integridad de datos, invariantes y drift.
-- [delivery/](delivery/README.md): handoff, soporte, release notes y demo package.
-- [design/](design/README.md): diseño general, UI premium y Awwwards/SOTY en un prompt canónico.
-- [discovery/](discovery/README.md): puntos ciegos, metodología y riesgos no previstos.
-- [dx/](dx/README.md): experiencia de desarrollador, scripts y onboarding técnico.
-- [final/](final/README.md): auditorías finales de código, docs, i18n, GitHub, presentación y release.
-- [growth/](growth/README.md): activación, retención, conversión y SEO programático.
-- [integrations/](integrations/README.md): APIs, contratos, webhooks, SDKs e integraciones.
-- [last-mile/](last-mile/README.md): copy final, claims, links, formularios, CTAs, assets y demo readiness.
-- [observability/](observability/README.md): logs, métricas, tracing, alertas y analytics.
-- [operations/](operations/README.md): backups, recovery, migraciones, import/export y lock-in.
-- [orchestration/](orchestration/README.md): router, briefs para agentes y síntesis de auditorías.
-- [privacy/](privacy/README.md): privacidad, legal, compliance, consentimiento y retención.
-- [product/](product/README.md): onboarding, microcopy, estados vacíos y sensación premium.
-- [quality/](quality/README.md): QA adversarial, edge cases, stress, escala y coste.
-- [strategy/](strategy/README.md): benchmark competitivo, roadmap, ROI y priorización.
-
-## Qué Usar Según la Fase
-
-### 1. No sé por dónde empezar
-
-Usa:
-
-```text
-orchestration/00-prompt-router.md
-```
-
-O pide:
-
-```text
-Lee docs/prompts/orchestration/00-prompt-router.md y dime qué flujo ejecutar para este repo.
-```
-
-### 1.1 Quiero mejorar la biblioteca de prompts
-
-Usa:
-
-```text
-flows/prompt-library-maintenance.md
-```
-
-Este flujo revisa `STANDARDS.md`, `TAXONOMY.md`, `COVERAGE.md`, `registry.json`, README, prompts, flujos y tests para evitar duplicados y mantener calidad de sistema.
-
-### 2. Quiero descubrir puntos ciegos
-
-Usa:
-
-```text
-discovery/01-methodology-and-blind-spots-audit.md
-discovery/02-product-ux-and-premium-quality-audit.md
-discovery/03-architecture-operations-and-risk-audit.md
-```
-
-### 3. Quiero mejora general del proyecto
-
-Usa:
-
-```text
-flows/full-polish.md
-```
-
-Este flujo cubre auditoría rápida, UX, visual, responsive, estados, clean code, performance, accesibilidad y verificación rápida.
-
-### 4. Quiero clean code y arquitectura exigente
-
-Usa:
-
-```text
-flows/clean-code-architecture-audit.md
-```
-
-Este flujo combina:
-
-- riesgo inicial;
-- arquitectura Staff-level;
-- simplificación segura de código;
-- verificación build/test.
-
-### 5. Quiero diseño general, premium o Awwwards/SOTY
-
-Usa el prompt canónico:
-
-```text
-design/01-product-design-and-awards-visual-excellence-audit.md
-```
-
-O el flujo completo:
-
-```text
-flows/awwwards-soty-design-review.md
-```
-
-No hay prompts separados para “diseño general” y “Awwwards” porque inspeccionan la misma superficie. El prompt usa niveles de ambición: `Product-solid`, `Premium`, `Awards-level`.
-
-### 6. Quiero preparar un release
-
-Usa en orden:
-
-```text
-flows/prefinal-hardening.md
-flows/release-candidate.md
-```
-
-No empieces con `release-candidate` si el proyecto aún no compila o si el flujo principal está roto.
-
-### 7. Quiero convertir una web a CMS editable
-
-Usa:
-
-```text
-flows/cms-editable-content-conversion.md
-```
-
-Este flujo revisa todos los textos e imágenes de contenido y guía la conversión a `EditableField` y `EditableImage` sin romper diseño, SEO, accesibilidad ni entrega.
-
-### 8. Quiero entregar a cliente o equipo
-
-Usa:
-
-```text
-flows/last-mile-client-site-delivery.md
-flows/client-delivery.md
-```
-
-El flujo `last-mile-client-site-delivery` revisa lo visible antes de enseñar una web: copy, CMS editable, links, formularios, CTAs, assets, responsive, accesibilidad y smoke test de navegador.
-
-El flujo `client-delivery` revisa reproducibilidad, docs, seguridad, repo polish, release notes y handoff.
-
-### 9. Quiero preparar GitHub o portfolio
-
-Usa:
-
-```text
-flows/github-repo-polish.md
-final/05-public-presentation-pass.md
-```
-
-### 10. Quiero analizar mercado y roadmap
-
-Usa:
-
-```text
-flows/market-analysis.md
-strategy/01-competitive-benchmark.md
-strategy/02-roadmap-roi-prioritization.md
-```
-
-### 11. Quiero revisar privacidad, datos o contratos
-
-Usa:
-
-```text
-privacy/01-privacy-legal-and-compliance-audit.md
-data/01-data-model-and-domain-integrity-audit.md
-integrations/01-api-integration-and-contract-audit.md
-```
-
-## Orden Recomendado Para un Repo Importante
-
-1. `orchestration/00-prompt-router.md`
-2. `discovery/01-methodology-and-blind-spots-audit.md`
-3. `flows/full-polish.md`
-4. `flows/clean-code-architecture-audit.md`
-5. `flows/ux-visual-pass.md` si hay UI.
-6. `flows/cms-editable-content-conversion.md` si hay entrega editable/CMS.
-7. `flows/last-mile-client-site-delivery.md` si hay web pública, demo o entrega a cliente.
-8. `privacy`, `data`, `integrations`, `operations` según aplique.
-9. `flows/prefinal-hardening.md`
-10. `flows/release-candidate.md`
-11. `flows/client-delivery.md` si hay entrega externa.
-
-## Reglas de Seguridad
-
-- No ejecutar flujos finales si el proyecto no compila.
-- No maquillar presentación si el producto o README mienten.
-- No hacer refactors grandes sin evidencia clara.
-- No introducir dependencias por comodidad.
-- No ocultar fallos de tests, build, lint o typecheck.
-- No continuar si un checkpoint bloqueante falla.
-- No crear prompts nuevos si una intención ya está cubierta en [COVERAGE.md](COVERAGE.md).
-
-## Cómo Acceder Desde HELEN
-
-```bash
-helen prompts
-helen prompts list --kind flow
-helen prompts list --kind step
-helen prompts list --kind checkpoint
-helen prompts list --kind prompt
-helen prompts list --kind guide
-helen prompts show coverage
-helen prompts show taxonomy
-helen prompts show standards
-helen prompts flow full-polish
-helen prompts flow prompt-library-maintenance
-helen prompts path release-candidate
-```
-
-## Criterio Final
-
-La biblioteca debe ser pequeña en intención y amplia en cobertura.
-
-No se añaden prompts para aparentar profundidad. Se añaden solo cuando cubren una intención distinta, con evidencia distinta, stop conditions distintas o un riesgo que normalmente se descubre demasiado tarde.

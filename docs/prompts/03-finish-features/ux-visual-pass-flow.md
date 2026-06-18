@@ -1,0 +1,49 @@
+# UX + Visual Pass Flow
+
+**Intención**: APPLY (Modificar el proyecto, salida mínima)
+
+## Objetivo
+
+Pulir y mejorar la usabilidad (UX), estética visual, responsive y accesibilidad de las interfaces del proyecto.
+
+## Fase Ideal
+
+Durante el refinamiento de la interfaz (Finish Features).
+
+## Prompts Incluidos
+
+1. [primary-user-experience-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/primary-user-experience-audit.md)
+2. [empty-states-errors-and-microcopy.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/empty-states-errors-and-microcopy.md)
+3. [premium-visual-polish-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/premium-visual-polish-pass.md)
+4. [responsive-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/responsive-pass.md)
+5. [basic-accessibility-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/basic-accessibility-pass.md)
+
+## Checkpoints Entre Pasos
+
+- **Durante el flujo**: Cargar [visual-ux-regression-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual-ux-regression-checkpoint.md) tras modificar textos y layouts.
+- **Final**: Repetir la validación de regresión visual para certificar el cierre.
+
+## Condiciones para Avanzar
+
+- El flujo principal de interacción no sufre regresiones funcionales.
+- No hay solapes de textos, overflow horizontal ni menús inaccesibles en los viewports verificados.
+
+## Cuándo Detenerse
+
+- Si las modificaciones de usabilidad detectadas exigen un rediseño de producto.
+- Si no hay modo de testear visualmente los componentes modificados.
+
+## Formato de Entrega
+
+El entregable debe ser minimalista. Produce únicamente:
+
+```text
+✅ UX y diseño visual pulidos. / [o] ⚠️ Completado con advertencias.
+
+Cambios aplicados:
+- [Breve lista de 1-3 viñetas con las mejoras visuales/UX aplicadas]
+
+Acciones manuales necesarias:
+- Ninguna. / [o especificar acciones]
+```
+*No generes informes extensos ni explicaciones teóricas.*

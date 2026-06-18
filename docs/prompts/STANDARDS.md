@@ -14,12 +14,22 @@ Every prompt must combine:
 
 The checklist is the floor, not the ceiling.
 
+## Intentions Classification
+
+Prompts are classified by their primary intention:
+
+- **APPLY**: Modifies project files or workspace state. Deliverables MUST have minimal output (e.g., `✅ Todo correcto. Cambios aplicados. Acciones manuales: ninguna`). Avoid verbose explanations.
+- **AUDIT**: Evaluates the codebase or design to identify issues/risks, without making changes.
+- **REPORT**: Provides status summaries or strategic findings.
+- **GENERATE**: Creates assets, scaffolding, or drafts.
+- **PLAN**: Produces roadmaps, tasks, checklists, or steps.
+
 ## Atomic Prompt Contract
 
 Atomic prompts should include:
 
 - Clear title.
-- Purpose.
+- Purpose and Intention.
 - When to use it.
 - When not to use it, or clear limits inside safety boundaries.
 - Prompt role.
@@ -27,7 +37,7 @@ Atomic prompts should include:
 - `Más allá de estos criterios`.
 - Safety limits.
 - Final checks.
-- Delivery format.
+- Delivery format (for **APPLY**, enforce minimal output format).
 
 Accepted Spanish headings:
 
@@ -37,20 +47,12 @@ Accepted Spanish headings:
 - `## Checks finales`
 - `## Formato de entrega`
 
-Accepted English equivalents only when preserving older files:
-
-- `## Required checks`
-- `## Beyond these criteria`
-- `## Safety limits`
-- `## Final checks`
-- `## Delivery format`
-
 ## Flow Contract
 
-Flows should include:
+Flows are orchestration instructions (not simple checklists) and should include:
 
 - Objective.
-- Ideal phase.
+- Ideal phase (out of the 8 moments).
 - Included prompts.
 - Exact order.
 - Checkpoints between steps.
@@ -59,11 +61,9 @@ Flows should include:
 - What to do when something fails.
 - Final summary format.
 
-Flows are orchestration instructions. They are not simple checklists.
-
 ## Checkpoint Contract
 
-Checkpoints should include:
+Checkpoints decide whether the agent may continue and should include:
 
 - What to run.
 - What to inspect manually.
@@ -71,30 +71,44 @@ Checkpoints should include:
 - What can remain as a warning.
 - What evidence to report.
 
-Checkpoints decide whether the agent may continue.
+## Project Phases (The 8 Moments)
 
-## Naming Rules
+Prompts are organized into 8 sequence-based moment folders:
+
+1. `01-start-project`: Initial research, scanning, and alignment.
+2. `02-building`: Active coding, model audits, and core functionality implementation.
+3. `03-finish-features`: Visual polish, UX audits, premium feel, and minor tweaks.
+4. `04-before-production`: Adversarial QA, security/privacy compliance, and observability.
+5. `05-final-audit`: Code quality, i18n, documentation, and final repository audits.
+6. `06-release`: Release notes, candidate validation, and change checks.
+7. `07-client-handoff`: Client delivery, browser smoke tests, copy audits, and support readiness.
+8. `08-maintenance`: Long-term maintenance, growth audits, data backups, and prompt library health.
+
+## Naming & Suffix Conventions
+
+Files must follow strict suffix conventions to help the CLI auto-detect their kind:
+
+- **Flows**: Filename must end with `-flow.md` (e.g., `clean-code-pass-flow.md`). Kind: `flow`.
+- **Checkpoints**: Filename must end with `-checkpoint.md` (e.g., `test-suite-checkpoint.md`). Kind: `checkpoint`.
+- **Prompts**: Any other filename (e.g., `data-model-and-domain-integrity-audit.md`). Kind: `prompt`.
 
 Names must explain the job without opening the file.
 
 Good:
-
-- `primary-user-experience-audit`
-- `safe-clean-code-simplification-pass`
-- `last-mile-client-site-delivery`
+- `primary-user-experience-audit.md`
+- `safe-clean-code-simplification-pass.md`
+- `last-mile-client-site-delivery-flow.md`
 
 Weak:
-
-- `general-audit`
-- `design-pass`
-- `final-review`
+- `general-audit.md`
+- `design-pass.md`
+- `final-review.md`
 
 ## Merge Rules
 
 Do not create a new prompt if the intention already exists.
 
 Merge prompts when they share:
-
 - The same evidence.
 - The same user journey.
 - The same stop conditions.
@@ -102,7 +116,6 @@ Merge prompts when they share:
 - The same output format.
 
 Split prompts when they need:
-
 - Different evidence.
 - Different safety limits.
 - Different timing.
@@ -121,14 +134,9 @@ A prompt is good only if an agent can:
 
 ## Maintenance Rule
 
-Before adding or editing prompt families, run:
+Before making major changes to prompt families, run the maintenance flow:
 
 ```text
-agent-quality/02-prompt-library-integrity-and-coverage-audit.md
+08-maintenance/prompt-library-maintenance-flow.md
 ```
 
-For larger changes, run:
-
-```text
-flows/prompt-library-maintenance.md
-```

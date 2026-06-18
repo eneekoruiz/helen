@@ -8,87 +8,78 @@ One user intention gets one canonical prompt.
 
 If two prompts answer the same question with slightly different intensity, merge them into one prompt with modes, levels, or sections.
 
-## Layers
+## Layers by Suffix
 
-1. **Prompt**
-   A reusable expert audit for one domain or intention.
+To keep the library structured and allow the CLI to dynamically resolve kind:
 
-2. **Step**
-   An operational action used inside flows. It may overlap with a prompt's domain, but it must be narrower and execution-oriented.
+1. **Flows** (`*-flow.md`)
+   An ordered orchestration of prompts and checkpoints to guide the user through a project moment or a complex cross-cutting workflow.
+2. **Checkpoints** (`*-checkpoint.md`)
+   A gate or test suite run that decides whether an agent or user may proceed to the next moment.
+3. **Prompts** (any other `.md` filename in the 8 phase directories)
+   A reusable expert audit or action for a specific moment.
 
-3. **Checkpoint**
-   A gate that decides whether an agent may continue.
+## Project Phases (The 8 Moments)
 
-4. **Flow**
-   An ordered orchestration of prompts, steps, and checkpoints.
+Every prompt file must reside in one of the 8 moments, reflecting its target project stage:
 
-5. **Registry**
-   Machine-readable discovery metadata.
+1. `01-start-project` (Start/Discovery)
+2. `02-building` (Development/Hardening)
+3. `03-finish-features` (UX/Visual Polish)
+4. `04-before-production` (Compliance/Analytics/QA)
+5. `05-final-audit` (Final closeout/i18n/Docs)
+6. `06-release` (Changelog/RC readiness)
+7. `07-client-handoff` (Client checks/Smoke testing)
+8. `08-maintenance` (Ops/Backups/Updates)
 
 ## When to Add a New Prompt
 
 Add a prompt only when at least one is true:
-
-- it covers a materially different professional domain;
-- it has different evidence requirements;
-- it has different stop conditions;
-- it requires a different expert persona;
-- it would prevent a class of late-discovered problems;
-- it changes the decision a user or agent would make.
+- It covers a materially different professional domain.
+- It has different evidence requirements.
+- It has different stop conditions.
+- It requires a different expert persona.
+- It would prevent a class of late-discovered problems.
+- It changes the decision a user or agent would make.
 
 ## When to Merge Instead
 
 Merge prompts when:
+- They inspect the same surface.
+- They differ mostly by intensity.
+- One is just a more glamorous version of the other.
+- Their output formats are nearly identical.
+- A flow could choose the ambition level instead.
 
-- they inspect the same surface;
-- they differ mostly by intensity;
-- one is just a more glamorous version of the other;
-- their output formats are nearly identical;
-- a flow could choose the ambition level instead.
+## Naming Conventions
 
-## Naming Rules
+Names must explain the job without opening the file, and end with the correct suffix.
 
-Names must explain the job without opening the file.
+### Flow Naming Rules
+Flows should name the journey and end in `-flow.md`:
+- `full-polish-flow.md`
+- `release-candidate-flow.md`
+- `client-delivery-flow.md`
+- `clean-code-architecture-audit-flow.md`
+- `awwwards-soty-design-review-flow.md`
 
-Good:
+### Checkpoint Naming Rules
+Checkpoints must end in `-checkpoint.md`:
+- `visual-ux-regression-checkpoint.md`
+- `build-and-compile-checkpoint.md`
+- `release-readiness-checkpoint.md`
 
-- `product-design-and-awards-visual-excellence-audit`
-- `staff-architecture-audit`
-- `clean-code-architecture-audit`
-- `release-readiness-checkpoint`
-
-Weak:
-
-- `general-improvement`
-- `premium-pass`
-- `audit-final`
-- `polish`
-
-## Flow Naming Rules
-
-Flows should name the journey, not just the topic:
-
-- `full-polish`
-- `release-candidate`
-- `client-delivery`
-- `clean-code-architecture-audit`
-- `awwwards-soty-design-review`
-
-## Step Naming Rules
-
-Steps should name the action:
-
-- `responsive-pass`
-- `fast-build-test-verification`
-- `security-hardening`
-- `loading-error-empty-states`
+### Prompt Naming Rules
+Prompts must use kebab-case describing the specific audit or pass:
+- `product-design-and-awards-visual-excellence-audit.md`
+- `safe-clean-code-simplification-pass.md`
+- `api-integration-and-contract-audit.md`
 
 ## Review Ritual
 
 Before adding a prompt, ask:
-
 1. Is this a new domain or just a stricter version of an existing prompt?
 2. Could this be a mode inside an existing prompt?
-3. Is it a prompt, step, checkpoint, or flow?
+3. Is it a prompt, checkpoint, or flow?
 4. Would a user understand the name in a CLI list?
 5. Does it reduce confusion or add library sprawl?
