@@ -62,6 +62,7 @@ If a new request fits one of these canonical intentions, improve the existing pr
 | | Generación de changelog, release notes y demo package | `06-release/release-notes-changelog-and-demo-package.md` |
 | | Flujo de candidato a release (Release Candidate) | `06-release/release-candidate-flow.md` |
 | | Checkpoint de preparación de release | `06-release/release-readiness-checkpoint.md` |
+| | Automatización de releases y changelogs | `06-release/automated-release-and-changelog-workflows.md` |
 | **07-client-handoff**| Preparación de handoff a cliente y soporte | `07-client-handoff/client-handoff-and-support-readiness.md` |
 | | Auditoría de textos, tono de marca e claims | `07-client-handoff/content-copy-brand-and-claims-audit.md` |
 | | Auditoría de enlaces, formularios y CTAs | `07-client-handoff/links-forms-ctas-and-conversion-paths-audit.md` |
@@ -77,6 +78,7 @@ If a new request fits one of these canonical intentions, improve the existing pr
 | | Generador de briefs para agentes de desarrollo | `08-maintenance/agent-brief-builder.md` |
 | | Síntesis y análisis cruzado de auditorías | `08-maintenance/cross-audit-synthesis.md` |
 | | Flujo de mantenimiento y auditoría de la librería de prompts | `08-maintenance/prompt-library-maintenance-flow.md` |
+| | Configuración de Dependabot y automantenimiento | `08-maintenance/dependabot-and-auto-maintenance.md` |
 
 ## Known Merge Decisions
 
