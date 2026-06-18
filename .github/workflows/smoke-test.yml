@@ -38,6 +38,8 @@ jobs:
           # Initialize Vite + React + TS project
           cd $TMP_DIR
           npm create vite@latest . -- --template react-ts --yes
+          npm install react@18 react-dom@18 --save
+          npm install @types/react@18 @types/react-dom@18 --save-dev
           npm install
           
           # Run CLI health checks
