@@ -35,6 +35,7 @@ If a new request fits one of these canonical intentions, improve the existing pr
 | | Pase de estados vacíos, errores y microcopy | `03-finish-features/apply-empty-states-errors-and-microcopy.md` |
 | | Pase de detalles y pulido premium | `03-finish-features/apply-premium-detail-pass.md` |
 | | Auditoría de diseño visual y excelencia para premios | `03-finish-features/audit-product-design-and-awards-visual-excellence.md` |
+| | Auditoría de visuales animados y 3D, rendimiento e integración | `03-finish-features/audit-animated-and-3d-visuals-performance-safety-and-integration.md` |
 | | Auditoría de experiencia de usuario primaria | `03-finish-features/audit-primary-user-experience.md` |
 | | Pase de pulido visual premium | `03-finish-features/apply-premium-visual-polish-pass.md` |
 | | Pase de diseño responsive | `03-finish-features/apply-responsive-pass.md` |
