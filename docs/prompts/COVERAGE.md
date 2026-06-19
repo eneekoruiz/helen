@@ -77,6 +77,7 @@ If a new request fits one of these canonical intentions, improve the existing pr
 | | Diseño de Quality Operating System | `08-maintenance/quality-operating-system-design.md` |
 | | Generador de briefs para agentes de desarrollo | `08-maintenance/agent-brief-builder.md` |
 | | Síntesis y análisis cruzado de auditorías | `08-maintenance/cross-audit-synthesis.md` |
+| | Revisión anual de presencia profesional, portfolio y marca personal | `08-maintenance/yearly-professional-presence-review.md` |
 | | Flujo de mantenimiento y auditoría de la librería de prompts | `08-maintenance/prompt-library-maintenance-flow.md` |
 | | Configuración de Dependabot y automantenimiento | `08-maintenance/dependabot-and-auto-maintenance.md` |
 
