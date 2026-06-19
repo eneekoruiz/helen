@@ -254,8 +254,8 @@ function getDependencyVersion(dep: string): string {
   const versions: Record<string, string> = {
     // Quality
     'eslint': '^8.57.0',
-    '@typescript-eslint/eslint-plugin': '^7.18.0',
-    '@typescript-eslint/parser': '^7.18.0',
+    '@typescript-eslint/eslint-plugin': '^8.61.1',
+    '@typescript-eslint/parser': '^8.61.1',
     'prettier': '^3.3.3',
     'eslint-config-prettier': '^9.1.0',
     

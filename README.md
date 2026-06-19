@@ -77,6 +77,12 @@ Prompt families:
 - [Delivery](docs/prompts/delivery/README.md)
 - [Final Audits](docs/prompts/final/README.md)
 
+## Architecture
+
+The command layer parses the requested modules and options, the registry resolves their implementations, and the module runner writes templates and configuration into the target project. Validation and dry-run support happen before files are changed, while backups and the `.helenrc` manifest support repeatable runs and rollback.
+
+Docker files, workflows, testing, SEO and security configuration are optional modules rather than requirements of the base scaffold. This keeps the core CLI small while allowing several modules to be composed in one run.
+
 ## Links
 
 - DeepWiki: https://deepwiki.com/eneekoruiz/helen
