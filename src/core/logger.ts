@@ -1,5 +1,5 @@
 import pc from 'picocolors';
-import { renderHelenWordmark } from './easterEgg.js';
+import { renderHelenWordmark } from './cinematicArt.js';
 
 export const logger = {
   info(msg: string): void {

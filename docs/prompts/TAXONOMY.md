@@ -16,12 +16,12 @@ To keep the library structured and allow the CLI to dynamically resolve kind:
    An ordered orchestration of prompts and checkpoints to guide the user through a project moment or a complex cross-cutting workflow.
 2. **Checkpoints** (`*-checkpoint.md`)
    A gate or test suite run that decides whether an agent or user may proceed to the next moment.
-3. **Prompts** (any other `.md` filename in the 8 phase directories)
+3. **Prompts** (any other `.md` filename in the phase directories)
    A reusable expert audit or action for a specific moment.
 
-## Project Phases (The 8 Moments)
+## Project Phases (The 9 Moments)
 
-Every prompt file must reside in one of the 8 moments, reflecting its target project stage:
+Every prompt file must reside in one of the 9 moments, reflecting its target project stage:
 
 1. `01-start-project` (Start/Discovery)
 2. `02-building` (Development/Hardening)
@@ -31,6 +31,7 @@ Every prompt file must reside in one of the 8 moments, reflecting its target pro
 6. `06-release` (Changelog/RC readiness)
 7. `07-client-handoff` (Client checks/Smoke testing)
 8. `08-maintenance` (Ops/Backups/Updates)
+9. `09-future-knowledge` (Long-Term Survival/Preservation)
 
 ## When to Add a New Prompt
 
@@ -51,29 +52,36 @@ Merge prompts when:
 - Their output formats are nearly identical.
 - A flow could choose the ambition level instead.
 
-## Naming Conventions
+## Naming Conventions & Intent Prefixes
 
-Names must explain the job without opening the file, and end with the correct suffix.
+Every prompt file must expose its primary intent in its filename. Names must follow this pattern: `[intent]-[name-kebab]-[optional-suffix].md`.
+
+### Intent Prefixes (Lowercase)
+- **`audit-`**: For evaluation, code checks, risk detection.
+- **`apply-`**: For modifying files, updating configuration, refactoring.
+- **`plan-`**: For roadmaps, scheduling, strategy creation.
+- **`research-`**: For competitive analysis, benchmark reports.
+- **`generate-`**: For boilerplate scaffolding, templates, documentation.
 
 ### Flow Naming Rules
 Flows should name the journey and end in `-flow.md`:
-- `full-polish-flow.md`
-- `release-candidate-flow.md`
-- `client-delivery-flow.md`
-- `clean-code-architecture-audit-flow.md`
-- `awwwards-soty-design-review-flow.md`
+- `apply-full-polish-flow.md`
+- `apply-release-candidate-flow.md`
+- `apply-client-delivery-flow.md`
+- `audit-clean-code-architecture-flow.md`
+- `audit-awwwards-soty-design-review-flow.md`
 
 ### Checkpoint Naming Rules
 Checkpoints must end in `-checkpoint.md`:
-- `visual-ux-regression-checkpoint.md`
-- `build-and-compile-checkpoint.md`
-- `release-readiness-checkpoint.md`
+- `audit-visual-ux-regression-checkpoint.md`
+- `audit-build-and-compile-checkpoint.md`
+- `audit-release-readiness-checkpoint.md`
 
 ### Prompt Naming Rules
 Prompts must use kebab-case describing the specific audit or pass:
-- `product-design-and-awards-visual-excellence-audit.md`
-- `safe-clean-code-simplification-pass.md`
-- `api-integration-and-contract-audit.md`
+- `audit-product-design-and-awards-visual-excellence.md`
+- `apply-safe-clean-code-simplification-pass.md`
+- `audit-api-integration-and-contract.md`
 
 ## Review Ritual
 

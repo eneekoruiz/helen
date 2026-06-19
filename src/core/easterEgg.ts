@@ -183,6 +183,10 @@ function reducedMotionRequested(): boolean {
 }
 
 export async function runEasterEgg(): Promise<void> {
+  const { runHelenArt } = await import('./cinematicArt.js');
+  await runHelenArt();
+  return;
+
   const width = clamp(process.stdout.columns ?? 80, 32, 120);
   const height = clamp((process.stdout.rows ?? 20) - 1, 9, 24);
   const color = process.env.NO_COLOR === undefined;

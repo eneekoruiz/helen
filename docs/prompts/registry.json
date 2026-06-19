@@ -22,91 +22,91 @@
   "executableFlows": [
     {
       "id": "full-polish",
-      "path": "docs/prompts/03-finish-features/full-polish-flow.md",
+      "path": "docs/prompts/03-finish-features/apply-full-polish-flow.md",
       "repeatable": true,
       "stage": "polish"
     },
     {
       "id": "prefinal-hardening",
-      "path": "docs/prompts/04-before-production/prefinal-hardening-flow.md",
+      "path": "docs/prompts/04-before-production/apply-prefinal-hardening-flow.md",
       "repeatable": true,
       "stage": "prefinal"
     },
     {
       "id": "release-candidate",
-      "path": "docs/prompts/06-release/release-candidate-flow.md",
+      "path": "docs/prompts/06-release/apply-release-candidate-flow.md",
       "repeatable": false,
       "stage": "final"
     },
     {
       "id": "client-delivery",
-      "path": "docs/prompts/07-client-handoff/client-delivery-flow.md",
+      "path": "docs/prompts/07-client-handoff/apply-client-delivery-flow.md",
       "repeatable": false,
       "stage": "delivery"
     },
     {
       "id": "market-analysis",
-      "path": "docs/prompts/01-start-project/market-analysis-flow.md",
+      "path": "docs/prompts/01-start-project/research-market-analysis-flow.md",
       "repeatable": true,
       "stage": "strategy"
     },
     {
       "id": "ux-visual-pass",
-      "path": "docs/prompts/03-finish-features/ux-visual-pass-flow.md",
+      "path": "docs/prompts/03-finish-features/apply-ux-visual-pass-flow.md",
       "repeatable": true,
       "stage": "polish"
     },
     {
       "id": "clean-code-pass",
-      "path": "docs/prompts/02-building/clean-code-pass-flow.md",
+      "path": "docs/prompts/02-building/apply-clean-code-pass-flow.md",
       "repeatable": true,
       "stage": "hardening"
     },
     {
       "id": "clean-code-architecture-audit",
-      "path": "docs/prompts/02-building/clean-code-architecture-audit-flow.md",
+      "path": "docs/prompts/02-building/audit-clean-code-architecture-flow.md",
       "repeatable": true,
       "stage": "hardening"
     },
     {
       "id": "awwwards-soty-design-review",
-      "path": "docs/prompts/03-finish-features/awwwards-soty-design-review-flow.md",
+      "path": "docs/prompts/03-finish-features/audit-awwwards-soty-design-review-flow.md",
       "repeatable": true,
       "stage": "polish"
     },
     {
       "id": "cms-editable-content-conversion",
-      "path": "docs/prompts/02-building/cms-editable-content-conversion-flow.md",
+      "path": "docs/prompts/02-building/apply-cms-editable-content-conversion-flow.md",
       "repeatable": true,
       "stage": "delivery"
     },
     {
       "id": "last-mile-client-site-delivery",
-      "path": "docs/prompts/07-client-handoff/last-mile-client-site-delivery-flow.md",
+      "path": "docs/prompts/07-client-handoff/apply-last-mile-client-site-delivery-flow.md",
       "repeatable": true,
       "stage": "delivery"
     },
     {
       "id": "prompt-library-maintenance",
-      "path": "docs/prompts/08-maintenance/prompt-library-maintenance-flow.md",
+      "path": "docs/prompts/08-maintenance/apply-prompt-library-maintenance-flow.md",
       "repeatable": true,
       "stage": "meta"
     },
     {
       "id": "security-hardening",
-      "path": "docs/prompts/02-building/security-hardening-flow.md",
+      "path": "docs/prompts/02-building/apply-security-hardening-flow.md",
       "repeatable": true,
       "stage": "hardening"
     },
     {
       "id": "github-repo-polish",
-      "path": "docs/prompts/05-final-audit/github-repository-audit-flow.md",
+      "path": "docs/prompts/05-final-audit/audit-github-repository-flow.md",
       "repeatable": true,
       "stage": "presentation"
     },
     {
       "id": "i18n-final-audit",
-      "path": "docs/prompts/05-final-audit/i18n-audit-flow.md",
+      "path": "docs/prompts/05-final-audit/audit-i18n-flow.md",
       "repeatable": false,
       "stage": "final"
     }

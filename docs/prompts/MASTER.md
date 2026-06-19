@@ -14,7 +14,7 @@ Responde de forma interactiva y ejecuta las siguientes directivas cuando el usua
 Muestra el mapa completo de fases (momentos del proyecto), una explicación compacta del sistema y la lista de comandos disponibles.
 
 ### 2. `/status` (o `/estado`)
-Inspecciona el repositorio de forma autónoma (estructura de archivos, commits, scripts en `package.json`, etc.) y determina en cuál de las 8 fases se encuentra el proyecto. Muestra un diagnóstico con:
+Inspecciona el repositorio de forma autónoma (estructura de archivos, commits, scripts en `package.json`, etc.) y determina en cuál de las 9 fases se encuentra el proyecto. Muestra un diagnóstico con:
 - Fase estimada actual.
 - Fricciones críticas detectadas en el happy path.
 - Checkpoints pasados o pendientes.
@@ -42,17 +42,17 @@ Ejecuta una secuencia transversal de prompts según el tipo de proyecto:
 
 ## ⚙️ Protocolo Operativo del Agente
 
-Cuando ejecutes un flujo o prompt individual, debes seguir estas reglas estrictas:
+Cuando ejecutes un flujo o prompt individual, debes seguir estas reglas estrictas de intención y formato de entrega:
 
 1. **Clasificación por Intención**:
-   - **APPLY**: Tu objetivo es modificar el código o documentación del proyecto de forma directa. La salida en el chat debe ser estrictamente minimalista (ej. confirmar cambios aplicados y acciones manuales, sin generar informes extensos). El usuario puede revisar tus diffs de código directamente.
+   - **APPLY**: Tu objetivo es modificar el código o documentación del proyecto de forma directa. La entrega en el chat debe ser estrictamente minimalista (ej. confirmar cambios aplicados y acciones manuales, sin generar informes extensos). El usuario puede revisar tus diffs de código directamente.
    - **AUDIT**: Inspecciona el código sin realizar modificaciones. Encuentra problemas y clasifícalos obligatoriamente por severidad: **Críticos**, **Importantes**, **Opcionales**.
-   - **REPORT**: Genera conocimiento estructurado (benchmarks, costes, análisis de competidores, etc.).
-   - **GENERATE**: Produce plantillas, guías, release notes, changelogs o briefs.
-   - **PLAN**: Diseña estrategias y secuencias de tareas.
+   - **PLAN**: Diseña estrategias, checklists y secuencias de tareas accionables de inmediato.
+   - **RESEARCH**: Genera conocimiento estructurado (benchmarks, análisis comparativos, etc.).
+   - **GENERATE**: Produce plantillas, guías, release notes, changelogs o briefs listos para usar.
 
 2. **Seguridad y Checkpoints**:
-   - Nunca avances en un flujo de release o hardening si falla un checkpoint bloqueante (como compilation o tests).
+   - Nunca avances en un flujo de release o hardening si falla un checkpoint bloqueante (como compilación o tests).
    - Nunca ocultes o maquilles un error de tipado, compilación o vulnerabilidad de seguridad.
    - Pide confirmación al usuario antes de aplicar refactorizaciones de alto riesgo o destructivas.
 
@@ -62,11 +62,12 @@ Cuando ejecutes un flujo o prompt individual, debes seguir estas reglas estricta
 
 El sistema operativo se estructura en torno a los momentos reales del proyecto:
 
-1. **[01-start-project](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/README.md)**: Diagnósticos iniciales, benchmark competitivo y roadmap.
+1. **[01-start-project](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/README.md)**: Diagnósticos iniciales, benchmark competitivo, roadmap y lifecycle de tecnología.
 2. **[02-building](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/README.md)**: Implementación, clean code, modelos de datos, APIs y checkpoints de compilación.
 3. **[03-finish-features](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/README.md)**: UX, diseño visual premium, responsive, accesibilidad y regresiones visuales.
 4. **[04-before-production](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/README.md)**: Pruebas adversarial, escala, coste, privacidad (GDPR) y observabilidad.
 5. **[05-final-audit](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/README.md)**: Auditorías definitivas de código, i18n, docs y GitHub.
 6. **[06-release](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/06-release/README.md)**: Empaquetado, changelogs, release notes y gates de release.
 7. **[07-client-handoff](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/07-client-handoff/README.md)**: Auditorías de última milla (forms, CTAs, links) y paquete de entrega.
-8. **[08-maintenance](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/README.md)**: Backups, migraciones, portabilidad, briefs e integridad de la biblioteca.
+8. **[08-maintenance](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/README.md)**: Backups, gobernanza, showcases e integridad de la biblioteca.
+9. **[09-future-knowledge](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/README.md)**: Onboarding futuro, resiliencia, factor autobús, bitácora de decisiones y preservación de conocimiento.

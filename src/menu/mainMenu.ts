@@ -19,6 +19,7 @@ export async function showMainMenu(): Promise<string | symbol> {
       { value: 'prompts', label: '🧭 Prompt library', hint: 'List reusable prompts and flows' },
       { value: 'rollback', label: '⏪ Rollback changes', hint: 'Revert all modifications and remove files created by HELEN' },
       { value: 'easter-egg', label: 'Run HELEN terminal art', hint: 'Play the cinematic identity sequence' },
+      { value: 'signature', label: 'Run ENEKO RUIZ signature', hint: 'Play the author signature sequence' },
       { value: 'exit', label: '👋 Exit' },
     ],
   });

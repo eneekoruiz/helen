@@ -14,15 +14,20 @@ Every prompt must combine:
 
 The checklist is the floor, not the ceiling.
 
-## Intentions Classification
+## Intentions Classification & Output Standards
 
-Prompts are classified by their primary intention:
+Prompts are classified by their primary intention, which defines their name prefix and output expectations:
 
-- **APPLY**: Modifies project files or workspace state. Deliverables MUST have minimal output (e.g., `✅ Todo correcto. Cambios aplicados. Acciones manuales: ninguna`). Avoid verbose explanations.
-- **AUDIT**: Evaluates the codebase or design to identify issues/risks, without making changes.
-- **REPORT**: Provides status summaries or strategic findings.
-- **GENERATE**: Creates assets, scaffolding, or drafts.
-- **PLAN**: Produces roadmaps, tasks, checklists, or steps.
+- **APPLY** (`apply-`): Modifies project files or workspace state.
+  - **Deliverable Standard**: MUST have strictly minimal output (e.g., `✅ Todo correcto. Cambios aplicados. Acciones manuales: ninguna`). Avoid verbose explanations or reporting details of successful edits; let git show the changes.
+- **AUDIT** (`audit-`): Evaluates the codebase or design to identify issues/risks, without making changes.
+  - **Deliverable Standard**: MUST provide structured findings classified by severity: **Críticos** (blocking issues), **Importantes** (high technical debt/usability gaps), and **Opcionales** (dx or minor polish).
+- **PLAN** (`plan-`): Produces roadmaps, tasks, checklists, or step-by-step orchestrations.
+  - **Deliverable Standard**: MUST provide actionable checklists with `[ ]` syntax ready to be executed.
+- **RESEARCH** (`research-`): Compares, benchmarks, or investigates technology choices or competitor solutions.
+  - **Deliverable Standard**: MUST provide structural reports, markdown tables, and benchmarking data.
+- **GENERATE** (`generate-`): Creates assets, config templates, code boilerplate, or release/handoff documentation.
+  - **Deliverable Standard**: MUST produce ready-to-use copy-pasteable files without generic placeholders.
 
 ## Atomic Prompt Contract
 
@@ -37,7 +42,7 @@ Atomic prompts should include:
 - `Más allá de estos criterios`.
 - Safety limits.
 - Final checks.
-- Delivery format (for **APPLY**, enforce minimal output format).
+- Delivery format (matching the intent output standards above).
 
 Accepted Spanish headings:
 
@@ -52,7 +57,7 @@ Accepted Spanish headings:
 Flows are orchestration instructions (not simple checklists) and should include:
 
 - Objective.
-- Ideal phase (out of the 8 moments).
+- Ideal phase (out of the 9 moments).
 - Included prompts.
 - Exact order.
 - Checkpoints between steps.
@@ -71,38 +76,39 @@ Checkpoints decide whether the agent may continue and should include:
 - What can remain as a warning.
 - What evidence to report.
 
-## Project Phases (The 8 Moments)
+## Project Phases (The 9 Moments)
 
-Prompts are organized into 8 sequence-based moment folders:
+Prompts are organized into 9 sequence-based moment folders:
 
-1. `01-start-project`: Initial research, scanning, and alignment.
-2. `02-building`: Active coding, model audits, and core functionality implementation.
-3. `03-finish-features`: Visual polish, UX audits, premium feel, and minor tweaks.
-4. `04-before-production`: Adversarial QA, security/privacy compliance, and observability.
-5. `05-final-audit`: Code quality, i18n, documentation, and final repository audits.
+1. `01-start-project`: Initial research, scanning, strategy, and lifecycle planning.
+2. `02-building`: Active coding, data models, CMS editable layers, and compile/linter checkpoints.
+3. `03-finish-features`: Visual polish, UX audits, premium feel, and visual regression checkpoints.
+4. `04-before-production`: Adversarial QA, scaling, privacy (GDPR), and observability.
+5. `05-final-audit`: Code quality closeout, documentation, i18n, and repository health audits.
 6. `06-release`: Release notes, candidate validation, and change checks.
 7. `07-client-handoff`: Client delivery, browser smoke tests, copy audits, and support readiness.
-8. `08-maintenance`: Long-term maintenance, growth audits, data backups, and prompt library health.
+8. `08-maintenance`: Long-term maintenance, governance, data backups, and portfolio showcases.
+9. `09-future-knowledge`: Long-term survival audits, developer onboarding, self-recovery, and knowledge preservation.
 
 ## Naming & Suffix Conventions
 
 Files must follow strict suffix conventions to help the CLI auto-detect their kind:
 
-- **Flows**: Filename must end with `-flow.md` (e.g., `clean-code-pass-flow.md`). Kind: `flow`.
-- **Checkpoints**: Filename must end with `-checkpoint.md` (e.g., `test-suite-checkpoint.md`). Kind: `checkpoint`.
-- **Prompts**: Any other filename (e.g., `data-model-and-domain-integrity-audit.md`). Kind: `prompt`.
+- **Flows**: Filename must end with `-flow.md` (e.g., `apply-clean-code-pass-flow.md`). Kind: `flow`.
+- **Checkpoints**: Filename must end with `-checkpoint.md` (e.g., `audit-test-suite-checkpoint.md`). Kind: `checkpoint`.
+- **Prompts**: Any other filename (e.g., `audit-api-integration-and-contract.md`). Kind: `prompt`.
 
 Names must explain the job without opening the file.
 
 Good:
-- `primary-user-experience-audit.md`
-- `safe-clean-code-simplification-pass.md`
-- `last-mile-client-site-delivery-flow.md`
+- `audit-primary-user-experience.md`
+- `apply-safe-clean-code-simplification-pass.md`
+- `apply-last-mile-client-site-delivery-flow.md`
 
 Weak:
-- `general-audit.md`
-- `design-pass.md`
-- `final-review.md`
+- `audit-general-audit.md`
+- `apply-design-pass.md`
+- `audit-final-review.md`
 
 ## Merge Rules
 
@@ -137,6 +143,5 @@ A prompt is good only if an agent can:
 Before making major changes to prompt families, run the maintenance flow:
 
 ```text
-08-maintenance/prompt-library-maintenance-flow.md
+08-maintenance/apply-prompt-library-maintenance-flow.md
 ```
-

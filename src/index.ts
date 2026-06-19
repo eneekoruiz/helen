@@ -156,6 +156,11 @@ export function createProgram(): Command {
             await runEasterEgg();
             break;
           }
+          case 'signature': {
+            const { runEnekoRuizArt } = await import('./core/cinematicArt.js');
+            await runEnekoRuizArt();
+            break;
+          }
           case 'modules':
             printModuleList();
             break;
@@ -475,6 +480,14 @@ export function createProgram(): Command {
       await runEasterEgg();
     });
 
+  scripts
+    .command('signature')
+    .description('Run the ENEKO RUIZ cinematic signature sequence')
+    .action(async () => {
+      const { runEnekoRuizArt } = await import('./core/cinematicArt.js');
+      await runEnekoRuizArt();
+    });
+
   // helen easter-egg (convenience alias)
   program
     .command('easter-egg')
@@ -482,6 +495,15 @@ export function createProgram(): Command {
     .action(async () => {
       const { runEasterEgg } = await import('./core/easterEgg.js');
       await runEasterEgg();
+    });
+
+  // helen signature
+  program
+    .command('signature')
+    .description('Run the ENEKO RUIZ cinematic signature sequence')
+    .action(async () => {
+      const { runEnekoRuizArt } = await import('./core/cinematicArt.js');
+      await runEnekoRuizArt();
     });
 
   return program;
