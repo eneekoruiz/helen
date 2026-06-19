@@ -84,6 +84,7 @@ If a new request fits one of these canonical intentions, improve the existing pr
 | | Auditoría de gobernanza y compliance del repositorio | `08-maintenance/audit-repository-governance-and-compliance.md` |
 | | Mantenimiento de showcase y portfolio | `08-maintenance/apply-portfolio-showcase-maintenance.md` |
 | | Mantenimiento de marca personal del desarrollador | `08-maintenance/apply-personal-branding-and-developer-credibility.md` |
+| | Auditoría de UX, enrutamiento, plataformas y offline | `08-maintenance/audit-password-manager-ux-routing-and-offline.md` |
 | **09-future-knowledge**| Auditoría de onboarding para desarrolladores futuros | `09-future-knowledge/audit-future-developer-onboarding.md` |
 | | Auditoría de capacidad de recuperación y backups | `09-future-knowledge/audit-self-recovery.md` |
 | | Auditoría de redundancia de equipo y Factor Autobús | `09-future-knowledge/audit-bus-factor.md` |
