@@ -18,7 +18,7 @@ export async function showMainMenu(): Promise<string | symbol> {
       { value: 'docs', label: '📚 Documentation', hint: 'View module documentation' },
       { value: 'prompts', label: '🧭 Prompt library', hint: 'List reusable prompts and flows' },
       { value: 'rollback', label: '⏪ Rollback changes', hint: 'Revert all modifications and remove files created by HELEN' },
-      { value: 'easter-egg', label: '✨ Run Eneko Ruiz Easter Egg', hint: 'Execute the vibrant truecolor terminal animation' },
+      { value: 'easter-egg', label: 'Run HELEN terminal art', hint: 'Play the cinematic identity sequence' },
       { value: 'exit', label: '👋 Exit' },
     ],
   });
