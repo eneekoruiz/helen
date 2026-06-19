@@ -8,9 +8,9 @@ const meta: HelenModule['meta'] = {
   id: 'dx',
   name: 'Developer Experience',
   category: 'DX',
-  summary: 'VS Code settings + extensions + .env.example + pluggable console Easter Egg script',
-  description: 'Sets up VS Code workspace settings for auto-formatting on save, recommended extensions, a documented .env.example template, and a pluggable 24-bit Truecolor animated Easter Egg console script.',
-  problemItSolves: 'New team members waste hours configuring their editor or creating dynamic easter eggs. This standardizes the DX and adds interactive, vibrant console branding from day one.',
+  summary: 'VS Code settings + extensions + .env.example + cinematic HELEN terminal art',
+  description: 'Sets up VS Code workspace settings, recommended extensions, a documented .env.example template, and a self-contained cinematic HELEN terminal art sequence.',
+  problemItSolves: 'New team members waste time configuring editors and projects often ship generic terminal branding. This standardizes the DX and provides a restrained, accessible HELEN identity.',
   whenToUse: 'On every project. Zero cost, high value.',
   whenNotToUse: 'If the team exclusively uses a different editor (rare).',
   filesCreated: ['.vscode/settings.json', '.vscode/extensions.json', '.env.example', 'scripts/easter-egg.ts'],
@@ -84,137 +84,107 @@ VITE_APP_NAME=My App
   if (r3 === 'created' || r3 === 'overwritten') result.created.push('.env.example');
   else result.skipped.push('.env.example');
 
-  // scripts/easter-egg.ts (Pluggable terminal easter egg)
+  // scripts/easter-egg.ts (self-contained HELEN terminal art)
   const easterEggTs = `/**
- * Eneko Ruiz Ultimate DX System Easter Egg
- * Fully self-contained animated console display with 24-bit Truecolor gradients.
- * Works out-of-the-box in any modern Terminal environment.
- * 
+ * HELEN cinematic terminal identity.
+ *
  * Usage:
  *   npx tsx scripts/easter-egg.ts
  */
 
-function hslToRgb(h: number, s: number, l: number): [number, number, number] {
-  h = h % 360;
-  s = s / 100;
-  l = l / 100;
-  const k = (n: number) => (n + h / 30) % 12;
-  const a = s * Math.min(l, 1 - l);
-  const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
-  return [
-    Math.round(255 * f(0)),
-    Math.round(255 * f(8)),
-    Math.round(255 * f(4))
-  ];
-}
-
-function rgbColor(r: number, g: number, b: number): string {
-  return \`\\x1b[38;2;\${r};\${g};\${b}m\`;
-}
-
-const RESET = '\\x1b[0m';
-const BOLD = '\\x1b[1m';
-const DIM = '\\x1b[2m';
-const CYAN = '\\x1b[36m';
-const YELLOW = '\\x1b[33m';
-const GREEN = '\\x1b[32m';
-const HIDE_CURSOR = '\\x1b[?25l';
-const SHOW_CURSOR = '\\x1b[?25h';
-
-const ART_LINES = [
-  '  ███████╗███╗   ██╗███████╗██╗  ██╗ ██████╗     ██████╗ ██╗   ██╗██╗███████╗',
-  '  ██╔════╝████╗  ██║██╔════╝██║ ██╔╝██╔═══██╗    ██╔══██╗██║   ██║██║╚══███╔╝',
-  '  █████╗  ██╔██╗ ██║█████╗  █████╔╝ ██║   ██║    ██████╔╝██║   ██║██║  ███╔╝ ',
-  '  ██╔══╝  ██║╚██╗██║██╔══╝  ██╔═██╗ ██║   ██║    ██╔══██╗██║   ██║██║ ███╔╝  ',
-  '  ███████╗██║ ╚████║███████╗██║  ██╗╚██████╔╝    ██║  ██║╚██████╔╝██║███████╗',
-  '  ╚══════╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝     ╚═╝  ╚═╝ ╚═════╝ ╚═╝╚══════╝'
+const ESC = '\\x1b[';
+const RESET = ESC + '0m';
+const LARGE = [
+  '██╗  ██╗███████╗██╗     ███████╗███╗   ██╗',
+  '██║  ██║██╔════╝██║     ██╔════╝████╗  ██║',
+  '███████║█████╗  ██║     █████╗  ██╔██╗ ██║',
+  '██╔══██║██╔══╝  ██║     ██╔══╝  ██║╚██╗██║',
+  '██║  ██║███████╗███████╗███████╗██║ ╚████║',
+  '╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═══╝'
 ];
+const COMPACT = [
+  '█  █  ███  █     ███  █▄ █',
+  '████  ██   █     ██   ████',
+  '█  █  ███  ████  ███  █ ▀█'
+];
+const POINTS = [[-0.4,-0.3],[-0.3,0.2],[-0.18,-0.1],[-0.1,0.35],[0.05,-0.3],[0.16,0.22],[0.28,-0.12],[0.4,0.28]];
+const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
+const ease = (n: number) => n < 0.5 ? 4 * n * n * n : 1 - Math.pow(-2 * n + 2, 3) / 2;
+const tone = (text: string, r: number, g: number, b: number, color: boolean) =>
+  color ? ESC + '38;2;' + r + ';' + g + ';' + b + 'm' + text + RESET : text;
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+function render(progress: number, width: number, height: number, color: boolean): string {
+  const logo = width >= LARGE[0].length + 4 ? LARGE : COMPACT;
+  const logoWidth = Math.max(...logo.map(line => line.length));
+  const canvas = Array.from({ length: height }, () => Array.from({ length: width }, () => ' '));
+  const put = (x: number, y: number, glyph: string) => {
+    if (y >= 0 && y < height && x >= 0 && x < width) canvas[y][x] = glyph;
+  };
 
-async function main() {
-  const isTTY = process.stdout.isTTY;
-
-  console.clear();
-  console.log(\`\${BOLD}\${CYAN}⚡ ENEKO RUIZ SYSTEM INTERRUPT SEED ⚡\${RESET}\`);
-  console.log(\`\${DIM}─── Initializing external boilerplate runtime ────────────────\${RESET}\`);
-  await sleep(350);
-
-  const steps = [
-    'Verifying sandbox dependencies...',
-    'Loading custom 24-bit Truecolor palette matrices...',
-    'Rendering high-fidelity Eneko Ruiz ASCII layout...'
-  ];
-
-  for (const s of steps) {
-    process.stdout.write(\`  \${YELLOW}◷\${RESET} \${s}\`);
-    await sleep(200);
-    process.stdout.write('\\r');
-    process.stdout.write(\`  \${GREEN}✔\${RESET} \${s}\\n\`);
-    await sleep(80);
+  if (progress < 0.56) {
+    const pull = ease(clamp(progress / 0.5, 0, 1));
+    POINTS.forEach(([dx, dy], index) => {
+      const x = Math.round(width / 2 + dx * width * (1 - pull) + Math.sin(progress * 8 + index) * 2 * (1 - pull));
+      const y = Math.round(height / 2 + dy * height * (1 - pull));
+      put(x, y, progress < 0.3 ? '·' : '•');
+    });
   }
 
-  await sleep(300);
-  console.clear();
-
-  if (isTTY) {
-    process.stdout.write(HIDE_CURSOR);
+  if (progress >= 0.22) {
+    const reveal = ease(clamp((progress - 0.22) / 0.65, 0, 1)) * (logoWidth + 8) - 4;
+    const left = Math.max(0, Math.floor((width - logoWidth) / 2));
+    const top = Math.max(1, Math.floor((height - logo.length) / 2));
+    logo.forEach((line, y) => Array.from(line).forEach((glyph, x) => {
+      if (glyph === ' ') return;
+      const distance = reveal - x - Math.sin(y * 1.4 + x * 0.24) * 1.7;
+      if (distance < -1.5) return;
+      put(left + x, top + y, distance < 0 ? '·' : distance < 1.4 ? '░' : distance < 2.7 ? '▒' : glyph);
+    }));
   }
 
-  let baseHue = 0;
-  const frames = 70;
-
-  for (let f = 0; f < frames; f++) {
-    if (isTTY && f > 0) {
-      process.stdout.write('\\x1b[H');
-    } else if (!isTTY) {
-      printFrame(baseHue);
-      break;
-    }
-    printFrame(baseHue);
-    baseHue = (baseHue + 6) % 360;
-    await sleep(50);
-  }
-
-  if (isTTY) {
-    process.stdout.write(SHOW_CURSOR);
-  }
-
-  console.log('');
-  console.log(\`\${BOLD}\${CYAN}  🛰️  Eneko Ruiz TS Boilerplate Easter Egg Online.\${RESET}\`);
-  console.log(\`\${DIM}  ──────────────────────────────────────────────────────────────────────────\${RESET}\`);
-  console.log(\`  \${BOLD}Status:\${RESET} \${GREEN}● ACTIVE\${RESET}  |  \${BOLD}DX Engine:\${RESET} HELEN Seed\`);
-  console.log(\`\${DIM}  ──────────────────────────────────────────────────────────────────────────\${RESET}\`);
-  console.log('');
+  const sweep = ease(clamp((progress - 0.2) / 0.68, 0, 1)) * width;
+  return canvas.map(row => row.map((glyph, x) => {
+    if (glyph === ' ') return glyph;
+    if (glyph === '·' || glyph === '•') return tone(glyph, 82, 86, 96, color);
+    if (progress >= 0.9) return tone(glyph, 245, 245, 247, color);
+    const distance = Math.abs(x - sweep);
+    if (distance < 3) return tone(glyph, 118, 166, 255, color);
+    if (distance < 9) return tone(glyph, 245, 245, 247, color);
+    return tone(glyph, 166, 171, 184, color);
+  }).join('').replace(/\\s+$/, '')).join('\\n');
 }
 
-function printFrame(baseHue: number) {
-  console.log('');
-  console.log(\`\${BOLD}\${DIM}   ─── 🌌 ENEKO RUIZ TS GRADIENT CONSOLE ANIMATION 🌌 ────────────────────\${RESET}\`);
-  console.log('');
+async function main(): Promise<void> {
+  const width = clamp(process.stdout.columns || 80, 32, 120);
+  const height = clamp((process.stdout.rows || 20) - 1, 9, 24);
+  const color = process.env.NO_COLOR === undefined;
+  const reduced = ['reduce', 'off'].includes((process.env.HELEN_MOTION || '').toLowerCase());
+  const animate = Boolean(process.stdout.isTTY) && !process.env.CI && process.env.TERM !== 'dumb' && !reduced;
 
-  for (let y = 0; y < ART_LINES.length; y++) {
-    const line = ART_LINES[y];
-    let coloredLine = '';
-    for (let x = 0; x < line.length; x++) {
-      const hue = (baseHue + x * 4.5 + y * 18) % 360;
-      const [r, g, b] = hslToRgb(hue, 100, 50);
-      coloredLine += \`\${rgbColor(r, g, b)}\${line[x]}\`;
-    }
-    console.log(coloredLine + RESET);
+  if (!animate) {
+    console.log(render(1, width, Math.min(height, 14), color));
+    return;
   }
 
-  console.log('');
-  const progress = Math.min(100, Math.round((baseHue / 360) * 100 + 40) % 101);
-  const barWidth = 40;
-  const filled = Math.round((progress / 100) * barWidth);
-  const empty = barWidth - filled;
-  const bar = \`\${CYAN}\${'█'.repeat(filled)}\${RESET}\${DIM}\${'░'.repeat(empty)}\${RESET}\`;
-  console.log(\`   [\${bar}] \${BOLD}\${progress}%\${RESET} | \${YELLOW}⚡ ANIMATING\${RESET} | CPU: \${GREEN}OK\${RESET}\`);
-  console.log(\`\${BOLD}\${DIM}   ──────────────────────────────────────────────────────────────────────\${RESET}\`);
+  process.stdout.write(ESC + '?25l' + ESC + '2J' + ESC + 'H');
+  try {
+    for (let frame = 0; frame < 78; frame++) {
+      process.stdout.write(ESC + 'H' + render(frame / 77, width, height, color) + RESET);
+      await sleep(32);
+    }
+    await sleep(700);
+    process.stdout.write('\\n');
+  } finally {
+    process.stdout.write(ESC + '?25h');
+  }
 }
 
-main().catch(console.error);
+main().catch(error => {
+  process.stdout.write(ESC + '?25h');
+  console.error(error);
+  process.exitCode = 1;
+});
 `;
   const r4 = writeFileSafe(path.join(cwd, 'scripts/easter-egg.ts'), easterEggTs, { dryRun, force });
   if (r4 === 'created' || r4 === 'overwritten') result.created.push('scripts/easter-egg.ts');
