@@ -1,4 +1,5 @@
 import pc from 'picocolors';
+import { renderHelenWordmark } from './easterEgg.js';
 
 export const logger = {
   info(msg: string): void {
@@ -25,15 +26,10 @@ export const logger = {
     console.log('');
   },
   banner(): void {
-    console.log(pc.cyan(pc.bold(`
-  ██╗  ██╗███████╗██╗     ███████╗███╗   ██╗
-  ██║  ██║██╔════╝██║     ██╔════╝████╗  ██║
-  ███████║█████╗  ██║     █████╗  ██╔██╗ ██║
-  ██╔══██║██╔══╝  ██║     ██╔══╝  ██║╚██╗██║
-  ██║  ██║███████╗███████╗███████╗██║ ╚████║
-  ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═══╝`)));
-    console.log(pc.bold('   v1.0.0 — Modern Project Setup CLI'));
-    console.log(pc.dim('   Security · Docker · CI/CD · Testing · SEO · DX'));
+    const width = Math.min(process.stdout.columns ?? 80, 88);
+    const color = process.env.NO_COLOR === undefined;
+    console.log(renderHelenWordmark({ width, height: 10, color }));
+    console.log(pc.dim('  Modern project systems, deliberately composed.'));
     console.log('');
   },
 };
