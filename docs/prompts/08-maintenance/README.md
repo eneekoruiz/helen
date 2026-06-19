@@ -27,6 +27,7 @@ Garantizar la salud operativa y la evolución sostenible del proyecto a largo pl
 | [quality-operating-system-design.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/quality-operating-system-design.md) | **PLAN** | Diseñar la metodología completa de calidad técnica del proyecto. | Baja (Una vez por ciclo mayor) |
 | [agent-brief-builder.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/agent-brief-builder.md) | **GENERATE** | Crear briefs de ejecución hiper-detallados y seguros para IAs. | Alta (Para cada nueva feature) |
 | [cross-audit-synthesis.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/cross-audit-synthesis.md) | **PLAN** | Consolidar hallazgos de múltiples prompts en un solo plan secuenciado. | Alta (Tras auditorías cruzadas) |
+| [yearly-professional-presence-review.md](yearly-professional-presence-review.md) | **APPLY/REPORT** | Revisar anualmente portfolio, GitHub, LinkedIn, CV y posicionamiento profesional como un único ecosistema. | Anual y tras cambios profesionales importantes |
 | [prompt-library-maintenance-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/prompt-library-maintenance-flow.md) | **APPLY flow** | Limpiar, actualizar referencias y resolver registry de la biblioteca. | Media |
 
 ---
@@ -36,3 +37,4 @@ Garantizar la salud operativa y la evolución sostenible del proyecto a largo pl
 - [ ] ¿Se ha realizado un simulacro de restauración de datos a partir de un backup real?
 - [ ] ¿Los esquemas de exportación de datos de usuario son accesibles e independientes de vendor?
 - [ ] ¿Se han consolidado o eliminado prompts redundantes y la registry resuelve correctamente?
+- [ ] ¿La presencia profesional pública representa el nivel, objetivos y trabajo actuales?
