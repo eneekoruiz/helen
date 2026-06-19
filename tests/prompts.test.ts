@@ -65,4 +65,15 @@ describe('Prompt Library', () => {
     expect(lastMile.kind).toBe('prompt');
     expect(agentQuality.toLowerCase()).toContain('prompt library');
   });
+
+  it('exposes the yearly professional presence review through the CLI resolver', () => {
+    const entry = resolvePromptEntry('yearly-professional-presence-review');
+    const content = readPrompt('08-maintenance/yearly-professional-presence-review');
+
+    expect(entry.kind).toBe('prompt');
+    expect(entry.id).toBe('08-maintenance/yearly-professional-presence-review');
+    expect(content).toContain('## Más allá de estos criterios');
+    expect(content).toContain('Manual actions required');
+    expect(content).toContain('High-impact opportunities');
+  });
 });
