@@ -469,7 +469,7 @@ export function createProgram(): Command {
 
   scripts
     .command('easter-egg')
-    .description('Run the vibrant 24-bit Truecolor console Easter Egg animation')
+    .description('Run Helen's cinematic terminal art sequence')
     .action(async () => {
       const { runEasterEgg } = await import('./core/easterEgg.js');
       await runEasterEgg();
@@ -478,7 +478,7 @@ export function createProgram(): Command {
   // helen easter-egg (convenience alias)
   program
     .command('easter-egg')
-    .description('Run the vibrant 24-bit Truecolor console Easter Egg animation')
+    .description('Run Helen's cinematic terminal art sequence')
     .action(async () => {
       const { runEasterEgg } = await import('./core/easterEgg.js');
       await runEasterEgg();
