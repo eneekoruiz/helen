@@ -46,4 +46,5 @@ helen prompts list                # Lista todos los prompts cargados por fases
 helen prompts show master         # Muestra el prompt MASTER orchestrator
 helen prompts show full-polish    # Busca y muestra un prompt por su nombre base
 helen prompts path full-polish    # Devuelve la ruta absoluta del archivo
+helen prompts show yearly-professional-presence-review # Revisión anual de presencia profesional
 ```
