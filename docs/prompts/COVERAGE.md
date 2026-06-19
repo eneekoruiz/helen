@@ -38,6 +38,7 @@ If a new request fits one of these canonical intentions, improve the existing pr
 | | Auditoría de visuales animados y 3D, rendimiento e integración | `03-finish-features/audit-animated-and-3d-visuals-performance-safety-and-integration.md` |
 | | Auditoría de experiencia de usuario primaria | `03-finish-features/audit-primary-user-experience.md` |
 | | Pase de pulido visual premium | `03-finish-features/apply-premium-visual-polish-pass.md` |
+| | Pase de conversión cinemática y visuales 3D | `03-finish-features/apply-cinematic-and-3d-visual-conversion.md` |
 | | Pase de diseño responsive | `03-finish-features/apply-responsive-pass.md` |
 | | Pase de accesibilidad básica | `03-finish-features/apply-basic-accessibility-pass.md` |
 | | Pase de rendimiento básico | `03-finish-features/apply-basic-performance-pass.md` |

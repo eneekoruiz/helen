@@ -55,6 +55,7 @@ describe('Prompt Library', () => {
     const data = resolvePromptEntry('02-building/audit-data-model-and-domain-integrity');
     const design = resolvePromptEntry('03-finish-features/audit-product-design-and-awards-visual-excellence');
     const animation3d = resolvePromptEntry('03-finish-features/audit-animated-and-3d-visuals-performance-safety-and-integration');
+    const cinematicConversion = resolvePromptEntry('03-finish-features/apply-cinematic-and-3d-visual-conversion');
     const cms = resolvePromptEntry('02-building/apply-cms-editable-content-conversion-flow');
     const lastMile = resolvePromptEntry('07-client-handoff/audit-browser-smoke-test-and-demo-readiness');
     const agentQuality = readPrompt('08-maintenance/apply-prompt-library-maintenance-flow');
@@ -63,6 +64,7 @@ describe('Prompt Library', () => {
     expect(data.kind).toBe('prompt');
     expect(design.kind).toBe('prompt');
     expect(animation3d.kind).toBe('prompt');
+    expect(cinematicConversion.kind).toBe('prompt');
     expect(cms.kind).toBe('flow');
     expect(lastMile.kind).toBe('prompt');
     expect(agentQuality.toLowerCase()).toContain('prompt library');
