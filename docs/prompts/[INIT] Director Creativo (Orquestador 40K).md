@@ -83,8 +83,36 @@ Busca una idea visual que pueda defenderse en una reunion con un cliente de alto
 - Performance/fallback:
 
 ## Plan de Sub-prompts
-1. `[prompt-id]` - objetivo, inputs, condición de avance.
-2. `[prompt-id]` - objetivo, inputs, condición de avance.
-3. `[prompt-id]` - objetivo, inputs, condición de avance.
+
+### Paso 1: UX Strategy & Taste (Cero Slop)
+* `/prompts show enhance-taste-visual-pov`: Inyectar variables HSL, fuentes premium y espaciados editoriales en CSS.
+* `/prompts show audit-ux-strategist-core`: Auditar ergonómica, contrastes WCAG, targets táctiles y estados de error/carga.
+* `/prompts show generate-premium-web-artifacts`: Crear componentes interactivos de conversión (tablas pricing, toggles, bento grids).
+* `/prompts show audit-ai-trace-erasure-and-human-craft`: Auditar y borrar rastros visuales típicos de plantillas IA.
+
+### Paso 2: Motion, Transitions & Scroll
+* `/prompts show enhance-motion-polish-and-transitions`: Añadir curvas bezier personalizadas y transiciones en modales/dropdowns.
+* `/prompts show enhance-scroll-linked-sequences`: Secuencias de animación interactiva y timeline scrubbing con GSAP y Lenis.
+* `/prompts show enhance-native-view-transitions`: Transiciones entre páginas/estados mediante la View Transitions API.
+* `/prompts show enhance-cinematic-loading-and-page-transition-polish`: Crear pantallas de carga cinemáticas inmersivas.
+
+### Paso 3: Tipografía Avanzada, WebGPU y Artefactos Creativos
+* `/prompts show enhance-dynamic-typography-pretext`: Pretexting off-DOM en JS y fluir texto alrededor de mallas 3D/canvas.
+* `/prompts show generate-webgpu-shaders`: Crear canvas interactivos líquidos y shaders WebGPU/WebGL dinámicos.
+* `/prompts show generate-app-store-canvas-exports`: Crear herramientas canvas locales para exportar banners de alta resolución.
+
+### Paso 4: 3D, Mockups y Assets High-End
+* `/prompts show generate-3d-motion-templates`: Coordinar mallas 3D con capas HTML flotantes y luces cinemáticas.
+* `/prompts show generate-integrated-premium-mockups`: Mockups vectoriales y 3D interactivos (iPhone, MacBook) con inclinación física.
+* `/prompts show generate-3d-spline-vs-react-three-fiber`: Decidir y configurar Spline para embeds rápidos vs R3F para shaders nativos.
+
+### Paso 5: Integración y Optimización Avanzada
+* `/prompts show generate-modern-ui-libraries-aceternity-magic-ui`: Componentes avanzados del catálogo Aceternity UI o Magic UI.
+* `/prompts show audit-animation-performance-and-fps`: Auditar tasas de refresco constantes a 60/120 FPS y resolver CLS.
+* `/prompts show enhance-ui-audio-micro-feedback`: Diseño de micro-feedback de audio con Web Audio API y botón de mute.
+
+### Paso 6: Orquestador Maestro de Fusión
+* `/prompts show apply-40k-visual-craft-flow`: Ejecutar el flujo maestro de pulido visual para la fusión de todos los sub-prompts.
 ```
+
 

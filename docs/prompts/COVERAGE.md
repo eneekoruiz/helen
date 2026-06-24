@@ -141,3 +141,21 @@ La capa 40K se concentra en Fase 3 porque su objetivo es elevar experiencias fun
 | Auditoria de direccion creativa y conversion 40K | `03-finish-features/audit-40k-creative-direction-and-conversion.md` |
 | Auditoria de presupuesto de rendimiento cinematico | `03-finish-features/audit-performance-budget-for-cinematic-sites.md` |
 | Auditoria anti-rastro IA y craft humano | `03-finish-features/audit-ai-trace-erasure-and-human-craft.md` |
+| Orquestador de Ejecución Visual Ultra-Premium 40K | `03-finish-features/apply-40k-visual-craft-flow.md` |
+| Auditoría ergonómica, targets táctiles y errores | `03-finish-features/audit-ux-strategist-core.md` |
+| Inyección de POV visual y tokens HSL con taste | `03-finish-features/enhance-taste-visual-pov.md` |
+| Generador de bloques interactivos React/Tailwind | `03-finish-features/generate-premium-web-artifacts.md` |
+| Transiciones premium de dropdowns y modales | `03-finish-features/enhance-motion-polish-and-transitions.md` |
+| Animaciones de timeline y scrubbing en scroll | `03-finish-features/enhance-scroll-linked-sequences.md` |
+| Transiciones entre páginas con View Transitions API | `03-finish-features/enhance-native-view-transitions.md` |
+| Pretexting matemático y layouts estilo revista | `03-finish-features/enhance-dynamic-typography-pretext.md` |
+| Lienzos líquidos y shaders interactivos WebGPU | `03-finish-features/generate-webgpu-shaders.md` |
+| Automatizador de banners y capturas de marketing | `03-finish-features/generate-app-store-canvas-exports.md` |
+| Plantillas de composición y motion en 3D | `03-finish-features/generate-3d-motion-templates.md` |
+| Integración de mockups de dispositivos vectoriales/3D | `03-finish-features/generate-integrated-premium-mockups.md` |
+| Matriz y configuración Spline vs React Three Fiber | `03-finish-features/generate-3d-spline-vs-react-three-fiber.md` |
+| Integración de componentes Aceternity/Magic UI | `03-finish-features/generate-modern-ui-libraries-aceternity-magic-ui.md` |
+| Auditoría estricta de FPS y Layout Shifts (CLS) | `03-finish-features/audit-animation-performance-and-fps.md` |
+| Diseño de micro-feedback de audio e inmersión | `03-finish-features/enhance-ui-audio-micro-feedback.md` |
+| Sub-orquestador CLI Creative Director 40K | `01-start-project/init-director-creativo-orquestador-40k.md` |
+
