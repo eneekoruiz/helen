@@ -35,8 +35,8 @@ stop_conditions:
 - [ ] La experiencia parece artesanal, no generada.
 
 ## Prompts clave
-- `generate-3d-global-canvas-setup.md`
-- `generate-3d-isolated-experience-component.md`
-- `enhance-3d-premium-scene-polish.md`
+- `3d/generate-3d-global-canvas-setup.md`
+- `3d/generate-3d-isolated-experience-component.md`
+- `3d/enhance-3d-premium-scene-polish.md`
 - `audit-product-ux-and-premium-quality.md`
 - `audit-visual-ux-regression-checkpoint.md`

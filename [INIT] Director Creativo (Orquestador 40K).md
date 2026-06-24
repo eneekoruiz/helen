@@ -65,9 +65,9 @@ En base al propósito operativo y la arquitectura elegida, genera la secuencia e
 * **`/prompts show generate-app-store-canvas-exports`**: Crear herramientas canvas locales para exportar banners de alta resolución.
 
 ### Paso 4: 3D, Mockups y Assets High-End
-* **`/prompts show generate-3d-motion-templates`**: Coordinar mallas 3D con capas HTML flotantes y luces cinemáticas.
-* **`/prompts show generate-integrated-premium-mockups`**: Mockups vectoriales y 3D interactivos (iPhone, MacBook) con inclinación física.
-* **`/prompts show generate-3d-spline-vs-react-three-fiber`**: Decidir y configurar Spline para embeds rápidos vs R3F para shaders nativos.
+* **`/prompts show 3d/generate-3d-motion-templates`**: Coordinar mallas 3D con capas HTML flotantes y luces cinemáticas.
+* **`/prompts show 3d/generate-integrated-premium-mockups`**: Mockups vectoriales y 3D interactivos (iPhone, MacBook) con inclinación física.
+* **`/prompts show 3d/generate-3d-spline-vs-react-three-fiber`**: Decidir y configurar Spline para embeds rápidos vs R3F para shaders nativos.
 
 ### Paso 5: Integración y Optimización Avanzada
 * **`/prompts show generate-modern-ui-libraries-aceternity-magic-ui`**: Componentes avanzados del catálogo Aceternity UI o Magic UI.

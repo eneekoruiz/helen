@@ -34,9 +34,9 @@ Indice operativo para elegir prompts sin memorizar carpetas.
 4. `03-finish-features/enhance-native-view-transitions.md` (**ENHANCE-**) - View Transitions API nativa del navegador.
 5. `03-finish-features/enhance-dynamic-typography-pretext.md` (**ENHANCE-**) - layouts de revista y pretexting off-DOM.
 6. `03-finish-features/generate-webgpu-shaders.md` (**GENERATE-**) - shaders líquidos e interactivos de GPU.
-7. `03-finish-features/generate-3d-motion-templates.md` (**GENERATE-**) - layouts y cámara cinemática 3D.
-8. `03-finish-features/generate-integrated-premium-mockups.md` (**GENERATE-**) - mockups de dispositivos interactivos.
-9. `03-finish-features/generate-3d-spline-vs-react-three-fiber.md` (**GENERATE-**) - decisión Spline vs R3F.
+7. `03-finish-features/3d/generate-3d-motion-templates.md` (**GENERATE-**) - layouts y cámara cinemática 3D.
+8. `03-finish-features/3d/generate-integrated-premium-mockups.md` (**GENERATE-**) - mockups de dispositivos interactivos.
+9. `03-finish-features/3d/generate-3d-spline-vs-react-three-fiber.md` (**GENERATE-**) - decisión Spline vs R3F.
 10. `03-finish-features/enhance-ui-audio-micro-feedback.md` (**ENHANCE-**) - diseño de sonido Web Audio y mute.
 11. `05-final-audit/audit-visual-quality-40k.md` (**AUDIT-**)
 
