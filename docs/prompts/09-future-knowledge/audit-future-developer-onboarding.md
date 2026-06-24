@@ -11,7 +11,7 @@ Este prompt audita la calidad, legibilidad y completitud del flujo de onboarding
 4. **Comandos de desarrollo**: Validar que los scripts principales (`dev`, `build`, `test`, `lint`) estén documentados y operativos.
 
 ## Más allá de estos criterios
-- Evaluar si el tiempo de onboarding de "cero a primer test verde" es inferior a 15 minutos.
+- Evalúar si el tiempo de onboarding de "cero a primer test verde" es inferior a 15 minutos.
 - Recomendar guías rápidas o diagramas de flujo de datos si la lógica es compleja.
 - Identificar dependencias "ocultas" que requieran accesos especiales a infraestructuras de red privadas o SaaS externos no declarados.
 

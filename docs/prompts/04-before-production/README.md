@@ -9,7 +9,7 @@ Descubrir fallos más allá del "happy path" a través de QA adversarial y casos
 - Previo a despliegues en entornos de staging o producción.
 
 **Qué problemas resuelve**:
-- Bugs raros o complejos (condiciones de carrera, fallos parciales, cancelaciones) que rompen la experiencia.
+- Bugs raros o complejos (condiciónes de carrera, fallos parciales, cancelaciones) que rompen la experiencia.
 - Consumos desmedidos de base de datos, API cuotas o recursos de infraestructura.
 - Sanciones legales o pérdida de confianza del usuario por mala gestión de datos personales.
 - "Ceguera" en producción por falta de logs o métricas de uso reales.
@@ -20,9 +20,9 @@ Descubrir fallos más allá del "happy path" a través de QA adversarial y casos
 
 | Prompt / Flow / Checkpoint | Intención | Propósito / Cuándo usarlo | Frecuencia |
 |---|---|---|---|
-| [adversarial-qa-and-edge-cases.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/adversarial-qa-and-edge-cases.md) | **AUDIT** | Atacar el producto con malformaciones, condiciones de carrera y fallos parciales. | Alta |
+| [adversarial-qa-and-edge-cases.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/adversarial-qa-and-edge-cases.md) | **AUDIT** | Atacar el producto con malformaciones, condiciónes de carrera y fallos parciales. | Alta |
 | [stress-scale-and-cost-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/stress-scale-and-cost-audit.md) | **AUDIT** | Auditar cuellos de botella y estimaciones de costes bajo crecimiento. | Media |
-| [privacy-legal-and-compliance-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/privacy-legal-and-compliance-audit.md) | **AUDIT** | Evaluar la privacidad (GDPR), licencias de código y obligaciones legales. | Media |
+| [privacy-legal-and-compliance-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/privacy-legal-and-compliance-audit.md) | **AUDIT** | Evalúar la privacidad (GDPR), licencias de código y obligaciones legales. | Media |
 | [observability-instrumentation-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/observability-instrumentation-audit.md) | **APPLY/AUDIT** | Revisar o instrumentar trazas de logs, métricas y gestión de errores. | Alta |
 | [product-analytics-and-metrics-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/product-analytics-and-metrics-audit.md) | **AUDIT** | Validar la captura de eventos de activación, retención y conversión. | Media |
 | [fast-build-test-verification.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/fast-build-test-verification.md) | **AUDIT** | Auditoría rápida de compilación y suite de tests para descartar roturas. | Alta |

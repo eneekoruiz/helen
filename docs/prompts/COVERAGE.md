@@ -115,3 +115,29 @@ Antes de añadir un nuevo prompt:
 1. Comprueba este mapa de cobertura.
 2. Consulta [TAXONOMY.md](TAXONOMY.md).
 3. Prefiere siempre mejorar un prompt existente en la fase correspondiente en lugar de añadir uno nuevo.
+
+## Ultra Premium 40K Expansion
+
+La capa 40K se concentra en Fase 3 porque su objetivo es elevar experiencias funcionales a direccion creativa, conversion, motion, 3D y craft premium. El punto de entrada es `[INIT] Director Creativo (Orquestador 40K).md`.
+
+| Intencion Canonica | Archivo Correspondiente |
+|---|---|
+| Orquestador de direccion creativa 40K | `[INIT] Director Creativo (Orquestador 40K).md` |
+| Generacion de shaders WebGPU/WebGL premium | `03-finish-features/generate-webgpu-shader-experience.md` |
+| Sistema de assets 3D y motion templates | `03-finish-features/generate-motion-template-asset-system.md` |
+| Sistema de mockups high-end integrados | `03-finish-features/generate-premium-mockup-layout-system.md` |
+| Secuencias scroll/video scrubbing | `03-finish-features/generate-scroll-video-scrubbing-sequence.md` |
+| Transiciones nativas de estado, tema y pagina | `03-finish-features/generate-view-transition-state-system.md` |
+| Integracion 3D rapida con Spline | `03-finish-features/generate-spline-rapid-interactive-embed.md` |
+| Arquitectura 3D custom con React Three Fiber/Drei | `03-finish-features/generate-3d-react-fiber-premium-architecture.md` |
+| Integracion de librerías premium de componentes | `03-finish-features/generate-premium-component-library-integration.md` |
+| Hero premium orientado a conversion | `03-finish-features/generate-conversion-led-hero-system.md` |
+| Direccion editorial premium | `03-finish-features/generate-editorial-art-direction-system.md` |
+| Configuradores o simuladores inmersivos | `03-finish-features/generate-immersive-product-configurator.md` |
+| Landing personalizada por segmento o intención | `03-finish-features/generate-ai-personalized-landing-flow.md` |
+| Pulido cinematico de cargas y transiciones | `03-finish-features/enhance-cinematic-loading-and-page-transition-polish.md` |
+| Pase CRO y profundidad de CTAs | `03-finish-features/enhance-cro-friction-removal-and-cta-depth.md` |
+| Microinteracciones y detalle sensorial | `03-finish-features/enhance-microinteraction-sensory-detail-pass.md` |
+| Auditoria de direccion creativa y conversion 40K | `03-finish-features/audit-40k-creative-direction-and-conversion.md` |
+| Auditoria de presupuesto de rendimiento cinematico | `03-finish-features/audit-performance-budget-for-cinematic-sites.md` |
+| Auditoria anti-rastro IA y craft humano | `03-finish-features/audit-ai-trace-erasure-and-human-craft.md` |

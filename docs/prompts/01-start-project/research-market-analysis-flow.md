@@ -8,7 +8,7 @@ Comparar el proyecto con alternativas y detectar oportunidades estratégicas.
 
 ## Fase Ideal
 
-Antes de roadmap, reposicionamiento, launch o rediseño de producto.
+Antes de roadmap, reposicionamiento, laúnch o rediseño de producto.
 
 ## Prompts Incluidos
 

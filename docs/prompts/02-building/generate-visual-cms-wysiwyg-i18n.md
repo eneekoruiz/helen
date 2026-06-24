@@ -1,6 +1,6 @@
 # [GENERATE] Visual CMS WYSIWYG i18n
 
-## Proposito e intencion
+## Proposito e intención
 Implementar un CMS visual protegido para que el cliente final edite contenido comercial sin tocar codigo, con soporte i18n diferenciando campos universales y traducibles.
 
 ## Cuando usarlo
@@ -9,7 +9,7 @@ Implementar un CMS visual protegido para que el cliente final edite contenido co
 - Antes del handoff si habra mantenimiento por parte de negocio.
 
 ## Prompt
-Actua como Principal CMS Architect, Product Engineer y i18n Lead. Implementa un CMS WYSIWYG seguro, claro y mantenible para contenido de ventas. El cliente debe poder gestionar la web sin ver codigo ni romper el diseno.
+Actúa como Principal CMS Architect, Product Engineer y i18n Lead. Implementa un CMS WYSIWYG seguro, claro y mantenible para contenido de ventas. El cliente debe poder gestionar la web sin ver codigo ni romper el diseno.
 
 Entradas:
 - Stack actual: `{{STACK}}`
@@ -26,7 +26,7 @@ Entradas:
 - Protege el diseno: limites de longitud, tipos de campo, validaciones, previews y fallback por idioma.
 - Incluye permisos o modo protegido para evitar edicion accidental de componentes criticos.
 - Anade preview visual y estados de borrador/publicado si el stack lo permite.
-- Mantén el CMS orientado a ventas: CTAs, pruebas, objeciones y bloques de confianza deben ser editables con intencion.
+- Mantén el CMS orientado a ventas: CTAs, pruebas, objeciónes y bloques de confianza deben ser editables con intención.
 
 ## Mas alla de estos criterios
 Si el proyecto no necesita un CMS completo, implementa una capa editorial minima pero robusta. La simplicidad que protege la conversion vale mas que un panel enorme que el cliente no usara.

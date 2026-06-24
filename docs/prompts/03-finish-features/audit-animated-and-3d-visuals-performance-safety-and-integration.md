@@ -33,7 +33,7 @@ Audit these areas at minimum:
    - **Contraste y Legibilidad en Capas Animadas**: Asegurar que los textos, botones e indicadores clave situados encima o cerca de las animaciones/3D mantengan relaciones de contraste WCAG óptimas y no se vean distorsionados o recortados por efectos interactivos.
 
 4. **Pulido Visual y Sincronización**
-   - **Curvas de Easing e Integración**: Evaluar la coherencia de las animaciones con la física del mundo real o las directrices de marca (usar easings personalizados/cúbicos en lugar de transiciones lineales abruptas).
+   - **Curvas de Easing e Integración**: Evalúar la coherencia de las animaciones con la física del mundo real o las directrices de marca (usar easings personalizados/cúbicos en lugar de transiciones lineales abruptas).
    - **Interacción Fluida**: Comprobar que los disparadores interactivos (hover, click, drag, scroll-jacking) tengan una respuesta instantánea y no interfieran con la fluidez nativa del scroll táctil del dispositivo.
 
 ## Más allá de estos criterios

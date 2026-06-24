@@ -51,6 +51,14 @@ Sigue estas instrucciones operativas para interactuar con el repositorio:
 
 ---
 
+## Orquestador 40K
+
+El prompt [`[INIT] Director Creativo (Orquestador 40K).md`](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/%5BINIT%5D%20Director%20Creativo%20(Orquestador%2040K).md) es el punto de entrada para proyectos visuales ultra-premium. Absorbe nicho, oferta, cliente, conversion y ambicion estetica antes de ejecutar sub-prompts de Fase 3.
+
+Usalo cuando el objetivo sea una web con direccion de arte propia, efectos tecnicos avanzados, conversion clara y cero rastro de IA.
+
+---
+
 ## 🛠️ Acceso Mediante CLI de HELEN
 
 La herramienta CLI de HELEN te permite interactuar con esta biblioteca directamente desde tu terminal local:

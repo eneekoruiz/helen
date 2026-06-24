@@ -17,6 +17,11 @@
       "id": "standards",
       "path": "docs/prompts/STANDARDS.md",
       "purpose": "Quality contract for prompt structure, naming, merge decisions, flows, and checkpoints."
+    },
+    {
+      "id": "director-creativo-40k",
+      "path": "docs/prompts/[INIT] Director Creativo (Orquestador 40K).md",
+      "purpose": "Ultra-premium creative direction orchestrator for conversion-led Awwwards-level visual systems."
     }
   ],
   "executableFlows": [

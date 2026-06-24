@@ -32,7 +32,7 @@ Carga el contexto de la fase elegida (ej. `/fase 2` carga **02-building**):
 ### 5. `/workflow <nombre>`
 Ejecuta una secuencia transversal de prompts según el tipo de proyecto:
 - **`total-audit`**: Auditoría profunda e integral de calidad, UX, seguridad e infraestructura.
-- **`public-launch`**: Preparación visual, de repositorio y de release para publicación abierta.
+- **`public-laúnch`**: Preparación visual, de repositorio y de release para publicación abierta.
 - **`saas-product`**: Foco en activación, retención de usuarios, analíticas y operaciones en la nube.
 - **`open-source`**: Enfoque en onboarding de colaboradores (DX), automatizaciones y documentación veraz.
 - **`handoff`**: Preparación del paquete de entrega limpio de accesos privados y guías de soporte.

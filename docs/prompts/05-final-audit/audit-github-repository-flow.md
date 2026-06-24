@@ -10,7 +10,7 @@ Asegurar que el repositorio de GitHub sea legible, creíble, descubrible, ordena
 
 Al finalizar el desarrollo y preparación de documentación (Final Audit).
 
-## Criterios de Evaluación y Polish
+## Criterios de Evalúación y Polish
 
 1. **README y About Box**:
    - Confirmar descripción concisa, temas (topics) relevantes de descubrimiento, licencia MIT (o la correspondiente) e imágenes de capturas.
@@ -41,7 +41,7 @@ Cambios aplicados:
 - [Breve lista de 1-3 viñetas con parches en README, configuración o licencias aplicados]
 
 Acciones manuales necesarias:
-- [Ej: Actualizar la descripción o social preview en la UI web de GitHub]
+- [Ej: Actúalizar la descripción o social preview en la UI web de GitHub]
 ```
 
 Si se ejecuta una auditoría de repositorio (AUDIT):

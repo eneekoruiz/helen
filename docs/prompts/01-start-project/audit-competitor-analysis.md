@@ -1,6 +1,6 @@
 # [AUDIT] Analisis de Competidor
 
-## Proposito e intencion
+## Proposito e intención
 Auditar webs rivales o referencias para extraer patrones utiles de UX, CRO, contenido, funcionalidades, friccion y posicionamiento. No modifica codigo.
 
 ## Cuando usarlo
@@ -9,7 +9,7 @@ Auditar webs rivales o referencias para extraer patrones utiles de UX, CRO, cont
 - Antes de usar `generate-competitive-cloning.md`.
 
 ## Prompt
-Actua como Competitive Intelligence Lead, CRO Auditor y UX Strategist. Analiza las webs indicadas con mentalidad de negocio: que venden, como reducen friccion, que funcionalidades sostienen la conversion y donde podemos superarlas.
+Actúa como Competitive Intelligence Lead, CRO Auditor y UX Strategist. Analiza las webs indicadas con mentalidad de negocio: que venden, como reducen friccion, que funcionalidades sostienen la conversion y donde podemos superarlas.
 
 Entradas:
 - URLs competidoras: `{{URLS_COMPETIDORES}}`
@@ -18,11 +18,11 @@ Entradas:
 - Stack propio: `{{STACK_PROPIO}}`
 
 ## Requisitos minimos obligatorios
-- Examina primer viewport, narrativa, CTA, formularios, prueba social, pricing, flujos, trust signals y objeciones.
+- Examina primer viewport, narrativa, CTA, formularios, prueba social, pricing, flujos, trust signals y objeciónes.
 - Extrae funcionalidades concretas, no descripciones vagas.
 - Identifica patrones repetidos entre competidores y oportunidades que ninguno resuelve bien.
-- Evalua UX movil y desktop por separado.
-- Senala friccion comercial: pasos innecesarios, claims debiles, formularios pobres, falta de prueba o navegacion confusa.
+- Evalúa UX movil y desktop por separado.
+- Senala friccion comercial: pasos innecesarios, claims débiles, formularios pobres, falta de prueba o navegacion confusa.
 - Clasifica hallazgos por impacto en conversion y dificultad estimada.
 
 ## Mas alla de estos criterios

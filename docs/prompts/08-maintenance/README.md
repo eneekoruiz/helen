@@ -21,7 +21,7 @@ Garantizar la salud operativa y la evolución sostenible del proyecto a largo pl
 | Prompt / Flow / Checkpoint | Intención | Propósito / Cuándo usarlo | Frecuencia |
 |---|---|---|---|
 | [data-lifecycle-backup-and-recovery.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/data-lifecycle-backup-and-recovery.md) | **AUDIT/REPORT** | Identificar datos persistentes y ensayar planes de restauración. | Media |
-| [migrations-import-export-lock-in.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/migrations-import-export-lock-in.md) | **AUDIT/REPORT** | Evaluar la portabilidad de datos y mitigar dependencias cautivas. | Media |
+| [migrations-import-export-lock-in.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/migrations-import-export-lock-in.md) | **AUDIT/REPORT** | Evalúar la portabilidad de datos y mitigar dependencias cautivas. | Media |
 | [growth-model-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/growth-model-audit.md) | **REPORT** | Auditar la retención y activación de usuarios para experimentos. | Media |
 | [programmatic-seo-and-content-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/programmatic-seo-and-content-audit.md) | **AUDIT** | Encontrar oportunidades de SEO programático y páginas útiles. | Baja |
 | [quality-operating-system-design.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/quality-operating-system-design.md) | **PLAN** | Diseñar la metodología completa de calidad técnica del proyecto. | Baja (Una vez por ciclo mayor) |

@@ -11,7 +11,7 @@ Este prompt audita las reglas de gobernanza del repositorio, permisos de ramas, 
 4. **Cumplimiento Legal y Dependencias**: Verificar que no se utilicen dependencias con licencias altamente restrictivas (como GPLv3 no autorizadas en productos SaaS comerciales cerrados).
 
 ## Más allá de estos criterios
-- Evaluar si las configuraciones de seguridad automatizadas de GitHub (CodeQL, Dependabot alert, secret scanning) están activas.
+- Evalúar si las configuraciones de seguridad automatizadas de GitHub (CodeQL, Dependabot alert, secret scanning) están activas.
 - Auditar los permisos del equipo para asegurar el principio de mínimo privilegio (Least Privilege).
 
 ## Límites de seguridad

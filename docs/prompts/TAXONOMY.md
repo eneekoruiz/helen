@@ -60,7 +60,7 @@ Every prompt file must expose its primary intent in its filename. Names must fol
 - **`init-`**: Initializes a blank or near-blank project with business DNA, scaffold rules, positioning, and first architecture.
 - **`generate-`**: Creates new assets, components, CMS models, scaffolds, documentation, or implementation from an existing brief.
 - **`enhance-`**: Improves existing code, UI, scenes, copy, or flows under strict non-breaking constraints.
-- **`audit-`**: Evaluates code, UX, market position, visual quality, risk, or implementation without modifying files.
+- **`audit-`**: Evalúates code, UX, market position, visual quality, risk, or implementation without modifying files.
 
 ### Legacy Compatible Prefixes
 - **`apply-`**: Existing implementation prompt. Treat as equivalent to `enhance-` when editing existing surfaces, or `generate-` when creating new project assets.

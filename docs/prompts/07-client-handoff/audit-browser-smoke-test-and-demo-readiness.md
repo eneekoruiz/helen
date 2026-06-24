@@ -25,7 +25,7 @@ Run the project if possible, inspect it in a browser, and verify that the visibl
 - Check desktop and mobile viewport basics.
 
 3. Smoke test critical interactions
-- Click primary navigation, CTAs, forms, menus, filters, modals, accordions, carousels, theme toggles, language controls, and edit controls where applicable.
+- Click primary navigation, CTAs, forms, menús, filters, modals, accordions, carousels, theme toggles, language controls, and edit controls where applicable.
 - Check loading, error, empty, and success states when reachable.
 
 4. Demo readiness

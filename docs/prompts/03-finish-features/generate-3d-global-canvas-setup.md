@@ -1,6 +1,6 @@
 # [GENERATE] 3D Global Canvas Setup
 
-## Proposito e intencion
+## Proposito e intención
 Crear la base tecnica global para experiencias 3D premium: canvas, motor, rendimiento, accesibilidad, fallback y reglas de integracion. No crea escenas especificas.
 
 ## Cuando usarlo
@@ -9,7 +9,7 @@ Crear la base tecnica global para experiencias 3D premium: canvas, motor, rendim
 - Cuando todavia no existe infraestructura 3D estable.
 
 ## Prompt
-Actua como UI UX PRO MAX, Creative Technologist y Principal Frontend Engineer especializado en Three.js/react-three-fiber. Implementa un setup 3D global premium, eficiente y mantenible.
+Actúa como UI UX PRO MAX, Creative Technologist y Principal Frontend Engineer especializado en Three.js/react-three-fiber. Implementa un setup 3D global premium, eficiente y mantenible.
 
 Entradas:
 - Stack actual: `{{STACK}}`

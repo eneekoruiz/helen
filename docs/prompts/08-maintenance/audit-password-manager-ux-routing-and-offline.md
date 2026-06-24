@@ -53,7 +53,7 @@ El agente auditor debe verificar minuciosamente los siguientes 8 puntos en la ba
 
 ### 8. Sincronización Automática y Persistencia Offline-First
 - **Sincronización al inicio**: Comprobar cambios locales pendientes frente al servidor remoto y sincronizar automáticamente al abrir la aplicación.
-- **Sincronización tras cambios**: Toda operación de escritura (crear/editar/eliminar identidad, contraseña, proveedor, importación) debe lanzar una sincronización automática en segundo plano tras guardar.
+- **Sincronización tras cambios**: Toda operación de escritura (crear/editar/eliminar identidad, contraseña, proveedor, importación) debe lanzar una sincronización automática en segúndo plano tras guardar.
 - **Persistencia local resiliente**: Si no hay conexión, los datos y operaciones deben encolarse localmente (ej: en IndexedDB o localStorage) y sincronizarse de manera transparente en cuanto vuelva la conectividad.
 - **Timestamps y Reconciliación**: Utilizar marcas de tiempo y estrategias de versionado para resolver conflictos sin sobrescribir datos.
 - **Indicadores claros**: Exponer el estado de sincronización de forma inequívoca al usuario (ej: cuándo fue la última sincronización, si hay cambios pendientes o errores).
@@ -61,7 +61,7 @@ El agente auditor debe verificar minuciosamente los siguientes 8 puntos en la ba
 ---
 
 ## Más allá de estos criterios
-- Evaluar el impacto de la sincronización en segundo plano sobre la batería en dispositivos móviles.
+- Evalúar el impacto de la sincronización en segúndo plano sobre la batería en dispositivos móviles.
 - Implementar transiciones visuales agradables al alternar entre el estado conectado y offline.
 
 ## Límites de seguridad
@@ -74,5 +74,5 @@ El agente auditor debe verificar minuciosamente los siguientes 8 puntos en la ba
 ## Formato de entrega
 El entregable final de esta auditoría debe agrupar los hallazgos en tres niveles de severidad:
 - **Hallazgos Críticos**: Fallos que causan pérdida de datos, 404s crudos, o que bloquean la navegación o el buscador.
-- **Hallazgos Importantes**: Texto cortado, falta de consistencia de marcas/alias en el buscador o ausencia de sincronización en segundo plano tras la modificación.
+- **Hallazgos Importantes**: Texto cortado, falta de consistencia de marcas/alias en el buscador o ausencia de sincronización en segúndo plano tras la modificación.
 - **Hallazgos Opcionales**: Mejoras estéticas en indicadores de sincronización o rendimiento en offline.

@@ -28,7 +28,7 @@ Ejecutar auditorías profundas y rigurosas de la calidad del código, internacio
 | Prompt / Flow / Runbook | Intención | Propósito / Cuándo usarlo | Frecuencia |
 |---|---|---|---|
 | [audit-visual-quality-40k.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/audit-visual-quality-40k.md) | **AUDIT** | Revisión técnico-visual final de aspecto 40K: luces, cámaras, shaders, motion, composición y conversión. | Alta (Si hay UI premium/3D) |
-| [code-quality-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/code-quality-audit.md) | **AUDIT** | Evaluación rigurosa de mantenibilidad, deuda técnica, bugs y tests. | Alta |
+| [code-quality-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/code-quality-audit.md) | **AUDIT** | Evalúación rigurosa de mantenibilidad, deuda técnica, bugs y tests. | Alta |
 | [i18n-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/i18n-audit.md) | **AUDIT/APPLY flow** | Auditar y corregir el soporte multilingüe, fallbacks y metadatos SEO. | Media |
 | [documentation-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/documentation-audit.md) | **AUDIT** | Validar la veracidad de quick-starts, guías de entorno y ejemplos. | Alta |
 | [github-repository-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/github-repository-audit.md) | **AUDIT/APPLY flow** | Auditar y pulir la legibilidad y presentación de GitHub (About, topics, tags). | Alta |

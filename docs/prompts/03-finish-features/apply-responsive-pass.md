@@ -23,7 +23,7 @@ Verificar y corregir de forma segura que las superficies de la UI funcionen corr
 
 ## Más allá de estos criterios
 
-Evalúa si cada viewport parece diseñado de forma nativa e intencionada, no simplemente encogido o forzado por CSS.
+Evalúa si cada viewport parece diseñado de forma nativa e intenciónada, no simplemente encogido o forzado por CSS.
 
 ## Límites de Seguridad
 

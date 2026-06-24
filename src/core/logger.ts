@@ -1,5 +1,5 @@
 import pc from 'picocolors';
-import { renderHelenWordmark } from './cinematicArt.js';
+import { renderHelenWordmark, shouldUseAsciiArt } from './cinematicArt.js';
 
 export const logger = {
   info(msg: string): void {
@@ -26,10 +26,11 @@ export const logger = {
     console.log('');
   },
   banner(): void {
-    const width = Math.min(process.stdout.columns ?? 80, 88);
+    const width = Math.min(process.stdout.columns ?? 80, 104);
     const color = process.env.NO_COLOR === undefined;
-    console.log(renderHelenWordmark({ width, height: 10, color }));
-    console.log(pc.dim('  Modern project systems, deliberately composed.'));
+    console.log(renderHelenWordmark({ width, height: 12, color, ascii: shouldUseAsciiArt() }));
+    console.log(pc.dim('  AI development system / cinematic scaffolds / production-grade taste'));
+    console.log(pc.dim('  Designed to ship quieter, sharper, and unmistakably human.'));
     console.log('');
   },
 };

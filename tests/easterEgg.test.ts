@@ -10,7 +10,8 @@ describe('Helen terminal art', () => {
     const frame = renderHelenWordmark({ width: 80, height: 14, color: false });
 
     expect(frame).toContain('███████');
-    expect(frame).toContain('███╗   ██╗');
+    expect(frame).toContain('SYSTEM');
+    expect(frame).toContain('B Y   E N E K O   R U I Z');
     expect(frame).not.toContain('\x1b[');
   });
 

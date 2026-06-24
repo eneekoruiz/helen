@@ -10,7 +10,7 @@ Este prompt tiene como fin escanear la base de código y la documentación inter
 3. **Flujos de Terceros**: Inspeccionar si la integración con APIs externas (ej. Stripe, Auth0, HubSpot) está documentada o si requiere investigar el código para deducir qué datos viajan.
 
 ## Más allá de estos criterios
-- Evaluar si las APIs locales cuentan con tipado completo o Swagger/OpenAPI dinámico.
+- Evalúar si las APIs locales cuentan con tipado completo o Swagger/OpenAPI dinámico.
 - Recomendar la eliminación sistemática de código muerto que confunda a futuros lectores sobre el flujo real.
 
 ## Límites de seguridad

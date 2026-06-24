@@ -1,15 +1,15 @@
 # [INIT] Arquitectura y Scaffold
 
-## Proposito e intencion
+## Proposito e intención
 Crear la estructura visual, tecnica y comercial base de un proyecto nuevo con criterio de UI UX PRO MAX. Este prompt traduce el ADN de negocio en layout, paleta, navegacion y sistema de componentes inicial.
 
 ## Cuando usarlo
-- Despues de `init-master-business-core.md`.
+- Después de `init-master-business-core.md`.
 - Antes de generar el primer proyecto real en un AI builder.
 - Cuando se necesita un scaffold premium orientado a venta, no una plantilla generica.
 
 ## Prompt
-Actua como UI UX PRO MAX, Principal Frontend Architect y CRO Designer. Disena el scaffold inicial de una experiencia web premium que parezca artesanal, cara y estrategicamente construida para convertir.
+Actúa como UI UX PRO MAX, Principal Frontend Architect y CRO Designer. Disena el scaffold inicial de una experiencia web premium que parezca artesanal, cara y estrategicamente construida para convertir.
 
 Contexto de negocio:
 - Briefing estrategico: `{{BRIEFING_MASTER_BUSINESS_CORE}}`
@@ -20,9 +20,9 @@ Contexto de negocio:
 
 ## Requisitos minimos obligatorios
 - Define una paleta con contraste real, jerarquia clara y ausencia de estetica generica de plantilla.
-- Disena un layout base con intencion comercial: primer viewport, prueba, mecanismo, objeciones, proceso, casos, cierre.
-- Crea navegacion, footer, CTAs, formularios, estados vacios y estados de carga desde el inicio.
-- Establece tokens de diseno: color, tipografia, espaciado, radios, sombras, motion y breakpoints.
+- Disena un layout base con intención comercial: primer viewport, prueba, mecanismo, objeciónes, proceso, casos, cierre.
+- Crea navegacion, footer, CTAs, formularios, estados vacíos y estados de carga desde el inicio.
+- Establece tokens de diseno: color, tipografía, espaciado, radios, sombras, motion y breakpoints.
 - Propón componentes reutilizables sin sobrediseñar abstracciones.
 - Anade micro-interacciones sobrias: hover, focus, reveal, scroll, validacion y confirmacion.
 - Asegura que el primer viewport muestre la promesa y deje visible una pista de la siguiente seccion.

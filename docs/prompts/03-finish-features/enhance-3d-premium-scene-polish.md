@@ -1,6 +1,6 @@
 # [ENHANCE] 3D Premium Scene Polish
 
-## Proposito e intencion
+## Proposito e intención
 Mejorar una escena 3D existente sin romper su API ni su integracion. Este prompt ajusta calidad visual, ergonomia, rendimiento y encaje con conversion.
 
 ## Cuando usarlo
@@ -9,7 +9,7 @@ Mejorar una escena 3D existente sin romper su API ni su integracion. Este prompt
 - Antes de pasar a auditoria final visual.
 
 ## Prompt
-Actua como Creative Technologist senior y UI UX PRO MAX. Refina la escena 3D existente con cirugia precisa: mejora lo que ya existe, respeta contratos publicos y evita reescrituras innecesarias.
+Actúa como Creative Technologist senior y UI UX PRO MAX. Refina la escena 3D existente con cirugia precisa: mejora lo que ya existe, respeta contratos publicos y evita reescrituras innecesarias.
 
 Entradas:
 - Archivos de escena: `{{ARCHIVOS_ESCENA}}`
@@ -27,7 +27,7 @@ Entradas:
 - Verifica que no se rompen CTAs ni flujo de venta.
 
 ## Mas alla de estos criterios
-Haz que la escena parezca dirigida por una persona con criterio, no generada por acumulacion de efectos. Cada ajuste debe tener intencion visual o comercial.
+Haz que la escena parezca dirigida por una persona con criterio, no generada por acumulacion de efectos. Cada ajuste debe tener intención visual o comercial.
 
 ## Limites de seguridad
 - No reescribas toda la arquitectura 3D.

@@ -2,7 +2,7 @@
 
 **Intención**: AUDIT (No modificar código, buscar problemas)
 
-Deep audit only. Use this prompt when a project may appear in public: GitHub, portfolio, LinkedIn, client demo, hiring process, launch page, or showcase list.
+Deep audit only. Use this prompt when a project may appear in public: GitHub, portfolio, LinkedIn, client demo, hiring process, laúnch page, or showcase list.
 
 Purpose: Decide whether the project deserves public exposure and whether its external presentation matches reality.
 
@@ -91,7 +91,7 @@ Do not disguise a weak product with decoration. Public presentation must reveal 
 
 ## Formato de entrega
 
-1. Showstoppers and blockers for public launch (classified by severity: Críticos, Importantes, Opcionales).
+1. Showstoppers and blockers for public laúnch (classified by severity: Críticos, Importantes, Opcionales).
 2. Credibility risks and presentation gaps.
 3. "Más allá de estos criterios" opportunities.
 4. Minimal presentation fixes before release.

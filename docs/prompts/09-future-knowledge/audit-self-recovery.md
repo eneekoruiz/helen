@@ -11,7 +11,7 @@ Este prompt audita los mecanismos de recuperación del sistema ante corrupciones
 4. **Estado de Salud (Healthchecks)**: Asegurar que el sistema expone endpoints de diagnóstico de dependencias activas (ej. conectividad de bases de datos, APIs de terceros).
 
 ## Más allá de estos criterios
-- Evaluar la viabilidad de automatizar el rollback mediante flujos de CI/CD basados en alertas de tasa de error elevadas.
+- Evalúar la viabilidad de automatizar el rollback mediante flujos de CI/CD basados en alertas de tasa de error elevadas.
 - Analizar si el tiempo de restauración (RTO) ante un fallo total es aceptable para los requerimientos del negocio.
 
 ## Límites de seguridad

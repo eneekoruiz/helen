@@ -10,7 +10,7 @@ Verificar que el soporte multilingüe del proyecto sea real, coherente, accesibl
 
 Auditoría final, cuando el proyecto afirma soportar múltiples idiomas.
 
-## Criterios de Evaluación y Polish
+## Criterios de Evalúación y Polish
 
 1. **Textos Hardcoded**:
    - Encontrar cadenas de texto de usuario fuera del sistema de traducción en vistas, modales, toasts, cargadores, errores y metadata.

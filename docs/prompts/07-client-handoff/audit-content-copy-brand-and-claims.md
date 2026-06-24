@@ -2,7 +2,7 @@
 
 **Intención**: AUDIT (No modificar código, buscar problemas)
 
-Purpose: Audit all visible copy for clarity, consistency, credibility, conversion, brand fit, and unsupported claims before demo, launch, or client delivery.
+Purpose: Audit all visible copy for clarity, consistency, credibility, conversion, brand fit, and unsupported claims before demo, laúnch, or client delivery.
 
 Use this when a site or app is visually close to ready but still needs the kind of editorial pass that makes it feel finished, trustworthy, and premium.
 

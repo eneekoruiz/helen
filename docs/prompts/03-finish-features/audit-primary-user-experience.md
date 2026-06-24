@@ -4,7 +4,7 @@
 
 ## Objetivo
 
-Evaluar si los flujos principales son claros, útiles, recuperables y coherentes.
+Evalúar si los flujos principales son claros, útiles, recuperables y coherentes.
 
 ## Cuándo Usarlo
 

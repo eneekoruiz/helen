@@ -58,3 +58,30 @@ Antes de pasar a la fase de **Before Production (04-before-production)**, asegú
 
 **Siguiente Fase**:
 Si la respuesta es **Sí** a todas las anteriores, estás listo para entrar en la fase **[04-before-production](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/README.md)**.
+
+---
+
+## Ecosistema 40K Ultra Premium
+
+Usa primero [`../[INIT] Director Creativo (Orquestador 40K).md`](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/%5BINIT%5D%20Director%20Creativo%20(Orquestador%2040K).md) cuando el proyecto requiera una estrategia visual profunda antes de implementar.
+
+| Prompt | Intencion | Uso |
+|---|---|---|
+| [generate-webgpu-shader-experience.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-webgpu-shader-experience.md) | **GENERATE** | Shaders WebGPU/WebGL con fallback y presupuesto de rendimiento. |
+| [generate-motion-template-asset-system.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-motion-template-asset-system.md) | **GENERATE** | Assets 3D y motion templates inspirados en benchmarks premium tipo ContentCore. |
+| [generate-premium-mockup-layout-system.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-premium-mockup-layout-system.md) | **GENERATE** | Mockups high-end tipo ls.graphics dentro del layout. |
+| [generate-scroll-video-scrubbing-sequence.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-scroll-video-scrubbing-sequence.md) | **GENERATE** | Secuencias scroll/video con GSAP ScrollTrigger, Lenis, canvas o video scrubbing. |
+| [generate-view-transition-state-system.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-view-transition-state-system.md) | **GENERATE** | Transiciones de tema, pagina y estado con View Transitions API. |
+| [generate-spline-rapid-interactive-embed.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-spline-rapid-interactive-embed.md) | **GENERATE** | Spline para experiencias 3D rapidas, acotadas y conversionales. |
+| [generate-3d-react-fiber-premium-architecture.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-3d-react-fiber-premium-architecture.md) | **GENERATE** | Arquitectura 3D custom con React Three Fiber y Drei. |
+| [generate-premium-component-library-integration.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-premium-component-library-integration.md) | **GENERATE** | Aceternity, Magic UI, Motion Primitives, shadcn u otras librerías sin rastro de plantilla. |
+| [generate-conversion-led-hero-system.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-conversion-led-hero-system.md) | **GENERATE** | Heroes premium con promesa, prueba visual, confianza y CTA. |
+| [generate-editorial-art-direction-system.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-editorial-art-direction-system.md) | **GENERATE** | Direccion editorial: grilla, ritmo, imagen, copy visual y jerarquia. |
+| [generate-immersive-product-configurator.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-immersive-product-configurator.md) | **GENERATE** | Configuradores, simuladores o demos interactivas que prueban valor antes de comprar. |
+| [generate-ai-personalized-landing-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-ai-personalized-landing-flow.md) | **GENERATE** | Landings personalizadas por segmento, fuente o intención con reglas responsables. |
+| [enhance-cinematic-loading-and-page-transition-polish.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/enhance-cinematic-loading-and-page-transition-polish.md) | **ENHANCE** | Loaders, rutas y cambios de estado como momentos premium breves. |
+| [enhance-cro-friction-removal-and-cta-depth.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/enhance-cro-friction-removal-and-cta-depth.md) | **ENHANCE** | Friccion, CTAs, objeciónes, formularios y medicion. |
+| [enhance-microinteraction-sensory-detail-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/enhance-microinteraction-sensory-detail-pass.md) | **ENHANCE** | Botones, inputs, cards, menús, hover/focus y feedback sensorial. |
+| [audit-40k-creative-direction-and-conversion.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/audit-40k-creative-direction-and-conversion.md) | **AUDIT** | Veredicto 40K sobre direccion creativa, conversion, craft y diferenciacion. |
+| [audit-performance-budget-for-cinematic-sites.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/audit-performance-budget-for-cinematic-sites.md) | **AUDIT** | Presupuestos de rendimiento para webs con 3D, shaders, video y motion. |
+| [audit-ai-trace-erasure-and-human-craft.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/audit-ai-trace-erasure-and-human-craft.md) | **AUDIT** | Rastros de IA, plantilla, claims genericos y falta de autoria humana. |

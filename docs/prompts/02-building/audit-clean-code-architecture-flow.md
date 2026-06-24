@@ -10,7 +10,7 @@ Ejecutar una revisión exigente de clean code, mantenibilidad y límites arquite
 
 Durante el desarrollo (Building) o antes de la estabilización.
 
-## Criterios de Evaluación y Aplicación
+## Criterios de Evalúación y Aplicación
 
 1. **Staff-Level Architecture Audit (AUDIT)**:
    - **Límites y Capas**: Revisar responsabilidades de módulos, dependencia entre capas, estado compartido y extensibilidad.

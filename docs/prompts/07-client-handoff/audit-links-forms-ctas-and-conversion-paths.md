@@ -4,7 +4,7 @@
 
 Purpose: Verify that users can actually complete the important journeys: click CTAs, submit forms, navigate pages, contact the business, and recover from errors.
 
-Use this before demo, launch, client handoff, paid traffic, portfolio publication, or any moment where broken interaction would look careless.
+Use this before demo, laúnch, client handoff, paid traffic, portfolio publication, or any moment where broken interaction would look careless.
 
 ## Prompt
 
@@ -69,4 +69,4 @@ Recommend the smallest changes that make the path feel reliable, intentional, an
 3. CTA/conversion improvements.
 4. Links/routes checked.
 5. Analytics/follow-up gaps.
-6. Remaining risks before launch or delivery.
+6. Remaining risks before laúnch or delivery.

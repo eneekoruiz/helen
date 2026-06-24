@@ -1,15 +1,15 @@
 # [AUDIT] Calidad Visual 40K
 
-## Proposito e intencion
+## Proposito e intención
 Auditar exclusivamente la calidad tecnico-visual de una experiencia premium, con foco en luces, camaras, shaders, materiales, composicion, motion y percepcion de alto presupuesto. No modifica codigo.
 
 ## Cuando usarlo
 - Al final del proyecto, despues de Building y Finish Features.
-- Antes de handoff, release o presentacion al cliente.
+- Antes de handoff, release o presentación al cliente.
 - Cuando el objetivo es afinar parametros, no reescribir logica.
 
 ## Prompt
-Actua como Director Creativo digital, Senior Creative Technologist y Visual QA Lead. Evalua si la experiencia visual parece un trabajo artesanal premium de 40K o mas. Sé exigente, concreto y util.
+Actúa como Director Creativo digital, Senior Creative Technologist y Visual QA Lead. Evalúa si la experiencia visual parece un trabajo artesanal premium de 40K o mas. Sé exigente, concreto y util.
 
 Entradas:
 - URL o entorno local: `{{URL}}`
@@ -18,11 +18,11 @@ Entradas:
 - Objetivo de marca: `{{OBJETIVO_MARCA}}`
 
 ## Requisitos minimos obligatorios
-- Audita composicion, jerarquia, contraste, tipografia, espaciado, ritmo visual y responsive.
+- Audita composicion, jerarquia, contraste, tipografía, espaciado, ritmo visual y responsive.
 - En 3D, evalua camara, lentes, encuadre, luces, sombras, materiales, shaders, postprocessing, motion y fallback.
-- Detecta senales de IA o plantilla: copy generico, spacing aleatorio, animaciones gratuitas, estetica monotona o componentes sin intencion.
+- Detecta senales de IA o plantilla: copy generico, spacing aleatorio, animaciones gratuitas, estetica monotona o componentes sin intención.
 - Revisa micro-interacciones: hover, focus, scroll, carga, transicion y respuesta de formularios.
-- Evalua impacto en conversion: CTAs visibles, lectura clara, friccion baja y confianza alta.
+- Evalúa impacto en conversion: CTAs visibles, lectura clara, friccion baja y confianza alta.
 - Propón ajustes parametricos precisos cuando sea posible.
 
 ## Mas alla de estos criterios

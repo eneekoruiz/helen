@@ -26,7 +26,7 @@ Busca el menor cambio que mejore la percepción de velocidad: menor tiempo de es
 
 ## Límites de Seguridad
 
-No introduzcas mecanismos complejos de caché, debounce o memorización sin necesidad o sin entender su ciclo de vida. No comprometas la corrección lógica por ganar milisegundos.
+No introduzcas mecanismos complejos de caché, debounce o memorización sin necesidad o sin entender su ciclo de vida. No comprometas la corrección lógica por ganar milisegúndos.
 
 ## Formato de Entrega
 

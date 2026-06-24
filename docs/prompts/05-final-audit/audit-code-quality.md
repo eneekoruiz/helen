@@ -42,7 +42,7 @@ Audit these areas at minimum:
 
 3. Architecture fitness
 - Check whether the architecture matches the real size and complexity of the project.
-- Identify global mutable state, circular dependencies, brittle registries, magic conventions, and extension points that are harder to reason about than the project needs.
+- Identify global mutable state, circular dependencies, brittle registries, magic conventions, and extensión points that are harder to reason about than the project needs.
 - Flag places where one small change is likely to create distant regressions.
 
 4. Configuration and environment safety

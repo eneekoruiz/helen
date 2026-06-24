@@ -26,7 +26,7 @@ Prompts are classified by their primary intention, which defines their name pref
   - **Deliverable Standard**: MUST keep output minimal, preserve public contracts, and report only material changes, manual actions, and verification.
 - **APPLY** (`apply-`): Legacy implementation prefix. New prompts should prefer `generate-` for creation and `enhance-` for constrained modification.
   - **Deliverable Standard**: MUST have strictly minimal output (e.g., `✅ Todo correcto. Cambios aplicados. Acciones manuales: ninguna`). Avoid verbose explanations or reporting details of successful edits; let git show the changes.
-- **AUDIT** (`audit-`): Evaluates the codebase or design to identify issues/risks, without making changes.
+- **AUDIT** (`audit-`): Evalúates the codebase or design to identify issues/risks, without making changes.
   - **Deliverable Standard**: MUST provide structured findings classified by severity: **Críticos** (blocking issues), **Importantes** (high technical debt/usability gaps), and **Opcionales** (dx or minor polish).
 - **PLAN** (`plan-`): Produces roadmaps, tasks, checklists, or step-by-step orchestrations.
   - **Deliverable Standard**: MUST provide actionable checklists with `[ ]` syntax ready to be executed.

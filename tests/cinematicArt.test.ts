@@ -12,6 +12,8 @@ describe('Cinematic terminal identities', () => {
 
     expect(frame).toContain('███████');
     expect(frame).toContain('B Y   E N E K O   R U I Z');
+    expect(frame).toContain('SYSTEM');
+    expect(frame).toContain('READY');
     expect(frame).not.toContain('\x1b[');
   });
 
@@ -29,8 +31,16 @@ describe('Cinematic terminal identities', () => {
     const final = renderCinematicFrame('helen', 1, { width: 80, height: 18, color: false });
 
     expect(field).toMatch(/[⠀-⣿]/u);
+    expect(field).toMatch(/[·∴∷∙]/u);
     expect(opening).not.toBe(field);
     expect(field).not.toBe(final);
+  });
+
+  it('draws the editorial frame once the identity has resolved', () => {
+    const frame = renderCinematicFrame('helen', 0.88, { width: 88, height: 16, color: false });
+
+    expect(frame).toMatch(/[─━]/u);
+    expect(frame).toContain('COMPOSED');
   });
 
   it('keeps both identities legible in narrow terminals', () => {
@@ -39,6 +49,14 @@ describe('Cinematic terminal identities', () => {
 
     expect(helen).toContain('█  █  ███');
     expect(signature).toContain('E N E K O');
+  });
+
+  it('can render a pure ASCII lockup for legacy terminals', () => {
+    const frame = renderHelenWordmark({ width: 80, height: 14, color: false, ascii: true });
+
+    expect(frame).toContain('H   H  EEEEE');
+    expect(frame).toContain('SYSTEM');
+    expect(frame).not.toMatch(/[^\x00-\x7F]/);
   });
 
   it('animates only in capable interactive terminals', () => {

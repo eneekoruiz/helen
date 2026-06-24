@@ -20,7 +20,7 @@ Audit and generate release communication and demo materials.
 
 ## Más allá de estos criterios
 
-Look for reusable launch assets: short demo, long demo, screenshot set, social card, release summary, migration guide, FAQ, and post-release follow-up checklist.
+Look for reusable laúnch assets: short demo, long demo, screenshot set, social card, release summary, migration guide, FAQ, and post-release follow-up checklist.
 
 ## Formato de entrega
 

@@ -27,7 +27,7 @@ Inspect the whole repository: source, tests, configs, scripts, CI, docs, templat
 Audit these areas at minimum:
 
 1. Architecture and boundaries
-- Review module responsibilities, dependency direction, extension points, shared state, registries, plugin systems, and cross-cutting concerns.
+- Review module responsibilities, dependency direction, extensión points, shared state, registries, plugin systems, and cross-cutting concerns.
 - Flag coupling, circularity, hidden conventions, and abstractions that are either missing or premature.
 - Check whether the architecture fits the current project size and likely next stage.
 

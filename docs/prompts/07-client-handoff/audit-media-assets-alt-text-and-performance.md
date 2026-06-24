@@ -37,7 +37,7 @@ Inspect all media assets and report or make the smallest high-impact fixes that 
 
 ## Más allá de estos criterios
 
-Think like a product designer zooming in before a premium launch.
+Think like a product designer zooming in before a premium laúnch.
 
 Look for small asset problems that make the product feel unfinished: blurry logos, inconsistent screenshot crops, weak social preview, generic stock imagery, mismatched icon sets, awkward hero image framing, unbalanced empty space, or CMS replacement images that will break the layout.
 

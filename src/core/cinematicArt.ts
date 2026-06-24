@@ -19,6 +19,14 @@ const HELEN_COMPACT = [
   '█  █  ███  ████  ███  █ ▀█',
 ];
 
+const HELEN_ASCII = [
+  'H   H  EEEEE  L      EEEEE  N   N',
+  'H   H  E      L      E      NN  N',
+  'HHHHH  EEEE   L      EEEE   N N N',
+  'H   H  E      L      E      N  NN',
+  'H   H  EEEEE  LLLLL  EEEEE  N   N',
+];
+
 const ENEKO_RUIZ_LARGE = [
   '███████ ██   ██ ███████ ██   ██  █████      ██████  ██   ██ ███████ ███████',
   '██      ███  ██ ██      ██  ██  ██   ██    ██   ██ ██   ██   ██       ██ ',
@@ -32,6 +40,11 @@ const ENEKO_RUIZ_COMPACT = [
   '─ ─ ─ ─ ─   ─ ─ ─ ─',
 ];
 
+const ENEKO_RUIZ_ASCII = [
+  'ENEKO RUIZ',
+  '----------',
+];
+
 const BRAILLE_BITS = [
   [0x01, 0x08],
   [0x02, 0x10],
@@ -40,12 +53,13 @@ const BRAILLE_BITS = [
 ] as const;
 
 type IdentityName = 'helen' | 'eneko-ruiz';
-type Layer = 'empty' | 'field' | 'spark' | 'wordmark' | 'attribution';
+type Layer = 'empty' | 'halo' | 'field' | 'frame' | 'spark' | 'wordmark' | 'attribution';
 
 interface Identity {
   name: IdentityName;
   large: string[];
   compact: string[];
+  ascii: string[];
   minimumLargeWidth: number;
   tempo: number;
 }
@@ -60,6 +74,7 @@ export interface CinematicArtOptions {
   width?: number;
   height?: number;
   color?: boolean;
+  ascii?: boolean;
 }
 
 export interface TerminalCapabilities {
@@ -74,6 +89,7 @@ const IDENTITIES: Record<IdentityName, Identity> = {
     name: 'helen',
     large: HELEN_LARGE,
     compact: HELEN_COMPACT,
+    ascii: HELEN_ASCII,
     minimumLargeWidth: HELEN_LARGE[0].length + 4,
     tempo: 1,
   },
@@ -81,6 +97,7 @@ const IDENTITIES: Record<IdentityName, Identity> = {
     name: 'eneko-ruiz',
     large: ENEKO_RUIZ_LARGE,
     compact: ENEKO_RUIZ_COMPACT,
+    ascii: ENEKO_RUIZ_ASCII,
     minimumLargeWidth: ENEKO_RUIZ_LARGE[0].length + 2,
     tempo: 0.92,
   },
@@ -123,9 +140,43 @@ function createCanvas(width: number, height: number): Cell[][] {
 
 function put(canvas: Cell[][], x: number, y: number, glyph: string, layer: Layer, energy: number): void {
   if (y < 0 || y >= canvas.length || x < 0 || x >= canvas[y].length) return;
-  const priority: Record<Layer, number> = { empty: 0, field: 1, spark: 2, wordmark: 3, attribution: 4 };
+  const priority: Record<Layer, number> = {
+    empty: 0,
+    halo: 1,
+    field: 2,
+    frame: 3,
+    spark: 4,
+    wordmark: 5,
+    attribution: 6,
+  };
   if (priority[layer] < priority[canvas[y][x].layer]) return;
   canvas[y][x] = { glyph, layer, energy: clamp(energy, 0, 1) };
+}
+
+function drawInterferenceHalo(canvas: Cell[][], progress: number, identity: Identity, ascii: boolean): void {
+  const presence = smoothstep(0.08, 0.28, progress) * (1 - smoothstep(0.82, 1, progress) * 0.35);
+  if (presence <= 0) return;
+
+  const width = canvas[0].length;
+  const height = canvas.length;
+  const cx = (width - 1) / 2;
+  const cy = (height - 1) / 2;
+  const aspect = width / Math.max(1, height);
+  const glyphs = ascii ? ['.', ':', '+', '*', '*'] as const : ['.', '·', '∴', '∷', '∙'] as const;
+
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      const dx = (x - cx) / Math.max(1, width * 0.46);
+      const dy = (y - cy) / Math.max(1, height * 0.42) * aspect;
+      const radius = Math.sqrt(dx * dx + dy * dy);
+      const ring = 1 - Math.abs(radius - (0.74 - progress * 0.16)) * 5.2;
+      const noise = Math.sin(x * 0.42 + y * 0.77 + progress * 18 * identity.tempo);
+      const glint = Math.sin((x - y) * 0.19 - progress * 14);
+      const energy = clamp((ring * 0.55 + noise * 0.18 + glint * 0.1) * presence, 0, 0.72);
+      if (energy < 0.24) continue;
+      put(canvas, x, y, glyphs[Math.min(glyphs.length - 1, Math.floor(energy * glyphs.length))], 'halo', energy);
+    }
+  }
 }
 
 function setBraillePixel(masks: number[][], pixelX: number, pixelY: number): void {
@@ -142,11 +193,12 @@ function drawBrailleStroke(masks: number[][], x: number, y: number, thickness: n
   }
 }
 
-function drawLiquidField(canvas: Cell[][], progress: number, identity: Identity): void {
+function drawLiquidField(canvas: Cell[][], progress: number, identity: Identity, ascii: boolean): void {
   const entrance = smoothstep(0.02, 0.19, progress);
   const exit = 1 - smoothstep(0.48, 0.75, progress);
   const opacity = entrance * exit;
   if (opacity <= 0) return;
+  if (ascii) return;
 
   const width = canvas[0].length;
   const height = canvas.length;
@@ -190,20 +242,59 @@ function drawLiquidField(canvas: Cell[][], progress: number, identity: Identity)
   }));
 }
 
-function drawSingularity(canvas: Cell[][], progress: number): void {
+function drawSingularity(canvas: Cell[][], progress: number, ascii: boolean): void {
   if (progress > 0.46) return;
   const centerX = Math.floor(canvas[0].length / 2);
   const centerY = Math.floor(canvas.length / 2);
-  const glyph = progress < 0.09 ? '·' : progress < 0.22 ? '◦' : progress < 0.36 ? '◇' : '◆';
+  const glyph = ascii
+    ? progress < 0.09 ? '.' : progress < 0.22 ? 'o' : progress < 0.36 ? 'x' : '*'
+    : progress < 0.09 ? '·' : progress < 0.22 ? '◦' : progress < 0.36 ? '◇' : '◆';
   const energy = smoothstep(0, 0.1, progress) * (1 - smoothstep(0.34, 0.46, progress));
   put(canvas, centerX, centerY, glyph, 'spark', energy);
 }
 
-function drawWordmark(canvas: Cell[][], progress: number, identity: Identity): void {
+function drawEditorialFrame(canvas: Cell[][], progress: number, identity: Identity, ascii: boolean): void {
+  const width = canvas[0].length;
+  const height = canvas.length;
+  if (width < 48 || height < 11) return;
+
+  const presence = smoothstep(0.46, 0.74, progress);
+  if (presence <= 0) return;
+
+  const marginX = width >= 92 ? 6 : 3;
+  const top = 1;
+  const bottom = height - 2;
+  const left = marginX;
+  const right = width - marginX - 1;
+  const drawLength = Math.floor((right - left) * presence);
+  const rail = ascii ? '-' : progress < 0.9 ? '─' : '━';
+  const corner = ascii ? '+' : progress < 0.9 ? '╴' : '╸';
+
+  for (let i = 0; i <= drawLength; i++) {
+    const x = left + i;
+    const edgeEnergy = i > drawLength - 3 ? 0.44 : 0.22;
+    put(canvas, x, top, i === drawLength ? corner : rail, 'frame', edgeEnergy);
+    put(canvas, right - i, bottom, i === drawLength ? (ascii ? '+' : '╶') : rail, 'frame', edgeEnergy);
+  }
+
+  const ticks = identity.name === 'helen'
+    ? ['SYSTEM', 'COMPOSED', 'READY']
+    : ['AUTHOR', 'ENEKO', 'RUIZ'];
+  const caption = ` ${ticks.join('  /  ')} `;
+  if (caption.length + 2 < right - left && progress > 0.66) {
+    const captionLeft = Math.floor((width - caption.length) / 2);
+    Array.from(caption).forEach((glyph, index) => {
+      if (glyph === ' ') return;
+      put(canvas, captionLeft + index, top, glyph, 'frame', 0.5);
+    });
+  }
+}
+
+function drawWordmark(canvas: Cell[][], progress: number, identity: Identity, ascii: boolean): void {
   if (progress < 0.29) return;
   const width = canvas[0].length;
   const height = canvas.length;
-  const wordmark = width >= identity.minimumLargeWidth ? identity.large : identity.compact;
+  const wordmark = ascii ? identity.ascii : width >= identity.minimumLargeWidth ? identity.large : identity.compact;
   const logoWidth = Math.max(...wordmark.map(line => line.length));
   const left = Math.max(0, Math.floor((width - logoWidth) / 2));
   const top = Math.max(1, Math.floor((height - wordmark.length) / 2));
@@ -215,20 +306,20 @@ function drawWordmark(canvas: Cell[][], progress: number, identity: Identity): v
     const distance = revealX - x - Math.sin(y * 1.35 + x * 0.21) * 2;
     if (distance < -2) return;
 
-    if (distance < -0.2) put(canvas, left + x, top + y, '·', 'wordmark', 0.25);
-    else if (distance < 1.15) put(canvas, left + x, top + y, '░', 'wordmark', 0.5);
-    else if (distance < 2.5) put(canvas, left + x, top + y, '▒', 'wordmark', 0.8);
-    else if (distance < 4) put(canvas, left + x, top + y, '▓', 'wordmark', 1);
+    if (distance < -0.2) put(canvas, left + x, top + y, ascii ? '.' : '·', 'wordmark', 0.25);
+    else if (distance < 1.15) put(canvas, left + x, top + y, ascii ? ':' : '░', 'wordmark', 0.5);
+    else if (distance < 2.5) put(canvas, left + x, top + y, ascii ? '+' : '▒', 'wordmark', 0.8);
+    else if (distance < 4) put(canvas, left + x, top + y, ascii ? '#' : '▓', 'wordmark', 1);
     else put(canvas, left + x, top + y, character, 'wordmark', 0.78);
   }));
 }
 
-function drawAttribution(canvas: Cell[][], progress: number, identity: Identity): void {
+function drawAttribution(canvas: Cell[][], progress: number, identity: Identity, ascii: boolean): void {
   if (identity.name !== 'helen' || progress < 0.78) return;
 
   const width = canvas[0].length;
   const height = canvas.length;
-  const wordmark = width >= identity.minimumLargeWidth ? identity.large : identity.compact;
+  const wordmark = ascii ? identity.ascii : width >= identity.minimumLargeWidth ? identity.large : identity.compact;
   const top = Math.max(1, Math.floor((height - wordmark.length) / 2));
   const y = top + wordmark.length + 1;
   if (y >= height) return;
@@ -241,7 +332,7 @@ function drawAttribution(canvas: Cell[][], progress: number, identity: Identity)
   Array.from(label).forEach((glyph, x) => {
     if (glyph === ' ' || x > reveal) return;
     const edge = reveal - x;
-    put(canvas, left + x, y, edge < 1.5 ? '·' : glyph, 'attribution', edge < 1.5 ? 0.3 : 0.72);
+    put(canvas, left + x, y, edge < 1.5 ? (ascii ? '.' : '·') : glyph, 'attribution', edge < 1.5 ? 0.3 : 0.72);
   });
 }
 function colorize(canvas: Cell[][], progress: number, color: boolean): string {
@@ -253,9 +344,16 @@ function colorize(canvas: Cell[][], progress: number, color: boolean): string {
   const silver = [164, 170, 184] as const;
   const blue = [104, 157, 255] as const;
   const violet = [153, 136, 255] as const;
+  const ember = [255, 196, 126] as const;
 
   return canvas.map(row => row.map((cell, x) => {
     if (cell.layer === 'empty') return ' ';
+    if (cell.layer === 'halo') {
+      const tint = Math.sin(x * 0.08 + progress * 4) > 0
+        ? mix(graphite, violet, cell.energy * 0.42)
+        : mix(graphite, blue, cell.energy * 0.46);
+      return paint(cell.glyph, tint, color);
+    }
     if (cell.layer === 'field') {
       const spectralPosition = (x / Math.max(1, width - 1) + progress * 0.34) % 1;
       const spectral = spectralPosition < 0.5
@@ -264,6 +362,7 @@ function colorize(canvas: Cell[][], progress: number, color: boolean): string {
       return paint(cell.glyph, mix(graphite, spectral, cell.energy * 0.6), color);
     }
     if (cell.layer === 'spark') return paint(cell.glyph, mix(blue, titanium, cell.energy), color);
+    if (cell.layer === 'frame') return paint(cell.glyph, mix(graphite, ember, cell.energy * 0.72), color);
     if (cell.layer === 'attribution') return paint(cell.glyph, mix(graphite, silver, cell.energy), color);
     if (progress >= 0.94) return paint(cell.glyph, titanium, color);
 
@@ -292,12 +391,15 @@ export function renderCinematicFrame(
   const identity = IDENTITIES[identityName];
   const width = clamp(options.width ?? 80, 20, 120);
   const height = clamp(options.height ?? 18, 7, 26);
+  const ascii = options.ascii ?? false;
   const canvas = createCanvas(width, height);
 
-  drawLiquidField(canvas, progress, identity);
-  drawSingularity(canvas, progress);
-  drawWordmark(canvas, progress, identity);
-  drawAttribution(canvas, progress, identity);
+  drawInterferenceHalo(canvas, progress, identity, ascii);
+  drawLiquidField(canvas, progress, identity, ascii);
+  drawSingularity(canvas, progress, ascii);
+  drawWordmark(canvas, progress, identity, ascii);
+  drawAttribution(canvas, progress, identity, ascii);
+  drawEditorialFrame(canvas, progress, identity, ascii);
   return colorize(canvas, progress, options.color ?? true);
 }
 
@@ -317,10 +419,19 @@ function reducedMotionRequested(): boolean {
   return value === 'reduce' || value === 'off';
 }
 
+export function shouldUseAsciiArt(): boolean {
+  if (process.env.HELEN_ASCII === '1') return true;
+  if (process.env.HELEN_ASCII === '0') return false;
+  if (process.platform !== 'win32') return false;
+  if (process.env.WT_SESSION || process.env.TERM_PROGRAM) return false;
+  return !/utf-?8/i.test(`${process.env.LANG ?? ''} ${process.env.LC_ALL ?? ''} ${process.env.LC_CTYPE ?? ''}`);
+}
+
 async function runIdentity(identity: IdentityName): Promise<void> {
   const width = clamp(process.stdout.columns ?? 80, 20, 120);
   const height = clamp((process.stdout.rows ?? 22) - 1, 7, 26);
   const color = process.env.NO_COLOR === undefined;
+  const ascii = shouldUseAsciiArt();
   const animate = shouldAnimateCinematicArt({
     isTTY: Boolean(process.stdout.isTTY),
     reducedMotion: reducedMotionRequested(),
@@ -329,7 +440,7 @@ async function runIdentity(identity: IdentityName): Promise<void> {
   });
 
   if (!animate) {
-    console.log(renderCinematicFrame(identity, 1, { width, height: Math.min(height, 14), color }));
+    console.log(renderCinematicFrame(identity, 1, { width, height: Math.min(height, 14), color, ascii }));
     return;
   }
 
@@ -340,7 +451,7 @@ async function runIdentity(identity: IdentityName): Promise<void> {
   try {
     for (let frame = 0; frame < frameCount; frame++) {
       process.stdout.write(ESC + 'H' + CLEAR_BELOW);
-      process.stdout.write(renderCinematicFrame(identity, frame / (frameCount - 1), { width, height, color }));
+      process.stdout.write(renderCinematicFrame(identity, frame / (frameCount - 1), { width, height, color, ascii }));
       process.stdout.write(RESET);
       await sleep(frameDuration);
     }

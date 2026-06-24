@@ -11,7 +11,7 @@ Este prompt audita las propiedades legales y de infraestructura del proyecto que
 4. **Acuerdos de Nivel de Servicio (SLA)**: Revisar las garantías contratadas en servidores y soporte de terceros.
 
 ## Más allá de estos criterios
-- Evaluar el impacto de la subida de precios de los proveedores externos en el coste operacional mensual.
+- Evalúar el impacto de la subida de precios de los proveedores externos en el coste operacional mensual.
 - Recomendar políticas de rotación periódica de credenciales maestras y llaves de cifrado en producción.
 
 ## Límites de seguridad
@@ -22,7 +22,7 @@ Este prompt audita las propiedades legales y de infraestructura del proyecto que
 
 ## Formato de entrega
 El informe de auditoría se presentará en el formato:
-- **Resumen de Propiedad y Renovaciones**: Tabla cronológica con proveedor, servicio, vencimiento y propietario.
+- **Resumen de Propiedad y Renovacíones**: Tabla cronológica con proveedor, servicio, vencimiento y propietario.
 - **Alertas Rojas de Caducidad**: Servicios en riesgo inminente de suspensión.
 - **Recomendaciones de Estructura de Propiedad**: Acciones para institucionalizar los accesos.
 ```

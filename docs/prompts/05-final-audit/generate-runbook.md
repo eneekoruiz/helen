@@ -26,7 +26,7 @@ Ejecuta:
 
 Objetivo:
 - Encontrar defectos reales de lógica, tipado y fallbacks.
-- Confirmar que el happy-path no enmascara bugs de borde.
+- Confirmar que el happy-path no enmáscara bugs de borde.
 
 *No avances a presentación pública si esta etapa devuelve un veredicto de `FAIL`.*
 
