@@ -143,11 +143,11 @@ function put(canvas: Cell[][], x: number, y: number, glyph: string, layer: Layer
   const priority: Record<Layer, number> = {
     empty: 0,
     halo: 1,
-    field: 2,
-    frame: 3,
-    spark: 4,
-    wordmark: 5,
-    attribution: 6,
+    field: 2,       // 3D background elements (depth > 0)
+    frame: 3,       // editorial borders
+    wordmark: 4,    // name/identity wordmark
+    spark: 5,       // 3D foreground elements (depth <= 0) & particles
+    attribution: 6, // Eneko Ruiz subtext attribution
   };
   if (priority[layer] < priority[canvas[y][x].layer]) return;
   canvas[y][x] = { glyph, layer, energy: clamp(energy, 0, 1) };
@@ -179,67 +179,141 @@ function drawInterferenceHalo(canvas: Cell[][], progress: number, identity: Iden
   }
 }
 
-function setBraillePixel(masks: number[][], pixelX: number, pixelY: number): void {
-  if (pixelX < 0 || pixelY < 0) return;
-  const cellX = Math.floor(pixelX / 2);
-  const cellY = Math.floor(pixelY / 4);
-  if (cellY >= masks.length || cellX >= masks[cellY].length) return;
-  masks[cellY][cellX] |= BRAILLE_BITS[pixelY % 4][pixelX % 2];
-}
 
-function drawBrailleStroke(masks: number[][], x: number, y: number, thickness: number): void {
-  for (let offset = -thickness; offset <= thickness; offset++) {
-    setBraillePixel(masks, x, y + offset);
-  }
-}
 
 function drawLiquidField(canvas: Cell[][], progress: number, identity: Identity, ascii: boolean): void {
   const entrance = smoothstep(0.02, 0.19, progress);
   const exit = 1 - smoothstep(0.48, 0.75, progress);
   const opacity = entrance * exit;
   if (opacity <= 0) return;
-  if (ascii) return;
 
   const width = canvas[0].length;
   const height = canvas.length;
+
   const pixelWidth = width * 2;
   const pixelHeight = height * 4;
-  const masks = Array.from({ length: height }, () => Array.from({ length: width }, () => 0));
-  const collapse = smoothstep(0.32, 0.66, progress);
-  const phase = progress * Math.PI * 3.6 * identity.tempo;
 
-  for (let pixelX = 0; pixelX < pixelWidth; pixelX++) {
-    const normalizedX = pixelX / Math.max(1, pixelWidth - 1);
-    const edge = Math.pow(Math.sin(normalizedX * Math.PI), 0.62);
-    const drift = Math.sin(normalizedX * Math.PI * 2 - phase * 0.3);
+  const cx = pixelWidth / 2;
+  const cy = pixelHeight / 2;
 
-    for (let ribbon = 0; ribbon < 3; ribbon++) {
-      const spread = (ribbon - 1) * pixelHeight * 0.075 * (1 - collapse);
-      const amplitude = pixelHeight * (0.1 + ribbon * 0.025) * edge * (1 - collapse * 0.72);
-      const frequency = 2.7 + ribbon * 0.51;
-      const wave = Math.sin(normalizedX * Math.PI * frequency + phase + ribbon * 1.9) * amplitude;
-      const y = Math.round(pixelHeight / 2 + spread + wave + drift * pixelHeight * 0.032);
-      drawBrailleStroke(masks, pixelX, y, ribbon === 1 && progress > 0.18 ? 1 : 0);
+  // responsive 3D sphere radius matching character aspect ratios
+  const maxRy = pixelHeight * 0.44;
+  const maxRx = pixelWidth * 0.44;
+  const radius = Math.min(maxRx, maxRy);
+  const rx = radius;
+  const ry = radius;
+
+  const D = 1.8; // Camera depth distance for 3D perspective projection
+
+  // Separate z-sorted Braille subpixel grids
+  const masksBack = Array.from({ length: height }, () => Array.from({ length: width }, () => 0));
+  const masksFront = Array.from({ length: height }, () => Array.from({ length: width }, () => 0));
+
+  function projectAndPlot(xL: number, yL: number, zL: number, rotX: number, rotY: number, rotZ: number, energyMult: number, isParticle = false) {
+    // 3D rotation X
+    const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+    const x1 = xL;
+    const y1 = yL * cosX - zL * sinX;
+    const z1 = yL * sinX + zL * cosX;
+
+    // 3D rotation Y
+    const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+    const x2 = x1 * cosY + z1 * sinY;
+    const y2 = y1;
+    const z2 = -x1 * sinY + z1 * cosY;
+
+    // 3D rotation Z
+    const cosZ = Math.cos(rotZ), sinZ = Math.sin(rotZ);
+    const x3 = x2 * cosZ - y2 * sinZ;
+    const y3 = x2 * sinZ + y2 * cosZ;
+    const z3 = z2;
+
+    // Perspective Projection
+    const denom = D - z3;
+    const px = cx + (x3 * rx) / denom;
+    const py = cy + (y3 * ry) / denom;
+
+    const cellX = Math.round(px / 2);
+    const cellY = Math.round(py / 4);
+
+    if (ascii) {
+      if (cellX >= 0 && cellX < width && cellY >= 0 && cellY < height) {
+        const glyph = isParticle
+          ? (z3 < -0.3 ? '*' : (z3 > 0.3 ? '.' : 'x'))
+          : (z3 < -0.3 ? 'O' : (z3 > 0.3 ? '.' : 'o'));
+        const layer = z3 > 0.0 ? 'field' : 'spark';
+        put(canvas, cellX, cellY, glyph, layer, opacity * energyMult);
+      }
+    } else {
+      const pixelX = Math.round(px);
+      const pixelY = Math.round(py);
+      const gridX = Math.floor(pixelX / 2);
+      const gridY = Math.floor(pixelY / 4);
+
+      if (gridX >= 0 && gridX < width && gridY >= 0 && gridY < height) {
+        if (z3 > 0.0) {
+          masksBack[gridY][gridX] |= BRAILLE_BITS[pixelY % 4][pixelX % 2];
+        } else {
+          masksFront[gridY][gridX] |= BRAILLE_BITS[pixelY % 4][pixelX % 2];
+        }
+      }
     }
   }
 
-  const ring = smoothstep(0.04, 0.3, progress) * (1 - smoothstep(0.34, 0.55, progress));
-  if (ring > 0) {
-    for (let degrees = 0; degrees < 360; degrees += 2) {
-      const angle = degrees * Math.PI / 180;
-      setBraillePixel(
-        masks,
-        Math.round(pixelWidth / 2 + Math.cos(angle) * pixelWidth * 0.23 * ring),
-        Math.round(pixelHeight / 2 + Math.sin(angle) * pixelHeight * 0.27 * ring),
-      );
-    }
+  // 1. Draw Ring 1 (X-Y plane, rotating fast, inclined)
+  const rotY1 = progress * Math.PI * 2.8 * identity.tempo;
+  const rotX1 = Math.PI / 5;
+  const rotZ1 = progress * Math.PI * 0.35;
+  const pointsCount = 140;
+  for (let i = 0; i < pointsCount; i++) {
+    const theta = (i / pointsCount) * Math.PI * 2;
+    projectAndPlot(Math.cos(theta), Math.sin(theta), 0, rotX1, rotY1, rotZ1, 0.85);
   }
 
-  masks.forEach((row, y) => row.forEach((mask, x) => {
-    if (mask === 0) return;
-    const centerDistance = Math.abs(x - width / 2) / Math.max(1, width / 2);
-    put(canvas, x, y, String.fromCodePoint(0x2800 + mask), 'field', opacity * (1 - centerDistance * 0.35));
-  }));
+  // 2. Draw Ring 2 (X-Z plane, rotating in opposite direction, inclined)
+  const rotX2 = -progress * Math.PI * 2.4 * identity.tempo;
+  const rotY2 = -Math.PI / 4;
+  const rotZ2 = -progress * Math.PI * 0.25;
+  for (let i = 0; i < pointsCount; i++) {
+    const theta = (i / pointsCount) * Math.PI * 2;
+    projectAndPlot(Math.cos(theta), 0, Math.sin(theta), rotX2, rotY2, rotZ2, 0.85);
+  }
+
+  // 3. Draw Ring 3 (Y-Z plane, slow dynamic orbit)
+  const rotZ3 = progress * Math.PI * 1.6 * identity.tempo;
+  const rotX3 = Math.PI / 3;
+  const rotY3 = -progress * Math.PI * 0.6;
+  for (let i = 0; i < pointsCount; i++) {
+    const theta = (i / pointsCount) * Math.PI * 2;
+    projectAndPlot(0, Math.cos(theta), Math.sin(theta), rotX3, rotY3, rotZ3, 0.8);
+  }
+
+  // 4. Draw Particle Vortex (particles swirling and collapsing inwards)
+  const particleCount = 40;
+  for (let p = 0; p < particleCount; p++) {
+    const theta = progress * Math.PI * 4.8 + (p / particleCount) * Math.PI * 2.0;
+    const swirlRadius = 0.95 * (1 - progress) + 0.08 * Math.sin(progress * 10 + p);
+    const pxL = swirlRadius * Math.cos(theta);
+    const pyL = swirlRadius * Math.sin(theta);
+    const pzL = 0.2 * Math.cos(theta * 2 + p);
+    projectAndPlot(pxL, pyL, pzL, progress * 0.6, progress * 0.9, progress * 0.4, 1.0, true);
+  }
+
+  // Commit Braille masks to canvas with correct z-sorted layers
+  if (!ascii) {
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        if (masksBack[y][x] > 0) {
+          const char = String.fromCodePoint(0x2800 + masksBack[y][x]);
+          put(canvas, x, y, char, 'field', opacity);
+        }
+        if (masksFront[y][x] > 0) {
+          const char = String.fromCodePoint(0x2800 + masksFront[y][x]);
+          put(canvas, x, y, char, 'spark', opacity);
+        }
+      }
+    }
+  }
 }
 
 function drawSingularity(canvas: Cell[][], progress: number, ascii: boolean): void {
