@@ -16,10 +16,18 @@ Escribir código limpio, modular, robusto y seguro mientras se implementan las f
 
 ---
 
+## Diferencia Operativa de Etiquetas
+
+- **GENERATE**: crea una funcionalidad nueva dentro de un proyecto iniciado, como CMS, modelos o componentes.
+- **ENHANCE/APPLY**: mejora código existente con restricciones de compatibilidad y sin reescrituras gratuitas.
+- **AUDIT**: revisa arquitectura, CMS, APIs o datos sin tocar archivos.
+- **INIT**: no corresponde a esta fase salvo que el proyecto se reinicie desde cero.
+
 ## Prompts Incluidos en esta Fase
 
 | Prompt / Flow / Checkpoint | Intención | Propósito / Cuándo usarlo | Frecuencia |
 |---|---|---|---|
+| [generate-visual-cms-wysiwyg-i18n.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/generate-visual-cms-wysiwyg-i18n.md) | **GENERATE** | Implementar CMS WYSIWYG protegido con matriz de campos universales/traducibles para i18n. | Media (Si aplica CMS cliente) |
 | [safe-clean-code-simplification-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/safe-clean-code-simplification-pass.md) | **APPLY** | Simplificación y refactorización local segura (clean code). | Alta (Antes de cada commit importante) |
 | [security-hardening.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/security-hardening.md) | **APPLY flow** | Mitigar riesgos de secretos, inyecciones, dependencias inseguras y malas prácticas. | Media |
 | [cms-editable-content-conversion.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/cms-editable-content-conversion.md) | **APPLY flow** | Flujo para mover textos e imágenes estáticas a campos editables del CMS. | Baja (Sólo si aplica CMS) |

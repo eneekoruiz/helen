@@ -18,7 +18,13 @@ The checklist is the floor, not the ceiling.
 
 Prompts are classified by their primary intention, which defines their name prefix and output expectations:
 
-- **APPLY** (`apply-`): Modifies project files or workspace state.
+- **INIT** (`init-`): Initializes business DNA, project architecture, scaffold rules, and first execution constraints from a blank or near-blank state.
+  - **Deliverable Standard**: MUST produce an operational brief or scaffold plan with explicit variables, assumptions, conversion priorities, and premium quality rules.
+- **GENERATE** (`generate-`): Creates assets, config templates, code boilerplate, components, CMS models, or production-ready implementation from an existing brief.
+  - **Deliverable Standard**: MUST produce ready-to-use files or implementation with no vague placeholders unless the input is genuinely missing.
+- **ENHANCE** (`enhance-`): Modifies existing code, UX, UI, copy, scenes, or workflows under non-breaking constraints.
+  - **Deliverable Standard**: MUST keep output minimal, preserve public contracts, and report only material changes, manual actions, and verification.
+- **APPLY** (`apply-`): Legacy implementation prefix. New prompts should prefer `generate-` for creation and `enhance-` for constrained modification.
   - **Deliverable Standard**: MUST have strictly minimal output (e.g., `✅ Todo correcto. Cambios aplicados. Acciones manuales: ninguna`). Avoid verbose explanations or reporting details of successful edits; let git show the changes.
 - **AUDIT** (`audit-`): Evaluates the codebase or design to identify issues/risks, without making changes.
   - **Deliverable Standard**: MUST provide structured findings classified by severity: **Críticos** (blocking issues), **Importantes** (high technical debt/usability gaps), and **Opcionales** (dx or minor polish).
@@ -145,3 +151,4 @@ Before making major changes to prompt families, run the maintenance flow:
 ```text
 08-maintenance/apply-prompt-library-maintenance-flow.md
 ```
+

@@ -16,10 +16,18 @@ Ejecutar auditorías profundas y rigurosas de la calidad del código, internacio
 
 ---
 
+## Diferencia Operativa de Etiquetas
+
+- **AUDIT**: única etiqueta principal de esta fase; revisa con severidad y no modifica archivos.
+- **GENERATE**: solo aplica a documentación o runbooks si falta un artefacto final.
+- **ENHANCE/APPLY**: no debe ejecutarse desde auditoría final salvo que una auditoría derive explícitamente una tarea separada.
+- **INIT**: no corresponde a cierre; si hace falta INIT aquí, el proyecto no estaba listo para auditoría.
+
 ## Prompts Incluidos en esta Fase
 
 | Prompt / Flow / Runbook | Intención | Propósito / Cuándo usarlo | Frecuencia |
 |---|---|---|---|
+| [audit-visual-quality-40k.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/audit-visual-quality-40k.md) | **AUDIT** | Revisión técnico-visual final de aspecto 40K: luces, cámaras, shaders, motion, composición y conversión. | Alta (Si hay UI premium/3D) |
 | [code-quality-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/code-quality-audit.md) | **AUDIT** | Evaluación rigurosa de mantenibilidad, deuda técnica, bugs y tests. | Alta |
 | [i18n-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/i18n-audit.md) | **AUDIT/APPLY flow** | Auditar y corregir el soporte multilingüe, fallbacks y metadatos SEO. | Media |
 | [documentation-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/documentation-audit.md) | **AUDIT** | Validar la veracidad de quick-starts, guías de entorno y ejemplos. | Alta |

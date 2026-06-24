@@ -56,7 +56,16 @@ Merge prompts when:
 
 Every prompt file must expose its primary intent in its filename. Names must follow this pattern: `[intent]-[name-kebab]-[optional-suffix].md`.
 
-### Intent Prefixes (Lowercase)
+### Canonical Action Prefixes (Lowercase)
+- **`init-`**: Initializes a blank or near-blank project with business DNA, scaffold rules, positioning, and first architecture.
+- **`generate-`**: Creates new assets, components, CMS models, scaffolds, documentation, or implementation from an existing brief.
+- **`enhance-`**: Improves existing code, UI, scenes, copy, or flows under strict non-breaking constraints.
+- **`audit-`**: Evaluates code, UX, market position, visual quality, risk, or implementation without modifying files.
+
+### Legacy Compatible Prefixes
+- **`apply-`**: Existing implementation prompt. Treat as equivalent to `enhance-` when editing existing surfaces, or `generate-` when creating new project assets.
+- **`plan-`**: Existing strategy/checklist prompt. Keep until merged into `init-`, `audit-`, or a flow.
+- **`research-`**: Existing market/benchmark prompt. Prefer `audit-` for new competitor analysis files.
 - **`audit-`**: For evaluation, code checks, risk detection.
 - **`apply-`**: For modifying files, updating configuration, refactoring.
 - **`plan-`**: For roadmaps, scheduling, strategy creation.
@@ -91,3 +100,4 @@ Before adding a prompt, ask:
 3. Is it a prompt, checkpoint, or flow?
 4. Would a user understand the name in a CLI list?
 5. Does it reduce confusion or add library sprawl?
+

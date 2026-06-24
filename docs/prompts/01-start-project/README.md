@@ -16,10 +16,21 @@ Establecer las bases metodológicas, analizar riesgos iniciales, evaluar la arqu
 
 ---
 
+## Diferencia Operativa de Etiquetas
+
+- **INIT**: úsalo cuando no existe base suficiente; define negocio, scaffold y reglas premium.
+- **AUDIT**: úsalo para observar mercado, riesgos o arquitectura sin modificar archivos.
+- **GENERATE**: úsalo cuando el análisis ya existe y toca construir algo nuevo.
+- **ENHANCE**: en esta fase solo aplica si ya hay una base existente que deba mejorarse sin romperla.
+
 ## Prompts Incluidos en esta Fase
 
 | Prompt / Flow | Intención | Propósito / Cuándo usarlo | Frecuencia |
 |---|---|---|---|
+| [init-master-business-core.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/init-master-business-core.md) | **INIT** | Inyectar ADN de negocio, tono premium y arquitectura de conversión antes del scaffold. | Alta (Cada proyecto nuevo) |
+| [init-architecture-and-scaffold.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/init-architecture-and-scaffold.md) | **INIT** | Convertir el briefing en estructura visual, layout base, tokens y sistema inicial UI UX PRO MAX. | Alta (Cada proyecto nuevo) |
+| [audit-competitor-analysis.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/audit-competitor-analysis.md) | **AUDIT** | Escanear competidores para extraer UX, CRO, flujos, trust signals y gaps accionables. | Media |
+| [generate-competitive-cloning.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/generate-competitive-cloning.md) | **GENERATE** | Implementar funcionalidades competitivas faltantes en nuestro stack, mejoradas y sin copiar marca. | Media |
 | [initial-project-risk-scan.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/initial-project-risk-scan.md) | **AUDIT** | Diagnóstico rápido y ligero de riesgos de build, UX, docs y seguridad. | Alta (Cada inicio de iteración amplia) |
 | [methodology-and-blind-spots-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/methodology-and-blind-spots-audit.md) | **AUDIT** | Detectar qué partes del ciclo de vida o de la estructura no estamos viendo. | Media (Una vez por sprint largo) |
 | [architecture-operations-and-risk-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/architecture-operations-and-risk-audit.md) | **AUDIT** | Evaluar la solidez de límites, dependencias y modularidad. | Media |

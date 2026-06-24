@@ -16,10 +16,20 @@ Elevar la experiencia de usuario (UX) e interfaz (UI) de un estado puramente fun
 
 ---
 
+## Diferencia Operativa de Etiquetas
+
+- **GENERATE**: crea una pieza visual nueva, como setup 3D global o componente aislado.
+- **ENHANCE/APPLY**: pule una interfaz o escena existente sin romper contratos ni flujos.
+- **AUDIT**: evalúa UX, visual craft o regresiones sin modificar código.
+- **INIT**: no se usa aquí; la base estratégica debe venir de Start Project.
+
 ## Prompts Incluidos en esta Fase
 
 | Prompt / Flow / Checkpoint | Intención | Propósito / Cuándo usarlo | Frecuencia |
 |---|---|---|---|
+| [generate-3d-global-canvas-setup.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-3d-global-canvas-setup.md) | **GENERATE** | Crear setup 3D global: canvas, provider, fallback, rendimiento y reglas de integración. | Media |
+| [generate-3d-isolated-experience-component.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-3d-isolated-experience-component.md) | **GENERATE** | Crear escenas, carruseles o showcases 3D aislados sobre el setup existente. | Media |
+| [enhance-3d-premium-scene-polish.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/enhance-3d-premium-scene-polish.md) | **ENHANCE** | Pulir escenas 3D existentes sin romper API, responsive, performance ni conversión. | Alta (Si hay 3D) |
 | [product-ux-and-premium-quality-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/product-ux-and-premium-quality-audit.md) | **AUDIT** | Auditoría integral del feeling premium y la usabilidad de la UI/CLI. | Alta |
 | [onboarding-activation-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/onboarding-activation-audit.md) | **AUDIT** | Optimizar los primeros minutos de uso y la conversión del usuario. | Media |
 | [empty-states-errors-and-microcopy.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/empty-states-errors-and-microcopy.md) | **APPLY** | Implementar/mejorar pantallas vacías, cargas, errores y microcopys. | Alta |
