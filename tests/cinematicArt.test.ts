@@ -20,8 +20,8 @@ describe('Cinematic terminal identities', () => {
   it('gives ENEKO RUIZ an independent panoramic wordmark', () => {
     const frame = renderEnekoRuizWordmark({ width: 100, height: 16, color: false });
 
-    expect(frame).toContain('███████ ██   ██ ███████ ██   ██');
-    expect(frame).toContain('███████ ██   ██ ███████ ██   ██  █████      ██   ██  █████  ███████ ███████');
+    expect(frame).toContain('███████  ██    ██  ███████  ██   ██');
+    expect(frame).toContain('███████  ██   ███  ███████  ██   ██   █████      ██   ██   █████   ██  ███████');
     expect(frame).not.toContain('B Y   E N E K O');
   });
 
