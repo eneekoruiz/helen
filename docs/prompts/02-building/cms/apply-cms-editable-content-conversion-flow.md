@@ -35,8 +35,8 @@ Durante el desarrollo (Building) o antes del handoff, cuando el proyecto pasa de
 
 ## Checkpoints Requeridos
 
-- **Compilación**: Lanzar [build-and-compile-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/build-and-compile-checkpoint.md).
-- **Linter/Tipados**: Lanzar [lint-and-typecheck-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/lint-and-typecheck-checkpoint.md).
+- **Compilación**: Lanzar [build-and-compile-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-build-and-compile-checkpoint.md).
+- **Linter/Tipados**: Lanzar [lint-and-typecheck-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-lint-and-typecheck-checkpoint.md).
 - **Regresión**: Verificar visualmente que los bordes dashed temporales de edición no rompan el responsive ni el layout.
 
 ## Formato de Entrega

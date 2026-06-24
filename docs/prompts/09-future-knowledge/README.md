@@ -10,19 +10,19 @@ Esta fase se centra en la supervivencia del proyecto a largo plazo, la transfere
 ## 🧭 Prompts Incluidos
 
 ### AUDIT
-- **[audit-future-developer-onboarding.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/audit-future-developer-onboarding.md)**: Audita la legibilidad y accesibilidad del workspace para nuevos programadores.
-- **[audit-self-recovery.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/audit-self-recovery.md)**: Establece el protocolo para recuperar el entorno local o el sistema ante corrupción crítica.
-- **[audit-bus-factor.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/audit-bus-factor.md)**: Evalúa el nivel de centralización del conocimiento técnico clave y los accesos.
-- **[audit-knowledge-gap.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/audit-knowledge-gap.md)**: Identifica supuestos implícitos no documentados en la arquitectura.
-- **[audit-legacy-resistance.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/audit-legacy-resistance.md)**: Audita áreas propensas a rot de código o alta fricción de actualización.
-- **[audit-long-term-ownership-review.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/audit-long-term-ownership-review.md)**: Revisa dependencias de dominios, suscripciones, claves y APIs.
+- **[audit-future-developer-onboarding.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/continuity/audit-future-developer-onboarding.md)**: Audita la legibilidad y accesibilidad del workspace para nuevos programadores.
+- **[audit-self-recovery.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/preservation/audit-self-recovery.md)**: Establece el protocolo para recuperar el entorno local o el sistema ante corrupción crítica.
+- **[audit-bus-factor.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/continuity/audit-bus-factor.md)**: Evalúa el nivel de centralización del conocimiento técnico clave y los accesos.
+- **[audit-knowledge-gap.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/continuity/audit-knowledge-gap.md)**: Identifica supuestos implícitos no documentados en la arquitectura.
+- **[audit-legacy-resistance.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/preservation/audit-legacy-resistance.md)**: Audita áreas propensas a rot de código o alta fricción de actualización.
+- **[audit-long-term-ownership-review.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/preservation/audit-long-term-ownership-review.md)**: Revisa dependencias de dominios, suscripciones, claves y APIs.
 
 ### GENERATE
-- **[generate-decision-log.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/generate-decision-log.md)**: Genera registros estructurados de decisiones de arquitectura (ADRs).
-- **[generate-ai-context.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/generate-ai-context.md)**: Crea plantillas de configuración de contexto nativas para agentes de IA (como `.claudeprompt`, `.cursorrules`).
+- **[generate-decision-log.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/docs/generate-decision-log.md)**: Genera registros estructurados de decisiones de arquitectura (ADRs).
+- **[generate-ai-context.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/docs/generate-ai-context.md)**: Crea plantillas de configuración de contexto nativas para agentes de IA (como `.claudeprompt`, `.cursorrules`).
 
 ### APPLY
-- **[apply-automated-knowledge-preservation.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/apply-automated-knowledge-preservation.md)**: Automatiza la compilación del estado de conocimiento del repositorio en un único archivo portátil.
+- **[apply-automated-knowledge-preservation.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/docs/apply-automated-knowledge-preservation.md)**: Automatiza la compilación del estado de conocimiento del repositorio en un único archivo portátil.
 
 ## 🏁 Criterios de Transición y Cierre
 Para considerar esta fase completada y garantizar la continuidad operacional:

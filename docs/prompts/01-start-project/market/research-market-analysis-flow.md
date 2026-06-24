@@ -12,8 +12,8 @@ Antes de roadmap, reposicionamiento, laúnch o rediseño de producto.
 
 ## Prompts Incluidos
 
-1. [competitive-benchmark.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/competitive-benchmark.md)
-2. [roadmap-roi-prioritization.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/roadmap-roi-prioritization.md)
+1. [competitive-benchmark.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/market/research-competitive-benchmark.md)
+2. [roadmap-roi-prioritization.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/strategy/plan-roadmap-roi-prioritization.md)
 
 ## Checkpoints Entre Pasos
 

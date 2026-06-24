@@ -23,8 +23,8 @@ Auditoría final, cuando el proyecto afirma soportar múltiples idiomas.
 
 ## Checkpoints Requeridos
 
-- **Validación Inicial**: Lanzar [build-and-compile-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/build-and-compile-checkpoint.md).
-- **Post-Fixes**: Lanzar [lint-and-typecheck-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/lint-and-typecheck-checkpoint.md).
+- **Validación Inicial**: Lanzar [build-and-compile-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-build-and-compile-checkpoint.md).
+- **Post-Fixes**: Lanzar [lint-and-typecheck-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-lint-and-typecheck-checkpoint.md).
 
 ## Condiciones de Fallo Automático
 

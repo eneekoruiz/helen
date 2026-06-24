@@ -20,10 +20,10 @@ Congelar el código verificado y empaquetar la versión estable (Release Candida
 
 | Prompt / Flow / Checkpoint | Intención | Propósito / Cuándo usarlo | Frecuencia |
 |---|---|---|---|
-| [release-checklist.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/06-release/release-checklist.md) | **PLAN/AUDIT** | Puerta de calidad global y veredicto final de release. | Alta |
-| [release-notes-changelog-and-demo-package.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/06-release/release-notes-changelog-and-demo-package.md) | **GENERATE** | Generar changelogs, guías de migración y guión de demo. | Alta |
-| [release-candidate-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/06-release/release-candidate-flow.md) | **PLAN flow** | Flujo completo de comprobación final (builds, tests, i18n, SEO, seguridad). | Alta |
-| [release-readiness-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/06-release/release-readiness-checkpoint.md) | **Checkpoint** | Validar que no quedan flecos técnicos abiertos antes del tag de release. | Alta |
+| [release-checklist.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/06-release/planning/plan-release-checklist.md) | **PLAN/AUDIT** | Puerta de calidad global y veredicto final de release. | Alta |
+| [release-notes-changelog-and-demo-package.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/06-release/notes/generate-release-notes-changelog-and-demo-package.md) | **GENERATE** | Generar changelogs, guías de migración y guión de demo. | Alta |
+| [release-candidate-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/06-release/flow/apply-release-candidate-flow.md) | **PLAN flow** | Flujo completo de comprobación final (builds, tests, i18n, SEO, seguridad). | Alta |
+| [release-readiness-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/06-release/flow/audit-release-readiness-checkpoint.md) | **Checkpoint** | Validar que no quedan flecos técnicos abiertos antes del tag de release. | Alta |
 
 ---
 

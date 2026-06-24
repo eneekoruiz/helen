@@ -149,6 +149,6 @@ A prompt is good only if an agent can:
 Before making major changes to prompt families, run the maintenance flow:
 
 ```text
-08-maintenance/apply-prompt-library-maintenance-flow.md
+08-maintenance/meta/apply-prompt-library-maintenance-flow.md
 ```
 

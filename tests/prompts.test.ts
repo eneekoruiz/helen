@@ -6,10 +6,10 @@ describe('Prompt Library', () => {
     const entries = listPromptEntries();
     const flows = entries.filter(entry => entry.kind === 'flow').map(entry => entry.id);
 
-    expect(flows).toContain('03-finish-features/apply-full-polish-flow');
-    expect(flows).toContain('06-release/apply-release-candidate-flow');
-    expect(flows).toContain('07-client-handoff/apply-client-delivery-flow');
-    expect(flows).toContain('08-maintenance/apply-prompt-library-maintenance-flow');
+    expect(flows).toContain('03-finish-features/flow/apply-full-polish-flow');
+    expect(flows).toContain('06-release/flow/apply-release-candidate-flow');
+    expect(flows).toContain('07-client-handoff/delivery/apply-client-delivery-flow');
+    expect(flows).toContain('08-maintenance/meta/apply-prompt-library-maintenance-flow');
   });
 
   it('resolves the master prompt', () => {
@@ -30,35 +30,35 @@ describe('Prompt Library', () => {
   });
 
   it('resolves exact flow ids before basename matches', () => {
-    const entry = resolvePromptEntry('02-building/apply-security-hardening-flow');
+    const entry = resolvePromptEntry('02-building/security/apply-security-hardening-flow');
 
     expect(entry.kind).toBe('flow');
-    expect(entry.id).toBe('02-building/apply-security-hardening-flow');
+    expect(entry.id).toBe('02-building/security/apply-security-hardening-flow');
   });
 
   it('can read an atomic step/prompt by full id', () => {
-    const content = readPrompt('02-building/apply-safe-clean-code-simplification-pass');
+    const content = readPrompt('02-building/clean-code/apply-safe-clean-code-simplification-pass');
 
     expect(content.toLowerCase()).toContain('clean code');
   });
 
   it('exposes standalone prompt families through the same resolver', () => {
-    const entry = resolvePromptEntry('05-final-audit/audit-code-quality');
-    const content = readPrompt('01-start-project/audit-methodology-and-blind-spots');
+    const entry = resolvePromptEntry('05-final-audit/code/audit-code-quality');
+    const content = readPrompt('01-start-project/audit/audit-methodology-and-blind-spots');
 
     expect(entry.kind).toBe('prompt');
     expect(content).toContain('Requisitos mínimos obligatorios');
   });
 
   it('exposes advanced blind-spot prompt families', () => {
-    const privacy = resolvePromptEntry('04-before-production/audit-privacy-legal-and-compliance');
-    const data = resolvePromptEntry('02-building/audit-data-model-and-domain-integrity');
-    const design = resolvePromptEntry('03-finish-features/audit-product-design-and-awards-visual-excellence');
-    const animation3d = resolvePromptEntry('03-finish-features/audit-animated-and-3d-visuals-performance-safety-and-integration');
-    const cinematicConversion = resolvePromptEntry('03-finish-features/apply-cinematic-and-3d-visual-conversion');
-    const cms = resolvePromptEntry('02-building/apply-cms-editable-content-conversion-flow');
-    const lastMile = resolvePromptEntry('07-client-handoff/audit-browser-smoke-test-and-demo-readiness');
-    const agentQuality = readPrompt('08-maintenance/apply-prompt-library-maintenance-flow');
+    const privacy = resolvePromptEntry('04-before-production/compliance/audit-privacy-legal-and-compliance');
+    const data = resolvePromptEntry('02-building/data-api/audit-data-model-and-domain-integrity');
+    const design = resolvePromptEntry('03-finish-features/visual/audit-product-design-and-awards-visual-excellence');
+    const animation3d = resolvePromptEntry('03-finish-features/performance/audit-animated-and-3d-visuals-performance-safety-and-integration');
+    const cinematicConversion = resolvePromptEntry('03-finish-features/flow/apply-cinematic-and-3d-visual-conversion');
+    const cms = resolvePromptEntry('02-building/cms/apply-cms-editable-content-conversion-flow');
+    const lastMile = resolvePromptEntry('07-client-handoff/verification/audit-browser-smoke-test-and-demo-readiness');
+    const agentQuality = readPrompt('08-maintenance/meta/apply-prompt-library-maintenance-flow');
 
     expect(privacy.kind).toBe('prompt');
     expect(data.kind).toBe('prompt');
@@ -72,10 +72,10 @@ describe('Prompt Library', () => {
 
   it('exposes the yearly professional presence review through the CLI resolver', () => {
     const entry = resolvePromptEntry('audit-yearly-professional-presence-review');
-    const content = readPrompt('08-maintenance/audit-yearly-professional-presence-review');
+    const content = readPrompt('08-maintenance/branding/audit-yearly-professional-presence-review');
 
     expect(entry.kind).toBe('prompt');
-    expect(entry.id).toBe('08-maintenance/audit-yearly-professional-presence-review');
+    expect(entry.id).toBe('08-maintenance/branding/audit-yearly-professional-presence-review');
     expect(content).toContain('## Más allá de estos criterios');
     expect(content).toContain('Manual actions required');
     expect(content).toContain('High-impact opportunities');

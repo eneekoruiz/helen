@@ -20,15 +20,15 @@ Descubrir fallos más allá del "happy path" a través de QA adversarial y casos
 
 | Prompt / Flow / Checkpoint | Intención | Propósito / Cuándo usarlo | Frecuencia |
 |---|---|---|---|
-| [adversarial-qa-and-edge-cases.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/adversarial-qa-and-edge-cases.md) | **AUDIT** | Atacar el producto con malformaciones, condiciónes de carrera y fallos parciales. | Alta |
-| [stress-scale-and-cost-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/stress-scale-and-cost-audit.md) | **AUDIT** | Auditar cuellos de botella y estimaciones de costes bajo crecimiento. | Media |
-| [privacy-legal-and-compliance-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/privacy-legal-and-compliance-audit.md) | **AUDIT** | Evalúar la privacidad (GDPR), licencias de código y obligaciones legales. | Media |
-| [observability-instrumentation-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/observability-instrumentation-audit.md) | **APPLY/AUDIT** | Revisar o instrumentar trazas de logs, métricas y gestión de errores. | Alta |
-| [product-analytics-and-metrics-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/product-analytics-and-metrics-audit.md) | **AUDIT** | Validar la captura de eventos de activación, retención y conversión. | Media |
-| [fast-build-test-verification.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/fast-build-test-verification.md) | **AUDIT** | Auditoría rápida de compilación y suite de tests para descartar roturas. | Alta |
-| [final-seo-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/final-seo-audit.md) | **AUDIT** | Revisar meta tags, sitemaps, indexabilidad y optimización para buscadores. | Media |
-| [prefinal-hardening-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/prefinal-hardening-flow.md) | **APPLY flow** | Flujo ejecutable para endurecer seguridad, QA adversarial y compilar limpio. | Media |
-| [security-risk-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/security-risk-checkpoint.md) | **Checkpoint** | Puerta de calidad para vetar riesgos graves de seguridad antes del despliegue. | Alta |
+| [adversarial-qa-and-edge-cases.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/qa/audit-adversarial-qa-and-edge-cases.md) | **AUDIT** | Atacar el producto con malformaciones, condiciónes de carrera y fallos parciales. | Alta |
+| [stress-scale-and-cost-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/qa/audit-stress-scale-and-cost.md) | **AUDIT** | Auditar cuellos de botella y estimaciones de costes bajo crecimiento. | Media |
+| [privacy-legal-and-compliance-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/compliance/audit-privacy-legal-and-compliance.md) | **AUDIT** | Evalúar la privacidad (GDPR), licencias de código y obligaciones legales. | Media |
+| [observability-instrumentation-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/observability/audit-observability-instrumentation.md) | **APPLY/AUDIT** | Revisar o instrumentar trazas de logs, métricas y gestión de errores. | Alta |
+| [product-analytics-and-metrics-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/observability/audit-product-analytics-and-metrics.md) | **AUDIT** | Validar la captura de eventos de activación, retención y conversión. | Media |
+| [fast-build-test-verification.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/qa/audit-fast-build-test-verification.md) | **AUDIT** | Auditoría rápida de compilación y suite de tests para descartar roturas. | Alta |
+| [final-seo-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/compliance/audit-final-seo.md) | **AUDIT** | Revisar meta tags, sitemaps, indexabilidad y optimización para buscadores. | Media |
+| [prefinal-hardening-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/flow/apply-prefinal-hardening-flow.md) | **APPLY flow** | Flujo ejecutable para endurecer seguridad, QA adversarial y compilar limpio. | Media |
+| [security-risk-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/flow/audit-security-risk-checkpoint.md) | **Checkpoint** | Puerta de calidad para vetar riesgos graves de seguridad antes del despliegue. | Alta |
 
 ---
 

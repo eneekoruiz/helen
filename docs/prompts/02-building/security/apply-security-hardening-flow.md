@@ -23,9 +23,9 @@ Durante el desarrollo (Building) y antes de estabilización.
 
 ## Checkpoints Requeridos
 
-- **Inicio**: Cargar [security-risk-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/security-risk-checkpoint.md)
+- **Inicio**: Cargar [security-risk-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/flow/audit-security-risk-checkpoint.md)
 - **Fixes**: Aplicar mitigaciones automáticas directamente en el código de forma segura.
-- **Validación**: Ejecutar [lint-and-typecheck-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/lint-and-typecheck-checkpoint.md) y confirmar que la compilación continúa siendo correcta.
+- **Validación**: Ejecutar [lint-and-typecheck-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-lint-and-typecheck-checkpoint.md) y confirmar que la compilación continúa siendo correcta.
 
 ## Límites de Seguridad
 

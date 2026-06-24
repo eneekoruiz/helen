@@ -20,15 +20,15 @@ Garantizar la salud operativa y la evolución sostenible del proyecto a largo pl
 
 | Prompt / Flow / Checkpoint | Intención | Propósito / Cuándo usarlo | Frecuencia |
 |---|---|---|---|
-| [data-lifecycle-backup-and-recovery.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/data-lifecycle-backup-and-recovery.md) | **AUDIT/REPORT** | Identificar datos persistentes y ensayar planes de restauración. | Media |
-| [migrations-import-export-lock-in.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/migrations-import-export-lock-in.md) | **AUDIT/REPORT** | Evalúar la portabilidad de datos y mitigar dependencias cautivas. | Media |
-| [growth-model-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/growth-model-audit.md) | **REPORT** | Auditar la retención y activación de usuarios para experimentos. | Media |
-| [programmatic-seo-and-content-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/programmatic-seo-and-content-audit.md) | **AUDIT** | Encontrar oportunidades de SEO programático y páginas útiles. | Baja |
-| [quality-operating-system-design.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/quality-operating-system-design.md) | **PLAN** | Diseñar la metodología completa de calidad técnica del proyecto. | Baja (Una vez por ciclo mayor) |
-| [agent-brief-builder.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/agent-brief-builder.md) | **GENERATE** | Crear briefs de ejecución hiper-detallados y seguros para IAs. | Alta (Para cada nueva feature) |
-| [cross-audit-synthesis.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/cross-audit-synthesis.md) | **PLAN** | Consolidar hallazgos de múltiples prompts en un solo plan secuenciado. | Alta (Tras auditorías cruzadas) |
-| [yearly-professional-presence-review.md](yearly-professional-presence-review.md) | **APPLY/REPORT** | Revisar anualmente portfolio, GitHub, LinkedIn, CV y posicionamiento profesional como un único ecosistema. | Anual y tras cambios profesionales importantes |
-| [prompt-library-maintenance-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/prompt-library-maintenance-flow.md) | **APPLY flow** | Limpiar, actualizar referencias y resolver registry de la biblioteca. | Media |
+| [data-lifecycle-backup-and-recovery.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/ops/audit-data-lifecycle-backup-and-recovery.md) | **AUDIT/REPORT** | Identificar datos persistentes y ensayar planes de restauración. | Media |
+| [migrations-import-export-lock-in.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/ops/audit-migrations-import-export-lock-in.md) | **AUDIT/REPORT** | Evalúar la portabilidad de datos y mitigar dependencias cautivas. | Media |
+| [growth-model-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/growth/audit-growth-model.md) | **REPORT** | Auditar la retención y activación de usuarios para experimentos. | Media |
+| [programmatic-seo-and-content-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/growth/audit-programmatic-seo-and-content.md) | **AUDIT** | Encontrar oportunidades de SEO programático y páginas útiles. | Baja |
+| [quality-operating-system-design.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/meta/plan-quality-operating-system-design.md) | **PLAN** | Diseñar la metodología completa de calidad técnica del proyecto. | Baja (Una vez por ciclo mayor) |
+| [agent-brief-builder.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/meta/generate-agent-brief-builder.md) | **GENERATE** | Crear briefs de ejecución hiper-detallados y seguros para IAs. | Alta (Para cada nueva feature) |
+| [cross-audit-synthesis.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/meta/audit-cross-audit-synthesis.md) | **PLAN** | Consolidar hallazgos de múltiples prompts en un solo plan secuenciado. | Alta (Tras auditorías cruzadas) |
+| [yearly-professional-presence-review.md](branding/audit-yearly-professional-presence-review.md) | **APPLY/REPORT** | Revisar anualmente portfolio, GitHub, LinkedIn, CV y posicionamiento profesional como un único ecosistema. | Anual y tras cambios profesionales importantes |
+| [prompt-library-maintenance-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/meta/apply-prompt-library-maintenance-flow.md) | **APPLY flow** | Limpiar, actualizar referencias y resolver registry de la biblioteca. | Media |
 
 ---
 

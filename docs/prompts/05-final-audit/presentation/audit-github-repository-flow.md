@@ -23,7 +23,7 @@ Al finalizar el desarrollo y preparación de documentación (Final Audit).
 
 ## Checkpoints Requeridos
 
-- **Higiene**: Cargar [lint-and-typecheck-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/lint-and-typecheck-checkpoint.md).
+- **Higiene**: Cargar [lint-and-typecheck-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-lint-and-typecheck-checkpoint.md).
 
 ## Condiciones de Fallo Automático
 

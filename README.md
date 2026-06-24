@@ -39,9 +39,8 @@ This boilerplate includes a reusable prompt orchestration library in [docs/promp
 Start with:
 
 - [MASTER](docs/prompts/MASTER.md) when you want an agent to execute a flow safely.
-- [Executable flows](docs/prompts/flows/README.md) for `full-polish`, `release-candidate`, `client-delivery`, and more.
-- [Prompt Router](docs/prompts/orchestration/00-prompt-router.md) when you want the agent to choose the right sequence.
-- [Workflows](docs/prompts/workflows/README.md) when you want a reusable route for launch, SaaS, open source, handoff, recovery, or total audit.
+- [Executable flows](docs/prompts/USE_CASE_INDEX.md) to choose the right sequence for `full-polish`, `release-candidate`, `client-delivery`, and more.
+- [Prompt Routers](docs/prompts/01-start-project/ROUTER.md) inside each phase directory to choose the right audit/apply step.
 - [Registry](docs/prompts/registry.json) for future automation around prompt families and phases.
 
 Each prompt uses mandatory minimum checks plus a "Más allá de estos criterios" section that asks the agent to apply its own expert judgment across the whole repository.
@@ -55,27 +54,17 @@ helen prompts flow full-polish
 helen prompts path release-candidate
 ```
 
-Prompt families:
+Prompt families organized by moment:
 
-- [Atomic Steps](docs/prompts/steps/)
-- [Checkpoints](docs/prompts/checkpoints/README.md)
-- [Executable Flows](docs/prompts/flows/README.md)
-- [Orchestration](docs/prompts/orchestration/README.md)
-- [Agent Quality](docs/prompts/agent-quality/README.md)
-- [Discovery](docs/prompts/discovery/README.md)
-- [Design and Awards-Level Visual Excellence](docs/prompts/design/README.md)
-- [Strategy](docs/prompts/strategy/README.md)
-- [Data and Domain Integrity](docs/prompts/data/README.md)
-- [APIs and Integrations](docs/prompts/integrations/README.md)
-- [Product](docs/prompts/product/README.md)
-- [Growth](docs/prompts/growth/README.md)
-- [Developer Experience](docs/prompts/dx/README.md)
-- [Quality](docs/prompts/quality/README.md)
-- [Operations](docs/prompts/operations/README.md)
-- [Privacy and Compliance](docs/prompts/privacy/README.md)
-- [Observability](docs/prompts/observability/README.md)
-- [Delivery](docs/prompts/delivery/README.md)
-- [Final Audits](docs/prompts/final/README.md)
+- [01-start-project](docs/prompts/01-start-project/README.md) (Inicio de proyecto, roadmap y riesgos)
+- [02-building](docs/prompts/02-building/README.md) (Desarrollo, Clean Code y CMS)
+- [03-finish-features](docs/prompts/03-finish-features/README.md) (UX, Dirección de Arte y Visuales Premium)
+- [04-before-production](docs/prompts/04-before-production/README.md) (QA Adversarial, Escala y Observabilidad)
+- [05-final-audit](docs/prompts/05-final-audit/README.md) (Internacionalización, Documentación y Repositorio)
+- [06-release](docs/prompts/06-release/README.md) (Candidatos a Release, Changlog y Empaquetado)
+- [07-client-handoff](docs/prompts/07-client-handoff/README.md) (Última milla y Entrega a Cliente)
+- [08-maintenance](docs/prompts/08-maintenance/README.md) (Backups, Showcase y Mantenimiento de Librería)
+- [09-future-knowledge](docs/prompts/09-future-knowledge/README.md) (Preservación del Conocimiento y ADRs)
 
 ## Architecture
 
