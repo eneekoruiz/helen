@@ -11,7 +11,12 @@ stop_conditions:
   - unsafe_to_continue
 ---
 
-# ENHANCE- Privacy, Cookies, and Legal Publication Readiness
+# [ENHANCE] - ENHANCE- Privacy, Cookies, and Legal Publication Readiness
+
+## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
+- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
+- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+
 
 ## Proposito e intencion
 Corregir e implementar lo necesario para que una web pueda salir a internet con una postura legal y de privacidad honesta: cookies, politica de privacidad, textos legales, consentimiento y enlaces visibles. No sustituye asesoramiento legal profesional, pero elimina riesgos obvios y reduce exposicion a multas.

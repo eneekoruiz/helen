@@ -1,4 +1,9 @@
-# Premium Mockup Layout System Generator
+# [GENERATE] - Premium Mockup Layout System Generator
+
+## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
+- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
+- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+
 
 **Intención**: GENERATE (crear layout con mockups high-end integrados)
 

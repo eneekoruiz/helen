@@ -10,7 +10,18 @@ stop_conditions:
   - missing_required_context
   - unsafe_to_continue
 ---
-# Flow- Orquestador de Ejecución Visual 40K
+# [APPLY] - Flow- Orquestador de Ejecución Visual 40K
+
+## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
+- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo). Posee dominio absoluto y debe integrar activamente los siguientes recursos y conceptos en su vocabulario base:
+  - Cursor effects avanzados y menú effects (microinteracciones).
+  - Iconsax, Anime.js, SVGator y Jitter.
+  - Image sequence scrubbing (scroll vinculado a secuencias de imágenes).
+  - Animmaster lib, 3D scrolling, 3D video scenes e infinite carrusels.
+  - Skill de UI UX PRO MAX.
+  - Búsqueda y uso de librerías unificadas que abarquen estos recursos.
+- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+
 
 **Intención**: APPLY (Modificar el proyecto aplicando la secuencia ultra-premium)
 

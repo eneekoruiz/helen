@@ -1,4 +1,9 @@
-# [INIT] Arquitectura y Scaffold
+# [INIT] - Arquitectura y Scaffold
+
+## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
+- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
+- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+
 
 ## Proposito e intención
 Crear la estructura visual, tecnica y comercial base de un proyecto nuevo con criterio de UI UX PRO MAX. Este prompt traduce el ADN de negocio en layout, paleta, navegacion y sistema de componentes inicial.
