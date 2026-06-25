@@ -4,9 +4,12 @@
 // Rendering pipeline:
 //   1. Fractal Brownian Motion atmospheric nebula
 //   2. Volumetric god rays (genesis starburst)
-//   3. Trefoil torus knot (p=2, q=3) with per-subpixel z-buffering
-//      • Tube cross-section rendering via Frenet frame
-//      • Phosphor motion trails at decaying opacity
+//   3. Organic flowing ribbon — noise-deformed trefoil torus knot
+//      • fBm-displaced vertices for fluid organic undulation
+//      • Dual-axis rotation with gentle wobble (incommensurate freq.)
+//      • Continuous gradient comet-tail (not discrete trail copies)
+//      • Variable tube radius with breathing modulation
+//      • Per-subpixel Braille z-buffering for proper occlusion
 //   4. Bloom post-processing (Gaussian diffusion)
 //   5. Protected typography layer (wordmark, attribution, frame)
 //   6. Iridescent depth-shaded colorizer with:
@@ -309,59 +312,72 @@ function drawSingularity(canvas: Cell[][], progress: number, ascii: boolean): vo
 }
 
 // ═══════════════════════════════════════════════════════════════
-// §7  Trefoil Torus Knot  (p=2, q=3)
-//     with per-subpixel z-buffer, tube cross-section,
-//     and phosphor motion trails
+// §7  Organic Flowing Ribbon
+//     Noise-deformed parametric curve with volumetric tube,
+//     dual-axis smooth rotation, continuous gradient trails,
+//     and surface-normal fBm perturbation for a natural feel.
 // ═══════════════════════════════════════════════════════════════
 
-function drawTorusKnot(
+function drawFlowingRibbon(
   canvas: Cell[][], progress: number, identity: Identity, ascii: boolean,
 ): void {
-  const entrance = smoothstep(0.04, 0.16, progress);
-  const exit = 1 - smoothstep(0.35, 0.58, progress);
-  const opacity = entrance * exit;
+  // Smooth lifecycle: gentle fade-in and dissolve-out, no hard cuts
+  const entrance = smoothstep(0.02, 0.20, progress);
+  const exit     = 1 - smoothstep(0.38, 0.62, progress);
+  const opacity  = entrance * exit;
   if (opacity <= 0) return;
 
   const W = canvas[0].length, H = canvas.length;
-  const pixW = W * 2, pixH = H * 4;
+  const pixW = W * 2, pixH = H * 4;           // Braille sub-pixel canvas
   const pcx = pixW / 2, pcy = pixH / 2;
-  const scale = Math.min(pixW, pixH) * 0.42;
-  const D = 2.2; // perspective focal distance
+  const scale = Math.min(pixW, pixH) * 0.40;
+  const D = 2.6;                               // perspective focal length
 
-  // Torus knot parameters
-  const P = 2, Q = 3;           // trefoil winding numbers
-  const R = 0.62;               // major radius
-  const r = 0.26;               // minor radius
-  const tubeR = 0.07;           // tube cross-section radius
   const TWO_PI = Math.PI * 2;
 
-  // Per-subpixel z-buffer for proper depth occlusion
-  const masks   = Array.from({ length: H }, () => new Int32Array(W));
-  const subZ    = Array.from({ length: H }, () =>
+  // ── Per-subpixel z-buffer for proper depth occlusion ──
+  const masks = Array.from({ length: H }, () => new Int32Array(W));
+  const subZ  = Array.from({ length: H }, () =>
     Array.from({ length: W }, () => new Float64Array(8).fill(Infinity)),
   );
-  const cellZ   = Array.from({ length: H }, () => new Float64Array(W).fill(Infinity));
+  const cellZ = Array.from({ length: H }, () => new Float64Array(W).fill(Infinity));
 
-  // Smooth rotation
-  const rotPhase = progress * Math.PI * 1.8 * identity.tempo;
-  const tiltX = Math.PI / 7;   // slight downward tilt for dimensionality
+  // ── Dual-axis rotation with gentle organic wobble ──
+  //    Uses incommensurate frequencies so the motion never repeats exactly.
+  const time       = progress * identity.tempo;
+  const rotY       = time * Math.PI * 2.2;                                      // primary spin
+  const rotX       = Math.PI / 6 + Math.sin(time * 1.7) * 0.12;                // tilt with breathing
+  const rotZ       = Math.sin(time * 2.3 + 0.4) * 0.08;                        // subtle roll
+  const breathe    = 1 + Math.sin(time * Math.PI * 3.4) * 0.04 * entrance;     // organic scale pulse
+
+  // Pre-compute trig for rotation matrices
+  const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+  const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+  const cosZ = Math.cos(rotZ), sinZ = Math.sin(rotZ);
 
   function project(
-    xL: number, yL: number, zL: number, extraRot: number,
+    xL: number, yL: number, zL: number,
   ): { px: number; py: number; z3: number } | null {
-    // Rotation Y (main spin + trail offset)
-    const a = rotPhase + extraRot;
-    const ca = Math.cos(a), sa = Math.sin(a);
-    const x1 = xL * ca + zL * sa;
-    const z1 = -xL * sa + zL * ca;
-    // Tilt X
-    const ct = Math.cos(tiltX), st = Math.sin(tiltX);
-    const y2 = yL * ct - z1 * st;
-    const z2 = yL * st + z1 * ct;
-    // Perspective
-    const denom = D - z2;
+    // Apply breathing scale
+    let x0 = xL * breathe, y0 = yL * breathe, z0 = zL * breathe;
+
+    // Rotation Z (roll)
+    let x1 = x0 * cosZ - y0 * sinZ;
+    let y1 = x0 * sinZ + y0 * cosZ;
+    const z1 = z0;
+
+    // Rotation Y (spin)
+    const x2 = x1 * cosY + z1 * sinY;
+    const z2 = -x1 * sinY + z1 * cosY;
+
+    // Rotation X (tilt)
+    const y3 = y1 * cosX - z2 * sinX;
+    const z3 = y1 * sinX + z2 * cosX;
+
+    // Perspective divide
+    const denom = D - z3;
     if (denom <= 0.05) return null;
-    return { px: pcx + (x1 * scale) / denom, py: pcy + (y2 * scale) / denom, z3: z2 };
+    return { px: pcx + (x2 * scale) / denom, py: pcy + (y3 * scale) / denom, z3 };
   }
 
   function plotBraille(px: number, py: number, z: number): void {
@@ -387,79 +403,114 @@ function drawTorusKnot(
     put(canvas, cx2, cy2, g, layer, opacity * brightness, z);
   }
 
-  // ── Sampling config ──
-  const knotPts = 320;
-  const tubeSeg = 5;
+  // ── Parametric curve: noise-deformed torus knot (p=2, q=3) ──
+  //    The base shape is a trefoil but every vertex is displaced
+  //    along its surface normal by fBm noise, creating organic
+  //    undulation that evolves with time — like ink dissolving in water.
+  const P = 2, Q = 3;
+  const R = 0.58;          // major radius
+  const r = 0.24;          // minor radius
+  const tubeR = 0.065;     // tube cross-section radius
+  const sampleCount = 600; // high density for smooth curves
+  const tubeSeg = 8;       // tube cross-section resolution
 
-  // ── Motion trails ──
-  const trails = [
-    { rot: 0, useTube: true },
-    { rot: -0.05, useTube: false },
-    { rot: -0.10, useTube: false },
-    { rot: -0.16, useTube: false },
-  ];
+  // Noise displacement intensity scales with lifecycle
+  const noiseAmp  = 0.035 * entrance * (0.6 + 0.4 * exit);
+  const noiseTime = time * 1.4;
 
-  for (const trail of trails) {
-    for (let i = 0; i < knotPts; i++) {
-      const t = (i / knotPts) * TWO_PI;
+  // ── Continuous gradient tail ──
+  //    Instead of discrete trail copies, we render the primary tube
+  //    with a per-vertex opacity that fades to zero over a "tail arc".
+  //    This creates a comet-like luminous tail that looks natural.
+  const tailArc = TWO_PI * 0.35;   // length of tail (35% of full loop)
+  const headT = (time * 1.3) % 1;  // normalised head position [0,1)
 
-      // Torus knot center-line (parametric trefoil)
-      const cosQt = Math.cos(Q * t), sinQt = Math.sin(Q * t);
-      const cosPt = Math.cos(P * t), sinPt = Math.sin(P * t);
-      const kx = (R + r * cosQt) * cosPt;
-      const ky = (R + r * cosQt) * sinPt;
-      const kz = r * sinQt;
+  for (let i = 0; i < sampleCount; i++) {
+    const tNorm = i / sampleCount;           // normalised [0, 1)
+    const t = tNorm * TWO_PI;
 
-      if (trail.useTube) {
-        // ── Frenet frame for tube cross-section ──
-        const dt = 0.005;
-        const t2 = t + dt;
-        const cosQt2 = Math.cos(Q * t2), sinQt2 = Math.sin(Q * t2);
-        const cosPt2 = Math.cos(P * t2), sinPt2 = Math.sin(P * t2);
-        const nx = (R + r * cosQt2) * cosPt2 - kx;
-        const ny = (R + r * cosQt2) * sinPt2 - ky;
-        const nz = r * sinQt2 - kz;
-        const tLen = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
-        const tx = nx / tLen, ty = ny / tLen, tz = nz / tLen;
+    // ── Gradient tail opacity ──
+    //    Distance from the head position, wrapped circularly.
+    const dist = ((tNorm - headT) % 1 + 1) % 1;  // 0 = at head, 1 = full loop behind
+    const tailFade = dist < (tailArc / TWO_PI)
+      ? smoothstep(tailArc / TWO_PI, 0, dist)     // bright at head, fading behind
+      : 0.22 + 0.12 * Math.sin(t * 5 + time * 3); // dim ambient glow on the rest
 
-        // Binormal ≈ tangent × world-up, then normal ≈ binormal × tangent
-        let bx = ty * 0 - tz * 0, by = tz * 0 - tx * 0, bz = tx * 0 - ty * 0;
-        // Fall back to tangent × (0,1,0) when tangent is near vertical
-        bx = ty * 1 - tz * 0; // cross(tangent, up=(0,0,1)) ... simplified
-        by = tz * 0 - tx * 1;
-        bz = tx * 0 - ty * 0;
-        // Actually: cross(tangent, (0, 0, 1)) = (ty, -tx, 0)
-        bx = ty; by = -tx; bz = 0;
-        let bLen = Math.sqrt(bx * bx + by * by + bz * bz);
-        if (bLen < 0.001) { bx = 1; by = 0; bz = 0; bLen = 1; }
-        bx /= bLen; by /= bLen; bz /= bLen;
-        // Normal = tangent × binormal
-        const nnx = ty * bz - tz * by;
-        const nny = tz * bx - tx * bz;
-        const nnz = tx * by - ty * bx;
+    // ── Base knot centerline ──
+    const cosQt = Math.cos(Q * t), sinQt = Math.sin(Q * t);
+    const cosPt = Math.cos(P * t), sinPt = Math.sin(P * t);
+    let kx = (R + r * cosQt) * cosPt;
+    let ky = (R + r * cosQt) * sinPt;
+    let kz = r * sinQt;
 
-        for (let s = 0; s < tubeSeg; s++) {
-          const a = (s / tubeSeg) * TWO_PI;
-          const ca = Math.cos(a), sa = Math.sin(a);
-          const ox = kx + tubeR * (ca * bx + sa * nnx);
-          const oy = ky + tubeR * (ca * by + sa * nny);
-          const oz = kz + tubeR * (ca * bz + sa * nnz);
-          const result = project(ox, oy, oz, trail.rot);
-          if (!result) continue;
-          if (ascii) plotAscii(result.px, result.py, result.z3);
-          else plotBraille(result.px, result.py, result.z3);
-        }
+    // ── Organic noise displacement along radial direction ──
+    //    Uses fBm seeded by curve parameter + time for flowing motion.
+    const noiseVal = fbm(t * 2.5 + noiseTime, tNorm * 4 + noiseTime * 0.7, 3) - 0.5;
+    const radialLen = Math.sqrt(kx * kx + ky * ky) || 1;
+    kx += (kx / radialLen) * noiseVal * noiseAmp;
+    ky += (ky / radialLen) * noiseVal * noiseAmp;
+    kz += noiseVal * noiseAmp * 0.6;
+
+    // ── Frenet frame for tube cross-section ──
+    const dt = 0.004;
+    const t2 = t + dt;
+    const cosQt2 = Math.cos(Q * t2), sinQt2 = Math.sin(Q * t2);
+    const cosPt2 = Math.cos(P * t2), sinPt2 = Math.sin(P * t2);
+    let fkx2 = (R + r * cosQt2) * cosPt2;
+    let fky2 = (R + r * cosQt2) * sinPt2;
+    let fkz2 = r * sinQt2;
+    // Apply matching noise to the forward sample for consistent tangent
+    const nv2 = fbm((t + dt) * 2.5 + noiseTime, ((i + 1) / sampleCount) * 4 + noiseTime * 0.7, 3) - 0.5;
+    const rl2 = Math.sqrt(fkx2 * fkx2 + fky2 * fky2) || 1;
+    fkx2 += (fkx2 / rl2) * nv2 * noiseAmp;
+    fky2 += (fky2 / rl2) * nv2 * noiseAmp;
+    fkz2 += nv2 * noiseAmp * 0.6;
+
+    // Tangent vector
+    let tx = fkx2 - kx, ty = fky2 - ky, tz = fkz2 - kz;
+    const tLen = Math.sqrt(tx * tx + ty * ty + tz * tz) || 1;
+    tx /= tLen; ty /= tLen; tz /= tLen;
+
+    // Binormal = tangent × (0, 0, 1), with fallback
+    let bx = ty, by = -tx, bz = 0;
+    let bLen = Math.sqrt(bx * bx + by * by);
+    if (bLen < 0.001) { bx = 1; by = 0; bz = 0; bLen = 1; }
+    else { bx /= bLen; by /= bLen; }
+
+    // Normal = tangent × binormal
+    const nnx = ty * bz - tz * by;
+    const nny = tz * bx - tx * bz;
+    const nnz = tx * by - ty * bx;
+
+    // ── Render tube cross-section ──
+    //    Tube radius breathes gently with noise for organic thickness variation.
+    const localTubeR = tubeR * (1 + 0.15 * Math.sin(t * 7 + time * 4));
+
+    for (let s = 0; s < tubeSeg; s++) {
+      const a = (s / tubeSeg) * TWO_PI;
+      const ca = Math.cos(a), sa = Math.sin(a);
+      const ox = kx + localTubeR * (ca * bx + sa * nnx);
+      const oy = ky + localTubeR * (ca * by + sa * nny);
+      const oz = kz + localTubeR * (ca * bz + sa * nnz);
+
+      const result = project(ox, oy, oz);
+      if (!result) continue;
+
+      // Scale energy by tail fade for the comet-trail effect
+      if (ascii) {
+        const cx2 = Math.round(result.px / 2), cy2 = Math.round(result.py / 4);
+        if (cx2 < 0 || cx2 >= W || cy2 < 0 || cy2 >= H) continue;
+        const brightness = clamp((1 - (result.z3 + 1) / 2) * tailFade, 0, 1);
+        const g = brightness > 0.6 ? '@' : brightness > 0.4 ? '#' : brightness > 0.2 ? 'o' : '.';
+        const layer: Layer = result.z3 > 0 ? 'field' : 'spark';
+        put(canvas, cx2, cy2, g, layer, opacity * brightness, result.z3);
       } else {
-        // Trail: center-line only (thinner = natural fade)
-        const result = project(kx, ky, kz, trail.rot);
-        if (!result) continue;
-        if (ascii) plotAscii(result.px, result.py, result.z3);
-        else plotBraille(result.px, result.py, result.z3);
+        plotBraille(result.px, result.py, result.z3);
       }
     }
   }
 
-  // ── Commit Braille masks to canvas with depth-based energy ──
+  // ── Commit Braille masks to canvas with depth-based energy + tail fade ──
   if (!ascii) {
     // Global z-range for depth normalisation
     let zMin = Infinity, zMax = -Infinity;
@@ -745,7 +796,7 @@ export function renderCinematicFrame(
   drawSingularity(canvas, progress, ascii);
 
   // 3. Hero 3D element
-  drawTorusKnot(canvas, progress, identity, ascii);
+  drawFlowingRibbon(canvas, progress, identity, ascii);
 
   // 4. Post-processing (before typography to protect letters)
   const bloom = computeBloom(canvas, width, height);
