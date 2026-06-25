@@ -54,6 +54,15 @@ helen prompts flow full-polish
 helen prompts path release-candidate
 ```
 
+### Remote Phase Orchestration
+
+When working on any external project and you want to analyze its current status, recommend the next phase, and execute the appropriate transition prompt, you can run the following command directly in your terminal:
+
+```bash
+curl -s https://raw.githubusercontent.com/eneekoruiz/helen/main/%5BPLAN%5D_Orquestador_Fases.md | tu-cli-de-ia
+```
+*(Replace `tu-cli-de-ia` with the command/pipe of your AI assistant).*
+
 Prompt families organized by moment:
 
 - [01-start-project](docs/prompts/01-start-project/README.md) (Inicio de proyecto, roadmap y riesgos)

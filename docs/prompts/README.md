@@ -57,6 +57,15 @@ El prompt [`[INIT] Director Creativo (Orquestador 40K).md`](file:///c:/Users/Use
 
 Usalo cuando el objetivo sea una web con direccion de arte propia, efectos tecnicos avanzados, conversion clara y cero rastro de IA.
 
+## 🌐 Orquestación de Fases Remota
+
+Cuando estés trabajando en cualquier otro proyecto ajeno y quieras saber en qué estado se encuentra, puedes ejecutar el orquestador maestro directamente desde la terminal con el siguiente comando:
+
+```bash
+curl -s https://raw.githubusercontent.com/eneekoruiz/helen/main/%5BPLAN%5D_Orquestador_Fases.md | tu-cli-de-ia
+```
+*(Reemplaza `tu-cli-de-ia` por el comando de ejecución de tu asistente de IA).*
+
 ---
 
 ## 🛠️ Acceso Mediante CLI de HELEN
