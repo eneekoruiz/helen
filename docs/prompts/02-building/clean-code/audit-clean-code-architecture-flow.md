@@ -17,7 +17,7 @@ Durante el desarrollo (Building) o antes de la estabilización.
    - **Acoplamiento**: Identificar acoplamiento oculto, convenciones mágicas y abstracciones prematuras o innecesarias.
    - **Simplificación**: Buscar redundancias de código, modularizaciones débiles y puntos potenciales de fallo.
 2. **Safe Clean Code Pass (APPLY)**:
-   - Reducir complejidad local, dead code, errores silenciosos y nombres engañosos.
+   - Reducir complejidad local, asegurar zero dead code (eliminación estricta de variables, importaciones, funciones y archivos no utilizados), evitar errores silenciosos y corregir nombres engañosos.
    - Conservar estrictamente el comportamiento funcional existente.
 
 ## Checkpoints Requeridos

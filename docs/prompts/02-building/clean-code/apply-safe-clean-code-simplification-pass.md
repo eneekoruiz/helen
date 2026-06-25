@@ -19,7 +19,8 @@ Reducir complejidad, duplicación y riesgo técnico sin cambiar comportamiento.
 
 ## Criterios Mínimos
 
-- Revisa responsabilidades, nombres, duplicación, acoplamiento, dead code, errores silenciosos y abstracciones.
+- **Zero Código Muerto**: Asegura la eliminación estricta de variables, importaciones, funciones, clases, componentes o archivos no utilizados (código muerto). Es un criterio crítico y de alta prioridad.
+- Revisa responsabilidades, nombres, duplicación, acoplamiento, errores silenciosos y abstracciones.
 - Prioriza cambios pequeños y seguros.
 - Conserva comportamiento existente.
 
