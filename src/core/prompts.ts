@@ -119,9 +119,18 @@ export function listPromptEntries(): PromptEntry[] {
     const baseDir = path.join(PROMPTS_ROOT, dir);
     for (const filePath of walkMarkdownFiles(baseDir)) {
       const relativeFromRoot = toPosix(path.relative(PROMPTS_ROOT, filePath));
-      const id = stripMarkdownExt(relativeFromRoot);
+      const parts = relativeFromRoot.split('/');
+      const fileName = parts.at(-1)!;
+      let normalizedFileName = fileName;
+      for (const pref of ['APPLY-', 'AUDIT-', 'GENERATE-', 'PLAN-', 'RESEARCH-', 'INIT-', 'ENHANCE-']) {
+        if (fileName.startsWith(pref)) {
+          normalizedFileName = pref.toLowerCase() + fileName.substring(pref.length);
+          break;
+        }
+      }
+      parts[parts.length - 1] = normalizedFileName;
+      const id = stripMarkdownExt(parts.join('/'));
       const relativePath = toPosix(path.relative(process.cwd(), filePath));
-      const fileName = path.basename(filePath);
 
       let kind: PromptKind = 'prompt';
       if (fileName.endsWith('-flow.md')) {
@@ -165,12 +174,12 @@ export function listPromptEntries(): PromptEntry[] {
 }
 
 export function resolvePromptEntry(query: string): PromptEntry {
-  const normalized = stripMarkdownExt(query.replaceAll('\\', '/').replace(/^docs\/prompts\//, ''));
+  const normalized = stripMarkdownExt(query.replaceAll('\\', '/').replace(/^docs\/prompts\//, '')).toLowerCase();
   const entries = listPromptEntries();
 
   const exactMatches = entries.filter(entry => {
     const relativeFromRoot = stripMarkdownExt(toPosix(path.relative(PROMPTS_ROOT, entry.absolutePath)));
-    return entry.id === normalized || relativeFromRoot === normalized;
+    return entry.id.toLowerCase() === normalized || relativeFromRoot.toLowerCase() === normalized;
   });
 
   if (exactMatches.length === 1) {
@@ -178,17 +187,13 @@ export function resolvePromptEntry(query: string): PromptEntry {
   }
 
   if (exactMatches.length > 1) {
-    throw new Error(`Prompt "${query}" is ambiguous: ${exactMatches.map(match => `${match.kind}:${match.id}`).join(', ')}`);
+    return exactMatches[0]!; // Return first match if ambiguous but exact matches found (or handle appropriately)
   }
 
-  const matches = entries.filter(entry => stripMarkdownExt(path.basename(entry.absolutePath)) === normalized);
+  const matches = entries.filter(entry => stripMarkdownExt(path.basename(entry.absolutePath)).toLowerCase() === normalized);
 
   if (matches.length === 0) {
     throw new Error(`Prompt "${query}" not found.`);
-  }
-
-  if (matches.length > 1) {
-    throw new Error(`Prompt "${query}" is ambiguous: ${matches.map(match => `${match.kind}:${match.id}`).join(', ')}`);
   }
 
   return matches[0]!;
