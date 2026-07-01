@@ -11,8 +11,60 @@ Every prompt must combine:
 3. Controlled freedom.
 4. Safety boundaries.
 5. Clear output.
+6. Explicit evidence and success criteria.
+7. A bounded reflection loop when the task has meaningful risk.
+8. Persistent memory notes when future agents must inherit context.
 
 The checklist is the floor, not the ceiling.
+
+## Agentic Excellence Protocol
+
+Every prompt must be executable by an autonomous agent without relying on hidden assumptions. Use this protocol as the shared operating layer for all new or modified prompts.
+
+### Evidence First
+
+Before planning or editing, the agent must inspect the relevant repository surface and identify the evidence it is using: files read, scripts available, product context, user constraints, and unresolved assumptions. If the prompt depends on current external facts, package versions, policies, market data, or best practices that may have changed, it must require fresh research and source attribution.
+
+### Bounded Reflection Loop
+
+Use a loop for work that changes code, architecture, prompt contracts, release readiness, security, compliance, UX quality, or business-critical copy.
+
+```text
+[APPLY or ANALYZE] -> [AUDIT against explicit criteria] -> [RE-APPLY only if the audit finds material gaps] -> [VERIFY]
+```
+
+The loop must stop when one of these is true:
+
+- The success criteria are met.
+- Further changes are speculative or lower value than the risk they introduce.
+- A blocker requires user input, missing credentials, unavailable services, or destructive action approval.
+- The agent has completed two consecutive audit passes without finding material improvements.
+
+Do not claim "perfect" or "100%" quality without naming the verification performed and remaining uncertainty.
+
+### Memory Contract
+
+Prompts that produce decisions, long-lived architecture, prompt-library changes, release state, or operational knowledge must update or recommend an appropriate memory artifact:
+
+- `docs/` decision logs or runbooks for project knowledge.
+- `.quality_audit_log.md` for prompt-system quality changes.
+- Existing changelogs, release notes, or handoff docs when the work affects delivery state.
+
+Memory entries must include date, changed surface, rationale, verification, and known residual risk.
+
+### Exception Handling
+
+Each prompt that can modify files or trigger workflows must define what happens when something fails:
+
+- Stop on destructive, security-sensitive, legal, privacy, release, or data-loss risk.
+- Prefer the smallest reversible change.
+- Preserve user changes and avoid unrelated refactors.
+- Report failed commands exactly enough for the next agent to reproduce the issue.
+- If verification cannot run, state why and mark the result as unverified rather than successful.
+
+### Output Discipline
+
+The output must match the action. Implementation prompts stay brief. Audit prompts lead with findings. Research prompts cite sources. Planning prompts produce executable checklists. Every output should separate verified facts from assumptions.
 
 ## Intentions Classification & Output Standards
 
@@ -32,8 +84,6 @@ Prompts are classified by their primary intention, which defines their name pref
   - **Deliverable Standard**: MUST provide actionable checklists with `[ ]` syntax ready to be executed.
 - **RESEARCH** (`research-`): Compares, benchmarks, or investigates technology choices or competitor solutions.
   - **Deliverable Standard**: MUST provide structural reports, markdown tables, and benchmarking data.
-- **GENERATE** (`generate-`): Creates assets, config templates, code boilerplate, or release/handoff documentation.
-  - **Deliverable Standard**: MUST produce ready-to-use copy-pasteable files without generic placeholders.
 
 ## Atomic Prompt Contract
 
@@ -47,6 +97,10 @@ Atomic prompts should include:
 - `Requisitos mínimos obligatorios`.
 - `Más allá de estos criterios`.
 - Safety limits.
+- Evidence requirements.
+- Reflection and retry rules when the task is risky or iterative.
+- Exception handling and stop conditions.
+- Memory/update target when the output should persist.
 - Final checks.
 - Delivery format (matching the intent output standards above).
 
@@ -67,9 +121,11 @@ Flows are orchestration instructions (not simple checklists) and should include:
 - Included prompts.
 - Exact order.
 - Checkpoints between steps.
+- Reflection loop boundaries.
 - Conditions to advance.
 - Stop conditions.
 - What to do when something fails.
+- Memory artifacts to update.
 - Final summary format.
 
 ## Checkpoint Contract
@@ -90,7 +146,7 @@ Prompts are organized into 9 sequence-based moment folders:
 2. `02-building`: Active coding, data models, CMS editable layers, and compile/linter checkpoints.
 3. `03-finish-features`: Visual polish, UX audits, premium feel, and visual regression checkpoints.
 4. `04-before-production`: Adversarial QA, scaling, privacy (GDPR), and observability.
-5. `05-final-audit`: Code quality closeout, documentation, i18n, and repository health audits.
+5. `05-final-audit`: Code quality closeout, documentation, localization (if applicable), and repository health audits.
 6. `06-release`: Release notes, candidate validation, and change checks.
 7. `07-client-handoff`: Client delivery, browser smoke tests, copy audits, and support readiness.
 8. `08-maintenance`: Long-term maintenance, governance, data backups, and portfolio showcases.
@@ -151,4 +207,3 @@ Before making major changes to prompt families, run the maintenance flow:
 ```text
 08-maintenance/meta/apply-prompt-library-maintenance-flow.md
 ```
-

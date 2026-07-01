@@ -24,6 +24,10 @@ Todo prompt debe exigir:
 - Restricciones explicitas de seguridad y no-rotura.
 - Output acorde a la accion: breve para cambios, severo para auditorias, operativo para inicializacion.
 - Criterio premium: micro-interacciones sutiles, jerarquia clara, responsive real y detalle visual con intencion.
+- Evidencia explicita antes de decidir: archivos leidos, contexto de negocio, supuestos y verificacion disponible.
+- Bucle de reflexion acotado para tareas criticas: aplicar, auditar, re-aplicar solo si hay brechas materiales y verificar.
+- Memoria persistente y obligatoria (escribir siempre en `.quality_audit_log.md` o artefacto equivalente) cuando el cambio afecte decisiones futuras, arquitectura, release, operaciones o calidad de prompts.
+- Manejo de excepciones: parar ante riesgo destructivo, legal, privacidad, seguridad o falta de contexto esencial.
 
 ## Metadatos obligatorios
 Todo prompt atomico en una fase debe empezar con frontmatter YAML:
@@ -40,8 +44,22 @@ requires_context:
 stop_conditions:
   - missing_required_context
   - unsafe_to_continue
+reflection_loop:
+  mode: bounded
+  max_material_retries: 2
+  stop_when: success_criteria_met_or_no_material_gain
+memory_target: .quality_audit_log.md # Cambiar si aplica otro artefacto persistente.
+verification:
+  - inspect_relevant_files
+  - run_available_checks
 ---
 ```
+
+## Protocolo agente obligatorio
+
+Antes de modificar o generar, el agente debe declarar internamente su evidencia minima: superficie inspeccionada, criterios de exito, riesgos, supuestos y comandos de verificacion disponibles. Para trabajos de alto impacto, debe ejecutar el ciclo [APPLY/ANALYZE] -> [AUDIT] -> [RE-APPLY si aporta valor material] -> [VERIFY].
+
+No se permite prometer perfeccion absoluta sin pruebas. La salida puede ser minimalista, pero la accion debe estar respaldada por evidencia y por una ruta de recuperacion si algo falla.
 
 ## Reglas de decision
 - Si el prompt crea una pieza nueva, usa **GENERATE-**.

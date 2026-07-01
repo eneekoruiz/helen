@@ -27,7 +27,7 @@ Every prompt file must reside in one of the 9 moments, reflecting its target pro
 2. `02-building` (Development/Hardening)
 3. `03-finish-features` (UX/Visual Polish)
 4. `04-before-production` (Compliance/Analytics/QA)
-5. `05-final-audit` (Final closeout/i18n/Docs)
+5. `05-final-audit` (Final closeout/Docs/Localization if present)
 6. `06-release` (Changelog/RC readiness)
 7. `07-client-handoff` (Client checks/Smoke testing)
 8. `08-maintenance` (Ops/Backups/Updates)
@@ -65,14 +65,22 @@ Every prompt file must expose its primary intent in its filename. Names must fol
 ### Legacy Compatible Prefixes
 - **`apply-`**: Existing implementation prompt. Treat as equivalent to `enhance-` when editing existing surfaces, or `generate-` when creating new project assets.
 - **`plan-`**: Existing strategy/checklist prompt. Keep until merged into `init-`, `audit-`, or a flow.
-- **`research-`**: Existing market/benchmark prompt. Prefer `audit-` for new competitor analysis files.
-- **`audit-`**: For evaluation, code checks, risk detection.
-- **`apply-`**: For modifying files, updating configuration, refactoring.
-- **`plan-`**: For roadmaps, scheduling, strategy creation.
-- **`research-`**: For competitive analysis, benchmark reports.
-- **`generate-`**: For boilerplate scaffolding, templates, documentation.
+- **`research-`**: Existing market/benchmark prompt. Prefer `audit-` for new competitor analysis files unless fresh external research and source comparison are the primary deliverable.
 
-### Flow Naming Rules
+Legacy prefixes may remain for compatibility, but new files should prefer the canonical action prefixes above unless a migration would break CLI resolution.
+
+## Agentic Quality Gate
+
+Before merging a prompt-library change, verify that the changed prompt or flow defines:
+
+- Evidence requirements and success criteria.
+- Stop conditions and exception handling.
+- A bounded reflection loop when the task is iterative or high impact.
+- A memory target for decisions that future agents must inherit.
+- Output format aligned with its action prefix.
+
+## Flow Naming Rules
+
 Flows should name the journey and end in `-flow.md`:
 - `apply-full-polish-flow.md`
 - `apply-release-candidate-flow.md`
@@ -80,13 +88,15 @@ Flows should name the journey and end in `-flow.md`:
 - `audit-clean-code-architecture-flow.md`
 - `audit-awwwards-soty-design-review-flow.md`
 
-### Checkpoint Naming Rules
+## Checkpoint Naming Rules
+
 Checkpoints must end in `-checkpoint.md`:
 - `audit-visual-ux-regression-checkpoint.md`
 - `audit-build-and-compile-checkpoint.md`
 - `audit-release-readiness-checkpoint.md`
 
-### Prompt Naming Rules
+## Prompt Naming Rules
+
 Prompts must use kebab-case describing the specific audit or pass:
 - `audit-product-design-and-awards-visual-excellence.md`
 - `apply-safe-clean-code-simplification-pass.md`
@@ -100,4 +110,3 @@ Before adding a prompt, ask:
 3. Is it a prompt, checkpoint, or flow?
 4. Would a user understand the name in a CLI list?
 5. Does it reduce confusion or add library sprawl?
-
