@@ -140,6 +140,7 @@ export class HelenAIOrchestrator {
 
     let humanFeedback: string | undefined = undefined;
 
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       // 1. Actor Node: Executing the task
       this.transition('EXECUTING_TASK', `Loop ${this.loopCount + 1}: Executing...`);

@@ -56,6 +56,7 @@ describe('Cinematic terminal identities', () => {
 
     expect(frame).toContain('H   H  EEEEE');
     expect(frame).toContain('SYSTEM');
+    // eslint-disable-next-line no-control-regex
     expect(frame).not.toMatch(/[^\x00-\x7F]/);
   });
 

@@ -581,7 +581,8 @@ function drawHeroRibbon(
     tanX /= tLen; tanY /= tLen; tanZ /= tLen;
 
     // Binormal = tangent × (0,0,1) with fallback
-    let bx = tanY, by = -tanX, bz = 0;
+    const bz = 0;
+    let bx = tanY, by = -tanX;
     let bLen = Math.sqrt(bx * bx + by * by);
     if (bLen < 0.001) { bx = 1; by = 0; bLen = 1; }
     else { bx /= bLen; by /= bLen; }
@@ -648,7 +649,7 @@ function drawHeroRibbon(
     const pt = phase + time * speed * TWO_PI;
     let px = orbitR * Math.cos(pt);
     let py = orbitR * Math.sin(pt) * Math.cos(tilt);
-    let pz = orbitR * Math.sin(pt) * Math.sin(tilt);
+    const pz = orbitR * Math.sin(pt) * Math.sin(tilt);
 
     // Gentle noise wiggle
     px += (fbm(pt * 0.3, i * 0.1 + time, 2) - 0.5) * 0.06;
