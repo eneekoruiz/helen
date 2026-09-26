@@ -16,6 +16,7 @@ updates:
         patterns:
           - '*'
     open-pull-requests-limit: 1
+    rebase-strategy: auto
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -29,3 +30,4 @@ updates:
         patterns:
           - '*'
     open-pull-requests-limit: 1
+    rebase-strategy: auto
