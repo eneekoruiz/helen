@@ -4,7 +4,7 @@ import { getSkillsRoot } from './skills.js';
 
 export type CatalogStatus = 'active' | 'caution' | 'discontinued';
 
-export type CatalogKind = 'skill' | 'plugin' | 'cli' | 'reference' | 'service';
+export type CatalogKind = 'skill' | 'plugin' | 'cli' | 'reference' | 'service' | 'mcp';
 
 export interface CatalogItem {
   id: string;
@@ -32,8 +32,8 @@ export function readCatalog(root: string = getSkillsRoot()): CatalogItem[] {
   return (JSON.parse(fs.readFileSync(file, 'utf-8')) as CatalogFile).items;
 }
 
-export function listCatalog(category?: string, root?: string): CatalogItem[] {
-  return readCatalog(root).filter(item => !category || item.category === category);
+export function listCatalog(category?: string, root?: string, kind?: string): CatalogItem[] {
+  return readCatalog(root).filter(item => (!category || item.category === category) && (!kind || item.kind === kind));
 }
 
 export function getCatalogItem(id: string, root?: string): CatalogItem {

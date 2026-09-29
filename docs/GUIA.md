@@ -69,7 +69,7 @@ helen skills installed                                   # comprobar
 
 Material antiguo de Antigravity habla de `.agent/skills/`: si tu versión lo usa, `--target custom --dir .agent/skills`. Añade `--dry-run` para ver qué haría; no pisa archivos existentes salvo con `--force`.
 
-**Herramientas de terceros:** HELEN **nunca** las instala por ti. `helen skills external <id>` te enseña los comandos oficiales; los ejecutas tú después de revisarlos (ver sección 6).
+**Herramientas de terceros:** HELEN **nunca** las instala por ti. `helen skills external <id>` te enseña los comandos oficiales; los ejecutas tú después de revisarlos (ver secciones 7 y 8).
 
 ## 3. Uso básico: tres formas, de más a menos automática
 
@@ -124,7 +124,7 @@ La fase detectada por `helen apply` es una **estimación** basada en archivos (p
 
 ## 5. Metas (lo que puedes pedir)
 
-`design`, `copy`, `motion`, `quality`, `security`, `seo-legal`, `qa`, `release`, `deploy`, `handoff`, `strategy`, `data`, `knowledge`, `autonomy`, `safe-install`. Cada una está definida en `docs/prompts/playbooks.json` con sus pasos.
+`design`, `copy`, `motion`, `quality`, `security`, `seo-legal`, `qa`, `release`, `deploy`, `handoff`, `strategy`, `data`, `knowledge`, `autonomy`, `connect-tools`, `safe-install`. Cada una está definida en `docs/prompts/playbooks.json` con sus pasos.
 
 ## 6. Skills propias incluidas
 
@@ -159,7 +159,21 @@ Reglas:
 3. Instala solo la skill que necesitas, no repositorios enteros; evita `curl ... | sh` a ciegas.
 4. Los comandos del catálogo salen del README de cada proyecto en el momento de la verificación: compruébalos antes de ejecutarlos.
 
-## 8. Mantener y ampliar HELEN
+## 8. Servidores MCP (conectar herramientas a la IA)
+
+Un **servidor MCP** es un programa o servicio remoto que da a tu IA herramientas reales: abrir un navegador, leer tu GitHub, ver logs de Vercel, consultar tu base de datos. Diferencias:
+
+| | Skill | Servidor MCP |
+|---|---|---|
+| Qué aporta | Conocimiento e instrucciones | Herramientas que actúan |
+| Riesgo | Instrucciones y scripts que lee la IA | Acceso real a tus cuentas y tokens |
+| Dónde se ve en HELEN | `helen skills list` | `helen skills catalog --kind mcp` |
+
+Incluidos en el catálogo: `playwright-mcp` y `chrome-devtools-mcp` (ver y medir la web), `context7` (documentación actual), `github-mcp`, `vercel-mcp` y `supabase-mcp`. `helen skills external <id>` muestra los comandos oficiales y sus avisos.
+
+Reglas por defecto: endpoint oficial, permisos mínimos, **solo lectura** cuando solo necesites mirar, base de datos y hosting de **desarrollo** (no producción), tokens fuera del repositorio, y confirmación humana para escribir, desplegar o gastar. La meta `helen apply connect-tools` empieza por el prompt `audit-mcp-servers-security-and-scope`.
+
+## 9. Mantener y ampliar HELEN
 
 - **Nuevo prompt**: crea el archivo en su fase con el frontmatter del contrato (`docs/prompts/PREMIUM_PROMPT_CONTRACT.md`) y añádelo al README y ROUTER de la fase.
 - **Nueva skill**: carpeta `skills/<nombre>/SKILL.md` con `name` (igual que la carpeta) y `description`.
@@ -167,7 +181,7 @@ Reglas:
 - **Nueva herramienta externa**: entrada en `skills/catalog.json` con `source`, `install`, `license`, `status`.
 - Después ejecuta `helen prompts lint` y `npm test`: validan frontmatter, enlaces, playbooks y catálogo.
 
-## 9. Qué NO hace HELEN
+## 10. Qué NO hace HELEN
 
 - No instala herramientas de terceros por ti.
 - No garantiza que la fase detectada sea correcta: la propone con evidencia.

@@ -18,7 +18,7 @@ One entry point for everything in HELEN. The user does not need to know which pr
    - `prompt` or `flow`: read it (`helen prompts show <ref>`) and follow it.
    - `checkpoint`: run it; if it fails, stop and report. Never advance past a failed checkpoint.
    - `skill`: use the bundled skill. If missing, install it: `helen skills install <name> --target claude codex` (or `--target custom --dir <path>`).
-   - `external`: never install on your own. Show `helen skills external <id>` output, remind the user to review it (`audit-third-party-skills-supply-chain`), and continue only with approval. Use at most ONE main design skill.
+   - `external` (skills, plugins, CLIs and MCP servers): never install or connect on your own. Show `helen skills external <id>` output, remind the user to review it (`audit-third-party-skills-supply-chain`), and continue only with approval. Use at most ONE main design skill.
 5. **Report**: steps done, skipped (and why), changes, risks, manual actions.
 
 ## Goals
@@ -39,6 +39,7 @@ One entry point for everything in HELEN. The user does not need to know which pr
 | data | API contracts and data model |
 | knowledge | ADRs, AI context, runbook, bus factor |
 | autonomy | agent loops, spec-driven work, automated review |
+| connect-tools | connecting MCP servers safely (browser, docs, GitHub, hosting, database) |
 | safe-install | vetting third-party skills |
 
 ## Rules

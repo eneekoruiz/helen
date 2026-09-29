@@ -190,3 +190,11 @@ Limitaciones conocidas: la detección de fase es una heurística por archivos; l
 - **Verificación**: 106 tests, lint, typecheck y build en verde; `helen prompts lint` (frontmatter, enlaces, playbooks); recorrido manual real: `setup` → `apply quality --track` → `next` → `check` → `done` en un proyecto vacío.
 
 Sigue abierto (no es código): evals de las skills con modelos reales, fusionar los prompts solapados de `03-finish-features/visual/` (decisión editorial) y confirmar con tu versión de Antigravity que lee `.agents/skills/`.
+
+
+## 13. Servidores MCP
+
+- Nuevo tipo `mcp` en el catálogo (31 entradas): `playwright-mcp`, `chrome-devtools-mcp`, `context7`, `github-mcp`, `supabase-mcp`, `vercel-mcp`, con comandos y avisos tomados de sus README y documentación oficial (`helen skills catalog --kind mcp`).
+- Nuevo prompt `audit-mcp-servers-security-and-scope` (endpoint oficial, mínimo privilegio, solo lectura, entorno de desarrollo, secretos fuera del repo, prompt injection, telemetría) y nueva meta `helen apply connect-tools`.
+- Añadidos pasos MCP a las metas `design`, `quality`, `deploy` y `data`; `helen-security`, el bloque de `AGENTS.md` y la guía cubren ahora MCP.
+- No verificado: el comando exacto de instalación del GitHub MCP en Claude Code (su README remite a una guía aparte; el catálogo lo indica).

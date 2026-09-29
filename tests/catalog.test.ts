@@ -15,7 +15,7 @@ describe('External skills catalog', () => {
   });
 
   it('covers the tools the user collected', () => {
-    for (const id of ['taste-skill', 'image-to-code', 'impeccable', 'web-design-guidelines', 'humanizer', 'cro-optimization', 'seo', 'scroll-craft', '21st-dev', 'playwright-cli', 'awesome-design-md', 'google-design-md', 'godly', 'transitions-dev', 'animos-app', 'deck-gallery', 'gsd-core', 'ralph-loop', 'coderabbit', 'roo-code']) {
+    for (const id of ['taste-skill', 'image-to-code', 'impeccable', 'web-design-guidelines', 'humanizer', 'cro-optimization', 'seo', 'scroll-craft', '21st-dev', 'playwright-cli', 'awesome-design-md', 'google-design-md', 'godly', 'transitions-dev', 'animos-app', 'deck-gallery', 'gsd-core', 'ralph-loop', 'coderabbit', 'roo-code', 'playwright-mcp', 'chrome-devtools-mcp', 'context7', 'github-mcp', 'supabase-mcp', 'vercel-mcp']) {
       expect(getCatalogItem(id).id).toBe(id);
     }
   });
@@ -25,6 +25,12 @@ describe('External skills catalog', () => {
     expect(getCatalogItem('coderabbit').status).toBe('caution');
     expect(getCatalogItem('godly').status).toBe('caution');
     for (const item of items) expect(['active', 'caution', 'discontinued']).toContain(item.status);
+  });
+
+  it('lists MCP servers separately and warns about permissions', () => {
+    const mcp = listCatalog(undefined, undefined, 'mcp');
+    expect(mcp.length).toBeGreaterThanOrEqual(6);
+    for (const item of mcp) expect(item.notes ?? '').not.toBe('');
   });
 
   it('filters by category and rejects unknown ids', () => {

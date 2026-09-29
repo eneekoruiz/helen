@@ -60,6 +60,9 @@ Indice operativo para elegir prompts sin memorizar carpetas.
 ## Quiero instalar una skill o plugin de terceros
 1. `08-maintenance/ops/audit-third-party-skills-supply-chain.md` (**AUDIT-**) y después `helen skills external <id>`.
 
+## Quiero conectar servidores MCP a mi IA
+1. `08-maintenance/ops/audit-mcp-servers-security-and-scope.md` (**AUDIT-**) y después `helen skills external <id>` (categoría `mcp`).
+
 ## Quiero mantener la biblioteca de prompts
 1. `08-maintenance/meta/apply-prompt-library-maintenance-flow.md` (**ENHANCE-**, legacy filename)
 2. `09-future-knowledge/docs/generate-ai-context.md` (**GENERATE-**)

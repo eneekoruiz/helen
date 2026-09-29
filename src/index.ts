@@ -689,9 +689,10 @@ export function createProgram(): Command {
   skills
     .command('catalog')
     .description('List recommended third-party skills and tools (HELEN never installs them for you)')
-    .option('--category <category>', 'Filter: design, quality, copy, seo, motion, components, verify, deploy, workflow')
-    .action((opts: { category?: string }) => {
-      for (const item of listCatalog(opts.category)) {
+    .option('--category <category>', 'Filter: design, quality, copy, seo, motion, components, verify, deploy, workflow, docs, data')
+    .option('--kind <kind>', 'Filter: skill, plugin, cli, reference, service, mcp')
+    .action((opts: { category?: string; kind?: string }) => {
+      for (const item of listCatalog(opts.category, undefined, opts.kind)) {
         console.log(`${item.id.padEnd(22)} ${item.category.padEnd(11)} ${item.kind.padEnd(10)} ${item.status.padEnd(12)} ${item.summary}`);
       }
     });

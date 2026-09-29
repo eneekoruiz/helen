@@ -32,7 +32,7 @@ export function helenBlock(): string {
     '- When asked to "use HELEN", or where the project stands, or what to do next: use the `helen-apply` skill, or run `helen apply`.',
     '- To work an area ("apply all the design improvements", "prepare the release"): `helen apply <goal>` prints the steps; `helen apply <goal> --track` follows them one by one with `helen next`, `helen done`, `helen check`.',
     '- Prompts: `helen prompts list`, `helen prompts show <id>`. Skills live in `.claude/skills` and `.agents/skills`. Guide: `helen guide`.',
-    '- Never install an external tool or plugin without showing its commands (`helen skills external <id>`) and getting explicit approval. Use at most one main design skill.',
+    '- Never install an external tool, plugin or MCP server without showing its commands (`helen skills external <id>`) and getting explicit approval. Use at most one main design skill. Prefer read-only, least-privilege, development-environment MCP connections.',
     '- Never invent content, testimonials, metrics, logos or claims. Stop if a checkpoint fails.',
     BLOCK_END,
   ].join('\n');

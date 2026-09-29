@@ -44,6 +44,7 @@ Revisar cualquier skill, plugin, extensión o script de terceros antes de instal
 5. **Instalación**: sin `curl | sh` a ciegas; versión fijada; no mezclar varios métodos de instalación para lo mismo.
 6. **Alcance**: instala solo la skill necesaria, no colecciones enteras.
 7. **Solapes**: elige una sola skill principal por función (por ejemplo, un solo skill de diseño).
+8. **Servidores MCP**: no se instalan con este prompt: usa `audit-mcp-servers-security-and-scope` (permisos, tokens, solo lectura, entorno).
 
 ## Más allá de estos criterios
 

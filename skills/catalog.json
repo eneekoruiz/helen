@@ -214,7 +214,7 @@
         "03-finish-features",
         "07-client-handoff"
       ],
-      "notes": "Useful for HELEN's visual regression and browser smoke test prompts.",
+      "notes": "Useful for HELEN's visual regression and browser smoke test prompts. MCP alternative: playwright-mcp.",
       "status": "active"
     },
     {
@@ -268,7 +268,7 @@
         "06-release",
         "07-client-handoff"
       ],
-      "notes": "Set environment variables in the host dashboard, never in the repo.",
+      "notes": "Set environment variables in the host dashboard, never in the repo. An official Vercel MCP exists: vercel-mcp.",
       "status": "active"
     },
     {
@@ -445,6 +445,122 @@
         "02-building"
       ],
       "notes": "Shown in a video as a tool for Antigravity; it is no longer maintained. Kept in the catalog so it is not re-added by mistake."
+    },
+    {
+      "id": "playwright-mcp",
+      "name": "Playwright MCP (Microsoft)",
+      "category": "verify",
+      "kind": "mcp",
+      "status": "active",
+      "source": "https://github.com/microsoft/playwright-mcp",
+      "summary": "MCP server that lets the agent drive a real browser: open pages, click, take screenshots, check what the user sees.",
+      "install": [
+        "claude mcp add playwright npx @playwright/mcp@latest",
+        "codex mcp add playwright npx \"@playwright/mcp@latest\"",
+        "# Any client, JSON: {\"mcpServers\":{\"playwright\":{\"command\":\"npx\",\"args\":[\"@playwright/mcp@latest\"]}}}"
+      ],
+      "license": "Apache-2.0",
+      "phases": [
+        "03-finish-features",
+        "07-client-handoff"
+      ],
+      "notes": "Its README says it is not a security boundary: do not point it at sites with sensitive sessions. Prefer playwright-cli when a CLI is enough (fewer tokens)."
+    },
+    {
+      "id": "chrome-devtools-mcp",
+      "name": "Chrome DevTools MCP (Google)",
+      "category": "verify",
+      "kind": "mcp",
+      "status": "active",
+      "source": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
+      "summary": "Lets the agent inspect a live Chrome: performance traces (LCP, CLS), network, console, automation. Its README names Antigravity, Claude, Cursor and Copilot as clients.",
+      "install": [
+        "# Any client, JSON: {\"mcpServers\":{\"chrome-devtools\":{\"command\":\"npx\",\"args\":[\"-y\",\"chrome-devtools-mcp@latest\"]}}}",
+        "# Add --no-usage-statistics to the args to opt out of Google usage statistics."
+      ],
+      "license": "Apache-2.0",
+      "phases": [
+        "03-finish-features",
+        "04-before-production"
+      ],
+      "notes": "Collects usage statistics unless you opt out. Do not open sensitive or personal pages while it is connected. Good evidence source for the audit-performance-budget prompts."
+    },
+    {
+      "id": "context7",
+      "name": "Context7 (Upstash)",
+      "category": "docs",
+      "kind": "mcp",
+      "status": "active",
+      "source": "https://github.com/upstash/context7",
+      "summary": "Brings current, version-specific library documentation into the agent so it stops inventing outdated APIs.",
+      "install": [
+        "npx ctx7 setup --claude   # or: npx ctx7 setup",
+        "# Manual: server URL https://mcp.context7.com/mcp with header Authorization: Bearer <API_KEY>"
+      ],
+      "license": "MIT",
+      "phases": [
+        "02-building",
+        "03-finish-features"
+      ],
+      "notes": "A free API key gives higher rate limits: keep it in an environment variable, never in the repo."
+    },
+    {
+      "id": "github-mcp",
+      "name": "GitHub MCP Server",
+      "category": "deploy",
+      "kind": "mcp",
+      "status": "active",
+      "source": "https://github.com/github/github-mcp-server",
+      "summary": "Official GitHub MCP: read and change repositories, issues and pull requests from the agent.",
+      "install": [
+        "# Remote (HTTP): {\"servers\":{\"github\":{\"type\":\"http\",\"url\":\"https://api.githubcopilot.com/mcp/\"}}}",
+        "# Local: docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN ghcr.io/github/github-mcp-server",
+        "# Claude Code/Desktop: see the install guide in the repository docs (not reproduced here)."
+      ],
+      "license": "MIT",
+      "phases": [
+        "05-final-audit",
+        "06-release"
+      ],
+      "notes": "Least privilege: minimum token scopes, a separate token per project, never commit it, use read-only mode when you only need to look. Writing tools (merge, delete) should require your confirmation."
+    },
+    {
+      "id": "supabase-mcp",
+      "name": "Supabase MCP",
+      "category": "data",
+      "kind": "mcp",
+      "status": "active",
+      "source": "https://github.com/supabase-community/supabase-mcp",
+      "summary": "Connects the agent to Supabase projects: tables, SQL, migrations, logs, docs.",
+      "install": [
+        "# Any client, JSON: {\"mcpServers\":{\"supabase\":{\"type\":\"http\",\"url\":\"https://mcp.supabase.com/mcp\"}}}",
+        "# Safer URL parameters: ?read_only=true&project_ref=<project-ref>&features=database,docs"
+      ],
+      "license": "Apache-2.0",
+      "phases": [
+        "02-building"
+      ],
+      "notes": "Use it against a development project, not production. Prefer read_only=true and project_ref scoping; never share service credentials across environments."
+    },
+    {
+      "id": "vercel-mcp",
+      "name": "Vercel MCP",
+      "category": "deploy",
+      "kind": "mcp",
+      "status": "active",
+      "source": "https://vercel.com/docs/agent-resources/vercel-mcp",
+      "summary": "Vercel's official remote MCP (OAuth): search docs, manage projects and deployments, read logs, query analytics.",
+      "install": [
+        "claude mcp add --transport http vercel https://mcp.vercel.com   # then /mcp to authenticate",
+        "codex mcp add vercel --url https://mcp.vercel.com",
+        "npx add-mcp https://mcp.vercel.com   # detects your installed agents and configures each"
+      ],
+      "license": "Service (Vercel terms). Beta at verification time.",
+      "phases": [
+        "06-release",
+        "07-client-handoff"
+      ],
+      "notes": "Connecting it gives the agent the same access as your Vercel user. Keep human confirmation on for deploys and purchases, and only trust the official URL https://mcp.vercel.com. Beware prompt injection through logs or web content."
     }
   ]
 }
