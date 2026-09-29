@@ -166,3 +166,14 @@ Pendiente (requiere decisión tuya, no lo he tocado):
 - Evals de cada skill (skill-creator) en al menos dos agentes.
 - Fusionar los ~15 prompts solapados de `03-finish-features/visual/` (decisión editorial).
 - Regla de aprobación de PRs y fijar un tag de release para el `curl`.
+
+
+## 11. Segunda ronda (capturas de herramientas, `helen apply` y guía)
+
+- **Catálogo** (`skills/catalog.json`, 25 entradas con `status`): taste-skill, image-to-code, impeccable, ui-ux-pro-max, frontend-design, web-design-guidelines, humanizer, cro-optimization, seo, scroll-craft, transitions-dev, animos-app, 21st-dev, playwright-cli, awesome-design-md, google-design-md, inspiration-sources, godly, deck-gallery, gsd-core, ralph-loop, coderabbit, roo-code, github-cli, hosting. Hallazgos verificados al catalogar: Roo Code está archivado (marcado `discontinued`); el GSD original está archivado y continúa como GSD Core; `godly.website` redirige a `recent.design`; CodeRabbit propone `curl | sh` y procesa código en un servicio de terceros; existen varios repos `taste-skill` (se usa el de la captura, `Leonxlnx/taste-skill`, cuyas estrellas coinciden). Dos nombres dictados eran ambiguos y se interpretaron como `animos.app` y `godly.website` (marcado en las notas).
+- **Skills propias** (16 en total): se añaden `helen-apply`, `helen-security`, `helen-seo-compliance`, `helen-qa-scale`, `helen-copy-cro`, `helen-motion-3d`, `helen-client-handoff`, `helen-knowledge`, `helen-strategy` y `helen-data-api`.
+- **Prompts nuevos**: `init-design-md-and-inspiration`, `generate-portfolio-layout-patterns`, `enhance-copy-humanization-and-cro`, `plan-agentic-loop-and-spec-driven-workflow`, `audit-automated-code-review-setup`, `apply-deploy-github-and-hosting`, `audit-third-party-skills-supply-chain` y el flow `apply-premium-site-stack-flow`; registrados en READMEs, ROUTERs, COVERAGE, USE_CASE_INDEX y registry.
+- **Sistema `helen apply`**: `docs/prompts/playbooks.json` (15 metas, mapa fase→metas) + `helen apply [meta]` (detecta fase con evidencia, plan, `--brief`, `--install`) + skill `helen-apply`. Los playbooks se validan contra prompts, skills y catálogo (`helen prompts lint` y tests).
+- **Guía**: `docs/GUIA.md` (también `helen guide`) explica prompts vs flows vs checkpoints vs skills vs catálogo vs playbooks, dónde ver lo que hay, cómo instalar y usar.
+
+Limitaciones conocidas: la detección de fase es una heurística por archivos; los comandos del catálogo provienen del README de cada proyecto en el momento de la verificación; sigue pendiente la decisión sobre `orchestrator.ts`/`src/components` (documentados como experimentales).

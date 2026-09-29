@@ -16,6 +16,9 @@ stop_conditions:
 Usa este router para llevar una experiencia funcional a nivel premium.
 
 ## Decision rapida
+- Quieres el stack completo de web premium hasta publicar: usa `apply-premium-site-stack-flow.md`.
+- Falta patrón de layout: usa `generate-portfolio-layout-patterns.md`.
+- El texto suena a IA o no convierte: usa `enhance-copy-humanization-and-cro.md`.
 - No existe infraestructura 3D: usa `3d/generate-3d-global-canvas-setup.md`.
 - Existe setup 3D y falta una escena concreta: usa `3d/generate-3d-isolated-experience-component.md`.
 - La escena existe pero parece barata o inestable: usa `3d/enhance-3d-premium-scene-polish.md`.

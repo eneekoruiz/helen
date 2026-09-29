@@ -31,9 +31,22 @@ npx helen-cli modules
 - `helen prompts show <id>`
 - `helen prompts path <id>`
 - `helen prompts flow <id>`
+- `helen guide`
+- `helen apply [goal] [--brief] [--install]`
+- `helen skills catalog [--category <c>]` / `helen skills external <id>` / `helen skills installed`
 - `helen prompts lint`
 - `helen skills list [--flows]`
 - `helen skills install [names...] [--target claude codex custom] [--dir <path>] [--flows]`
+
+## Start here
+
+```bash
+helen guide                 # what prompts, skills, catalog and playbooks are (docs/GUIA.md)
+helen apply                 # detect the project phase and suggest goals
+helen apply design          # plan: prompts, skills and tools for a goal
+```
+
+Or tell your AI: "Use HELEN: analyze where the project is and what to apply" (with the `helen-apply` skill installed). Full explanation in [docs/GUIA.md](docs/GUIA.md).
 
 ## Agent Skills
 
@@ -46,7 +59,8 @@ helen skills install --target custom --dir <path> # any other agent: pass its sk
 helen skills install --target claude --flows      # also install each executable flow as helen-flow-<id>
 ```
 
-Bundled skills: `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`, `helen-release`, `helen-router`.
+Bundled skills: `helen-apply` (entry point), `helen-router`, `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`, `helen-copy-cro`, `helen-motion-3d`, `helen-security`, `helen-seo-compliance`, `helen-qa-scale`, `helen-release`, `helen-client-handoff`, `helen-strategy`, `helen-data-api`, `helen-knowledge`.
+Third-party tools live in a catalog (`helen skills catalog`); HELEN only prints their install commands.
 
 Known targets are limited to the ones with documented paths; use `custom` for everything else.
 

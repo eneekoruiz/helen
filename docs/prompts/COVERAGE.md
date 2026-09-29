@@ -10,7 +10,8 @@ If a new request fits one of these canonical intentions, improve the existing pr
 
 | Momento / Fase | Intención Canónica | Archivo Correspondiente |
 |---|---|---|
-| **01-start-project** | Escaneo inicial de riesgos del proyecto | `01-start-project/audit/audit-initial-project-risk-scan.md` |
+| **01-start-project** | Inspiración y DESIGN.md | `01-start-project/init/init-design-md-and-inspiration.md` |
+| | Escaneo inicial de riesgos del proyecto | `01-start-project/audit/audit-initial-project-risk-scan.md` |
 | | Auditoría de metodología y puntos ciegos | `01-start-project/audit/audit-methodology-and-blind-spots.md` |
 | | Auditoría de arquitectura, operaciones y riesgos | `01-start-project/audit/audit-architecture-operations-and-risk.md` |
 | | Auditoría de onboarding del desarrollador | `01-start-project/audit/audit-developer-onboarding.md` |
@@ -45,6 +46,9 @@ If a new request fits one of these canonical intentions, improve the existing pr
 | | Flujo de pase visual y UX | `03-finish-features/flow/apply-ux-visual-pass-flow.md` |
 | | Flujo de revisión de diseño estilo Awwwards/SOTY | `03-finish-features/flow/audit-awwwards-soty-design-review-flow.md` |
 | | Flujo completo de pulido guiado | `03-finish-features/flow/apply-full-polish-flow.md` |
+| | Stack completo de web premium hasta publicar | `03-finish-features/flow/apply-premium-site-stack-flow.md` |
+| | Patrones de layout de portfolio y showcase | `03-finish-features/visual/generate-portfolio-layout-patterns.md` |
+| | Humanización de copy y CRO | `03-finish-features/visual/enhance-copy-humanization-and-cro.md` |
 | | Checkpoint de regresión visual y de UX | `03-finish-features/flow/audit-visual-ux-regression-checkpoint.md` |
 | **04-before-production** | QA adversarial y casos de borde | `04-before-production/qa/audit-adversarial-qa-and-edge-cases.md` |
 | | Auditoría de stress, escala y costos | `04-before-production/qa/audit-stress-scale-and-cost.md` |

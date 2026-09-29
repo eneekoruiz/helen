@@ -16,6 +16,7 @@ stop_conditions:
 Usa este router para mantener calidad, gobernanza y crecimiento.
 
 ## Decision rapida
+- Vas a instalar una skill o plugin de terceros: usa `audit-third-party-skills-supply-chain.md` primero.
 - La biblioteca de prompts crece sin orden: usa `apply-prompt-library-maintenance-flow.md`.
 - Hay riesgo de datos o backups: usa `audit-data-lifecycle-backup-and-recovery.md`.
 - Hay deuda de repositorio: usa `audit-repository-governance-and-compliance.md`.

@@ -21,6 +21,7 @@ Congelar el código verificado y empaquetar la versión estable (Release Candida
 | Prompt / Flow / Checkpoint | Intención | Propósito / Cuándo usarlo | Frecuencia |
 |---|---|---|---|
 | [release-checklist.md](planning/PLAN-release-checklist.md) | **PLAN/AUDIT** | Puerta de calidad global y veredicto final de release. | Alta |
+| [deploy-github-and-hosting.md](deploy/APPLY-deploy-github-and-hosting.md) | **APPLY** | Subir a GitHub (privado) y conectar el hosting con variables de entorno seguras. | Alta |
 | [release-notes-changelog-and-demo-package.md](notes/GENERATE-release-notes-changelog-and-demo-package.md) | **GENERATE** | Generar changelogs, guías de migración y guión de demo. | Alta |
 | [release-candidate-flow.md](flow/APPLY-release-candidate-flow.md) | **PLAN flow** | Flujo completo de comprobación final (builds, tests, i18n, SEO, seguridad). | Alta |
 | [release-readiness-checkpoint.md](flow/AUDIT-release-readiness-checkpoint.md) | **Checkpoint** | Validar que no quedan flecos técnicos abiertos antes del tag de release. | Alta |

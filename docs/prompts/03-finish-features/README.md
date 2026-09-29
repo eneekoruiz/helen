@@ -43,6 +43,9 @@ Elevar la experiencia de usuario (UX) e interfaz (UI) de un estado puramente fun
 | [ux-visual-pass-flow.md](flow/APPLY-ux-visual-pass-flow.md) | **APPLY flow** | Flujo compuesto centrado en pulir visualmente y resolver responsive. | Media |
 | [awwwards-soty-design-review-flow.md](flow/AUDIT-awwwards-soty-design-review-flow.md) | **AUDIT/APPLY flow** | Flujo completo de craft estético y revisión de visual excellence. | Media |
 | [full-polish-flow.md](flow/APPLY-full-polish-flow.md) | **APPLY flow** | El flujo más amplio de refinamiento UX, visual, responsive y verificación. | Alta |
+| [premium-site-stack-flow.md](flow/APPLY-premium-site-stack-flow.md) | **APPLY flow** | Stack completo: inspiración, diseño, textos, animación, calidad, SEO y publicación, con herramientas del catálogo. | Alta |
+| [portfolio-layout-patterns.md](visual/GENERATE-portfolio-layout-patterns.md) | **GENERATE** | Elegir e implementar un patrón de layout de portfolio o showcase (sandwich, trabajo primero, sticky split). | Media |
+| [copy-humanization-and-cro.md](visual/ENHANCE-copy-humanization-and-cro.md) | **ENHANCE** | Quitar rastros de IA del texto y mejorar titulares, CTAs y formularios sin inventar claims. | Alta |
 | [visual-ux-regression-checkpoint.md](flow/AUDIT-visual-ux-regression-checkpoint.md) | **Checkpoint** | Validar que no hay roturas visuales ni regresiones tras los cambios. | Alta |
 
 ---

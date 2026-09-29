@@ -1,0 +1,203 @@
+{
+  "version": 1,
+  "purpose": "Goal -> ordered steps (HELEN prompts, flows, checkpoints, bundled skills and catalog tools). Read by 'helen apply' and by the helen-apply skill.",
+  "phaseGoals": {
+    "01-start-project": ["strategy", "design"],
+    "02-building": ["quality", "security", "data", "autonomy"],
+    "03-finish-features": ["design", "copy", "motion", "quality"],
+    "04-before-production": ["qa", "security", "seo-legal"],
+    "05-final-audit": ["quality", "seo-legal", "knowledge"],
+    "06-release": ["release", "deploy"],
+    "07-client-handoff": ["handoff", "copy"],
+    "08-maintenance": ["knowledge", "safe-install"],
+    "09-future-knowledge": ["knowledge"]
+  },
+  "goals": {
+    "design": {
+      "title": "Diseño premium",
+      "description": "Inspiración, identidad visual, layout, criterio visual, responsive y calidad. Elige UNA skill de diseño principal.",
+      "keywords": ["diseñ", "design", "visual", "ui", "ux", "estétic", "premium", "look"],
+      "steps": [
+        { "kind": "prompt", "ref": "init-design-md-and-inspiration", "why": "Reunir referencias y crear DESIGN.md validado" },
+        { "kind": "skill", "ref": "helen-premium-design", "why": "Criterio de diseño premium y anti-plantilla" },
+        { "kind": "external", "ref": "taste-skill", "why": "Skill de diseño principal (alternativas: impeccable, ui-ux-pro-max; usa solo una)" },
+        { "kind": "prompt", "ref": "generate-portfolio-layout-patterns", "why": "Elegir patrón de layout" },
+        { "kind": "flow", "ref": "apply-premium-site-stack-flow", "why": "Flujo completo de diseño hasta publicar" },
+        { "kind": "prompt", "ref": "enhance-taste-visual-pov", "why": "Punto de vista visual propio" },
+        { "kind": "prompt", "ref": "audit-ai-trace-erasure-and-human-craft", "why": "Eliminar rastros de plantilla o IA" },
+        { "kind": "prompt", "ref": "apply-responsive-pass", "why": "Responsive real" },
+        { "kind": "prompt", "ref": "apply-premium-detail-pass", "why": "Detalles finos" },
+        { "kind": "external", "ref": "web-design-guidelines", "why": "Revisión con 100+ reglas de interfaz" },
+        { "kind": "checkpoint", "ref": "audit-visual-ux-regression-checkpoint", "why": "Comprobar que no hay regresiones visuales" }
+      ]
+    },
+    "copy": {
+      "title": "Textos y conversión",
+      "description": "Quitar rastros de IA, verificar claims y mejorar titulares, botones y formularios.",
+      "keywords": ["texto", "copy", "cro", "conversi", "humaniz", "claims", "cta"],
+      "steps": [
+        { "kind": "skill", "ref": "helen-copy-cro", "why": "Criterios de copy y conversión" },
+        { "kind": "prompt", "ref": "audit-content-copy-brand-and-claims", "why": "Auditar tono, marca y claims" },
+        { "kind": "prompt", "ref": "enhance-copy-humanization-and-cro", "why": "Humanizar y optimizar" },
+        { "kind": "prompt", "ref": "audit-links-forms-ctas-and-conversion-paths", "why": "Enlaces, formularios y CTAs" },
+        { "kind": "external", "ref": "humanizer", "why": "Skill para quitar patrones de IA" },
+        { "kind": "external", "ref": "cro-optimization", "why": "Marco de 13 principios CRO" }
+      ]
+    },
+    "motion": {
+      "title": "Animación, scroll y 3D",
+      "description": "Motion con función, transiciones, scroll-driven y 3D con presupuesto de rendimiento.",
+      "keywords": ["anim", "motion", "scroll", "3d", "transici", "shader", "video"],
+      "steps": [
+        { "kind": "skill", "ref": "helen-motion-3d", "why": "Reglas de motion y presupuesto" },
+        { "kind": "prompt", "ref": "enhance-motion-polish-and-transitions", "why": "Pulir motion y transiciones" },
+        { "kind": "prompt", "ref": "enhance-scroll-linked-sequences", "why": "Secuencias ligadas al scroll" },
+        { "kind": "prompt", "ref": "enhance-native-view-transitions", "why": "View Transitions nativas" },
+        { "kind": "external", "ref": "scroll-craft", "why": "Skill para sitios scroll-driven" },
+        { "kind": "external", "ref": "transitions-dev", "why": "Librería y agente de transiciones" },
+        { "kind": "external", "ref": "21st-dev", "why": "Componentes listos" },
+        { "kind": "prompt", "ref": "audit-performance-budget-for-cinematic-sites", "why": "Presupuesto de rendimiento" },
+        { "kind": "prompt", "ref": "audit-animation-performance-and-fps", "why": "FPS y rendimiento de animación" }
+      ]
+    },
+    "quality": {
+      "title": "Calidad de código, accesibilidad y rendimiento",
+      "description": "Clean code sin cambiar comportamiento, accesibilidad, rendimiento y checkpoints de build, lint y tests.",
+      "keywords": ["limpi", "clean", "refactor", "accesib", "a11y", "rendim", "performance", "calidad", "código", "codigo"],
+      "steps": [
+        { "kind": "checkpoint", "ref": "audit-build-and-compile-checkpoint", "why": "Punto de partida: compila" },
+        { "kind": "skill", "ref": "helen-clean-code", "why": "Criterios de clean code" },
+        { "kind": "flow", "ref": "apply-clean-code-pass-flow", "why": "Pasada de clean code" },
+        { "kind": "skill", "ref": "helen-a11y-perf", "why": "Accesibilidad y rendimiento" },
+        { "kind": "prompt", "ref": "apply-basic-accessibility-pass", "why": "Accesibilidad básica" },
+        { "kind": "prompt", "ref": "apply-basic-performance-pass", "why": "Rendimiento básico" },
+        { "kind": "checkpoint", "ref": "audit-lint-and-typecheck-checkpoint", "why": "Lint y tipos" },
+        { "kind": "checkpoint", "ref": "audit-test-suite-checkpoint", "why": "Tests" }
+      ]
+    },
+    "security": {
+      "title": "Seguridad",
+      "description": "Secretos, inyecciones, dependencias y permisos.",
+      "keywords": ["segur", "security", "vulnerab", "secret", "hardening"],
+      "steps": [
+        { "kind": "skill", "ref": "helen-security", "why": "Criterios de seguridad" },
+        { "kind": "checkpoint", "ref": "audit-security-risk-checkpoint", "why": "Punto de control de riesgo" },
+        { "kind": "flow", "ref": "apply-security-hardening-flow", "why": "Endurecer el proyecto" }
+      ]
+    },
+    "seo-legal": {
+      "title": "SEO, i18n y cumplimiento",
+      "description": "SEO técnico, idiomas, privacidad y claims legales.",
+      "keywords": ["seo", "legal", "privacidad", "gdpr", "cookie", "i18n", "idioma", "indexa"],
+      "steps": [
+        { "kind": "skill", "ref": "helen-seo-compliance", "why": "Criterios de SEO y cumplimiento" },
+        { "kind": "prompt", "ref": "audit-final-seo", "why": "SEO técnico" },
+        { "kind": "prompt", "ref": "audit-i18n-flow", "why": "Internacionalización" },
+        { "kind": "prompt", "ref": "audit-privacy-legal-and-compliance", "why": "Privacidad y legal" },
+        { "kind": "external", "ref": "seo", "why": "Skill externa de SEO técnico (revisar antes)" }
+      ]
+    },
+    "qa": {
+      "title": "QA, escala y observabilidad",
+      "description": "Qué se rompe con malos datos, carga, reintentos y fallos parciales.",
+      "keywords": ["qa", "prueba", "test", "escala", "observ", "estr", "edge", "carga"],
+      "steps": [
+        { "kind": "skill", "ref": "helen-qa-scale", "why": "Criterios de QA y escala" },
+        { "kind": "prompt", "ref": "audit-fast-build-test-verification", "why": "Verificación rápida" },
+        { "kind": "prompt", "ref": "audit-adversarial-qa-and-edge-cases", "why": "QA adversarial" },
+        { "kind": "prompt", "ref": "audit-stress-scale-and-cost", "why": "Escala y coste" },
+        { "kind": "prompt", "ref": "audit-observability-instrumentation", "why": "Observabilidad" },
+        { "kind": "flow", "ref": "apply-prefinal-hardening-flow", "why": "Endurecimiento previo al final" }
+      ]
+    },
+    "release": {
+      "title": "Release candidate",
+      "description": "Puertas de calidad y veredicto RC READY, RC WITH CAVEATS o NOT RC READY.",
+      "keywords": ["release", "lanzar", "lanzamiento", "versi", "changelog", "publicar versi"],
+      "steps": [
+        { "kind": "skill", "ref": "helen-release", "why": "Secuencia de release" },
+        { "kind": "flow", "ref": "apply-release-candidate-flow", "why": "Flujo completo de release candidate" },
+        { "kind": "prompt", "ref": "generate-release-notes-changelog-and-demo-package", "why": "Notas, changelog y demo" },
+        { "kind": "checkpoint", "ref": "audit-release-readiness-checkpoint", "why": "Puerta final" }
+      ]
+    },
+    "deploy": {
+      "title": "Publicar la web",
+      "description": "GitHub privado y hosting conectado, sin filtrar secretos.",
+      "keywords": ["desplieg", "deploy", "publicar", "hosting", "github", "vercel", "cloudflare", "online"],
+      "steps": [
+        { "kind": "prompt", "ref": "apply-deploy-github-and-hosting", "why": "Subir y desplegar" },
+        { "kind": "external", "ref": "github-cli", "why": "Comandos gh" },
+        { "kind": "external", "ref": "hosting", "why": "Vercel o Cloudflare" },
+        { "kind": "checkpoint", "ref": "audit-release-readiness-checkpoint", "why": "Antes de publicar" }
+      ]
+    },
+    "handoff": {
+      "title": "Entrega a cliente",
+      "description": "Paquete de entrega, accesos, smoke test y sign-off.",
+      "keywords": ["cliente", "entrega", "handoff", "traspaso"],
+      "steps": [
+        { "kind": "skill", "ref": "helen-client-handoff", "why": "Checklist de entrega" },
+        { "kind": "flow", "ref": "apply-client-delivery-flow", "why": "Flujo de entrega" },
+        { "kind": "prompt", "ref": "audit-browser-smoke-test-and-demo-readiness", "why": "Smoke test en navegador" },
+        { "kind": "prompt", "ref": "audit-media-assets-alt-text-and-performance", "why": "Media y alt text" },
+        { "kind": "external", "ref": "playwright-cli", "why": "Que el agente vea la página" }
+      ]
+    },
+    "strategy": {
+      "title": "Estrategia y priorización",
+      "description": "Riesgos iniciales, benchmark, roadmap por ROI y base visual.",
+      "keywords": ["estrateg", "mercado", "roadmap", "competid", "priori", "idea", "empezar", "inicio"],
+      "steps": [
+        { "kind": "skill", "ref": "helen-strategy", "why": "Criterios de estrategia" },
+        { "kind": "prompt", "ref": "audit-initial-project-risk-scan", "why": "Riesgos iniciales" },
+        { "kind": "prompt", "ref": "research-competitive-benchmark", "why": "Benchmark competitivo" },
+        { "kind": "prompt", "ref": "plan-roadmap-roi-prioritization", "why": "Roadmap por ROI" },
+        { "kind": "external", "ref": "deck-gallery", "why": "Referencias de decks" }
+      ]
+    },
+    "data": {
+      "title": "Datos y APIs",
+      "description": "Contratos de API, integraciones y modelo de datos.",
+      "keywords": ["api", "datos", "modelo", "integraci", "base de datos", "contrato"],
+      "steps": [
+        { "kind": "skill", "ref": "helen-data-api", "why": "Criterios de datos y APIs" },
+        { "kind": "prompt", "ref": "audit-api-integration-and-contract", "why": "Contratos" },
+        { "kind": "prompt", "ref": "audit-data-model-and-domain-integrity", "why": "Integridad del modelo" }
+      ]
+    },
+    "knowledge": {
+      "title": "Conocimiento y continuidad",
+      "description": "ADRs, contexto para IA, runbook y factor autobús.",
+      "keywords": ["document", "adr", "bus factor", "runbook", "conocimiento", "onboarding", "continuidad"],
+      "steps": [
+        { "kind": "skill", "ref": "helen-knowledge", "why": "Criterios de conocimiento" },
+        { "kind": "prompt", "ref": "generate-ai-context", "why": "Archivo de contexto para IA" },
+        { "kind": "prompt", "ref": "generate-decision-log", "why": "Registro de decisiones" },
+        { "kind": "prompt", "ref": "audit-bus-factor", "why": "Factor autobús" },
+        { "kind": "prompt", "ref": "generate-runbook", "why": "Runbook operativo" }
+      ]
+    },
+    "autonomy": {
+      "title": "Trabajo autónomo del agente",
+      "description": "Bucles y flujos por especificación con límites, y revisión automática.",
+      "keywords": ["autónom", "autonom", "loop", "bucle", "agente", "ralph", "gsd"],
+      "steps": [
+        { "kind": "prompt", "ref": "plan-agentic-loop-and-spec-driven-workflow", "why": "Reglas antes de dejar iterar" },
+        { "kind": "external", "ref": "ralph-loop", "why": "Iterar hasta cumplir un criterio" },
+        { "kind": "external", "ref": "gsd-core", "why": "Desarrollo por especificación" },
+        { "kind": "prompt", "ref": "audit-automated-code-review-setup", "why": "Revisión automática de PR" },
+        { "kind": "external", "ref": "coderabbit", "why": "Revisión con IA (servicio de terceros)" }
+      ]
+    },
+    "safe-install": {
+      "title": "Instalar skills de terceros con seguridad",
+      "description": "Revisar origen, estado, licencia y scripts antes de instalar.",
+      "keywords": ["instalar", "terceros", "plugin", "skill externa", "supply chain"],
+      "steps": [
+        { "kind": "prompt", "ref": "audit-third-party-skills-supply-chain", "why": "Revisión previa obligatoria" },
+        { "kind": "skill", "ref": "helen-security", "why": "Criterios de seguridad" }
+      ]
+    }
+  }
+}

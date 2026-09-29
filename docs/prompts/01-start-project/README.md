@@ -29,6 +29,7 @@ Establecer las bases metodológicas, analizar riesgos iniciales, evaluar la arqu
 |---|---|---|---|
 | [init-master-business-core.md](init/INIT-master-business-core.md) | **INIT** | Inyectar ADN de negocio, tono premium y arquitectura de conversión antes del scaffold. | Alta (Cada proyecto nuevo) |
 | [init-architecture-and-scaffold.md](init/INIT-architecture-and-scaffold.md) | **INIT** | Convertir el briefing en estructura visual, layout base, tokens y sistema inicial UI UX PRO MAX. | Alta (Cada proyecto nuevo) |
+| [design-md-and-inspiration.md](init/INIT-design-md-and-inspiration.md) | **INIT** | Reunir inspiración real y capturar la identidad visual en un `DESIGN.md` validado. | Alta (Proyectos visuales) |
 | [audit-competitor-analysis.md](market/AUDIT-competitor-analysis.md) | **AUDIT** | Escanear competidores para extraer UX, CRO, flujos, trust signals y gaps accionables. | Media |
 | [generate-competitive-cloning.md](market/GENERATE-competitive-cloning.md) | **GENERATE** | Implementar funcionalidades competitivas faltantes en nuestro stack, mejoradas y sin copiar marca. | Media |
 | [initial-project-risk-scan.md](audit/AUDIT-initial-project-risk-scan.md) | **AUDIT** | Diagnóstico rápido y ligero de riesgos de build, UX, docs y seguridad. | Alta (Cada inicio de iteración amplia) |

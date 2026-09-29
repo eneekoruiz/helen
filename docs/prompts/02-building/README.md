@@ -29,6 +29,7 @@ Escribir código limpio, modular, robusto y seguro mientras se implementan las f
 |---|---|---|---|
 | [generate-visual-cms-wysiwyg-i18n.md](cms/GENERATE-visual-cms-wysiwyg-i18n.md) | **GENERATE** | Implementar CMS WYSIWYG protegido con matriz de campos universales/traducibles para i18n. | Media (Si aplica CMS cliente) |
 | [safe-clean-code-simplification-pass.md](clean-code/APPLY-safe-clean-code-simplification-pass.md) | **APPLY** | Simplificación y refactorización local segura (clean code). | Alta (Antes de cada commit importante) |
+| [agentic-loop-and-spec-driven-workflow.md](automation/PLAN-agentic-loop-and-spec-driven-workflow.md) | **PLAN** | Decidir cuándo usar bucles autónomos o flujos por especificación, con límites y puntos de control. | Media (Construcciones largas) |
 | [security-hardening.md](security/APPLY-security-hardening-flow.md) | **APPLY flow** | Mitigar riesgos de secretos, inyecciones, dependencias inseguras y malas prácticas. | Media |
 | [cms-editable-content-conversion.md](cms/APPLY-cms-editable-content-conversion-flow.md) | **APPLY flow** | Flujo para mover textos e imágenes estáticas a campos editables del CMS. | Baja (Sólo si aplica CMS) |
 | [content-model-and-editorial-workflow-audit.md](data-api/AUDIT-content-model-and-editorial-workflow.md) | **AUDIT** | Revisar la estructura y el flujo editorial del CMS. | Baja |

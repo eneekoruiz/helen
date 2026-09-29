@@ -1,3 +1,6 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import * as p from '@clack/prompts';
 import { logger } from './core/logger.js';
@@ -9,6 +12,8 @@ import { showMainMenu, showModuleSelector, showExplainSelector, printModuleExpla
 import { generateModuleDocs } from './core/docs.js';
 import { printPromptContent, printPromptList, printPromptPath, type PromptKind } from './core/prompts.js';
 import { ejectModule } from './core/moduleRunner.js';
+import { buildPlan, detectPhase, formatBrief, formatPlan, readPlaybooks, suggestedGoals, installedSkillNames, validatePlaybooks } from './core/apply.js';
+import { getCatalogItem, listCatalog } from './core/catalog.js';
 import { lintPrompts } from './core/promptLint.js';
 import { SKILL_TARGETS, installSkills, listFlowSkills, listSkills, type SkillTarget } from './core/skills.js';
 import { readConfig, updateConfig } from './core/config.js';
@@ -438,10 +443,14 @@ export function createProgram(): Command {
     .description('Validate prompt frontmatter and links against the Premium Prompt Contract')
     .action(() => {
       const issues = lintPrompts();
+      const playbookIssues = validatePlaybooks();
       for (const issue of issues) {
         logger.error(`${issue.file}: ${issue.message}`);
       }
-      if (issues.length > 0) {
+      for (const issue of playbookIssues) {
+        logger.error(`playbooks.json: ${issue}`);
+      }
+      if (issues.length > 0 || playbookIssues.length > 0) {
         process.exitCode = 1;
         return;
       }
@@ -478,6 +487,49 @@ export function createProgram(): Command {
     .action((flow: string) => {
       try {
         printPromptContent(flow);
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  // helen guide
+  program
+    .command('guide')
+    .description('Print the user guide: what prompts, skills, catalog and playbooks are and how to use them')
+    .action(() => {
+      const guide = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'docs', 'GUIA.md');
+      console.log(fs.existsSync(guide) ? fs.readFileSync(guide, 'utf-8') : 'Guide not found (docs/GUIA.md).');
+    });
+
+  // helen apply
+  program
+    .command('apply [goal...]')
+    .description('Analyze the project, detect its phase, and plan which HELEN prompts, skills and tools to use for a goal (e.g. "design", "release", "mejora el diseño")')
+    .option('--brief', 'Print a paste-ready brief for an AI agent instead of the plan', false)
+    .option('--install', 'Install the bundled skills the goal needs into --target', false)
+    .option('--target <targets...>', 'Where to install skills: claude, codex, custom', ['claude'])
+    .option('--dir <path>', 'Project-relative directory for the "custom" target')
+    .action((goalWords: string[], opts: { brief: boolean; install: boolean; target: string[]; dir?: string }) => {
+      try {
+        const playbooks = readPlaybooks();
+        const cwd = process.cwd();
+        if (goalWords.length === 0) {
+          const detection = detectPhase(cwd);
+          console.log(`Detected phase: ${detection.phase} (confidence ${detection.confidence}; estimate, please confirm)`);
+          console.log(`Evidence: ${detection.evidence.join('; ')}`);
+          console.log(`Suggested goals for this phase: ${suggestedGoals(detection.phase, playbooks).join(', ')}`);
+          console.log('\nAll goals:');
+          for (const [id, goal] of Object.entries(playbooks.goals)) console.log(`  ${id.padEnd(13)} ${goal.title}`);
+          console.log('\nRun: helen apply <goal>   (add --brief for an AI-ready brief, --install to install the needed skills)');
+          return;
+        }
+        const plan = buildPlan(cwd, goalWords.join(' '), playbooks);
+        console.log(opts.brief ? formatBrief(plan) : formatPlan(plan));
+        if (opts.install && plan.missingSkills.length > 0) {
+          const result = installSkills({ cwd, targets: opts.target as SkillTarget[], customDir: opts.dir, skills: plan.missingSkills });
+          logger.success(`Skills: ${result.created.length} created, ${result.skipped.length} skipped.`);
+        }
       } catch (err) {
         logger.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;
@@ -524,6 +576,45 @@ export function createProgram(): Command {
           force: opts.force,
         });
         logger.success(`Skills: ${result.created.length} created, ${result.overwritten.length} overwritten, ${result.skipped.length} skipped.`);
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  skills
+    .command('installed')
+    .description('Show which skills are installed in this project')
+    .action(() => {
+      const names = installedSkillNames(process.cwd());
+      console.log(names.length > 0 ? names.join('\n') : 'No skills installed in .claude/skills or .agents/skills.');
+    });
+
+  skills
+    .command('catalog')
+    .description('List recommended third-party skills and tools (HELEN never installs them for you)')
+    .option('--category <category>', 'Filter: design, quality, copy, seo, motion, components, verify, deploy, workflow')
+    .action((opts: { category?: string }) => {
+      for (const item of listCatalog(opts.category)) {
+        console.log(`${item.id.padEnd(22)} ${item.category.padEnd(11)} ${item.kind.padEnd(10)} ${item.status.padEnd(12)} ${item.summary}`);
+      }
+    });
+
+  skills
+    .command('external <id>')
+    .description('Show what a catalog item is and the exact commands to install it (prints only, runs nothing)')
+    .action((id: string) => {
+      try {
+        const item = getCatalogItem(id);
+        console.log(`${item.name} [${item.kind}, ${item.status}]`);
+        if (item.status === 'discontinued') console.log('WARNING: discontinued. Do not install.');
+        console.log(item.summary);
+        console.log(`Source:  ${item.source}`);
+        console.log(`License: ${item.license}`);
+        console.log(`Phases:  ${item.phases.join(', ')}`);
+        console.log('\nInstall (review, then run yourself):');
+        for (const command of item.install) console.log(`  ${command}`);
+        if (item.notes) console.log(`\nNote: ${item.notes}`);
       } catch (err) {
         logger.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;

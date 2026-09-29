@@ -16,6 +16,7 @@ stop_conditions:
 Usa este router para elegir el primer prompt correcto.
 
 ## Decision rapida
+- Falta identidad visual o inspiración: usa `init-design-md-and-inspiration.md`.
 - Lienzo en blanco o AI builder nuevo: usa `init-master-business-core.md`.
 - Ya existe briefing de negocio pero falta estructura: usa `init-architecture-and-scaffold.md`.
 - Hay competidores concretos que estudiar: usa `audit-competitor-analysis.md`.

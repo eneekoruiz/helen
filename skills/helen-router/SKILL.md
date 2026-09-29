@@ -30,6 +30,10 @@ Act as a development operating system: show the current state, recommend the nex
 
 Detected phase, brief checklist answers, and the command to run next. No long reports.
 
+## Next step
+
+Once the phase is known, use `helen-apply` to run a goal's playbook (`helen apply <goal>`).
+
 ## Rules
 
 - Do not advance a release or hardening flow if a blocking checkpoint fails.

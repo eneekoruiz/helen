@@ -29,6 +29,7 @@ Ejecutar auditorías profundas y rigurosas de la calidad del código, internacio
 |---|---|---|---|
 | [audit-visual-quality-40k.md](presentation/AUDIT-visual-quality-40k.md) | **AUDIT** | Revisión técnico-visual final de aspecto 40K: luces, cámaras, shaders, motion, composición y conversión. | Alta (Si hay UI premium/3D) |
 | [code-quality-audit.md](code/AUDIT-code-quality.md) | **AUDIT** | Evalúación rigurosa de mantenibilidad, deuda técnica, bugs y tests. | Alta |
+| [automated-code-review-setup.md](code/AUDIT-automated-code-review-setup.md) | **AUDIT** | Evaluar revisión de código automatizada (privacidad, instalación segura, qué bloquea). | Media |
 | [i18n-audit.md](code/AUDIT-i18n-flow.md) | **AUDIT/APPLY flow** | Auditar y corregir el soporte multilingüe, fallbacks y metadatos SEO. | Media |
 | [documentation-audit.md](operations/AUDIT-documentation.md) | **AUDIT** | Validar la veracidad de quick-starts, guías de entorno y ejemplos. | Alta |
 | [github-repository-audit.md](presentation/AUDIT-github-repository-flow.md) | **AUDIT/APPLY flow** | Auditar y pulir la legibilidad y presentación de GitHub (About, topics, tags). | Alta |

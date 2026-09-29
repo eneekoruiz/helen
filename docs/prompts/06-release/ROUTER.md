@@ -16,6 +16,7 @@ stop_conditions:
 Usa este router para preparar version publicable.
 
 ## Decision rapida
+- Toca publicar la web: usa `apply-deploy-github-and-hosting.md`.
 - Falta checklist de salida: usa `plan-release-checklist.md` como **INIT-** operativo.
 - Faltan notas o changelog: usa `generate-release-notes-changelog-and-demo-package.md`.
 - Hay dudas de release: usa `audit-release-readiness-checkpoint.md`.

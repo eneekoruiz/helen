@@ -33,3 +33,7 @@ HELEN does not produce standard web pages. It produces digital assets oriented t
 
 - `references/vocabulary.md`: motion, effects, and library vocabulary the HELEN prompts assume.
 - For deeper flows, use the HELEN prompt library (`helen prompts list`), phase `03-finish-features`.
+
+## Layout patterns
+
+For portfolios and showcases see `references/layouts.md` (sandwich, showcase, sticky split).

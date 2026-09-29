@@ -29,6 +29,7 @@ Garantizar la salud operativa y la evolución sostenible del proyecto a largo pl
 | [cross-audit-synthesis.md](meta/AUDIT-cross-audit-synthesis.md) | **PLAN** | Consolidar hallazgos de múltiples prompts en un solo plan secuenciado. | Alta (Tras auditorías cruzadas) |
 | [yearly-professional-presence-review.md](branding/AUDIT-yearly-professional-presence-review.md) | **APPLY/REPORT** | Revisar anualmente portfolio, GitHub, LinkedIn, CV y posicionamiento profesional como un único ecosistema. | Anual y tras cambios profesionales importantes |
 | [prompt-library-maintenance-flow.md](meta/APPLY-prompt-library-maintenance-flow.md) | **APPLY flow** | Limpiar, actualizar referencias y resolver registry de la biblioteca. | Media |
+| [third-party-skills-supply-chain.md](ops/AUDIT-third-party-skills-supply-chain.md) | **AUDIT** | Revisar origen, estado, licencia y scripts de skills de terceros antes de instalarlas. | Alta (Antes de instalar) |
 
 ---
 

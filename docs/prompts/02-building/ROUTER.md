@@ -16,6 +16,7 @@ stop_conditions:
 Usa este router durante desarrollo activo.
 
 ## Decision rapida
+- Vas a dejar a un agente iterar solo: usa `plan-agentic-loop-and-spec-driven-workflow.md` antes.
 - Falta una funcionalidad nueva: usa un prompt **GENERATE-**.
 - La funcionalidad existe pero necesita refactor o endurecimiento: usa un prompt legacy `apply-*` como **ENHANCE-**.
 - Hay dudas sobre datos, API o CMS: usa primero **AUDIT-**.

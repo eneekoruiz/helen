@@ -16,6 +16,7 @@ stop_conditions:
 Usa este router para el cierre tecnico y visual.
 
 ## Decision rapida
+- Dudas sobre revisión automática de PR: usa `audit-automated-code-review-setup.md`.
 - Hay UI premium o 3D: usa `audit-visual-quality-40k.md`.
 - Hay dudas de mantenibilidad: usa `audit-code-quality.md`.
 - Hay multiidioma: usa `audit-i18n-flow.md`.

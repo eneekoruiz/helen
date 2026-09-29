@@ -47,6 +47,19 @@ Indice operativo para elegir prompts sin memorizar carpetas.
 4. `05-final-audit/ROUTER.md`
 5. `07-client-handoff/ROUTER.md`
 
+## Quiero construir una web premium completa hasta publicarla
+1. `03-finish-features/flow/apply-premium-site-stack-flow.md` (**ENHANCE-**, flow)
+2. `01-start-project/init/init-design-md-and-inspiration.md` (**INIT-**) para inspiración y `DESIGN.md`.
+3. `03-finish-features/visual/generate-portfolio-layout-patterns.md` (**GENERATE-**) y `enhance-copy-humanization-and-cro.md` (**ENHANCE-**).
+4. `06-release/deploy/apply-deploy-github-and-hosting.md` (**ENHANCE-**) para publicar.
+
+## Quiero dejar trabajar a un agente de forma autónoma
+1. `02-building/automation/plan-agentic-loop-and-spec-driven-workflow.md` (**PLAN-**)
+2. `05-final-audit/code/audit-automated-code-review-setup.md` (**AUDIT-**)
+
+## Quiero instalar una skill o plugin de terceros
+1. `08-maintenance/ops/audit-third-party-skills-supply-chain.md` (**AUDIT-**) y después `helen skills external <id>`.
+
 ## Quiero mantener la biblioteca de prompts
 1. `08-maintenance/meta/apply-prompt-library-maintenance-flow.md` (**ENHANCE-**, legacy filename)
 2. `09-future-knowledge/docs/generate-ai-context.md` (**GENERATE-**)

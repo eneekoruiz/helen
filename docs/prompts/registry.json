@@ -125,6 +125,12 @@
       "path": "docs/prompts/03-finish-features/flow/APPLY-40k-visual-craft-flow.md",
       "repeatable": true,
       "stage": "polish"
+    },
+    {
+      "id": "premium-site-stack",
+      "path": "docs/prompts/03-finish-features/flow/APPLY-premium-site-stack-flow.md",
+      "repeatable": true,
+      "stage": "polish"
     }
   ]
 }
