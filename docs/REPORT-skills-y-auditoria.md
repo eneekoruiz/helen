@@ -102,3 +102,44 @@ Pasos:
 ## 8. Qué NO he hecho
 
 No he modificado nada del repo salvo este informe. No he instalado ni auditado línea a línea el código de las skills externas: las descripciones vienen de sus páginas públicas.
+
+## 9. Addendum: compatibilidad multi-agente (Claude Code, Codex, Antigravity)
+
+`SKILL.md` (carpeta con `name` + `description` + cuerpo Markdown, más `references/` y `scripts/` opcionales) es un estándar abierto y lo leen los tres agentes. Lo que cambia es **dónde se instala** y **cómo se llaman los prompts de fase**:
+
+| Concepto HELEN | Claude Code | Codex | Antigravity |
+|---|---|---|---|
+| Skill (transversal) | `.claude/skills/<n>/SKILL.md` | `.agents/skills/<n>/SKILL.md` (también `~/.agents/skills`) | `.agent/skills/<n>/SKILL.md` (según fuentes, a veces `.agents/`: **verificar en tu versión**) |
+| Reglas siempre activas | `CLAUDE.md` | `AGENTS.md` | reglas en `.agent/rules/` (también lee `AGENTS.md`) |
+| Prompt de fase / flow invocable | skill con invocación explícita o `.claude/commands/` | skill invocada por nombre | `.agent/workflows/*.md` |
+
+Fuentes: [Codex skills](https://developers.openai.com/codex/skills), [Antigravity skills](https://codelabs.developers.google.com/getting-started-with-antigravity-skills), [Antigravity + AGENTS.md](https://thepromptshelf.dev/blog/google-antigravity-agents-md-rules-guide-2026/).
+
+### Diseño: una fuente, compilada por destino
+
+```
+src/                          # FUENTE ÚNICA (lo que editas)
+  skills/<name>/SKILL.md      # transversales (clean-code, premium-design, a11y-perf, router)
+  prompts/<fase>/<id>.md      # prompts de fase con frontmatter (los 131 actuales, migrados)
+  rules/core.md               # reglas siempre activas (sustituye el "Nivel 0" repetido)
+dist-agents/  (generado, no se edita)
+  claude/  .claude/skills, .claude/commands, CLAUDE.md
+  codex/   .agents/skills, AGENTS.md
+  antigravity/ .agent/skills, .agent/workflows, .agent/rules
+```
+
+- **`helen agents install --target claude|codex|antigravity|all`** copia/compila al proyecto destino (lo mismo que ya hace el CLI con módulos; dry-run y rollback incluidos).
+- Los prompts de fase se emiten como **skills invocables** en Claude/Codex y como **workflows** en Antigravity; el contenido es el mismo, solo cambian el wrapper y la ruta.
+- `AGENTS.md` como formato común de reglas; `CLAUDE.md` puede ser un simple enlace/import a él.
+- Diferencias por agente (herramientas, nombres de comandos) van en un bloque condicional del frontmatter (`targets:`), no en copias del prompt.
+- CI: validar frontmatter, regenerar `registry.json` y comprobar que la salida compilada está al día.
+
+### Alcance "todo el workflow"
+
+Las 9 fases quedan cubiertas así: 5 skills transversales + los flows (`full-polish`, `release-candidate`, `client-delivery`, …) como workflows/skills invocables + `helen-router` que detecta la fase y recomienda el siguiente paso, con los `HUMAN_CHECKLIST` como puertas de transición.
+
+### Riesgos
+
+- Las rutas de Antigravity y Codex cambian entre versiones: aislarlas en una tabla de destinos del CLI (una línea por agente) para corregirlas sin tocar contenido.
+- Un mismo texto rinde distinto en cada modelo: 3–5 evals por skill en al menos Claude y Codex antes de darla por buena.
+- Limitar la longitud de `description` y del cuerpo de cada SKILL.md (el resto a `references/`), porque todos cargan metadatos de todas las skills en cada sesión.
