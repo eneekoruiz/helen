@@ -1,0 +1,104 @@
+# Informe: Skills + auditoría del repositorio HELEN
+
+Fecha: 2026-09-29 · Estado verificado: `typecheck`, `lint` y `test` (13 ficheros, 78 tests) en verde.
+
+## 1. Qué es HELEN hoy (diagnóstico honesto)
+
+Son **dos productos en un repo**:
+
+1. **CLI TypeScript** (`src/`, ~3.000 líneas en `core/`): scaffolding de módulos (docker, ci, seo, security…). Sano: tipado estricto, tests, path-safety, rollback.
+2. **Biblioteca de prompts** (`docs/prompts/`, 131 prompts atómicos, ~390 KB, 9 fases): el verdadero activo diferencial.
+
+Además hay un tercero a medias: `src/core/orchestrator.ts` (`HelenAIOrchestrator`) con actor/QA **simulados por defecto** (`setTimeout` + texto fijo). Es una maqueta, no un orquestador.
+
+## 2. Tu idea: prompts → Skills (valoración: correcta)
+
+Un prompt de repositorio se carga **por fase, a mano** (`helen prompts show <id>`). Una Skill (`SKILL.md` con `name` + `description`) se carga **por intención**: el agente la activa solo cuando la tarea coincide, y solo paga tokens cuando se usa (divulgación progresiva: metadatos siempre, cuerpo bajo demanda, `references/` y `scripts/` si hacen falta).
+
+**Regla para decidir qué va dónde:**
+
+| Tipo de conocimiento | Dónde | Ejemplo en HELEN |
+|---|---|---|
+| Transversal, sin fase (criterio, estilo, reglas) | **Skill** | Clean Code, UI/UX Pro Max, a11y, performance web, anti-"AI slop" |
+| Ligado a una fase y con checklist bloqueante | **Prompt/flow** (se queda) | `release-candidate`, `client-delivery`, `HUMAN_CHECKLIST` |
+| Orquestación (qué fase toca) | **Skill "helen-router"** + registry | `[PLAN]_Orquestador_Fases.md` |
+
+Clean Code es el caso perfecto: aparece en `02-building/clean-code/*` pero también lo necesitas en 05 (AUDIT-code-quality) y 08. Hoy está duplicado por fase; como Skill se escribe una vez.
+
+## 3. Skills candidatas (verificadas por búsqueda; revisa el código antes de instalar)
+
+| Skill | Fuente | Encaje en HELEN | Prioridad |
+|---|---|---|---|
+| **ui-ux-pro-max** (67 estilos, paletas, tipografías, 98 guías UX, 100 reglas de razonamiento; 13 stacks incl. React/Next/shadcn) | [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | Es lo que tus prompts ya nombran ("Skill de UI UX PRO MAX") **sin que exista en el repo**. Sustituye a fase 03 `visual/` y `ux/` como base de criterio | Alta |
+| **frontend-design** (Anthropic) | [anthropics/skills](https://github.com/anthropics/skills/blob/main/skills/frontend-design/SKILL.md) | Anti "AI slop", tipografía y motion deliberados. Cubre `AUDIT-ai-trace-erasure`, `ENHANCE-taste-visual-pov` | Alta |
+| **web-design-guidelines** (100+ reglas a11y/UX/perf) | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | Sustituye `APPLY-basic-accessibility-pass` y parte de `performance/` | Alta |
+| **react-best-practices** (45 reglas de rendimiento) | mismo repo Vercel | Fase 02/03 para proyectos React que genera HELEN | Media |
+| **code-review / simplify / security-review** | ya disponibles en tu entorno Claude Code | Cubren `AUDIT-code-quality`, `APPLY-safe-clean-code-simplification-pass`, `AUDIT-security-risk-checkpoint` sin escribir nada | Alta (coste cero) |
+| **skill-creator** | ya disponible (anthropic-skills) | Para crear y evaluar las skills propias de HELEN | Alta |
+| **Skills propias de HELEN** (ver §4) | tú | Lo distintivo | Alta |
+
+Nota: la búsqueda no encontró skills equivalentes ya instaladas en tu cuenta de claude.ai (`SearchSkills` devolvió vacío para "clean code / design"). Esto es una lista de candidatas de la web, no una recomendación auditada: las skills ejecutan instrucciones con tus permisos, así que léelas antes de instalarlas y fija versión/commit.
+
+## 4. Propuesta de integración
+
+```
+skills/                         # nuevo, formato estándar
+  helen-clean-code/SKILL.md     # de 02-building/clean-code + AUDIT-code-quality
+  helen-premium-design/SKILL.md # 40K, taste, anti-AI-trace; delega en ui-ux-pro-max + frontend-design
+  helen-a11y-perf/SKILL.md      # basic-accessibility + performance budget
+  helen-release/SKILL.md        # release-candidate + changelog (fase-específica, con scripts/)
+  helen-router/SKILL.md         # sustituye [PLAN]_Orquestador_Fases.md
+docs/prompts/                   # se queda SOLO lo ligado a fase (flows, checklists, ROUTER)
+```
+
+Pasos:
+
+1. **Extraer** a `skills/` lo transversal. Cada SKILL.md: `description` en tercera persona con disparadores concretos ("usar al refactorizar, revisar código, eliminar código muerto…"). Detalle largo en `references/`.
+2. **Un solo bloque "Nivel 0"** dentro de la skill de criterio en vez de copiarlo 131 veces (hoy son ~86 KB, 22 % del corpus, idéntico en todos los prompts).
+3. **CLI**: añadir `helen skills install [--target claude|cursor|codex]` que copie `skills/` a `.claude/skills/` del proyecto destino (es lo que el CLI ya sabe hacer: módulos y templates). Encaja como un módulo más del `registry.ts`. Esto convierte a HELEN en el instalador de tu sistema, no solo en un scaffold.
+4. **Registry**: añadir `skills[]` a `registry.json` y que `helen prompts` los liste; los flows referencian skills por nombre en lugar de duplicar texto.
+5. **Evals**: usar skill-creator para 3–5 casos por skill (antes/después) — hoy no hay forma de saber si un prompt mejora algo.
+
+## 5. Debilidades del repositorio (por gravedad)
+
+**Alta**
+- **Registro casi vacío**: `registry.json` lista 16 flows + 5 guías; los otros ~114 prompts no están registrados. `helen prompts list` solo puede ver lo registrado + lo que descubra por ruta; las "automatizaciones futuras" del README no tienen base. Genera el registry desde el frontmatter con un script en CI.
+- **Frontmatter en 18/131 prompts** aunque `PREMIUM_PROMPT_CONTRACT` lo declara "obligatorio". El contrato no se hace cumplir: no hay lint. Tu propio `.quality_audit_log.md` lo reconoce como riesgo residual.
+- **Ejecución remota con `curl | tu-cli-de-ia`** (README + `[PLAN]_Orquestador_Fases.md`): inyecta contenido de `main` sin fijar versión directamente en un agente con herramientas. Es un vector de prompt-injection/supply-chain (si `main` se compromete o hay un typo-squat de la URL, el agente lo ejecuta). Mitigación: pinear a tag/commit, y mejor entregarlo como skill instalada.
+- **Boilerplate "Nivel 0 y Mente Abierta" idéntico ×131** y con instrucciones contraproducentes: "prohíbe limitar el desarrollo a lo pedido… aplicar sin dudarlo". Choca con los propios "Límites de Seguridad" ("no hagas refactors masivos") y con `APPLY` = "cambios pequeños y seguros". Un agente recibe órdenes contradictorias; el "sin dudarlo" invita a scope creep y a modificar dependencias sin consentir. Quítalo de los prompts de `APPLY` y déjalo solo en los de `AUDIT`/`GENERATE`, como *propuesta*, no aplicación.
+- **Referencia a "Skill de UI UX PRO MAX" que no existe** en el repo: 132 menciones a algo no instalable = el agente lo alucina.
+
+**Media**
+- **Duplicación**: `[INIT] Director Creativo (Orquestador 40K).md` existe 3 veces (raíz, `docs/prompts/` y `INIT-director-creativo-…`), con contenido distinto. Fuente de verdad ambigua.
+- **Solapamiento de contenido**: solo la carpeta `03-finish-features/visual/` tiene 15 prompts sobre casi lo mismo (40K, premium, taste, polish, awwwards). 28 ficheros citan Awwwards. Fusionar (`TAXONOMY.md` ya lo pide).
+- **Sin escala de tamaño coherente**: 16 prompts <1,8 KB (esqueletos) frente a máx. 10 KB. Los "flow" enlazan prompts sin garantizar orden ni condiciones de parada verificables.
+- **`orchestrator.ts` simulado** y sin conexión con el CLI real (`src/components/OrchestratorUI.tsx` es React dentro de un CLI y está excluido del tsconfig: código sin compilar ni testear en build).
+- **`src/components`, `src/context` (React/TSX)** excluidos de `tsc`: no los valida CI. O se mueven a `templates/` (si son plantillas) o se borran.
+- **`.helenrc` está en `.gitignore` pero commiteado** (`git ls-files` lo lista): estado local en el repo.
+- **Mezcla de idiomas** (README inglés, prompts español, `tu-cli-de-ia`, typo "Changlog", "public-laúnch").
+- **`helen.sh` y `legacy/`**: stub que solo imprime un aviso; borrar o mover a una rama/tag.
+- **Prompts empaquetados en el npm** (`files: docs`) pero la ruta a prompts se resuelve con `../../docs/prompts` relativa al build: funciona, pero `docs/AUDIT.md` y módulos van también en el paquete. Separar `docs/prompts` a un directorio `prompts/` (o `skills/`) evita publicar documentación interna.
+
+**Baja**
+- Módulos `docs/modules/*.md` sin tests que verifiquen que documentan lo que hace cada módulo.
+- `README` lista badges y comandos, pero no explica la relación CLI ↔ prompts para un tercero.
+- Cobertura de tests: 13 ficheros para 20+ módulos; `cinematicArt.ts` (1.096 líneas de arte ASCII) es el fichero más grande del core y no aporta funcionalidad.
+
+## 6. Fortalezas (conservar)
+
+- CI limpio (typecheck+lint+test+build, Node 22, dependabot con automerge).
+- Path-safety, anti prototype-pollution, backup/rollback de `.helenrc`: bien pensado.
+- La taxonomía de intenciones (`INIT/GENERATE/ENHANCE/AUDIT/APPLY`) y los `HUMAN_CHECKLIST` por fase son un modelo mental claro y diferencial.
+- Formatos de salida mínimos en los `APPLY` (buen control de tokens y ruido).
+
+## 7. Plan recomendado (orden)
+
+1. **Ya (1 h)**: quitar el boilerplate contradictorio de los `APPLY`; borrar duplicados de `[INIT]`; pinear el `curl` a un tag.
+2. **Skills (1–2 días)**: crear `helen-clean-code` como piloto (es el caso que planteas), evaluarlo con skill-creator; luego `helen-premium-design` apoyado en ui-ux-pro-max + frontend-design.
+3. **Herramienta**: script de CI que valide frontmatter y regenere `registry.json`; esto hace real el contrato.
+4. **CLI**: `helen skills install`.
+5. **Decisión pendiente tuya**: ¿el orquestador se convierte en algo real (integración con Claude Agent SDK) o se elimina?
+
+## 8. Qué NO he hecho
+
+No he modificado nada del repo salvo este informe. No he instalado ni auditado línea a línea el código de las skills externas: las descripciones vienen de sus páginas públicas.
