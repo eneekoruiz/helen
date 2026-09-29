@@ -1,6 +1,3 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import * as p from '@clack/prompts';
 import { logger } from './core/logger.js';
@@ -14,6 +11,9 @@ import { printPromptContent, printPromptList, printPromptPath, type PromptKind }
 import { ejectModule } from './core/moduleRunner.js';
 import { buildPlan, detectPhase, formatBrief, formatPlan, readPlaybooks, suggestedGoals, installedSkillNames, validatePlaybooks } from './core/apply.js';
 import { getCatalogItem, listCatalog } from './core/catalog.js';
+import { formatNext, formatStatus, markDone, readProgress, runChecks, skipStep, startProgress } from './core/progress.js';
+import { readGuide } from './core/guide.js';
+import { setupProject, type SetupAgent } from './core/setup.js';
 import { lintPrompts } from './core/promptLint.js';
 import { SKILL_TARGETS, installSkills, listFlowSkills, listSkills, type SkillTarget } from './core/skills.js';
 import { readConfig, updateConfig } from './core/config.js';
@@ -188,6 +188,15 @@ export function createProgram(): Command {
             break;
           case 'prompts':
             printPromptList();
+            break;
+          case 'apply': {
+            const detection = detectPhase(cwd);
+            console.log(`Detected phase: ${detection.phase} (estimate). Suggested goals: ${suggestedGoals(detection.phase).join(', ')}`);
+            console.log('Run: helen apply <goal>');
+            break;
+          }
+          case 'guide':
+            console.log(readGuide());
             break;
         }
       }
@@ -493,13 +502,94 @@ export function createProgram(): Command {
       }
     });
 
+  // helen next / done / skip / status / check
+  program
+    .command('next')
+    .description('Show the current step of the tracked plan, with the prompt or commands to use')
+    .option('--short', 'Do not print the prompt text', false)
+    .action((opts: { short: boolean }) => {
+      try {
+        const progress = readProgress(process.cwd());
+        if (!progress) throw new Error('Nothing is being tracked. Start with: helen apply <goal> --track');
+        console.log(formatNext(progress, !opts.short));
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  program
+    .command('done [note...]')
+    .description('Mark the current step as done (checkpoints need a passing helen check)')
+    .option('--force', 'Allow a checkpoint without a passing check (say why in the note)', false)
+    .action((note: string[], opts: { force: boolean }) => {
+      try {
+        console.log(formatStatus(markDone(process.cwd(), note.join(' ') || undefined, opts.force)));
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  program
+    .command('skip <reason...>')
+    .description('Skip the current step, recording why')
+    .action((reason: string[]) => {
+      try {
+        console.log(formatStatus(skipStep(process.cwd(), reason.join(' '))));
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  program
+    .command('status')
+    .description('Show progress of the tracked plan')
+    .action(() => {
+      const progress = readProgress(process.cwd());
+      console.log(progress ? formatStatus(progress) : 'Nothing is being tracked. Start with: helen apply <goal> --track');
+    });
+
+  program
+    .command('check')
+    .description("Run the project's own typecheck, lint, test and build scripts as a gate")
+    .action(() => {
+      const run = runChecks(process.cwd());
+      if (run.results.length === 0) {
+        logger.warn('No typecheck, lint, test or build scripts found in package.json.');
+      }
+      run.ok ? logger.success('Checks passed.') : logger.error('Checks failed.');
+      process.exitCode = run.ok ? 0 : 1;
+    });
+
+  // helen setup
+  program
+    .command('setup')
+    .description('One command: install HELEN skills for your agents and add HELEN instructions to AGENTS.md / CLAUDE.md')
+    .option('--agents <agents...>', 'claude, codex, antigravity', ['claude', 'codex', 'antigravity'])
+    .option('--flows', 'Also install every executable flow as a skill', false)
+    .option('--dry-run', 'Preview without writing files', false)
+    .option('--force', 'Overwrite existing skill files', false)
+    .action((opts: { agents: string[]; flows: boolean; dryRun: boolean; force: boolean }) => {
+      try {
+        const invalid = opts.agents.filter(agent => !['claude', 'codex', 'antigravity'].includes(agent));
+        if (invalid.length > 0) throw new Error(`Unknown agent(s): ${invalid.join(', ')}. Valid: claude, codex, antigravity`);
+        const result = setupProject({ cwd: process.cwd(), agents: opts.agents as SetupAgent[], flows: opts.flows, dryRun: opts.dryRun, force: opts.force });
+        logger.success(`Skills: ${result.skills.created.length} created, ${result.skills.skipped.length} already there. Instructions: ${result.instructionFiles.join(', ')}.`);
+        console.log('\nNext: tell your AI "Use HELEN: analyze where the project is and what to apply", or run: helen apply');
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
   // helen guide
   program
     .command('guide')
     .description('Print the user guide: what prompts, skills, catalog and playbooks are and how to use them')
     .action(() => {
-      const guide = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'docs', 'GUIA.md');
-      console.log(fs.existsSync(guide) ? fs.readFileSync(guide, 'utf-8') : 'Guide not found (docs/GUIA.md).');
+      console.log(readGuide());
     });
 
   // helen apply
@@ -507,10 +597,12 @@ export function createProgram(): Command {
     .command('apply [goal...]')
     .description('Analyze the project, detect its phase, and plan which HELEN prompts, skills and tools to use for a goal (e.g. "design", "release", "mejora el diseño")')
     .option('--brief', 'Print a paste-ready brief for an AI agent instead of the plan', false)
+    .option('--track', 'Follow the plan step by step: then use helen next / done / skip / status / check', false)
+    .option('--force', 'With --track: restart even if another plan is in progress', false)
     .option('--install', 'Install the bundled skills the goal needs into --target', false)
     .option('--target <targets...>', 'Where to install skills: claude, codex, custom', ['claude'])
     .option('--dir <path>', 'Project-relative directory for the "custom" target')
-    .action((goalWords: string[], opts: { brief: boolean; install: boolean; target: string[]; dir?: string }) => {
+    .action((goalWords: string[], opts: { brief: boolean; track: boolean; force: boolean; install: boolean; target: string[]; dir?: string }) => {
       try {
         const playbooks = readPlaybooks();
         const cwd = process.cwd();
@@ -526,6 +618,10 @@ export function createProgram(): Command {
         }
         const plan = buildPlan(cwd, goalWords.join(' '), playbooks);
         console.log(opts.brief ? formatBrief(plan) : formatPlan(plan));
+        if (opts.track) {
+          startProgress(cwd, plan, opts.force);
+          console.log('\nTracking started (.helen/progress.json; add .helen/ to .gitignore if you do not want it in git). Next: helen next');
+        }
         if (opts.install && plan.missingSkills.length > 0) {
           const result = installSkills({ cwd, targets: opts.target as SkillTarget[], customDir: opts.dir, skills: plan.missingSkills });
           logger.success(`Skills: ${result.created.length} created, ${result.skipped.length} skipped.`);

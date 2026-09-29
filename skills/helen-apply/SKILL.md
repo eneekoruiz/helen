@@ -13,7 +13,7 @@ One entry point for everything in HELEN. The user does not need to know which pr
 2. **Choose the goal.**
    - The user named an area: map it to a goal below (or run `helen apply "<their words>"`).
    - The user only said "use HELEN" or "what should I do": propose the goals suggested for the detected phase and ask which to run. Do not run all of them unasked.
-3. **Load the playbook.** `helen apply <goal>` prints the ordered steps; `helen apply <goal> --brief` prints a brief. Without the CLI, read `docs/prompts/playbooks.json`.
+3. **Load the playbook.** `helen apply <goal> --track` starts a tracked run: then `helen next` shows the current step with the prompt text or commands, `helen done "<what you did>"` advances, `helen skip "<reason>"` skips, `helen status` shows progress, `helen check` runs the project's typecheck, lint, test and build (a checkpoint step cannot be marked done until it passes). Without tracking, `helen apply <goal>` prints the steps and `--brief` prints a brief. Without the CLI, read `docs/prompts/playbooks.json`.
 4. **Execute the steps in order.** By step kind:
    - `prompt` or `flow`: read it (`helen prompts show <ref>`) and follow it.
    - `checkpoint`: run it; if it fails, stop and report. Never advance past a failed checkpoint.

@@ -31,7 +31,9 @@ npx helen-cli modules
 - `helen prompts show <id>`
 - `helen prompts path <id>`
 - `helen prompts flow <id>`
+- `helen setup [--agents claude codex antigravity] [--dry-run]`
 - `helen guide`
+- `helen apply <goal> --track`, then `helen next` / `helen done` / `helen skip` / `helen status` / `helen check`
 - `helen apply [goal] [--brief] [--install]`
 - `helen skills catalog [--category <c>]` / `helen skills external <id>` / `helen skills installed`
 - `helen prompts lint`
@@ -41,6 +43,7 @@ npx helen-cli modules
 ## Start here
 
 ```bash
+helen setup                 # install skills for Claude, Codex and Antigravity + AGENTS.md/CLAUDE.md instructions
 helen guide                 # what prompts, skills, catalog and playbooks are (docs/GUIA.md)
 helen apply                 # detect the project phase and suggest goals
 helen apply design          # plan: prompts, skills and tools for a goal

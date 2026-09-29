@@ -12,6 +12,9 @@ import { listPromptEntries } from './prompts.js';
 export const SKILL_TARGETS = {
   claude: '.claude/skills',
   codex: '.agents/skills',
+  // Google's Antigravity codelab documents <project-root>/.agents/skills/ for workspace skills,
+  // the same folder Codex reads. Older material mentions .agent/skills: use `custom --dir` for that.
+  antigravity: '.agents/skills',
 } as const;
 
 export type SkillTarget = keyof typeof SKILL_TARGETS | 'custom';
@@ -125,8 +128,10 @@ export function installSkills(options: InstallSkillsOptions, root: string = SKIL
 
   const result: InstallSkillsResult = { created: [], overwritten: [], skipped: [] };
 
-  for (const target of new Set(options.targets)) {
-    const targetDir = resolveTargetDir(target, options.customDir);
+  // Several agents can share a folder (codex and antigravity): write each folder once.
+  const targetDirs = new Set(options.targets.map(target => resolveTargetDir(target, options.customDir)));
+
+  for (const targetDir of targetDirs) {
     for (const skill of selected) {
       for (const [relative, content] of Object.entries(skillFiles(skill))) {
         const destination = path.join(options.cwd, targetDir, skill.name, relative);

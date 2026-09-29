@@ -28,6 +28,9 @@ describe('Skills installer', () => {
       const content = fs.readFileSync(path.join(skill.dir!, 'SKILL.md'), 'utf-8');
       expect(content).toMatch(new RegExp(`^---\\nname: ${skill.name}\\ndescription: .+\\n---`));
       expect(content.length).toBeGreaterThan(200);
+      const description = /^description: (.+)$/m.exec(content)![1]!;
+      expect(description.length).toBeLessThanOrEqual(1024);
+      expect(content.split('\n').length).toBeLessThan(500);
     }
   });
 

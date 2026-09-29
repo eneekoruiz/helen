@@ -24,6 +24,7 @@ HELEN es un repositorio con **tres capas** más un **cerebro** que las conecta:
 | Herramientas de terceros recomendadas | `helen skills catalog` (filtra con `--category design`) |
 | Detalle y comandos de una herramienta | `helen skills external <id>` (solo muestra, no instala) |
 | Qué skills tiene ya instaladas este proyecto | `helen skills installed` |
+| Cómo va el plan en curso | `helen status` |
 | En qué fase estás y qué te conviene | `helen apply` |
 | Todas las metas disponibles | `helen apply` (sin argumentos) |
 | Validar la biblioteca | `helen prompts lint` |
@@ -40,19 +41,33 @@ node dist/cli.js --help      # o: npm link  y luego simplemente: helen --help
 
 (`npx helen-cli ...` solo funciona si el paquete está publicado en npm; desde el clon siempre funciona.)
 
-**Skills en el proyecto donde trabajas** (ejecuta esto dentro de ese proyecto):
+**Lo más fácil: un solo comando dentro del proyecto donde trabajas.**
 
 ```bash
-helen skills install --target claude codex          # todas las skills propias
-helen skills install helen-apply helen-router --target claude   # solo algunas
-helen skills install --target custom --dir <carpeta>   # cualquier otro agente (p. ej. Antigravity): su carpeta de skills
-helen skills install --target claude --flows        # además, cada flow como skill (helen-flow-<id>)
-helen skills installed                              # comprobar
+helen setup                     # skills para Claude, Codex y Antigravity + instrucciones en AGENTS.md y CLAUDE.md
+helen setup --agents claude     # solo para un agente
+helen setup --dry-run           # ver qué haría sin escribir
 ```
 
-- `claude` copia a `.claude/skills/`, `codex` a `.agents/skills/`.
-- Para Antigravity u otro agente usa `custom` con la carpeta que **tu** versión lea; HELEN no supone esa ruta.
-- Añade `--dry-run` para ver qué haría sin escribir nada. No pisa archivos existentes salvo con `--force`.
+`helen setup` instala las skills y añade un bloque corto entre marcas `HELEN:START/END` en `AGENTS.md` (y `CLAUDE.md`) que enseña a cualquier IA a usar HELEN. Es repetible: solo reescribe su bloque y respeta el resto del archivo. Con eso, cualquier agente que lea `AGENTS.md` sabe qué hacer aunque no cargue skills.
+
+**Control fino de las skills:**
+
+```bash
+helen skills install --target claude codex antigravity   # todas las skills propias
+helen skills install helen-apply helen-router --target claude   # solo algunas
+helen skills install --target custom --dir <carpeta>     # cualquier otro agente, con su carpeta
+helen skills install --target claude --flows             # además, cada flow como skill (helen-flow-<id>)
+helen skills installed                                   # comprobar
+```
+
+| Agente | Carpeta de skills del proyecto | Fuente |
+|---|---|---|
+| Claude Code | `.claude/skills/` | convención de Claude Code |
+| Codex | `.agents/skills/` | documentación de Codex |
+| Antigravity | `.agents/skills/` (la misma que Codex) | codelab oficial de Google Antigravity; en Antigravity las skills globales van en `~/.gemini/config/skills/` |
+
+Material antiguo de Antigravity habla de `.agent/skills/`: si tu versión lo usa, `--target custom --dir .agent/skills`. Añade `--dry-run` para ver qué haría; no pisa archivos existentes salvo con `--force`.
 
 **Herramientas de terceros:** HELEN **nunca** las instala por ti. `helen skills external <id>` te enseña los comandos oficiales; los ejecutas tú después de revisarlos (ver sección 6).
 
@@ -74,7 +89,20 @@ helen apply design             # plan de diseño: pasos, skills, herramientas
 helen apply "mejora el diseño" # también entiende frases (español o inglés)
 helen apply design --install   # instala las skills propias que falten
 helen apply design --brief     # texto listo para pegar en cualquier IA
+helen apply design --track     # seguir el plan paso a paso (ver abajo)
 ```
+
+**Seguimiento paso a paso (`--track`)**: guarda el progreso en `.helen/progress.json`.
+
+| Comando | Qué hace |
+|---|---|
+| `helen next` | Muestra el paso actual con todo lo necesario (texto del prompt, o comandos y avisos si es una herramienta externa) |
+| `helen done "qué hice"` | Marca el paso como hecho y avanza |
+| `helen skip "motivo"` | Salta el paso y guarda el motivo |
+| `helen check` | Ejecuta `typecheck`, `lint`, `test` y `build` del proyecto (los que existan) |
+| `helen status` | Muestra el avance |
+
+Los pasos de tipo *checkpoint* no se pueden dar por hechos hasta que `helen check` pase (salvo `--force` con nota). Una IA puede llevar todo el proceso solo con `helen next` / `helen done`.
 
 **C) Manual.** Elige un prompt con `helen prompts list` o el `ROUTER.md` de la fase y ejecútalo con `helen prompts show <id>`.
 
@@ -144,4 +172,4 @@ Reglas:
 - No instala herramientas de terceros por ti.
 - No garantiza que la fase detectada sea correcta: la propone con evidencia.
 - No sustituye la revisión humana ni los tests.
-- Partes experimentales: `src/core/orchestrator.ts` (orquestador con ejecutores simulados) y `src/components` no forman parte del uso descrito aquí.
+- No ejecuta un modelo de IA por su cuenta: prepara, ordena y verifica; el trabajo lo hace tu IA.

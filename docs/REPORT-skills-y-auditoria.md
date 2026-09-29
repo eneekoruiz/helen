@@ -177,3 +177,16 @@ Pendiente (requiere decisión tuya, no lo he tocado):
 - **Guía**: `docs/GUIA.md` (también `helen guide`) explica prompts vs flows vs checkpoints vs skills vs catálogo vs playbooks, dónde ver lo que hay, cómo instalar y usar.
 
 Limitaciones conocidas: la detección de fase es una heurística por archivos; los comandos del catálogo provienen del README de cada proyecto en el momento de la verificación; sigue pendiente la decisión sobre `orchestrator.ts`/`src/components` (documentados como experimentales).
+
+
+## 12. Tercera ronda: decisiones técnicas cerradas (sin partes experimentales)
+
+- **Antigravity resuelto con dato oficial**: el codelab de Google documenta `<proyecto>/.agents/skills/` (mismo directorio que Codex) y `~/.gemini/config/skills/` para global. `antigravity` es ya un destino conocido; `custom --dir` sigue disponible para versiones antiguas (`.agent/skills`).
+- **Un comando para todo**: `helen setup` instala las skills para Claude, Codex y Antigravity y añade un bloque gestionado (`HELEN:START/END`) a `AGENTS.md` y `CLAUDE.md`, de modo que cualquier IA que lea esos archivos sabe usar HELEN aunque no cargue skills. Es idempotente y respeta el resto del archivo.
+- **Orquestador simulado sustituido por uno real**: `helen apply <meta> --track` guarda el progreso (`.helen/progress.json`); `helen next` da a la IA o a la persona todo lo necesario para el paso actual; `helen done` / `helen skip` (con motivo) avanzan; `helen check` ejecuta typecheck, lint, test y build del proyecto y actúa de **puerta**: un paso *checkpoint* no se puede cerrar hasta que pase.
+- **Eliminado**: `src/core/orchestrator.ts` y su test (ejecutores simulados), `src/components` y `src/context` (copias muertas de lo que los módulos CMS/GDPR ya generan desde plantillas internas; excluidas de `tsc`), `helen.sh` y `legacy/` (stub y archivo del script bash original; siguen en el historial de git). `tsconfig` sin exclusiones especiales.
+- **Bug corregido durante la verificación**: sin lockfile el gestor de paquetes se detectaba como `unknown` y `helen check` intentaba ejecutar un programa con ese nombre; ahora usa `npm` por defecto (con test).
+- **Menú interactivo**: nuevas entradas *Apply* y *Guide*.
+- **Verificación**: 106 tests, lint, typecheck y build en verde; `helen prompts lint` (frontmatter, enlaces, playbooks); recorrido manual real: `setup` → `apply quality --track` → `next` → `check` → `done` en un proyecto vacío.
+
+Sigue abierto (no es código): evals de las skills con modelos reales, fusionar los prompts solapados de `03-finish-features/visual/` (decisión editorial) y confirmar con tu versión de Antigravity que lee `.agents/skills/`.

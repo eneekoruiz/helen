@@ -11,6 +11,8 @@ export async function showMainMenu(): Promise<string | symbol> {
   const action = await p.select({
     message: 'What would you like to do?',
     options: [
+      { value: 'apply', label: '🧭 Apply (analyze project)', hint: 'Detect the phase and see which prompts and skills to use' },
+      { value: 'guide', label: '📖 Guide', hint: 'What prompts, skills and the catalog are, and how to use them' },
       { value: 'add', label: '📦 Add modules', hint: 'Select and install modules' },
       { value: 'modules', label: '📋 List modules', hint: 'See all available modules' },
       { value: 'doctor', label: '🩺 Doctor', hint: 'Check project health' },

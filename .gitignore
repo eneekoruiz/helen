@@ -12,3 +12,4 @@ coverage/
 .helenrc
 .helenrc.corrupt
 sandbox-qa.js
+.helen/
