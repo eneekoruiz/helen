@@ -27,13 +27,13 @@ Ejecutar auditorías profundas y rigurosas de la calidad del código, internacio
 
 | Prompt / Flow / Runbook | Intención | Propósito / Cuándo usarlo | Frecuencia |
 |---|---|---|---|
-| [audit-visual-quality-40k.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/presentation/audit-visual-quality-40k.md) | **AUDIT** | Revisión técnico-visual final de aspecto 40K: luces, cámaras, shaders, motion, composición y conversión. | Alta (Si hay UI premium/3D) |
-| [code-quality-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/code/audit-code-quality.md) | **AUDIT** | Evalúación rigurosa de mantenibilidad, deuda técnica, bugs y tests. | Alta |
-| [i18n-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/code/audit-i18n-flow.md) | **AUDIT/APPLY flow** | Auditar y corregir el soporte multilingüe, fallbacks y metadatos SEO. | Media |
-| [documentation-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/operations/audit-documentation.md) | **AUDIT** | Validar la veracidad de quick-starts, guías de entorno y ejemplos. | Alta |
-| [github-repository-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/presentation/audit-github-repository-flow.md) | **AUDIT/APPLY flow** | Auditar y pulir la legibilidad y presentación de GitHub (About, topics, tags). | Alta |
-| [public-presentation-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/presentation/apply-public-presentation-pass.md) | **AUDIT** | Juzgar si el proyecto merece exposición pública y si OG/Social preview es sólida. | Alta |
-| [runbook.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/operations/generate-runbook.md) | **REPORT/PLAN** | Guía de orden y reglas de decisión para cerrar la auditoría final. | Alta |
+| [audit-visual-quality-40k.md](presentation/AUDIT-visual-quality-40k.md) | **AUDIT** | Revisión técnico-visual final de aspecto 40K: luces, cámaras, shaders, motion, composición y conversión. | Alta (Si hay UI premium/3D) |
+| [code-quality-audit.md](code/AUDIT-code-quality.md) | **AUDIT** | Evalúación rigurosa de mantenibilidad, deuda técnica, bugs y tests. | Alta |
+| [i18n-audit.md](code/AUDIT-i18n-flow.md) | **AUDIT/APPLY flow** | Auditar y corregir el soporte multilingüe, fallbacks y metadatos SEO. | Media |
+| [documentation-audit.md](operations/AUDIT-documentation.md) | **AUDIT** | Validar la veracidad de quick-starts, guías de entorno y ejemplos. | Alta |
+| [github-repository-audit.md](presentation/AUDIT-github-repository-flow.md) | **AUDIT/APPLY flow** | Auditar y pulir la legibilidad y presentación de GitHub (About, topics, tags). | Alta |
+| [public-presentation-pass.md](presentation/APPLY-public-presentation-pass.md) | **AUDIT** | Juzgar si el proyecto merece exposición pública y si OG/Social preview es sólida. | Alta |
+| [runbook.md](operations/GENERATE-runbook.md) | **REPORT/PLAN** | Guía de orden y reglas de decisión para cerrar la auditoría final. | Alta |
 
 ---
 
@@ -47,4 +47,4 @@ Antes de pasar a la fase de **Release (06-release)**, asegúrate de responder af
 - [ ] ¿Se ha completado la secuencia de pasos detallada en el `runbook.md` con éxito?
 
 **Siguiente Fase**:
-Si la respuesta es **Sí** a todas las anteriores, estás listo para entrar en la fase **[06-release](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/06-release/README.md)**.
+Si la respuesta es **Sí** a todas las anteriores, estás listo para entrar en la fase **[06-release](../06-release/README.md)**.

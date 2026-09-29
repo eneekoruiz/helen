@@ -10,15 +10,15 @@ Esta carpeta contiene la biblioteca de prompts de HELEN, estructurada en torno a
 
 Los prompts se organizan por la fase en la que se encuentra el proyecto, respondiendo a la pregunta: **¿Cuándo debe usarse este prompt?**
 
-1. **[01-start-project](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/README.md)** (Inicio): Diagnóstico rápido de riesgos, benchmark de competidores, priorización del roadmap y lifecycle tecnológico.
-2. **[02-building](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/README.md)** (Desarrollo): Clean code local, consistencia de datos, contratos de API, conversión CMS y checkpoints de compilación/lint.
-3. **[03-finish-features](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/README.md)** (Refinamiento): Usabilidad (UX), diseño visual premium, responsive, accesibilidad y regresiones visuales.
-4. **[04-before-production](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/README.md)** (Pre-Producción): QA adversarial, límites de escala, costes, privacidad (GDPR) e instrumentación de observabilidad.
-5. **[05-final-audit](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/README.md)** (Auditoría): Veredictos técnicos de código, internacionalización (i18n), documentación e higiene del repositorio.
-6. **[06-release](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/06-release/README.md)** (Publicación): Empaquetado estable, changelogs, release notes y gates de versión.
-7. **[07-client-handoff](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/07-client-handoff/README.md)** (Entrega): Comprobaciones de última milla (formularios, links, CTAs) y paquete de entrega.
-8. **[08-maintenance](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/README.md)** (Mantenimiento): Copias de seguridad, gobernanza del repositorio, showcases e integridad de la biblioteca.
-9. **[09-future-knowledge](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/README.md)** (Preservación): Onboarding futuro, autorestauración, factor autobús y bitácora de decisiones (ADR).
+1. **[01-start-project](01-start-project/README.md)** (Inicio): Diagnóstico rápido de riesgos, benchmark de competidores, priorización del roadmap y lifecycle tecnológico.
+2. **[02-building](02-building/README.md)** (Desarrollo): Clean code local, consistencia de datos, contratos de API, conversión CMS y checkpoints de compilación/lint.
+3. **[03-finish-features](03-finish-features/README.md)** (Refinamiento): Usabilidad (UX), diseño visual premium, responsive, accesibilidad y regresiones visuales.
+4. **[04-before-production](04-before-production/README.md)** (Pre-Producción): QA adversarial, límites de escala, costes, privacidad (GDPR) e instrumentación de observabilidad.
+5. **[05-final-audit](05-final-audit/README.md)** (Auditoría): Veredictos técnicos de código, internacionalización (i18n), documentación e higiene del repositorio.
+6. **[06-release](06-release/README.md)** (Publicación): Empaquetado estable, changelogs, release notes y gates de versión.
+7. **[07-client-handoff](07-client-handoff/README.md)** (Entrega): Comprobaciones de última milla (formularios, links, CTAs) y paquete de entrega.
+8. **[08-maintenance](08-maintenance/README.md)** (Mantenimiento): Copias de seguridad, gobernanza del repositorio, showcases e integridad de la biblioteca.
+9. **[09-future-knowledge](09-future-knowledge/README.md)** (Preservación): Onboarding futuro, autorestauración, factor autobús y bitácora de decisiones (ADR).
 
 ---
 
@@ -53,7 +53,7 @@ Sigue estas instrucciones operativas para interactuar con el repositorio:
 
 ## Orquestador 40K
 
-El prompt [`[INIT] Director Creativo (Orquestador 40K).md`](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/%5BINIT%5D%20Director%20Creativo%20(Orquestador%2040K).md) es el punto de entrada para proyectos visuales ultra-premium. Absorbe nicho, oferta, cliente, conversion y ambicion estetica antes de ejecutar sub-prompts de Fase 3.
+El prompt [`[INIT] Director Creativo (Orquestador 40K).md`](%5BINIT%5D%20Director%20Creativo%20(Orquestador%2040K).md) es el punto de entrada para proyectos visuales ultra-premium. Absorbe nicho, oferta, cliente, conversion y ambicion estetica antes de ejecutar sub-prompts de Fase 3.
 
 Usalo cuando el objetivo sea una web con direccion de arte propia, efectos tecnicos avanzados, conversion clara y cero rastro de IA.
 

@@ -1,9 +1,28 @@
+---
+action: APPLY
+label: APPLY-
+phase: 08-maintenance
+modifies_code: true
+requires_context:
+  - project_state
+stop_conditions:
+  - missing_required_context
+  - unsafe_to_continue
+reflection_loop:
+  mode: bounded
+  max_material_retries: 2
+  stop_when: success_criteria_met_or_no_material_gain
+memory_target: .quality_audit_log.md
+verification:
+  - inspect_relevant_files
+  - run_available_checks
+---
+
 # [APPLY] - Prompt Library Maintenance Flow
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento minimo indispensable la excelencia absoluta en el campo (codigo limpio, sistemas agenticos, accesibilidad y rendimiento optimo).
-- **Mente Abierta**: Se prohibe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad tecnica: si existe una tecnologia mas moderna, un enfoque mas optimo o mejores recursos disponibles, deben investigarse y aplicarse cuando reduzcan riesgo o aumenten calidad verificable.
-
+## Nivel 0 y Mente Abierta
+- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
+- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
 **Intencion**: APPLY (Modificar el proyecto, salida minima)
 
 ## Objetivo
@@ -49,7 +68,7 @@ Limites del bucle:
 
 ## Checkpoints Requeridos
 
-- **Inicio**: Cargar y revisar [STANDARDS.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/STANDARDS.md), [TAXONOMY.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/TAXONOMY.md), [PREMIUM_PROMPT_CONTRACT.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/PREMIUM_PROMPT_CONTRACT.md) y `.quality_audit_log.md` si existe.
+- **Inicio**: Cargar y revisar [STANDARDS.md](../../STANDARDS.md), [TAXONOMY.md](../../TAXONOMY.md), [PREMIUM_PROMPT_CONTRACT.md](../../PREMIUM_PROMPT_CONTRACT.md) y `.quality_audit_log.md` si existe.
 - **Investigacion**: Consultar fuentes actuales cuando el cambio dependa de practicas externas, modelos, herramientas, seguridad, regulacion o patrones agenticos cambiantes.
 - **Auditoria previa**: Medir cobertura de frontmatter, evidencia, seguridad, checks, memoria y excepciones antes de editar.
 - **Post-cambios**: Ejecutar tests unitarios (`npm run test`) para verificar que el CLI y el resolvedor de prompts local no sufren regresiones.

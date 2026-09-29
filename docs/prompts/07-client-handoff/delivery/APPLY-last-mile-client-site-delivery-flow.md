@@ -1,8 +1,28 @@
+---
+action: APPLY
+label: APPLY-
+phase: 07-client-handoff
+modifies_code: true
+requires_context:
+  - project_state
+stop_conditions:
+  - missing_required_context
+  - unsafe_to_continue
+reflection_loop:
+  mode: bounded
+  max_material_retries: 2
+  stop_when: success_criteria_met_or_no_material_gain
+memory_target: .quality_audit_log.md
+verification:
+  - inspect_relevant_files
+  - run_available_checks
+---
+
 # [APPLY] - Last-Mile Client Site Delivery Flow
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+## Nivel 0 y Mente Abierta
+- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
+- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
 
 
 **Intención**: AUDIT (No modificar código, buscar problemas)
@@ -17,23 +37,23 @@ Al finalizar la estabilización de releases (Client Handoff).
 
 ## Prompts Incluidos
 
-1. [fast-build-test-verification.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/qa/audit-fast-build-test-verification.md)
-2. [content-copy-brand-and-claims-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/07-client-handoff/marketing/audit-content-copy-brand-and-claims.md)
-3. [cms-editable-content-conversion.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/cms/apply-cms-editable-content-conversion-flow.md)
-4. [links-forms-ctas-and-conversion-paths-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/07-client-handoff/marketing/audit-links-forms-ctas-and-conversion-paths.md)
-5. [media-assets-alt-text-and-performance-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/07-client-handoff/verification/audit-media-assets-alt-text-and-performance.md)
-6. [responsive-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/apply-responsive-pass.md)
-7. [basic-accessibility-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/performance/apply-basic-accessibility-pass.md)
-8. [browser-smoke-test-and-demo-readiness-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/07-client-handoff/verification/audit-browser-smoke-test-and-demo-readiness.md)
-9. [client-handoff-and-support-readiness.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/07-client-handoff/delivery/audit-client-handoff-and-support-readiness.md)
+1. [fast-build-test-verification.md](../../04-before-production/qa/AUDIT-fast-build-test-verification.md)
+2. [content-copy-brand-and-claims-audit.md](../marketing/AUDIT-content-copy-brand-and-claims.md)
+3. [cms-editable-content-conversion.md](../../02-building/cms/APPLY-cms-editable-content-conversion-flow.md)
+4. [links-forms-ctas-and-conversion-paths-audit.md](../marketing/AUDIT-links-forms-ctas-and-conversion-paths.md)
+5. [media-assets-alt-text-and-performance-audit.md](../verification/AUDIT-media-assets-alt-text-and-performance.md)
+6. [responsive-pass.md](../../03-finish-features/visual/APPLY-responsive-pass.md)
+7. [basic-accessibility-pass.md](../../03-finish-features/performance/APPLY-basic-accessibility-pass.md)
+8. [browser-smoke-test-and-demo-readiness-audit.md](../verification/AUDIT-browser-smoke-test-and-demo-readiness.md)
+9. [client-handoff-and-support-readiness.md](AUDIT-client-handoff-and-support-readiness.md)
 
 ## Checkpoints Entre Pasos
 
-- **Inicio**: Cargar [build-and-compile-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-build-and-compile-checkpoint.md).
+- **Inicio**: Cargar [build-and-compile-checkpoint.md](../../02-building/checkpoint/AUDIT-build-and-compile-checkpoint.md).
 - **Post-conversiones**: Validar visualmente que no hay layout shift ni controles solapados.
 - **Post-enlaces/forms**: Smoke test manual de los formularios de contacto y enlaces primarios.
-- **Post-assets/responsive**: Cargar [visual-ux-regression-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/flow/audit-visual-ux-regression-checkpoint.md).
-- **Final**: Cargar [release-readiness-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/06-release/flow/audit-release-readiness-checkpoint.md).
+- **Post-assets/responsive**: Cargar [visual-ux-regression-checkpoint.md](../../03-finish-features/flow/AUDIT-visual-ux-regression-checkpoint.md).
+- **Final**: Cargar [release-readiness-checkpoint.md](../../06-release/flow/AUDIT-release-readiness-checkpoint.md).
 
 ## Condiciones para Avanzar
 

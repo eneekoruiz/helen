@@ -62,7 +62,7 @@ Pasos:
 ## 5. Debilidades del repositorio (por gravedad)
 
 **Alta**
-- **Registro casi vacío**: `registry.json` lista 16 flows + 5 guías; los otros ~114 prompts no están registrados. `helen prompts list` solo puede ver lo registrado + lo que descubra por ruta; las "automatizaciones futuras" del README no tienen base. Genera el registry desde el frontmatter con un script en CI.
+- **Registro incompleto** (corrección: el CLI ya descubre los prompts escaneando `docs/prompts/`, así que `helen prompts list` sí los ve): `registry.json` solo lista 16 flows + 5 guías, es decir, solo esos llevan metadatos (`repeatable`, `stage`). El frontmatter de cada prompt es hoy la fuente de metadatos de los demás.
 - **Frontmatter en 18/131 prompts** aunque `PREMIUM_PROMPT_CONTRACT` lo declara "obligatorio". El contrato no se hace cumplir: no hay lint. Tu propio `.quality_audit_log.md` lo reconoce como riesgo residual.
 - **Ejecución remota con `curl | tu-cli-de-ia`** (README + `[PLAN]_Orquestador_Fases.md`): inyecta contenido de `main` sin fijar versión directamente en un agente con herramientas. Es un vector de prompt-injection/supply-chain (si `main` se compromete o hay un typo-squat de la URL, el agente lo ejecuta). Mitigación: pinear a tag/commit, y mejor entregarlo como skill instalada.
 - **Boilerplate "Nivel 0 y Mente Abierta" idéntico ×131** y con instrucciones contraproducentes: "prohíbe limitar el desarrollo a lo pedido… aplicar sin dudarlo". Choca con los propios "Límites de Seguridad" ("no hagas refactors masivos") y con `APPLY` = "cambios pequeños y seguros". Un agente recibe órdenes contradictorias; el "sin dudarlo" invita a scope creep y a modificar dependencias sin consentir. Quítalo de los prompts de `APPLY` y déjalo solo en los de `AUDIT`/`GENERATE`, como *propuesta*, no aplicación.
@@ -75,7 +75,7 @@ Pasos:
 - **`orchestrator.ts` simulado** y sin conexión con el CLI real (`src/components/OrchestratorUI.tsx` es React dentro de un CLI y está excluido del tsconfig: código sin compilar ni testear en build).
 - **`src/components`, `src/context` (React/TSX)** excluidos de `tsc`: no los valida CI. O se mueven a `templates/` (si son plantillas) o se borran.
 - **`.helenrc` está en `.gitignore` pero commiteado** (`git ls-files` lo lista): estado local en el repo.
-- **Mezcla de idiomas** (README inglés, prompts español, `tu-cli-de-ia`, typo "Changlog", "public-laúnch").
+- **Mezcla de idiomas** (README inglés, prompts español, `tu-cli-de-ia`, typo "Changlog", "public-launch").
 - **`helen.sh` y `legacy/`**: stub que solo imprime un aviso; borrar o mover a una rama/tag.
 - **Prompts empaquetados en el npm** (`files: docs`) pero la ruta a prompts se resuelve con `../../docs/prompts` relativa al build: funciona, pero `docs/AUDIT.md` y módulos van también en el paquete. Separar `docs/prompts` a un directorio `prompts/` (o `skills/`) evita publicar documentación interna.
 
@@ -143,3 +143,26 @@ Las 9 fases quedan cubiertas así: 5 skills transversales + los flows (`full-pol
 - Las rutas de Antigravity y Codex cambian entre versiones: aislarlas en una tabla de destinos del CLI (una línea por agente) para corregirlas sin tocar contenido.
 - Un mismo texto rinde distinto en cada modelo: 3–5 evals por skill en al menos Claude y Codex antes de darla por buena.
 - Limitar la longitud de `description` y del cuerpo de cada SKILL.md (el resto a `references/`), porque todos cargan metadatos de todas las skills en cada sesión.
+
+
+## 10. Estado de implementación (rama `claude/skills-audit-report`)
+
+Hecho:
+
+- **Skills incluidas** (`skills/`): `helen-clean-code`, `helen-premium-design` (con `references/vocabulary.md`, donde se conserva el vocabulario de recursos que estaba repetido en los prompts), `helen-a11y-perf`, `helen-release`, `helen-router`.
+- **Flows como skills**: `helen skills install --flows` genera una skill `helen-flow-<id>` por cada flow ejecutable (16), con los enlaces a pasos reescritos a `helen prompts show <id>`.
+- **Instalador genérico**: `helen skills list|install`, destinos `claude` (`.claude/skills`), `codex` (`.agents/skills`) y `custom --dir <ruta>` para cualquier otro agente (p. ej. Antigravity), sin rutas inventadas.
+- **Bloque "Nivel 0 y Mente Abierta"**: sustituido en los 132 ficheros por una versión corta que apunta a las skills y pide proponer, no aplicar sin encargo (elimina la contradicción con los Límites de Seguridad y el ~22 % de contenido repetido).
+- **Frontmatter**: añadido a los 113 prompts que no lo tenían (ahora 131/131); `helen prompts lint` valida frontmatter, coherencia acción/prefijo/fase, y enlaces, y corre en CI.
+- **Enlaces**: eliminadas 210 rutas absolutas `file:///c:/Users/...`, y corregidos ~226 enlaces que apuntaban a nombres en minúscula (`audit-…`) tras el renombrado a mayúscula: estaban rotos en sistemas de archivos sensibles a mayúsculas (Linux, macOS por defecto no, pero sí CI/npm en Linux).
+- **Duplicado eliminado**: `[INIT] Director Creativo (Orquestador 40K).md` de la raíz (no estaba referenciado). Se mantienen el de `docs/prompts/` (registrado) y `INIT-director-creativo-orquestador-40k.md` (sub-orquestador).
+- **Limpieza**: `.helenrc` deja de estar versionado (ya estaba en `.gitignore`); erratas (`Changlog`, `public-laúnch`, `laúnch`, `funcióna`…); el `curl | agente` del README ahora exige fijar `<TAG_OR_COMMIT>`.
+
+Pendiente (requiere decisión tuya, no lo he tocado):
+
+- Destino de `src/orchestrator.ts` y `src/components|context` (React excluido de `tsc`): integrarlo de verdad con un SDK de agentes o eliminarlo.
+- `helen.sh` y `legacy/`: borrar o mover a un tag.
+- Verificar la carpeta de skills de Antigravity en tu versión y, si es estable, añadirla como destino conocido en `SKILL_TARGETS` (una línea).
+- Evals de cada skill (skill-creator) en al menos dos agentes.
+- Fusionar los ~15 prompts solapados de `03-finish-features/visual/` (decisión editorial).
+- Regla de aprobación de PRs y fijar un tag de release para el `curl`.

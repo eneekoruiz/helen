@@ -9,7 +9,8 @@ import { showMainMenu, showModuleSelector, showExplainSelector, printModuleExpla
 import { generateModuleDocs } from './core/docs.js';
 import { printPromptContent, printPromptList, printPromptPath, type PromptKind } from './core/prompts.js';
 import { ejectModule } from './core/moduleRunner.js';
-import { SKILL_TARGETS, installSkills, listSkills, type SkillTarget } from './core/skills.js';
+import { lintPrompts } from './core/promptLint.js';
+import { SKILL_TARGETS, installSkills, listFlowSkills, listSkills, type SkillTarget } from './core/skills.js';
 import { readConfig, updateConfig } from './core/config.js';
 import { scaffoldProject } from './core/scaffold.js';
 import { generateEntity } from './core/generator.js';
@@ -433,6 +434,21 @@ export function createProgram(): Command {
     });
 
   prompts
+    .command('lint')
+    .description('Validate prompt frontmatter and links against the Premium Prompt Contract')
+    .action(() => {
+      const issues = lintPrompts();
+      for (const issue of issues) {
+        logger.error(`${issue.file}: ${issue.message}`);
+      }
+      if (issues.length > 0) {
+        process.exitCode = 1;
+        return;
+      }
+      logger.success('Prompt library is valid.');
+    });
+
+  prompts
     .command('show <prompt>')
     .description('Print a prompt, step, checkpoint, or flow')
     .action((prompt: string) => {
@@ -475,9 +491,10 @@ export function createProgram(): Command {
 
   skills
     .command('list')
-    .description('List bundled skills')
-    .action(() => {
-      for (const skill of listSkills()) {
+    .description('List bundled skills (add --flows to include prompt flows)')
+    .option('--flows', 'Include executable prompt flows as skills', false)
+    .action((opts: { flows: boolean }) => {
+      for (const skill of [...listSkills(), ...(opts.flows ? listFlowSkills() : [])]) {
         console.log(skill.name);
       }
     });
@@ -487,9 +504,10 @@ export function createProgram(): Command {
     .description('Install skills into the current project for one or more agents')
     .option('--target <targets...>', `Targets: ${Object.keys(SKILL_TARGETS).join(', ')}, custom`, ['claude'])
     .option('--dir <path>', 'Project-relative directory for the "custom" target (any agent that scans a skills folder)')
+    .option('--flows', 'Also install executable prompt flows as helen-flow-<id> skills', false)
     .option('--dry-run', 'Preview without writing files', false)
     .option('--force', 'Overwrite existing files', false)
-    .action((names: string[], opts: { target: string[]; dir?: string; dryRun: boolean; force: boolean }) => {
+    .action((names: string[], opts: { target: string[]; dir?: string; flows: boolean; dryRun: boolean; force: boolean }) => {
       try {
         const valid = [...Object.keys(SKILL_TARGETS), 'custom'];
         const invalid = opts.target.filter(t => !valid.includes(t));
@@ -501,6 +519,7 @@ export function createProgram(): Command {
           targets: opts.target as SkillTarget[],
           customDir: opts.dir,
           skills: names,
+          flows: opts.flows,
           dryRun: opts.dryRun,
           force: opts.force,
         });

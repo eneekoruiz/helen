@@ -19,13 +19,13 @@ Garantizar una transferencia de código limpia, autónoma y sin fricciones hacia
 
 | Prompt / Flow | Intención | Propósito / Cuándo usarlo | Frecuencia |
 |---|---|---|---|
-| [client-handoff-and-support-readiness.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/07-client-handoff/delivery/audit-client-handoff-and-support-readiness.md) | **REPORT/PLAN** | Auditar y empaquetar guías de despliegue, FAQ de soporte y propiedad. | Alta |
-| [content-copy-brand-and-claims-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/07-client-handoff/marketing/audit-content-copy-brand-and-claims.md) | **AUDIT** | Revisión editorial de copys, coherencia de marca y claims veraces. | Alta |
-| [links-forms-ctas-and-conversion-paths-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/07-client-handoff/marketing/audit-links-forms-ctas-and-conversion-paths.md) | **AUDIT** | Comprobar que todos los botones, formularios y links de conversión funcionan. | Alta |
-| [media-assets-alt-text-and-performance-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/07-client-handoff/verification/audit-media-assets-alt-text-and-performance.md) | **AUDIT** | Optimizar recortado de imágenes, logos y rendimiento de assets finales. | Media |
-| [browser-smoke-test-and-demo-readiness-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/07-client-handoff/verification/audit-browser-smoke-test-and-demo-readiness.md) | **AUDIT** | Prueba de humo en navegador para asegurar reloads estables y cero errores de consola. | Alta |
-| [last-mile-client-site-delivery-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/07-client-handoff/delivery/apply-last-mile-client-site-delivery-flow.md) | **AUDIT flow** | Flujo integral de revisión visual y técnica visible antes de mostrar a cliente. | Alta |
-| [client-delivery-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/07-client-handoff/delivery/apply-client-delivery-flow.md) | **PLAN/REPORT flow** | Flujo compuesto centrado en la operabilidad y transferencia limpia del repo. | Alta |
+| [client-handoff-and-support-readiness.md](delivery/AUDIT-client-handoff-and-support-readiness.md) | **REPORT/PLAN** | Auditar y empaquetar guías de despliegue, FAQ de soporte y propiedad. | Alta |
+| [content-copy-brand-and-claims-audit.md](marketing/AUDIT-content-copy-brand-and-claims.md) | **AUDIT** | Revisión editorial de copys, coherencia de marca y claims veraces. | Alta |
+| [links-forms-ctas-and-conversion-paths-audit.md](marketing/AUDIT-links-forms-ctas-and-conversion-paths.md) | **AUDIT** | Comprobar que todos los botones, formularios y links de conversión funcionan. | Alta |
+| [media-assets-alt-text-and-performance-audit.md](verification/AUDIT-media-assets-alt-text-and-performance.md) | **AUDIT** | Optimizar recortado de imágenes, logos y rendimiento de assets finales. | Media |
+| [browser-smoke-test-and-demo-readiness-audit.md](verification/AUDIT-browser-smoke-test-and-demo-readiness.md) | **AUDIT** | Prueba de humo en navegador para asegurar reloads estables y cero errores de consola. | Alta |
+| [last-mile-client-site-delivery-flow.md](delivery/APPLY-last-mile-client-site-delivery-flow.md) | **AUDIT flow** | Flujo integral de revisión visual y técnica visible antes de mostrar a cliente. | Alta |
+| [client-delivery-flow.md](delivery/APPLY-client-delivery-flow.md) | **PLAN/REPORT flow** | Flujo compuesto centrado en la operabilidad y transferencia limpia del repo. | Alta |
 
 ---
 
@@ -39,4 +39,4 @@ Antes de dar el proyecto por **Entregado (Fase 7 completada)**, asegúrate de re
 - [ ] ¿El paquete de soporte técnico y el acuerdo de nivel de servicio (si aplica) están definidos?
 
 **Siguiente Fase**:
-Una vez completada la entrega, el proyecto pasa a la fase de **[08-maintenance](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/README.md)**.
+Una vez completada la entrega, el proyecto pasa a la fase de **[08-maintenance](../08-maintenance/README.md)**.

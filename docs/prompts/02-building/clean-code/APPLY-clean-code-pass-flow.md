@@ -1,8 +1,28 @@
+---
+action: APPLY
+label: APPLY-
+phase: 02-building
+modifies_code: true
+requires_context:
+  - project_state
+stop_conditions:
+  - missing_required_context
+  - unsafe_to_continue
+reflection_loop:
+  mode: bounded
+  max_material_retries: 2
+  stop_when: success_criteria_met_or_no_material_gain
+memory_target: .quality_audit_log.md
+verification:
+  - inspect_relevant_files
+  - run_available_checks
+---
+
 # [APPLY] - Clean Code Pass Flow
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+## Nivel 0 y Mente Abierta
+- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
+- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
 
 
 **Intención**: APPLY (Modificar el proyecto, salida mínima)
@@ -17,15 +37,15 @@ Durante el desarrollo de funcionalidades (Building).
 
 ## Prompts Incluidos
 
-1. [initial-project-risk-scan.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/audit/audit-initial-project-risk-scan.md)
-2. [safe-clean-code-simplification-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/clean-code/apply-safe-clean-code-simplification-pass.md)
-3. [fast-build-test-verification.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/qa/audit-fast-build-test-verification.md)
+1. [initial-project-risk-scan.md](../../01-start-project/audit/AUDIT-initial-project-risk-scan.md)
+2. [safe-clean-code-simplification-pass.md](APPLY-safe-clean-code-simplification-pass.md)
+3. [fast-build-test-verification.md](../../04-before-production/qa/AUDIT-fast-build-test-verification.md)
 
 ## Checkpoints Entre Pasos
 
-- **Inicio**: Cargar [build-and-compile-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-build-and-compile-checkpoint.md).
-- **Post-refactor**: Cargar [lint-and-typecheck-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-lint-and-typecheck-checkpoint.md).
-- **Final**: Cargar [test-suite-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-test-suite-checkpoint.md).
+- **Inicio**: Cargar [build-and-compile-checkpoint.md](../checkpoint/AUDIT-build-and-compile-checkpoint.md).
+- **Post-refactor**: Cargar [lint-and-typecheck-checkpoint.md](../checkpoint/AUDIT-lint-and-typecheck-checkpoint.md).
+- **Final**: Cargar [test-suite-checkpoint.md](../checkpoint/AUDIT-test-suite-checkpoint.md).
 
 ## Condiciones para Avanzar
 

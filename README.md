@@ -31,6 +31,9 @@ npx helen-cli modules
 - `helen prompts show <id>`
 - `helen prompts path <id>`
 - `helen prompts flow <id>`
+- `helen prompts lint`
+- `helen skills list [--flows]`
+- `helen skills install [names...] [--target claude codex custom] [--dir <path>] [--flows]`
 
 ## Agent Skills
 
@@ -40,7 +43,10 @@ Reusable skills (`skills/<name>/SKILL.md`) can be installed into a project for a
 helen skills list
 helen skills install --target claude codex        # .claude/skills, .agents/skills
 helen skills install --target custom --dir <path> # any other agent: pass its skills folder
+helen skills install --target claude --flows      # also install each executable flow as helen-flow-<id>
 ```
+
+Bundled skills: `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`, `helen-release`, `helen-router`.
 
 Known targets are limited to the ones with documented paths; use `custom` for everything else.
 
@@ -71,9 +77,9 @@ helen prompts path release-candidate
 When working on any external project and you want to analyze its current status, recommend the next phase, and execute the appropriate transition prompt, you can run the following command directly in your terminal:
 
 ```bash
-curl -s https://raw.githubusercontent.com/eneekoruiz/helen/main/%5BPLAN%5D_Orquestador_Fases.md | tu-cli-de-ia
+curl -s https://raw.githubusercontent.com/eneekoruiz/helen/<TAG_OR_COMMIT>/%5BPLAN%5D_Orquestador_Fases.md | tu-cli-de-ia
 ```
-*(Replace `tu-cli-de-ia` with the command/pipe of your AI assistant).*
+*(Replace `tu-cli-de-ia` with the command/pipe of your AI assistant, and `<TAG_OR_COMMIT>` with a release tag or commit SHA. Do not pipe an unpinned branch into an agent that has tool access. Prefer `helen skills install` with the `helen-router` skill.)*
 
 Prompt families organized by moment:
 
@@ -82,7 +88,7 @@ Prompt families organized by moment:
 - [03-finish-features](docs/prompts/03-finish-features/README.md) (UX, Dirección de Arte y Visuales Premium)
 - [04-before-production](docs/prompts/04-before-production/README.md) (QA Adversarial, Escala y Observabilidad)
 - [05-final-audit](docs/prompts/05-final-audit/README.md) (Internacionalización, Documentación y Repositorio)
-- [06-release](docs/prompts/06-release/README.md) (Candidatos a Release, Changlog y Empaquetado)
+- [06-release](docs/prompts/06-release/README.md) (Candidatos a Release, Changelog y Empaquetado)
 - [07-client-handoff](docs/prompts/07-client-handoff/README.md) (Última milla y Entrega a Cliente)
 - [08-maintenance](docs/prompts/08-maintenance/README.md) (Backups, Showcase y Mantenimiento de Librería)
 - [09-future-knowledge](docs/prompts/09-future-knowledge/README.md) (Preservación del Conocimiento y ADRs)

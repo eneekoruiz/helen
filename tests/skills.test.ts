@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { installSkills, listSkills, resolveTargetDir } from '../src/core/skills.js';
+import { installSkills, listFlowSkills, listSkills, resolveTargetDir } from '../src/core/skills.js';
 
 describe('Skills installer', () => {
   let tmp: string;
@@ -25,8 +25,9 @@ describe('Skills installer', () => {
 
   it('every bundled skill has name and description frontmatter matching its folder', () => {
     for (const skill of listSkills()) {
-      const content = fs.readFileSync(path.join(skill.dir, 'SKILL.md'), 'utf-8');
+      const content = fs.readFileSync(path.join(skill.dir!, 'SKILL.md'), 'utf-8');
       expect(content).toMatch(new RegExp(`^---\\nname: ${skill.name}\\ndescription: .+\\n---`));
+      expect(content.length).toBeGreaterThan(200);
     }
   });
 
@@ -35,7 +36,9 @@ describe('Skills installer', () => {
 
     expect(fs.existsSync(path.join(tmp, '.claude/skills/helen-clean-code/SKILL.md'))).toBe(true);
     expect(fs.existsSync(path.join(tmp, '.agents/skills/helen-clean-code/SKILL.md'))).toBe(true);
-    expect(result.created).toHaveLength(2);
+    expect(result.created).toContain(path.join('.claude/skills/helen-clean-code/SKILL.md'));
+    expect(result.created).toContain(path.join('.agents/skills/helen-clean-code/SKILL.md'));
+    expect(result.skipped).toHaveLength(0);
   });
 
   it('supports a generic custom directory', () => {
@@ -54,12 +57,33 @@ describe('Skills installer', () => {
     installSkills({ cwd: tmp, targets: ['claude'], dryRun: true });
     expect(fs.existsSync(path.join(tmp, '.claude'))).toBe(false);
 
-    installSkills({ cwd: tmp, targets: ['claude'] });
+    const first = installSkills({ cwd: tmp, targets: ['claude'] });
     const second = installSkills({ cwd: tmp, targets: ['claude'] });
-    expect(second.skipped).toHaveLength(1);
+    expect(second.skipped).toHaveLength(first.created.length);
   });
 
   it('errors on an unknown skill name', () => {
     expect(() => installSkills({ cwd: tmp, targets: ['claude'], skills: ['nope'] })).toThrow(/not found/);
+  });
+
+  it('turns every executable flow into a valid, self-contained skill', () => {
+    const flows = listFlowSkills();
+    const names = flows.map(skill => skill.name);
+
+    expect(flows.length).toBeGreaterThanOrEqual(16);
+    expect(new Set(names).size).toBe(names.length);
+    for (const flow of flows) {
+      const content = flow.files!['SKILL.md']!;
+      expect(content).toMatch(new RegExp(`^---\\nname: ${flow.name}\\ndescription: ".+"\\n---`));
+      expect(content).not.toMatch(/\]\([^)]*\.md\)/);
+    }
+  });
+
+  it('installs flow skills only when requested', () => {
+    installSkills({ cwd: tmp, targets: ['claude'], skills: ['helen-clean-code'] });
+    expect(fs.existsSync(path.join(tmp, '.claude/skills/helen-flow-full-polish'))).toBe(false);
+
+    installSkills({ cwd: tmp, targets: ['claude'], flows: true, skills: ['helen-flow-full-polish'] });
+    expect(fs.existsSync(path.join(tmp, '.claude/skills/helen-flow-full-polish/SKILL.md'))).toBe(true);
   });
 });

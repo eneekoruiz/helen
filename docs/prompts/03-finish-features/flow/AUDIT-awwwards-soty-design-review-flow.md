@@ -1,8 +1,28 @@
+---
+action: AUDIT
+label: AUDIT-
+phase: 03-finish-features
+modifies_code: false
+requires_context:
+  - project_state
+stop_conditions:
+  - missing_required_context
+  - unsafe_to_continue
+reflection_loop:
+  mode: bounded
+  max_material_retries: 2
+  stop_when: success_criteria_met_or_no_material_gain
+memory_target: .quality_audit_log.md
+verification:
+  - inspect_relevant_files
+  - run_available_checks
+---
+
 # [AUDIT] - Awwwards and Site of the Year Design Review Flow
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+## Nivel 0 y Mente Abierta
+- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
+- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
 
 
 **Intención**: AUDIT (No modificar código, buscar problemas) / APPLY (Modificaciones si son seguras, salida mínima)
@@ -17,16 +37,16 @@ Al finalizar las funcionalidades principales en proyectos con alto enfoque visua
 
 ## Prompts Incluidos
 
-1. [product-design-and-awards-visual-excellence-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/audit-product-design-and-awards-visual-excellence.md)
-2. [premium-visual-polish-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/apply-premium-visual-polish-pass.md)
-3. [responsive-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/apply-responsive-pass.md)
-4. [basic-accessibility-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/performance/apply-basic-accessibility-pass.md)
-5. [basic-performance-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/performance/apply-basic-performance-pass.md)
+1. [product-design-and-awards-visual-excellence-audit.md](../visual/AUDIT-product-design-and-awards-visual-excellence.md)
+2. [premium-visual-polish-pass.md](../visual/APPLY-premium-visual-polish-pass.md)
+3. [responsive-pass.md](../visual/APPLY-responsive-pass.md)
+4. [basic-accessibility-pass.md](../performance/APPLY-basic-accessibility-pass.md)
+5. [basic-performance-pass.md](../performance/APPLY-basic-performance-pass.md)
 
 ## Checkpoints Entre Pasos
 
 - **Design Audit**: Decidir si el nivel de ambición objetivo es `Premium` o `Awards-level`.
-- **Durante el flujo**: Cargar [visual-ux-regression-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/flow/audit-visual-ux-regression-checkpoint.md).
+- **Durante el flujo**: Cargar [visual-ux-regression-checkpoint.md](AUDIT-visual-ux-regression-checkpoint.md).
 - **Final**: Balancear efectos visuales y transiciones frente a warnings de rendimiento o accesibilidad antes de realizar envíos públicos.
 
 ## Condiciones para Avanzar

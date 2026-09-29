@@ -32,7 +32,7 @@ Carga el contexto de la fase elegida (ej. `/fase 2` carga **02-building**):
 ### 5. `/workflow <nombre>`
 Ejecuta una secuencia transversal de prompts según el tipo de proyecto:
 - **`total-audit`**: Auditoría profunda e integral de calidad, UX, seguridad e infraestructura.
-- **`public-laúnch`**: Preparación visual, de repositorio y de release para publicación abierta.
+- **`public-launch`**: Preparación visual, de repositorio y de release para publicación abierta.
 - **`saas-product`**: Foco en activación, retención de usuarios, analíticas y operaciones en la nube.
 - **`open-source`**: Enfoque en onboarding de colaboradores (DX), automatizaciones y documentación veraz.
 - **`handoff`**: Preparación del paquete de entrega limpio de accesos privados y guías de soporte.
@@ -62,12 +62,12 @@ Cuando ejecutes un flujo o prompt individual, debes seguir estas reglas estricta
 
 El sistema operativo se estructura en torno a los momentos reales del proyecto:
 
-1. **[01-start-project](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/README.md)**: Diagnósticos iniciales, benchmark competitivo, roadmap y lifecycle de tecnología.
-2. **[02-building](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/README.md)**: Implementación, clean code, modelos de datos, APIs y checkpoints de compilación.
-3. **[03-finish-features](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/README.md)**: UX, diseño visual premium, responsive, accesibilidad y regresiones visuales.
-4. **[04-before-production](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/README.md)**: Pruebas adversarial, escala, coste, privacidad (GDPR) y observabilidad.
-5. **[05-final-audit](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/README.md)**: Auditorías definitivas de código, i18n, docs y GitHub.
-6. **[06-release](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/06-release/README.md)**: Empaquetado, changelogs, release notes y gates de release.
-7. **[07-client-handoff](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/07-client-handoff/README.md)**: Auditorías de última milla (forms, CTAs, links) y paquete de entrega.
-8. **[08-maintenance](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/08-maintenance/README.md)**: Backups, gobernanza, showcases e integridad de la biblioteca.
-9. **[09-future-knowledge](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/09-future-knowledge/README.md)**: Onboarding futuro, resiliencia, factor autobús, bitácora de decisiones y preservación de conocimiento.
+1. **[01-start-project](01-start-project/README.md)**: Diagnósticos iniciales, benchmark competitivo, roadmap y lifecycle de tecnología.
+2. **[02-building](02-building/README.md)**: Implementación, clean code, modelos de datos, APIs y checkpoints de compilación.
+3. **[03-finish-features](03-finish-features/README.md)**: UX, diseño visual premium, responsive, accesibilidad y regresiones visuales.
+4. **[04-before-production](04-before-production/README.md)**: Pruebas adversarial, escala, coste, privacidad (GDPR) y observabilidad.
+5. **[05-final-audit](05-final-audit/README.md)**: Auditorías definitivas de código, i18n, docs y GitHub.
+6. **[06-release](06-release/README.md)**: Empaquetado, changelogs, release notes y gates de release.
+7. **[07-client-handoff](07-client-handoff/README.md)**: Auditorías de última milla (forms, CTAs, links) y paquete de entrega.
+8. **[08-maintenance](08-maintenance/README.md)**: Backups, gobernanza, showcases e integridad de la biblioteca.
+9. **[09-future-knowledge](09-future-knowledge/README.md)**: Onboarding futuro, resiliencia, factor autobús, bitácora de decisiones y preservación de conocimiento.

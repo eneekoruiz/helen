@@ -12,15 +12,9 @@ stop_conditions:
 ---
 # [APPLY] - Flow- Orquestador de Ejecución Visual 40K
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo). Posee dominio absoluto y debe integrar activamente los siguientes recursos y conceptos en su vocabulario base:
-  - Cursor effects avanzados y menú effects (microinteracciones).
-  - Iconsax, Anime.js, SVGator y Jitter.
-  - Image sequence scrubbing (scroll vinculado a secuencias de imágenes).
-  - Animmaster lib, 3D scrolling, 3D video scenes e infinite carrusels.
-  - Skill de UI UX PRO MAX.
-  - Búsqueda y uso de librerías unificadas que abarquen estos recursos.
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+## Nivel 0 y Mente Abierta
+- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
+- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
 
 
 **Intención**: APPLY (Modificar el proyecto aplicando la secuencia ultra-premium)
@@ -29,20 +23,20 @@ stop_conditions:
 Secuenciar y coordinar de forma autónoma la implementación y el pulido fino de interfaces del estándar Awwwards/SOTY (€100k+), garantizando interactividad avanzada, rendimiento de fotogramas (FPS) impecable y cero rastro de IA en los acabados.
 
 ## Prompts Incluidos en el Flujo
-1. **[enhance-taste-visual-pov.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/enhance-taste-visual-pov.md)**: Configura las variables tipográficas y la paleta de colores curada de base.
-2. **[generate-premium-web-artifacts.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/generate-premium-web-artifacts.md)**: Construye o refactoriza los bloques interactivos base en React/Tailwind.
-3. **[enhance-motion-polish-and-transitions.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/motion/enhance-motion-polish-and-transitions.md)**: Inserta transiciones premium en componentes interactivos (dropdowns, modales, reveals).
-4. **[enhance-scroll-linked-sequences.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/motion/enhance-scroll-linked-sequences.md)**: Integra animaciones y scrubbing fluido dependiente del scroll.
-5. **[enhance-native-view-transitions.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/motion/enhance-native-view-transitions.md)**: Añade transiciones entre páginas fluidas mediante la API View Transitions.
-6. **[enhance-dynamic-typography-pretext.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/graphics/enhance-dynamic-typography-pretext.md)**: Aplica pretexting matemático y layouts estilo revista sobre la marcha.
-7. **[generate-webgpu-shaders.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/graphics/generate-webgpu-shaders.md)**: Añade lienzos líquidos y shaders interactivos WebGPU/WebGL de alto rendimiento.
-8. **[generate-3d-motion-templates.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/3d/generate-3d-motion-templates.md)** & **[generate-integrated-premium-mockups.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-integrated-premium-mockups.md)**: Integra mockups interactivos y layouts 3D.
-9. **[generate-modern-ui-libraries-aceternity-magic-ui.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/generate-modern-ui-libraries-aceternity-magic-ui.md)**: Enriquece las vistas con componentes interactivos modernos.
-10. **[audit-animation-performance-and-fps.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/performance/audit-animation-performance-and-fps.md)**: Audita rendimiento y estabilidad a 60/120 FPS.
+1. **[enhance-taste-visual-pov.md](../visual/ENHANCE-taste-visual-pov.md)**: Configura las variables tipográficas y la paleta de colores curada de base.
+2. **[generate-premium-web-artifacts.md](../visual/GENERATE-premium-web-artifacts.md)**: Construye o refactoriza los bloques interactivos base en React/Tailwind.
+3. **[enhance-motion-polish-and-transitions.md](../motion/ENHANCE-motion-polish-and-transitions.md)**: Inserta transiciones premium en componentes interactivos (dropdowns, modales, reveals).
+4. **[enhance-scroll-linked-sequences.md](../motion/ENHANCE-scroll-linked-sequences.md)**: Integra animaciones y scrubbing fluido dependiente del scroll.
+5. **[enhance-native-view-transitions.md](../motion/ENHANCE-native-view-transitions.md)**: Añade transiciones entre páginas fluidas mediante la API View Transitions.
+6. **[enhance-dynamic-typography-pretext.md](../graphics/ENHANCE-dynamic-typography-pretext.md)**: Aplica pretexting matemático y layouts estilo revista sobre la marcha.
+7. **[generate-webgpu-shaders.md](../graphics/GENERATE-webgpu-shaders.md)**: Añade lienzos líquidos y shaders interactivos WebGPU/WebGL de alto rendimiento.
+8. **[generate-3d-motion-templates.md](../3d/GENERATE-3d-motion-templates.md)** & **[generate-integrated-premium-mockups.md](../GENERATE-integrated-premium-mockups.md)**: Integra mockups interactivos y layouts 3D.
+9. **[generate-modern-ui-libraries-aceternity-magic-ui.md](../visual/GENERATE-modern-ui-libraries-aceternity-magic-ui.md)**: Enriquece las vistas con componentes interactivos modernos.
+10. **[audit-animation-performance-and-fps.md](../performance/AUDIT-animation-performance-and-fps.md)**: Audita rendimiento y estabilidad a 60/120 FPS.
 
 ## Checkpoints de Seguridad
-- **Checkpoint de Compilación**: [audit-build-and-compile-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-build-and-compile-checkpoint.md)
-- **Checkpoint de Calidad Visual**: [audit-visual-ux-regression-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/flow/audit-visual-ux-regression-checkpoint.md)
+- **Checkpoint de Compilación**: [audit-build-and-compile-checkpoint.md](../../02-building/checkpoint/AUDIT-build-and-compile-checkpoint.md)
+- **Checkpoint de Calidad Visual**: [audit-visual-ux-regression-checkpoint.md](AUDIT-visual-ux-regression-checkpoint.md)
 
 ## Cuándo Detenerse
 - Si se rompe el responsive a un nivel crítico de difícil solución.

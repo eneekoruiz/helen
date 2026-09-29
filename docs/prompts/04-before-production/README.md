@@ -20,15 +20,15 @@ Descubrir fallos más allá del "happy path" a través de QA adversarial y casos
 
 | Prompt / Flow / Checkpoint | Intención | Propósito / Cuándo usarlo | Frecuencia |
 |---|---|---|---|
-| [adversarial-qa-and-edge-cases.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/qa/audit-adversarial-qa-and-edge-cases.md) | **AUDIT** | Atacar el producto con malformaciones, condiciónes de carrera y fallos parciales. | Alta |
-| [stress-scale-and-cost-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/qa/audit-stress-scale-and-cost.md) | **AUDIT** | Auditar cuellos de botella y estimaciones de costes bajo crecimiento. | Media |
-| [privacy-legal-and-compliance-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/compliance/audit-privacy-legal-and-compliance.md) | **AUDIT** | Evalúar la privacidad (GDPR), licencias de código y obligaciones legales. | Media |
-| [observability-instrumentation-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/observability/audit-observability-instrumentation.md) | **APPLY/AUDIT** | Revisar o instrumentar trazas de logs, métricas y gestión de errores. | Alta |
-| [product-analytics-and-metrics-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/observability/audit-product-analytics-and-metrics.md) | **AUDIT** | Validar la captura de eventos de activación, retención y conversión. | Media |
-| [fast-build-test-verification.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/qa/audit-fast-build-test-verification.md) | **AUDIT** | Auditoría rápida de compilación y suite de tests para descartar roturas. | Alta |
-| [final-seo-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/compliance/audit-final-seo.md) | **AUDIT** | Revisar meta tags, sitemaps, indexabilidad y optimización para buscadores. | Media |
-| [prefinal-hardening-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/flow/apply-prefinal-hardening-flow.md) | **APPLY flow** | Flujo ejecutable para endurecer seguridad, QA adversarial y compilar limpio. | Media |
-| [security-risk-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/flow/audit-security-risk-checkpoint.md) | **Checkpoint** | Puerta de calidad para vetar riesgos graves de seguridad antes del despliegue. | Alta |
+| [adversarial-qa-and-edge-cases.md](qa/AUDIT-adversarial-qa-and-edge-cases.md) | **AUDIT** | Atacar el producto con malformaciones, condiciónes de carrera y fallos parciales. | Alta |
+| [stress-scale-and-cost-audit.md](qa/AUDIT-stress-scale-and-cost.md) | **AUDIT** | Auditar cuellos de botella y estimaciones de costes bajo crecimiento. | Media |
+| [privacy-legal-and-compliance-audit.md](compliance/AUDIT-privacy-legal-and-compliance.md) | **AUDIT** | Evalúar la privacidad (GDPR), licencias de código y obligaciones legales. | Media |
+| [observability-instrumentation-audit.md](observability/AUDIT-observability-instrumentation.md) | **APPLY/AUDIT** | Revisar o instrumentar trazas de logs, métricas y gestión de errores. | Alta |
+| [product-analytics-and-metrics-audit.md](observability/AUDIT-product-analytics-and-metrics.md) | **AUDIT** | Validar la captura de eventos de activación, retención y conversión. | Media |
+| [fast-build-test-verification.md](qa/AUDIT-fast-build-test-verification.md) | **AUDIT** | Auditoría rápida de compilación y suite de tests para descartar roturas. | Alta |
+| [final-seo-audit.md](compliance/AUDIT-final-seo.md) | **AUDIT** | Revisar meta tags, sitemaps, indexabilidad y optimización para buscadores. | Media |
+| [prefinal-hardening-flow.md](flow/APPLY-prefinal-hardening-flow.md) | **APPLY flow** | Flujo ejecutable para endurecer seguridad, QA adversarial y compilar limpio. | Media |
+| [security-risk-checkpoint.md](flow/AUDIT-security-risk-checkpoint.md) | **Checkpoint** | Puerta de calidad para vetar riesgos graves de seguridad antes del despliegue. | Alta |
 
 ---
 
@@ -42,4 +42,4 @@ Antes de pasar a la fase de **Final Audit (05-final-audit)**, asegúrate de resp
 - [ ] ¿Se superó con éxito el `security-risk-checkpoint` sin fallos críticos bloqueantes?
 
 **Siguiente Fase**:
-Si la respuesta es **Sí** a todas las anteriores, estás listo para entrar en la fase **[05-final-audit](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/README.md)**.
+Si la respuesta es **Sí** a todas las anteriores, estás listo para entrar en la fase **[05-final-audit](../05-final-audit/README.md)**.
