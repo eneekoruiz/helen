@@ -9,6 +9,7 @@ import { showMainMenu, showModuleSelector, showExplainSelector, printModuleExpla
 import { generateModuleDocs } from './core/docs.js';
 import { printPromptContent, printPromptList, printPromptPath, type PromptKind } from './core/prompts.js';
 import { ejectModule } from './core/moduleRunner.js';
+import { SKILL_TARGETS, installSkills, listSkills, type SkillTarget } from './core/skills.js';
 import { readConfig, updateConfig } from './core/config.js';
 import { scaffoldProject } from './core/scaffold.js';
 import { generateEntity } from './core/generator.js';
@@ -461,6 +462,49 @@ export function createProgram(): Command {
     .action((flow: string) => {
       try {
         printPromptContent(flow);
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  // helen skills
+  const skills = program
+    .command('skills')
+    .description('Browse and install agent skills (SKILL.md folders)');
+
+  skills
+    .command('list')
+    .description('List bundled skills')
+    .action(() => {
+      for (const skill of listSkills()) {
+        console.log(skill.name);
+      }
+    });
+
+  skills
+    .command('install [names...]')
+    .description('Install skills into the current project for one or more agents')
+    .option('--target <targets...>', `Targets: ${Object.keys(SKILL_TARGETS).join(', ')}, custom`, ['claude'])
+    .option('--dir <path>', 'Project-relative directory for the "custom" target (any agent that scans a skills folder)')
+    .option('--dry-run', 'Preview without writing files', false)
+    .option('--force', 'Overwrite existing files', false)
+    .action((names: string[], opts: { target: string[]; dir?: string; dryRun: boolean; force: boolean }) => {
+      try {
+        const valid = [...Object.keys(SKILL_TARGETS), 'custom'];
+        const invalid = opts.target.filter(t => !valid.includes(t));
+        if (invalid.length > 0) {
+          throw new Error(`Unknown target(s): ${invalid.join(', ')}. Valid: ${valid.join(', ')}`);
+        }
+        const result = installSkills({
+          cwd: process.cwd(),
+          targets: opts.target as SkillTarget[],
+          customDir: opts.dir,
+          skills: names,
+          dryRun: opts.dryRun,
+          force: opts.force,
+        });
+        logger.success(`Skills: ${result.created.length} created, ${result.overwritten.length} overwritten, ${result.skipped.length} skipped.`);
       } catch (err) {
         logger.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;

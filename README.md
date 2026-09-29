@@ -32,6 +32,18 @@ npx helen-cli modules
 - `helen prompts path <id>`
 - `helen prompts flow <id>`
 
+## Agent Skills
+
+Reusable skills (`skills/<name>/SKILL.md`) can be installed into a project for any agent that scans a skills folder:
+
+```bash
+helen skills list
+helen skills install --target claude codex        # .claude/skills, .agents/skills
+helen skills install --target custom --dir <path> # any other agent: pass its skills folder
+```
+
+Known targets are limited to the ones with documented paths; use `custom` for everything else.
+
 ## Project Quality Prompts
 
 This boilerplate includes a reusable prompt orchestration library in [docs/prompts](docs/prompts). It is designed for agents that can inspect a full repository, route themselves through the right audits, and apply senior judgment beyond rigid checklists.
