@@ -1,0 +1,66 @@
+{
+  "skill": "helen-impeccable",
+  "cases": [
+    {
+      "id": "apple-audit-request",
+      "prompt": "Conduct an Apple-grade audit on this repository's verification level and code craft. Discard any conversational complacency or prior AI praise and look for subtle invariant defects and failure modes. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Adopts an uncompromising, adversarial auditor posture without conversational flattery",
+        "Checks verification depth and distinguishes between vanity tests and proof of invariants",
+        "Audits error handling, failure paths, rollback integrity, and edge case resilience",
+        "Checks type craft, single responsibility, and elimination of dead or misleading code",
+        "Provides a structured verdict with a 0-100 Craftsmanship Score and prioritized remediation backlog"
+      ]
+    },
+    {
+      "id": "vanity-test-detection",
+      "prompt": "Review this test suite to determine if it actually proves invariant safety or is merely vanity coverage. Answer in chat only; do not modify or create files.\n```ts\nit('processes payment', async () => {\n  const res = await processOrder({ id: '123', amount: 50 });\n  expect(res).toBeDefined();\n});\n```",
+      "criteria": [
+        "Identifies expect(res).toBeDefined() as a low-signal vanity assertion",
+        "Flags missing verification of invariant outcomes (balance reduction, idempotency, receipt creation)",
+        "Highlights absence of failure case testing (network timeout, insufficient funds, duplicate submissions)",
+        "Recommends concrete adversarial assertions that prove correctness"
+      ]
+    },
+    {
+      "id": "ai-blind-spot-inspection",
+      "prompt": "I've been working with an AI for 4 hours and it keeps telling me the code is flawless. Audit this file as a fresh-eyes inspector for defects the AI is blind to. Answer in chat only; do not modify or create files.\n```ts\nexport async function syncData(items: any[]) {\n  for (const item of items) {\n    await db.save(item);\n  }\n  return { success: true };\n}\n```",
+      "criteria": [
+        "Identifies loose any[] typing and lack of domain validation",
+        "Flags sequential loop awaiting db.save without batching or concurrency limits (N+1 query bottleneck)",
+        "Points out that a failure halfway through leaves partial, uncommitted state without transactional rollback",
+        "Notes that returning { success: true } masks partial success or unhandled promise rejections"
+      ]
+    },
+    {
+      "id": "cross-platform-path-audit",
+      "prompt": "Audit this filesystem helper function for Apple-standard craft and multiplatform resilience. Answer in chat only; do not modify or create files.\n```ts\nexport function getCachePath(sub: string) {\n  return process.cwd() + '/.cache/' + sub + '/data.json';\n}\n```",
+      "criteria": [
+        "Flags hardcoded forward slashes breaking Windows path conventions",
+        "Recommends using path.join or path.resolve",
+        "Warns about missing directory existence verification or path traversal risks if sub contains relative segments",
+        "Suggests robust error and boundary handling"
+      ]
+    },
+    {
+      "id": "css-flex-align",
+      "expectTrigger": false,
+      "prompt": "How do I vertically center two divs inside a container using CSS Flexbox? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains display: flex and align-items: center",
+        "Provides a minimal and clean CSS code snippet",
+        "Does not trigger repository-level verification or code audit skills"
+      ]
+    },
+    {
+      "id": "git-commit-amend",
+      "expectTrigger": false,
+      "prompt": "What is the git command to amend the most recent commit message without changing any code? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Provides git commit --amend",
+        "Mentions -m flag or interactive editor behavior",
+        "Does not trigger deep code quality or verification skills"
+      ]
+    }
+  ]
+}
