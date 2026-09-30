@@ -167,7 +167,7 @@
         "04-before-production",
         "05-final-audit"
       ],
-      "notes": "ECC warns to install only from its official channels (github.com/affaan-m/ECC, npm ecc-universal, plugin ecc@ecc, ecc.tools); re-uploads and mirrors may contain malware. Do not stack several install methods. HELEN already has AUDIT-final-seo.",
+      "notes": "ECC warns to install only from its official channels (github.com/affaan-m/ECC, npm ecc-universal, plugin ecc@ecc, ecc.tools); re-uploads and mirrors may contain malware. Do not stack several install methods. HELEN already has audit-final-seo. ECC itself is catalogued as `ecc`.",
       "status": "active",
       "verified": "2026-09-29"
     },
@@ -592,6 +592,66 @@
       ],
       "notes": "Connecting it gives the agent the same access as your Vercel user. Keep human confirmation on for deploys and purchases, and only trust the official URL https://mcp.vercel.com. Beware prompt injection through logs or web content.",
       "verified": "2026-09-29"
+    },
+    {
+      "id": "ecc",
+      "name": "ECC (Everything Claude Code harness)",
+      "category": "workflow",
+      "kind": "plugin",
+      "status": "caution",
+      "source": "https://github.com/affaan-m/ECC",
+      "summary": "Large agent harness: ~68 agents, ~290 skills, command shims, hooks, rules, memory and the AgentShield scanner, for Claude Code, Codex, Cursor, OpenCode and (experimental) Antigravity.",
+      "install": [
+        "npx ecc-universal@<version> setup   # official universal installer; pin the version (README example 2.2.2, npm latest 2.2.1 at verification)",
+        "/plugin marketplace add https://github.com/affaan-m/ECC   # Claude Code plugin alternative",
+        "/plugin install ecc@ecc",
+        "./install.sh --profile minimal --target claude --no-hooks   # from a clone: smallest footprint"
+      ],
+      "license": "MIT",
+      "phases": [
+        "02-building",
+        "08-maintenance"
+      ],
+      "notes": "Overlaps heavily with HELEN (skills, rules, hooks, memory). Do not install it whole on top of HELEN: pick single skills (e.g. seo) or the minimal profile without hooks. Install from official channels only (GitHub repo, npm ecc-universal / ecc-agentshield, plugin ecc@ecc, ecc.tools) and never stack two install methods in the same harness.",
+      "verified": "2026-09-30"
+    },
+    {
+      "id": "agentshield",
+      "name": "AgentShield (ECC security scanner)",
+      "category": "quality",
+      "kind": "cli",
+      "status": "active",
+      "source": "https://github.com/affaan-m/ECC",
+      "summary": "Security auditor for AI agent configurations: scans prompts, hooks, MCP configs, permissions, secrets and agent files for vulnerabilities, misconfigurations and injection risks.",
+      "install": [
+        "npx ecc-agentshield@<version> scan --path .   # pin the version (1.6.0 at verification); binary: agentshield; confirm flags with --help"
+      ],
+      "license": "MIT",
+      "phases": [
+        "04-before-production",
+        "08-maintenance"
+      ],
+      "notes": "Complements `helen doctor` (which only checks HELEN setup and inline MCP secrets) and the audit-third-party-tools-and-mcp prompt.",
+      "verified": "2026-09-30"
+    },
+    {
+      "id": "portfolio-references",
+      "name": "Portfolio references",
+      "category": "design",
+      "kind": "reference",
+      "status": "active",
+      "source": "https://danilodemarco.com",
+      "summary": "Real designer portfolios to study for layout, typography and presentation. Current list: danilodemarco.com (creative director, type designer, Awwwards judge: image-led grids, thematic sections, restrained navigation).",
+      "install": [
+        "# Websites: study principles (hierarchy, rhythm, project order), never copy design or text."
+      ],
+      "license": "Each site belongs to its author.",
+      "phases": [
+        "01-start-project",
+        "03-finish-features"
+      ],
+      "notes": "Pairs with generate-portfolio-layout-patterns. nicolodemarca.com did not resolve at verification time; add sites here as you find them.",
+      "verified": "2026-09-30"
     }
   ]
 }

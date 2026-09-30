@@ -1,0 +1,37 @@
+{
+  "skill": "helen-knowledge",
+  "cases": [
+    {
+      "id": "adr",
+      "prompt": "We decided to move from REST to tRPC because our frontend and backend are both TypeScript and we kept breaking contracts. Write the decision record. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Uses an ADR structure with Context, Decision, Consequences and Status",
+        "Includes negative consequences or tradeoffs, not only benefits",
+        "Mentions alternatives considered or rejected",
+        "Is limited to this single decision"
+      ]
+    },
+    {
+      "id": "bus",
+      "prompt": "Only Ana knows how to deploy: she runs a script on her laptop with a password stored in her notes, and the domain is registered to her personal Gmail. Ana leaves in two weeks. What do we do? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Moves domain and accounts to organization-owned accounts",
+        "Moves the password to a team password manager / secrets store and rotates it",
+        "Documents or automates the deploy (runbook / CI)",
+        "Prioritizes by urgency given the two-week deadline",
+        "Does not ask to write the password into documentation"
+      ]
+    },
+    {
+      "id": "agents-md",
+      "prompt": "Write an AGENTS.md for a Vite + React + TypeScript project with pnpm, Vitest and ESLint. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Includes the stack and key commands (install, dev, build, test, lint)",
+        "Includes the main folder structure or where logic lives",
+        "Includes limits on what the agent must not do (e.g. major upgrades, skipping tests, committing secrets)",
+        "Is concise rather than a long essay",
+        "Contains no secrets"
+      ]
+    }
+  ]
+}

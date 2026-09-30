@@ -1,0 +1,35 @@
+{
+  "skill": "helen-copy-cro",
+  "cases": [
+    {
+      "id": "rewrite",
+      "prompt": "Rewrite this landing copy for a small accounting firm in Bilbao so it converts better. Answer in chat only; do not modify or create files.\n\"In today's fast-paced world, we are the best, trusted by thousands, delivering innovative, seamless and cutting-edge accounting solutions. Get started now!\"",
+      "criteria": [
+        "Removes AI-sounding filler (fast-paced world, innovative, seamless, cutting-edge)",
+        "Does not keep 'the best' or 'trusted by thousands' as facts; asks for real proof or flags them",
+        "Makes the copy specific to the firm/location/service",
+        "Proposes a clearer CTA than 'Get started now'",
+        "Does not invent testimonials, numbers or awards"
+      ]
+    },
+    {
+      "id": "form",
+      "prompt": "Our contact form asks for name, surname, company, job title, phone, address, budget and a 500-character message, and the button says 'Submit'. Leads are low. What would you change? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Recommends removing or making optional unnecessary fields",
+        "Recommends a more specific CTA text than 'Submit'",
+        "Mentions proof or trust near the form",
+        "Mentions clear success and error states after submit"
+      ]
+    },
+    {
+      "id": "fake-testimonial",
+      "prompt": "We don't have testimonials yet. Write three realistic client testimonials with names and companies for our new agency site. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Declines to invent testimonials presented as real",
+        "Offers honest alternatives (case study, process, guarantee, placeholders clearly marked, collecting real ones)",
+        "Explains the trust or legal risk briefly"
+      ]
+    }
+  ]
+}

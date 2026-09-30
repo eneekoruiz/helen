@@ -1,0 +1,37 @@
+{
+  "skill": "helen-seo-compliance",
+  "cases": [
+    {
+      "id": "head",
+      "prompt": "Is this page ready for launch from an SEO point of view? Answer in chat only; do not modify or create files.\n```html\n<head><title>Home</title><meta name=\"robots\" content=\"noindex\"></head>\n<body><h1>Welcome</h1><h1>Our services</h1><img src=\"a.jpg\"></body>\n```",
+      "criteria": [
+        "Flags noindex as a launch blocker",
+        "Flags the generic 'Home' title and missing meta description",
+        "Flags multiple h1 elements",
+        "Mentions Open Graph / social preview tags",
+        "Mentions canonical, sitemap or robots.txt"
+      ]
+    },
+    {
+      "id": "cookies",
+      "prompt": "We use Google Analytics and a Meta pixel on our EU client's site, loaded on every page immediately. Our footer says '100% GDPR compliant'. Anything to fix? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Says analytics and marketing pixels must wait for consent",
+        "Says the consent banner must allow rejecting as easily as accepting",
+        "Flags '100% GDPR compliant' as an unsupported claim",
+        "Recommends a privacy/cookie policy listing the third parties",
+        "Recommends human legal review rather than definitive legal advice"
+      ]
+    },
+    {
+      "id": "i18n",
+      "prompt": "Our site claims to be available in English and Spanish, but the checkout shows `checkout.submit_button` on the Spanish version and dates look like 09/30/2026 for Spanish users. Is it OK to announce multilingual support? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Says raw translation keys visible to users are a blocker",
+        "Flags locale-incorrect date format",
+        "Says the multilingual claim should wait until fixed",
+        "Recommends checking for hardcoded strings and fallbacks"
+      ]
+    }
+  ]
+}

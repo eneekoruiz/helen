@@ -1,124 +1,87 @@
-# HELEN CLI
+# HELEN
 
-HELEN is a CLI for scaffolding and hardening React, Vite, and TypeScript projects.
+HELEN is a workflow kit for building projects with AI agents (Claude Code, Codex, Antigravity or any agent that reads `SKILL.md` folders):
 
-It focuses on practical setup, optional modules, and simple project hygiene.
+- **Prompts** (`docs/prompts`): 94 English, lint-checked task prompts and flows, organized by project phase.
+- **Skills** (`skills/`): 15 bundled agent skills that load the right prompts automatically.
+- **Playbooks** (`helen apply`): detect the project phase and plan which prompts, skills and tools to use for a goal.
+- **Catalog** (`helen skills catalog`): vetted third-party skills, CLIs, MCP servers and references, with install commands HELEN prints but never runs.
+- **Scaffolding**: optional modules for React + Vite + TypeScript projects (`helen init`, `helen add`).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg?style=flat-square)](LICENSE)
 [![Language: TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg?style=flat-square)](https://www.typescriptlang.org)
 [![Tested: Vitest](https://img.shields.io/badge/Tested%20with-Vitest-orange.svg?style=flat-square)](https://vitest.dev)
 
-## Quick start
+## Install
+
+HELEN is not published on npm yet. Install it from the repository:
 
 ```bash
-npx helen-cli init
-npx helen-cli add security --security-level strict
-npx helen-cli modules
+git clone https://github.com/eneekoruiz/helen.git
+cd helen && npm ci && npm run build && npm link   # exposes the `helen` command
 ```
-
-## Commands
-
-- `helen`
-- `helen init [--dry-run] [--force] [--security-level <simple|strict>]`
-- `helen add <modules...> [--dry-run] [--force] [--security-level <simple|strict>]`
-- `helen modules`
-- `helen explain <module>`
-- `helen doctor`
-- `helen scripts easter-egg`
-- `helen docs`
-- `helen prompts`
-- `helen prompts list [--kind <master|guide|flow|step|checkpoint|prompt>]`
-- `helen prompts show <id>`
-- `helen prompts path <id>`
-- `helen prompts flow <id>`
-- `helen setup [--agents claude codex antigravity] [--dry-run]`
-- `helen guide`
-- `helen apply <goal> --track`, then `helen next` / `helen done` / `helen skip` / `helen status` / `helen check`
-- `helen apply [goal] [--brief] [--install]`
-- `helen skills catalog [--category <c>]` / `helen skills external <id>` / `helen skills installed`
-- `helen prompts lint`
-- `helen skills list [--flows]`
-- `helen skills install [names...] [--target claude codex custom] [--dir <path>] [--flows]`
 
 ## Start here
 
 ```bash
+cd your-project
 helen setup                 # install skills for Claude, Codex and Antigravity + AGENTS.md/CLAUDE.md instructions
-helen guide                 # what prompts, skills, catalog and playbooks are (docs/GUIA.md)
 helen apply                 # detect the project phase and suggest goals
-helen apply design          # plan: prompts, skills and tools for a goal
+helen apply design --track  # plan a goal and track it step by step
+helen next                  # current step, with its prompt
+helen done                  # mark it done (checkpoints require `helen check` to pass)
+helen doctor                # project + agent setup health (skills, MCP config, inline secrets)
 ```
 
-Or tell your AI: "Use HELEN: analyze where the project is and what to apply" (with the `helen-apply` skill installed). Full explanation in [docs/GUIA.md](docs/GUIA.md).
+Or just tell your agent: *"Use HELEN: analyze where the project is and what to apply"* — the `helen-apply` skill does the rest.
+The full explanation (in Spanish) is in [docs/GUIA.md](docs/GUIA.md); `helen guide` prints it.
 
-## Agent Skills
+## Commands
 
-Reusable skills (`skills/<name>/SKILL.md`) can be installed into a project for any agent that scans a skills folder:
+| Area | Commands |
+|---|---|
+| Plan and track | `helen apply [goal] [--brief] [--track] [--install]` · `helen next` · `helen done` · `helen skip <reason>` · `helen status` · `helen check` |
+| Setup and health | `helen setup [--agents claude codex antigravity] [--dry-run]` · `helen doctor` · `helen guide` |
+| Prompts | `helen prompts list [--kind flow]` · `helen prompts search <text>` · `helen prompts show <id>` · `helen prompts path <id>` · `helen prompts flow <id>` · `helen prompts index` · `helen prompts lint` |
+| Skills | `helen skills list [--flows]` · `helen skills install [names...] [--target claude codex antigravity custom] [--dir <path>]` · `helen skills update` · `helen skills installed` |
+| Catalog | `helen skills catalog [--category <c>] [--kind skill\|cli\|mcp\|plugin\|reference\|service]` · `helen skills external <id>` |
+| Library quality | `helen lint` (prompts, indexes, playbooks, skills, catalog) · `npm run evals` (skill quality, see below) |
+| Scaffolding | `helen init` · `helen create <name>` · `helen add <modules...>` · `helen modules` · `helen explain <module>` · `helen update` · `helen eject <module>` · `helen rollback` |
 
-```bash
-helen skills list
-helen skills install --target claude codex        # .claude/skills, .agents/skills
-helen skills install --target custom --dir <path> # any other agent: pass its skills folder
-helen skills install --target claude --flows      # also install each executable flow as helen-flow-<id>
-```
+Prompt ids accept the full id, the short id (without the action prefix), a path, or a legacy alias.
 
-Bundled skills: `helen-apply` (entry point), `helen-router`, `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`, `helen-copy-cro`, `helen-motion-3d`, `helen-security`, `helen-seo-compliance`, `helen-qa-scale`, `helen-release`, `helen-client-handoff`, `helen-strategy`, `helen-data-api`, `helen-knowledge`.
-Third-party tools live in a catalog (`helen skills catalog`); HELEN only prints their install commands.
+## Prompts
 
-Known targets are limited to the ones with documented paths; use `custom` for everything else.
+`docs/prompts` holds the library:
 
-## Project Quality Prompts
+- [RULES.md](docs/prompts/RULES.md) — shared rules every prompt inherits (safety, evidence, no secrets).
+- [CONTRACT.md](docs/prompts/CONTRACT.md) — the format every prompt must follow; `helen lint` enforces it (frontmatter, `Goal`, `Use when`, `Steps`/`Requirements`, `Limits`, `Output`, English only).
+- [MASTER.md](docs/prompts/MASTER.md) — how an agent executes a flow safely.
+- [playbooks.json](docs/prompts/playbooks.json) — goals (design, copy, motion, quality, security, seo-legal, qa, release, deploy, handoff, strategy, data, knowledge, autonomy, connect-tools, safe-install).
 
-This boilerplate includes a reusable prompt orchestration library in [docs/prompts](docs/prompts). It is designed for agents that can inspect a full repository, route themselves through the right audits, and apply senior judgment beyond rigid checklists.
+Phases: [01 start](docs/prompts/01-start-project/README.md) · [02 building](docs/prompts/02-building/README.md) · [03 finish features](docs/prompts/03-finish-features/README.md) · [04 before production](docs/prompts/04-before-production/README.md) · [05 final audit](docs/prompts/05-final-audit/README.md) · [06 release](docs/prompts/06-release/README.md) · [07 client handoff](docs/prompts/07-client-handoff/README.md) · [08 maintenance](docs/prompts/08-maintenance/README.md) · [09 future knowledge](docs/prompts/09-future-knowledge/README.md)
 
-Start with:
+Each phase README has quick decisions, an exit checklist and a generated index.
 
-- [MASTER](docs/prompts/MASTER.md) when you want an agent to execute a flow safely.
-- [Executable flows](docs/prompts/USE_CASE_INDEX.md) to choose the right sequence for `full-polish`, `release-candidate`, `client-delivery`, and more.
-- [Prompt Routers](docs/prompts/01-start-project/ROUTER.md) inside each phase directory to choose the right audit/apply step.
-- [Registry](docs/prompts/registry.json) for future automation around prompt families and phases.
+## Skills
 
-Each prompt uses mandatory minimum checks plus a "Más allá de estos criterios" section that asks the agent to apply its own expert judgment across the whole repository.
+Bundled: `helen-apply` (entry point), `helen-router`, `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`, `helen-copy-cro`, `helen-motion-3d`, `helen-security`, `helen-seo-compliance`, `helen-qa-scale`, `helen-release`, `helen-client-handoff`, `helen-strategy`, `helen-data-api`, `helen-knowledge`.
 
-CLI examples:
+| Target | Folder |
+|---|---|
+| `claude` | `.claude/skills` |
+| `codex` / `antigravity` | `.agents/skills` |
+| `custom --dir <path>` | any agent that scans a skills folder |
 
-```bash
-helen prompts list --kind flow
-helen prompts show master
-helen prompts flow full-polish
-helen prompts path release-candidate
-```
+Quality per skill (trigger rate, baseline vs with-skill pass rate) is measured by `npm run evals` and published in [docs/SKILLS_QUALITY.md](docs/SKILLS_QUALITY.md). Eval cases live in [`evals/`](evals).
 
-### Remote Phase Orchestration
+## Third-party tools
 
-When working on any external project and you want to analyze its current status, recommend the next phase, and execute the appropriate transition prompt, you can run the following command directly in your terminal:
-
-```bash
-curl -s https://raw.githubusercontent.com/eneekoruiz/helen/<TAG_OR_COMMIT>/%5BPLAN%5D_Orquestador_Fases.md | tu-cli-de-ia
-```
-*(Replace `tu-cli-de-ia` with the command/pipe of your AI assistant, and `<TAG_OR_COMMIT>` with a release tag or commit SHA. Do not pipe an unpinned branch into an agent that has tool access. Prefer `helen skills install` with the `helen-router` skill.)*
-
-Prompt families organized by moment:
-
-- [01-start-project](docs/prompts/01-start-project/README.md) (Inicio de proyecto, roadmap y riesgos)
-- [02-building](docs/prompts/02-building/README.md) (Desarrollo, Clean Code y CMS)
-- [03-finish-features](docs/prompts/03-finish-features/README.md) (UX, Dirección de Arte y Visuales Premium)
-- [04-before-production](docs/prompts/04-before-production/README.md) (QA Adversarial, Escala y Observabilidad)
-- [05-final-audit](docs/prompts/05-final-audit/README.md) (Internacionalización, Documentación y Repositorio)
-- [06-release](docs/prompts/06-release/README.md) (Candidatos a Release, Changelog y Empaquetado)
-- [07-client-handoff](docs/prompts/07-client-handoff/README.md) (Última milla y Entrega a Cliente)
-- [08-maintenance](docs/prompts/08-maintenance/README.md) (Backups, Showcase y Mantenimiento de Librería)
-- [09-future-knowledge](docs/prompts/09-future-knowledge/README.md) (Preservación del Conocimiento y ADRs)
+`helen skills catalog` lists vetted tools (design skills, Playwright, GitHub CLI, Vercel/Cloudflare, MCP servers, ECC, AgentShield, design references...). Each entry has a status (`active`, `caution`, `discontinued`) and a `verified` date; `helen lint` warns when a verification is older than 180 days. HELEN never installs third-party code on its own: it prints the pinned command so you review it first.
 
 ## Architecture
 
-The command layer parses the requested modules and options, the registry resolves their implementations, and the module runner writes templates and configuration into the target project. Validation and dry-run support happen before files are changed, while backups and the `.helenrc` manifest support repeatable runs and rollback.
-
-Docker files, workflows, testing, SEO and security configuration are optional modules rather than requirements of the base scaffold. This keeps the core CLI small while allowing several modules to be composed in one run.
-
-## Links
-
-- DeepWiki: https://deepwiki.com/eneekoruiz/helen
+`src/core` holds the library logic (frontmatter parsing, prompt resolution, lint, playbooks, progress tracking, skills, catalog, doctor). `src/index.ts` is the command layer. The scaffolding modules write templates with dry-run, backups and a `.helenrc` manifest for rollback.
 
 ## License
 

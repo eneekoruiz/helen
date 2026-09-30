@@ -69,6 +69,11 @@
           "why": "References and a validated DESIGN.md"
         },
         {
+          "kind": "external",
+          "ref": "portfolio-references",
+          "why": "Real portfolios to study (for portfolio projects)"
+        },
+        {
           "kind": "skill",
           "ref": "helen-premium-design",
           "why": "Premium, anti-template design criteria"
@@ -702,6 +707,11 @@
           "why": "Mandatory review: permissions, read-only, environment, tokens"
         },
         {
+          "kind": "external",
+          "ref": "agentshield",
+          "why": "Scan the resulting agent and MCP configuration"
+        },
+        {
           "kind": "skill",
           "ref": "helen-security",
           "why": "Security criteria"
@@ -758,6 +768,11 @@
           "kind": "skill",
           "ref": "helen-security",
           "why": "Security criteria"
+        },
+        {
+          "kind": "external",
+          "ref": "agentshield",
+          "why": "Scan agent configs, hooks and MCP settings"
         }
       ]
     }

@@ -19,7 +19,9 @@ HELEN es un repositorio con **tres capas** más un **cerebro** que las conecta:
 | Quieres ver... | Comando |
 |---|---|
 | Todos los prompts, flows y checkpoints | `helen prompts list` (filtra con `--kind flow`) |
-| Leer uno | `helen prompts show <id>` |
+| Buscar por tema | `helen prompts search <texto>` |
+| Leer uno | `helen prompts show <id>` (acepta id completo, id corto o alias antiguo) |
+| Reglas comunes de todos los prompts | `helen prompts show rules` |
 | Las skills propias de HELEN | `helen skills list` (con `--flows` incluye cada flow como skill) |
 | Herramientas de terceros recomendadas | `helen skills catalog` (filtra con `--category design`) |
 | Detalle y comandos de una herramienta | `helen skills external <id>` (solo muestra, no instala) |
@@ -27,7 +29,10 @@ HELEN es un repositorio con **tres capas** más un **cerebro** que las conecta:
 | Cómo va el plan en curso | `helen status` |
 | En qué fase estás y qué te conviene | `helen apply` |
 | Todas las metas disponibles | `helen apply` (sin argumentos) |
-| Validar la biblioteca | `helen prompts lint` |
+| Validar toda la biblioteca | `helen lint` |
+| Salud del proyecto y de tus agentes | `helen doctor` |
+| Actualizar las skills instaladas | `helen skills update` |
+| Calidad medida de cada skill | [SKILLS_QUALITY.md](SKILLS_QUALITY.md) |
 
 ## 2. Cómo se instala
 
@@ -35,7 +40,7 @@ HELEN es un repositorio con **tres capas** más un **cerebro** que las conecta:
 
 ```bash
 git clone https://github.com/eneekoruiz/helen && cd helen
-npm install && npm run build
+npm ci && npm run build
 node dist/cli.js --help      # o: npm link  y luego simplemente: helen --help
 ```
 
@@ -122,6 +127,8 @@ Los pasos de tipo *checkpoint* no se pueden dar por hechos hasta que `helen chec
 
 La fase detectada por `helen apply` es una **estimación** basada en archivos (package.json, tests, CI, CHANGELOG, despliegue). Confírmala.
 
+**Idioma.** Los prompts están en inglés (menos tokens y mejor comprensión por cualquier modelo); puedes hablar a la IA en español y las metas entienden frases en español. Las reglas comunes están en `docs/prompts/RULES.md` y el formato obligatorio en `docs/prompts/CONTRACT.md`: cada prompt tiene `Goal`, `Use when`, `Steps` o `Requirements`, `Limits` y `Output`.
+
 ## 5. Metas (lo que puedes pedir)
 
 `design`, `copy`, `motion`, `quality`, `security`, `seo-legal`, `qa`, `release`, `deploy`, `handoff`, `strategy`, `data`, `knowledge`, `autonomy`, `connect-tools`, `safe-install`. Cada una está definida en `docs/prompts/playbooks.json` con sus pasos.
@@ -148,7 +155,9 @@ La fase detectada por `helen apply` es una **estimación** basada en archivos (p
 
 ## 7. Herramientas de terceros (catálogo) y seguridad
 
-`helen skills catalog` lista, entre otras: taste-skill, impeccable, ui-ux-pro-max, image-to-code (diseño); web-design-guidelines (calidad); humanizer, cro-optimization (textos); scroll-craft, transitions-dev, 21st-dev, animos-app (motion y componentes); playwright-cli (que el agente vea la página); google-design-md, awesome-design-md, godly, deck-gallery, inspiration-sources (referencias); gsd-core, ralph-loop, coderabbit (flujo de agente); seo; github-cli y hosting (publicar).
+`helen skills catalog` lista, entre otras: taste-skill, impeccable, ui-ux-pro-max, image-to-code (diseño); web-design-guidelines (calidad); humanizer, cro-optimization (textos); scroll-craft, transitions-dev, 21st-dev, animos-app (motion y componentes); playwright-cli (que el agente vea la página); google-design-md, awesome-design-md, godly, deck-gallery, inspiration-sources (referencias); gsd-core, ralph-loop, coderabbit (flujo de agente); ecc y agentshield (arnés de agente y escáner de seguridad de la configuración); seo; portfolio-references (portfolios de referencia); github-cli y hosting (publicar).
+
+**ECC (Everything Claude Code)** es un arnés completo para agentes (MIT): decenas de agentes, cientos de skills, hooks y comandos, más **AgentShield**, un escáner de seguridad de tu configuración (`CLAUDE.md`, MCP, hooks, permisos). Está como `caution` porque se solapa con HELEN: instala solo un perfil mínimo y sin hooks (`helen skills external ecc`), y usa `agentshield` (`npx ecc-agentshield@<versión> scan`) como comprobación de seguridad; no hace falta instalar ECC entero para usarlo.
 
 Cada entrada tiene **estado**: `active`, `caution` (léelo antes) o `discontinued` (no instalar, p. ej. Roo Code).
 
@@ -173,15 +182,22 @@ Incluidos en el catálogo: `playwright-mcp` y `chrome-devtools-mcp` (ver y medir
 
 Reglas por defecto: endpoint oficial, permisos mínimos, **solo lectura** cuando solo necesites mirar, base de datos y hosting de **desarrollo** (no producción), tokens fuera del repositorio, y confirmación humana para escribir, desplegar o gastar. La meta `helen apply connect-tools` empieza por el prompt `audit-third-party-tools-and-mcp`.
 
-## 9. Mantener y ampliar HELEN
+## 9. Salud, actualizaciones y calidad
+
+- `helen doctor`: además del proyecto, revisa tus agentes: skills de HELEN instaladas y desactualizadas, archivos de configuración MCP y **secretos escritos a mano** en ellos (los señala sin imprimirlos).
+- `helen skills update`: reinstala las skills de HELEN ya instaladas con su última versión (`--dry-run` para ver qué cambia).
+- `npm run evals` (desde el repositorio de HELEN, requiere el CLI `claude`): cada caso de `evals/<skill>.json` se ejecuta en un proyecto limpio **sin** la skill y **con** ella; un juez puntúa ambas respuestas contra los criterios. El resultado está en [SKILLS_QUALITY.md](SKILLS_QUALITY.md): tasa de activación automática, % sin skill, % con skill, diferencia y nota (A/B/C).
+
+## 10. Mantener y ampliar HELEN
 
 - **Nuevo prompt**: crea el archivo en su fase siguiendo `docs/prompts/CONTRACT.md` (en inglés) y ejecuta `helen prompts index`; el índice de la fase se genera solo.
 - **Nueva skill**: carpeta `skills/<nombre>/SKILL.md` con `name` (igual que la carpeta) y `description`.
 - **Nueva meta o paso**: edita `docs/prompts/playbooks.json`.
 - **Nueva herramienta externa**: entrada en `skills/catalog.json` con `source`, `install`, `license`, `status`.
-- Después ejecuta `helen prompts lint` y `npm test`: validan frontmatter, enlaces, playbooks y catálogo.
+- **Nueva skill**: añade también `evals/<nombre>.json` con 3 casos y criterios verificables.
+- Después ejecuta `helen lint` y `npm test`: validan frontmatter, secciones obligatorias, idioma, enlaces, índices, playbooks, skills y catálogo (avisa si una herramienta lleva más de 180 días sin verificar).
 
-## 10. Qué NO hace HELEN
+## 11. Qué NO hace HELEN
 
 - No instala herramientas de terceros por ti.
 - No garantiza que la fase detectada sea correcta: la propone con evidencia.

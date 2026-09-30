@@ -22,7 +22,7 @@ describe('progress tracking', () => {
     expect(currentIndex(progress)).toBe(0);
 
     markDone(tmp, 'read it');
-    skipStep(tmp, 'not needed here');
+    for (let i = 1; i < progress.steps.length; i++) skipStep(tmp, 'not needed here');
     const finished = readProgress(tmp)!;
     expect(currentIndex(finished)).toBe(-1);
     expect(finished.steps[0]!.note).toBe('read it');

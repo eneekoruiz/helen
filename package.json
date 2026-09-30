@@ -1,7 +1,7 @@
 {
   "name": "helen-cli",
-  "version": "1.0.0",
-  "description": "HELEN — Project setup CLI for React + Vite + TypeScript. Modular, interactive, safe.",
+  "version": "2.0.0",
+  "description": "HELEN — AI agent workflow kit: phase prompts, agent skills, playbooks and a vetted tool catalog, plus React + Vite + TypeScript scaffolding.",
   "type": "module",
   "bin": {
     "helen": "./dist/cli.js"
@@ -22,7 +22,8 @@
     "lint": "eslint src/ tests/ --ext .ts",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
-    "clean": "node -e \"const fs=require('fs');fs.rmSync('dist',{recursive:true,force:true});\""
+    "clean": "node -e \"const fs=require('fs');fs.rmSync('dist',{recursive:true,force:true});\"",
+    "evals": "node scripts/run-skill-evals.mjs"
   },
   "keywords": [
     "cli",

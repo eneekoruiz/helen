@@ -1,0 +1,38 @@
+{
+  "skill": "helen-qa-scale",
+  "cases": [
+    {
+      "id": "edge",
+      "prompt": "List the edge cases I should test for this endpoint that transfers credits between users: POST /transfer {from, to, amount}. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Includes negative, zero or huge amounts / malformed input",
+        "Includes double submission or retries (idempotency)",
+        "Includes concurrent transfers / race conditions",
+        "Includes transfer to self or to a nonexistent user",
+        "Includes partial failure between debit and credit (atomicity / rollback)",
+        "Suggests regression tests for the risky cases"
+      ]
+    },
+    {
+      "id": "scale",
+      "prompt": "Our product page loops over products and for each one queries its reviews from the database, then renders. It's fine with 20 products in staging. We launch with 20,000 products next week. Concerns? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Identifies the N+1 query pattern",
+        "Recommends batching/joins, pagination or caching",
+        "Mentions measuring or load testing before launch",
+        "Mentions cost or database load at scale",
+        "Prefers simple mitigations over a big re-architecture"
+      ]
+    },
+    {
+      "id": "logs",
+      "prompt": "Our error logs look like `console.log('error', err)` and sometimes include the full request body with the user's password. How should we improve observability? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Flags logging passwords/PII as a critical problem",
+        "Recommends structured logs with context (request id, user action, version)",
+        "Recommends an error tracking service or error boundaries (lightweight first)",
+        "Mentions alerting with ownership or actionable signals"
+      ]
+    }
+  ]
+}

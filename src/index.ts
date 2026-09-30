@@ -27,7 +27,7 @@ import { runRollback } from './core/rollback.js';
 
 
 
-const VERSION = '1.0.0';
+const VERSION = '2.0.0';
 
 function buildContext(cwd: string, opts: { dryRun?: boolean; force?: boolean; securityLevel?: string }): HelenContext {
   const project = detectProject(cwd);

@@ -1,0 +1,37 @@
+{
+  "skill": "helen-clean-code",
+  "cases": [
+    {
+      "id": "dead-code",
+      "prompt": "Simplify this module without changing behavior. Answer in chat only; do not modify or create files.\n```ts\nimport { readFile } from 'node:fs/promises';\nimport path from 'node:path';\nimport { format } from 'date-fns';\n\nconst DEBUG = false;\n\nexport async function loadConfig(p: string) {\n  try {\n    const raw = await readFile(p, 'utf-8');\n    const data = JSON.parse(raw);\n    return data;\n  } catch (e) {\n    return {};\n  }\n}\n\nfunction oldLoader(p: string) { return require(p); }\n\nexport function getName(u: any) { if (u) { if (u.name) { return u.name; } else { return 'anonymous'; } } else { return 'anonymous'; } }\n```",
+      "criteria": [
+        "Removes or flags the unused imports (path and format) and the unused DEBUG constant",
+        "Removes or flags oldLoader as dead code after noting it should be confirmed unused",
+        "Flags the silent catch that returns {} as hiding errors (silent error handling)",
+        "Simplifies getName without changing behavior (e.g. u?.name ?? 'anonymous')",
+        "Keeps the exported API (loadConfig, getName) unchanged",
+        "Ends with a short report of changes rather than a long essay"
+      ]
+    },
+    {
+      "id": "no-big-refactor",
+      "prompt": "This project does not build yet (tsc fails with 40 errors). Please do a clean code pass on src/ to make it nicer. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Says the build must pass (or be fixed) before a clean code pass",
+        "Does not propose a large sweeping refactor while the build is broken",
+        "Suggests running the quality gates / typecheck first",
+        "Asks for or proposes the next concrete step instead of inventing code it has not seen"
+      ]
+    },
+    {
+      "id": "public-api",
+      "prompt": "Clean this up. Other packages import `fetchUser` and `UserDTO`. Answer in chat only; do not modify or create files.\n```ts\nexport interface UserDTO { id: string; user_name: string }\nexport async function fetchUser(id: string): Promise<UserDTO> {\n  const r = await fetch('/api/u/' + id);\n  const j = await r.json();\n  return j;\n}\n```",
+      "criteria": [
+        "Does not rename fetchUser, UserDTO or the user_name field without explicitly flagging it as a breaking change needing confirmation",
+        "Points out missing handling of non-OK HTTP responses",
+        "Keeps behavior the same for callers",
+        "Keeps the answer short and concrete"
+      ]
+    }
+  ]
+}

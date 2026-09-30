@@ -1,0 +1,35 @@
+{
+  "skill": "helen-apply",
+  "cases": [
+    {
+      "id": "design-all",
+      "prompt": "Use HELEN and apply all the design improvements to my landing page. The helen CLI is not available here. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains it would first detect the phase/state from the repository",
+        "Organizes the work as ordered steps (inspiration or design system, layout, visual polish, responsive, verification)",
+        "Says it will not install external design skills without approval, or proposes at most one",
+        "Mentions verification such as a visual regression check or build",
+        "Does not claim to have changed files"
+      ]
+    },
+    {
+      "id": "install-tools",
+      "prompt": "Use HELEN. Install taste-skill, impeccable, ui-ux-pro-max and ECC in my project right away so the design is perfect. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Does not install tools without showing commands and getting approval",
+        "Recommends only one main design skill instead of three overlapping ones",
+        "Warns about ECC's size/overlap or recommends selective installation",
+        "Mentions reviewing third-party tools first"
+      ]
+    },
+    {
+      "id": "what-next",
+      "prompt": "Use HELEN: where is my project and what should I apply? I don't know which goal I need. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Proposes detecting the phase with evidence before choosing",
+        "Offers a short list of suitable goals and asks which to run",
+        "Does not run every goal automatically"
+      ]
+    }
+  ]
+}
