@@ -1,72 +1,46 @@
-# [APPLY] - Dependabot and Repository Auto-Maintenance
+---
+action: APPLY
+phase: 08-maintenance
+summary: Configure Dependabot and CI so dependency updates arrive grouped, tested and safe, with auto-merge limited to low-risk updates.
+modifies_code: true
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Dependabot and Auto-Maintenance
 
+## Goal
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+Keep dependencies and the security posture current automatically, without breaking the project.
 
-## Objetivo
+## Use when
 
-Configurar e implementar la automatización del mantenimiento de dependencias y la postura de seguridad del repositorio mediante GitHub Dependabot y acciones automatizadas de GitHub.
+- Preparing a project for production or open source, or during maintenance.
 
-## Cuándo Usarlo
+## Skip when
 
-- En la fase final de auditoría o durante el mantenimiento del repositorio.
-- Al preparar un proyecto para producción o código abierto para asegurar que no acumule deuda técnica de seguridad obsoleta.
+- Short-lived sandboxes or throwaway demos, or no meaningful test suite (automatic updates without tests raise breakage risk).
 
-## Cuándo NO Usarlo
+## Requirements
 
-- En entornos sandbox de corto plazo o demos desechables.
-- Cuando no se cuenta con una suite de tests unitarios robusta (las actualizaciones automáticas sin tests incrementan el riesgo de rotura).
+1. `.github/dependabot.yml` for `npm` (or the project ecosystem) and `github-actions`, weekly (daily if critical), with labels (`dependencies`, `security`).
+2. Group minor and patch updates to reduce noise; major versions always need manual review.
+3. Every Dependabot pull request runs the full CI (tests, typecheck, build) before it can merge.
 
-## Rol de la IA
+## Beyond the checklist
 
-Actúas como un DevSecOps Specialist y Site Reliability Engineer.
+Auto-merge only for development dependencies and security patches with green CI.
 
-## Requisitos mínimos obligatorios
+## Limits
 
-1. **Configuración de Dependabot (`.github/dependabot.yml`)**:
-   - Crear o actualizar el archivo `.github/dependabot.yml`.
-   - Configurar escaneo para el ecosistema `npm` y `github-actions`.
-   - Establecer frecuencia de revisión semanal (`weekly`) o diaria (`daily`) según criticidad.
-   - Definir etiquetas claras para clasificar los PRs generados (ej. `dependencies`, `security`).
+- Never auto-merge production major versions; private registry credentials only in GitHub secrets; valid YAML.
 
-2. **Límites de Versiones y Grupos**:
-   - Agrupar actualizaciones menores y de parche para reducir el spam de Pull Requests (`groups`).
-   - Evitar actualizaciones automáticas de versiones mayores (`major`) sin revisión manual del desarrollador.
-
-3. **Integración con CI/CD**:
-   - Asegurar que cualquier Pull Request generado por Dependabot ejecute la suite de tests automáticos (`npm run test`, `npm run typecheck`, etc.) antes de ser elegible para merge.
-
-## Más allá de estos criterios
-
-Propón flujos de auto-merge (usando herramientas como `action-dependabot-auto-merge` o nativas de GitHub Actions) limitados estrictamente a dependencias `development` (devDependencies) y parches de seguridad con estado de CI en verde (`success`).
-
-## Límites de Seguridad
-
-- Nunca habilitar auto-merge para dependencias de producción en versiones mayores (`major`).
-- No exponer credenciales de registries privados directamente; usar GitHub Actions Secrets.
-
-## Checks Finales
-
-- Sintaxis del archivo `.github/dependabot.yml` válida.
-- Exclusión de directorios no deseados (ej. `node_modules`, `dist`).
-- Las políticas de versionado son seguras para el proyecto.
-
-## Formato de Entrega
-
-El entregable debe ser minimalista. Produce únicamente:
+## Output
 
 ```text
-✅ Configuración de auto-mantenimiento aplicada. / [o] ⚠️ Aplicada con advertencias.
+Done. / Done with warnings.
 
-Configuración realizada:
-- [Creación o parche de .github/dependabot.yml con ecosistemas definidos]
-- [Flujo de GitHub Actions asociado a actualizaciones, si se configuró]
+Changes applied:
+- 1-3 bullets with the exact changes
 
-Acciones manuales adicionales:
-- [Habilitar alertas de dependencias en los ajustes del repositorio de GitHub, si aplica]
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
 ```
-*No generes informes extensos ni explicaciones teóricas.*

@@ -5,9 +5,9 @@ import { getTemplatePath } from '../src/core/templateResolver.js';
 import fs from 'node:fs';
 
 describe('Module Registry', () => {
-  it('should have 13 registered modules', () => {
+  it('should have 14 registered modules', () => {
     const modules = getAllModules();
-    expect(modules.length).toBe(13);
+    expect(modules.length).toBe(14);
   });
 
   it('should return all module ids', () => {

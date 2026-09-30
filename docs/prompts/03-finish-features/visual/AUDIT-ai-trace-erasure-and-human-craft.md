@@ -1,69 +1,34 @@
-# [AUDIT] - AI Trace Erasure and Human Craft Audit
+---
+action: AUDIT
+phase: 03-finish-features
+summary: Detect AI and template traces in copy, visuals, layout, icons and motion, and propose specific human replacements.
+modifies_code: false
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo). Posee dominio absoluto y debe integrar activamente los siguientes recursos y conceptos en su vocabulario base:
-  - Cursor effects avanzados y menú effects (microinteracciones).
-  - Iconsax, Anime.js, SVGator y Jitter.
-  - Image sequence scrubbing (scroll vinculado a secuencias de imágenes).
-  - Animmaster lib, 3D scrolling, 3D video scenes e infinite carrusels.
-  - Skill de UI UX PRO MAX.
-  - Búsqueda y uso de librerías unificadas que abarquen estos recursos.
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# AI Trace Erasure and Human Craft Audit
 
+## Goal
 
-**Intención**: AUDIT (detectar y eliminar rastros de IA o plantilla)
+Find every sign that the site was produced by a template or a generic AI, and replace it with something only this client could have. Anything interchangeable is suspect.
 
-## Objetivo
+## Use when
 
-Auditar textos, visuales, layout, iconografía, motion y decisiones de producto para detectar cualquier rastro de IA, plantilla, demo genérica o falta de autoría humana. Cero rastro de IA, 100% conversional, humano y calidad Awwwards.
+- Before client delivery or publishing a portfolio or premium landing; when the result works but has no soul or specificity.
 
-## Cuándo Usarlo
+## Requirements
 
-- Antes de entregar a cliente.
-- Antes de publicar portfolios o landings premium.
-- Cuando el resultado funcióna pero no tiene alma ni especificidad.
+1. **Copy traces:** empty claims, inflated phrases, staged run-ups, forced triples, generic enthusiasm, implausible testimonials, microcopy without context.
+2. **Visual traces:** excessive symmetry, generic gradients, repeated cards, obvious icons, default radii and shadows, stock-looking imagery, motion without concept.
+3. **Missing authorship:** no point of view, no industry detail, no concrete proof, no uncomfortable decisions.
+4. **Replacements:** specific copy, visuals with a real source, less generic layout, verifiable proof, motion with a concept. Helpers: `helen skills external humanizer`, `helen skills external taste-skill`.
 
-## Rol de la IA
+## Limits
 
-Actúa como Editor Creativo, Brand Guardian y Auditor anti-plantilla.
+- Audit only: do not modify files.
+- Never suggest inventing data, logos, testimonials or cases; do not trade clarity for originality; minimalism is not lack of personality.
 
-## Requisitos mínimos obligatorios
+## Output
 
-1. Detecta claims vacíos, frases infladas, simetria excesiva, gradientes genéricos, cards repetidas, iconos obvios, testimonios inverosímiles y microcopy sin contexto.
-2. Detecta falta de autoría: sin punto de vista, sin detalles de industria, sin prueba concreta y sin decisiones incómodas.
-3. Propone copy específico, visuales con fuente real, layout menos genérico, prueba verificable y motion con concepto.
-
-## Más allá de estos criterios
-
-Una web premium debe parecer inevitablemente hecha para ese cliente. Todo lo intercambiable es sospechoso.
-
-## Límites de seguridad
-
-- No propongas inventar datos, logos, testimonios o casos.
-- No elimines claridad por querer sonar original.
-- No confundas minimalismo con falta de personalidad.
-
-## Checks finales
-
-- [ ] Rastros IA clasificados.
-- [ ] Sustituciones concretas.
-- [ ] Riesgos de credibilidad marcados.
-- [ ] Siguiente prompt recomendado.
-
-## Formato de entrega
-
-```markdown
-## Críticos
-- ...
-
-## Importantes
-- ...
-
-## Opcionales
-- ...
-
-## Sustituciones de mayor impacto
-- Antes:
-- Después:
-```
-
+1. Findings grouped as **Critical**, **Important** and **Optional**. For each: evidence (file, line, screen or command), impact, recommended fix and effort.
+2. Highest-impact replacements as before / after pairs.
+3. Credibility risks and the next prompt to run.

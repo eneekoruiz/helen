@@ -1,56 +1,47 @@
-# [APPLY] - Responsive Pass
+---
+action: APPLY
+phase: 03-finish-features
+summary: Verify and fix mobile, tablet and desktop layouts: overflow, overlap, broken menus, unreachable buttons, clipped text, density.
+modifies_code: true
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo). Posee dominio absoluto y debe integrar activamente los siguientes recursos y conceptos en su vocabulario base:
-  - Cursor effects avanzados y menú effects (microinteracciones).
-  - Iconsax, Anime.js, SVGator y Jitter.
-  - Image sequence scrubbing (scroll vinculado a secuencias de imágenes).
-  - Animmaster lib, 3D scrolling, 3D video scenes e infinite carrusels.
-  - Skill de UI UX PRO MAX.
-  - Búsqueda y uso de librerías unificadas que abarquen estos recursos.
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Responsive Pass
 
+## Goal
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+Make every surface work, and look designed, on mobile, tablet and desktop.
 
-## Objetivo
+## Use when
 
-Verificar y corregir de forma segura que las superficies de la UI funcionen correctamente en mobile, tablet y desktop.
+- During polish, and before public screenshots or a web release.
 
-## Cuándo Usarlo
+## Skip when
 
-- En la fase de pulido visual y UX.
-- Antes de capturas públicas o release web.
+- The project has no responsive interface.
 
-## Cuándo NO Usarlo
+## Requirements
 
-- Si el proyecto no tiene interfaz de usuario responsive.
+1. Check small (360-414px), medium (768-1024px), large (1280-1440px) and wide (1920px) viewports; use a real browser when available (`helen skills external playwright-cli`).
+2. Fix horizontal overflow, overlap, broken menus, unreachable buttons, clipped text and wrong density.
+3. The main flow can be completed on every device.
+4. Touch targets and spacing work with fingers, not only with a mouse.
 
-## Criterios Mínimos
+## Beyond the checklist
 
-- Revisa viewports pequeños (móvil), medianos (tablet) y grandes (desktop).
-- Corrige overflow horizontal, solapes, menús rotos, botones inaccesibles, textos cortados y densidades incorrectas.
-- Comprueba que el flujo principal se pueda completar en todos los dispositivos.
+Each viewport should look natively designed, not just shrunk by CSS.
 
-## Más allá de estos criterios
+## Limits
 
-Evalúa si cada viewport parece diseñado de forma nativa e intenciónada, no simplemente encogido o forzado por CSS.
+- Avoid restructuring large layouts; fix visible, blocking problems first.
 
-## Límites de Seguridad
-
-Evita reestructurar layouts grandes sin necesidad. Corrige primero los problemas de visualización e interacción visibles y bloqueantes.
-
-## Formato de Entrega
-
-El entregable debe ser minimalista. Produce únicamente:
+## Output
 
 ```text
-✅ Ajustes de responsive aplicados. / [o] ⚠️ Completado con advertencias.
+Done. / Done with warnings.
 
-Cambios aplicados:
-- [Breve lista de 1-3 viñetas con las correcciones responsive aplicadas]
+Changes applied:
+- 1-3 bullets with the exact changes
 
-Acciones manuales necesarias:
-- Ninguna. / [o detallar acciones]
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
 ```
-*No generes informes extensos ni explicaciones teóricas.*

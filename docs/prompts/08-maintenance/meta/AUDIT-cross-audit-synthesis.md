@@ -1,52 +1,39 @@
-# [AUDIT] - Cross-Audit Synthesis
+---
+action: AUDIT
+phase: 08-maintenance
+summary: Merge the findings of several audits into one deduplicated, prioritized plan with work packages and the decisions needed.
+modifies_code: false
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Cross-Audit Synthesis
 
+## Goal
 
-**Intención**: PLAN (Diseñar estrategias y fases)
+Consolidate the findings of several prompts into one coherent execution plan.
 
-Purpose: Consolidate findings from multiple prompts into one coherent execution plan.
+## Use when
 
-## Prompt
+- After running two or more audits on the same project.
 
-Act as a Principal Engineer and Product Lead reviewing multiple audit outputs.
+## Requirements
 
-Synthesize them into a single prioritized plan.
+1. **Deduplicate:** merge repeated issues, keeping the strongest evidence and highest severity.
+2. **Resolve conflicts:** choose a direction or mark a decision as needed.
+3. **Prioritize** by user impact, risk reduction, effort, leverage and dependencies.
+4. **Phase:** now, next, later or intentionally ignored.
+5. **Work packages:** small, coherent batches of related items.
 
-## Requisitos mínimos obligatorios
+## Beyond the checklist
 
-1. Deduplicate findings
-- Merge repeated issues across audits.
-- Preserve the strongest evidence and highest severity.
+Find the hidden theme and the systemic causes (unclear direction, weak boundaries, poor naming, missing ownership, insufficient verification, presentation over substance). Recommend deleting or simplifying work when that creates more quality.
 
-2. Resolve conflicts
-- Identify contradictory recommendations.
-- Choose a direction or mark a decision needed.
+## Limits
 
-3. Prioritize
-- Rank by user impact, risk reduction, effort, leverage, and sequencing dependencies.
+- Plan only: do not modify files; keep the source audit for every item.
 
-4. Assign phase
-- Classify each item as now, next, later, or intentionally ignored.
-
-5. Define execution packages
-- Group related items into small coherent work batches.
-
-## Más allá de estos criterios
-
-Look for the hidden theme behind the findings.
-
-Identify systemic causes: unclear product direction, weak architecture boundary, poor naming, missing ownership, insufficient verification, or presentation over substance.
-
-Recommend deleting, merging, or simplifying work when that creates more quality than adding more.
-
-## Formato de entrega
+## Output
 
 1. Executive summary.
-2. Top risks (classified by severity: Críticos, Importantes, Opcionales).
-3. Prioritized work packages.
-4. Decisions needed.
-5. Items to ignore or defer.
-6. Recommended next prompt or agent brief.
+2. Top risks as **Critical**, **Important**, **Optional**.
+3. Prioritized work packages and decisions needed.
+4. Items to ignore or defer, and the next prompt or agent brief (`generate-agent-brief-builder`).

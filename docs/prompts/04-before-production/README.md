@@ -1,45 +1,38 @@
-# Fase 4: Before Production (Preparación para Producción)
+# 04 · Before production
 
-**Objetivo de la fase**:
-Descubrir fallos más allá del "happy path" a través de QA adversarial y casos de borde. Validar la resiliencia del sistema ante problemas de escala y costes, asegurar el cumplimiento de privacidad/legalidad (GDPR), e instrumentar adecuadamente la observabilidad y analíticas del producto.
+Make sure the product can go online without obvious risk: adversarial QA, scale and cost, security, privacy and legal, SEO and observability.
 
-**Cuándo se utiliza**:
-- Después de pulir la interfaz y la UX de las funcionalidades.
-- Antes de congelar código para la release candidate.
-- Previo a despliegues en entornos de staging o producción.
+## Quick decisions
 
-**Qué problemas resuelve**:
-- Bugs raros o complejos (condiciónes de carrera, fallos parciales, cancelaciones) que rompen la experiencia.
-- Consumos desmedidos de base de datos, API cuotas o recursos de infraestructura.
-- Sanciones legales o pérdida de confianza del usuario por mala gestión de datos personales.
-- "Ceguera" en producción por falta de logs o métricas de uso reales.
+- Extreme bugs are the risk: `audit-adversarial-qa-and-edge-cases`.
+- Scale, cost or performance risk: `audit-stress-scale-and-cost`.
+- Legal or privacy risk: `enhance-privacy-and-legal-readiness` (audit-only on request).
+- Public web project: `audit-final-seo`.
+- Hard-to-debug failures: `audit-observability-instrumentation`.
+- Combined hardening after the audits: `apply-prefinal-hardening-flow`.
+- Stop: do not move to release with critical risks open.
 
----
+## Exit checklist
 
-## Prompts Incluidos en esta Fase
+Before moving on to 05-final-audit:
 
-| Prompt / Flow / Checkpoint | Intención | Propósito / Cuándo usarlo | Frecuencia |
-|---|---|---|---|
-| [adversarial-qa-and-edge-cases.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/qa/audit-adversarial-qa-and-edge-cases.md) | **AUDIT** | Atacar el producto con malformaciones, condiciónes de carrera y fallos parciales. | Alta |
-| [stress-scale-and-cost-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/qa/audit-stress-scale-and-cost.md) | **AUDIT** | Auditar cuellos de botella y estimaciones de costes bajo crecimiento. | Media |
-| [privacy-legal-and-compliance-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/compliance/audit-privacy-legal-and-compliance.md) | **AUDIT** | Evalúar la privacidad (GDPR), licencias de código y obligaciones legales. | Media |
-| [observability-instrumentation-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/observability/audit-observability-instrumentation.md) | **APPLY/AUDIT** | Revisar o instrumentar trazas de logs, métricas y gestión de errores. | Alta |
-| [product-analytics-and-metrics-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/observability/audit-product-analytics-and-metrics.md) | **AUDIT** | Validar la captura de eventos de activación, retención y conversión. | Media |
-| [fast-build-test-verification.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/qa/audit-fast-build-test-verification.md) | **AUDIT** | Auditoría rápida de compilación y suite de tests para descartar roturas. | Alta |
-| [final-seo-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/compliance/audit-final-seo.md) | **AUDIT** | Revisar meta tags, sitemaps, indexabilidad y optimización para buscadores. | Media |
-| [prefinal-hardening-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/flow/apply-prefinal-hardening-flow.md) | **APPLY flow** | Flujo ejecutable para endurecer seguridad, QA adversarial y compilar limpio. | Media |
-| [security-risk-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/flow/audit-security-risk-checkpoint.md) | **Checkpoint** | Puerta de calidad para vetar riesgos graves de seguridad antes del despliegue. | Alta |
+- [ ] Adversarial QA has no open critical bugs.
+- [ ] Security and privacy have no critical blockers.
+- [ ] Basic technical SEO is complete.
+- [ ] Logs and error handling work.
+- [ ] Costs and third-party limits are understood.
+- [ ] The product can go online without obvious risk of fines or loss of trust.
 
----
+## Prompts
 
-## Checklist de Transición: ¿Ya estoy preparado para pasar a la siguiente fase?
-
-Antes de pasar a la fase de **Final Audit (05-final-audit)**, asegúrate de responder afirmativamente a las siguientes preguntas:
-
-- [ ] ¿Se han documentado y solucionado los bugs críticos del QA adversarial?
-- [ ] ¿Los logs y la gestión de errores en producción están configurados correctamente?
-- [ ] ¿El inventario de datos y la política de cookies/privacidad cumplen con el estándar honesto?
-- [ ] ¿Se superó con éxito el `security-risk-checkpoint` sin fallos críticos bloqueantes?
-
-**Siguiente Fase**:
-Si la respuesta es **Sí** a todas las anteriores, estás listo para entrar en la fase **[05-final-audit](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/05-final-audit/README.md)**.
+<!-- HELEN:INDEX:START (generated by `helen prompts index`, do not edit) -->
+| Prompt | Type | Summary |
+|---|---|---|
+| [audit-final-seo](compliance/AUDIT-final-seo.md) | AUDIT | Verify technical SEO before publishing: titles, descriptions, Open Graph, canonicals, robots, sitemap, headings and indexability. |
+| [enhance-privacy-and-legal-readiness](compliance/ENHANCE-privacy-and-legal-readiness.md) | ENHANCE | Audit privacy and legal risk, then fix what is needed to publish: privacy and cookie policies, consent banner, script blocking, forms. |
+| [apply-prefinal-hardening-flow](flow/APPLY-prefinal-hardening-flow.md) | APPLY flow | Flow: harden security, robustness and technical quality before packaging a release candidate. |
+| [audit-security-risk-checkpoint](flow/AUDIT-security-risk-checkpoint.md) | checkpoint | Blocking gate: no exposed secrets, reachable critical dependency vulnerabilities, unsafe destructive behavior or data leaks. |
+| [audit-observability-instrumentation](observability/AUDIT-observability-instrumentation.md) | AUDIT | Check that failures and key behavior are visible, actionable and not noisy: logs, errors, metrics, alerts, health checks, PII in logs. |
+| [audit-adversarial-qa-and-edge-cases](qa/AUDIT-adversarial-qa-and-edge-cases.md) | AUDIT | Attack the product with edge cases: malformed, empty and huge data, duplicates, slow network, cancellations, races and partial failures. |
+| [audit-stress-scale-and-cost](qa/AUDIT-stress-scale-and-cost.md) | AUDIT | Find scale, performance and cost problems before success makes them painful: bottlenecks, N+1s, quotas, rate limits, cost drivers. |
+<!-- HELEN:INDEX:END -->

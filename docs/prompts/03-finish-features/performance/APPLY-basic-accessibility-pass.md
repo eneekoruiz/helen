@@ -1,55 +1,49 @@
-# [APPLY] - Basic Accessibility Pass
+---
+action: APPLY
+phase: 03-finish-features
+summary: Find and fix basic accessibility problems: keyboard, focus, contrast, semantics, labels, alt text, touch targets and reduced motion.
+modifies_code: true
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo). Posee dominio absoluto y debe integrar activamente los siguientes recursos y conceptos en su vocabulario base:
-  - Cursor effects avanzados y menú effects (microinteracciones).
-  - Iconsax, Anime.js, SVGator y Jitter.
-  - Image sequence scrubbing (scroll vinculado a secuencias de imágenes).
-  - Animmaster lib, 3D scrolling, 3D video scenes e infinite carrusels.
-  - Skill de UI UX PRO MAX.
-  - Búsqueda y uso de librerías unificadas que abarquen estos recursos.
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Basic Accessibility Pass
 
+## Goal
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+Fix the accessibility problems that block real people before release or a public presentation.
 
-## Objetivo
+## Use when
 
-Detectar y corregir problemas básicos de accesibilidad en la UI antes de release o presentación pública.
+- During visual and UX polish, and before publishing a web UI or delivering to a client.
 
-## Cuándo Usarlo
+## Skip when
 
-- En la fase de pulido visual y UX.
-- Antes de publicar una UI web o entregar a cliente.
+- The project has no user interface or interactive content.
 
-## Cuándo NO Usarlo
+## Requirements
 
-- Si el proyecto no tiene interfaz de usuario ni contenido interactivo.
+1. Keyboard navigation reaches every interactive element in a sensible order; focus is always visible (a designed focus ring, not the browser default removed).
+2. Text contrast at least 4.5:1 (3:1 for large text, 18px bold or more); the main flow never depends only on color or hover.
+3. Semantic HTML: landmarks, one `h1` and ordered headings, buttons vs links used correctly.
+4. Labelled form fields, descriptive errors linked to their fields, alt text for content images (empty alt for decoration).
+5. Touch targets at least 44-48px (or an expanded hit area), with at least 8px between adjacent targets.
+6. Basic screen reader support and `prefers-reduced-motion` respected.
 
-## Criterios Mínimos
+## Beyond the checklist
 
-- Revisa navegación por teclado, visibilidad del focus, contrastes de color, etiquetas semánticas HTML, alt texts de imágenes de contenido, etiquetas de formularios y soporte básico para lectores de pantalla.
-- Comprueba que el flujo principal no dependa únicamente de colores o de eventos hover.
+Accessibility as product quality: clear error text, predictable interfaces, easy recovery, plain language. The external `web-design-guidelines` skill adds 100+ rules (`helen skills external web-design-guidelines`).
 
-## Más allá de estos criterios
+## Limits
 
-Busca la accesibilidad como calidad de producto: claridad en textos de error, interfaces predecibles, facilidades de recuperación ante errores y lenguaje sencillo.
+- No wrong or redundant ARIA to look accessible ("aria theater"); native semantics first.
 
-## Límites de Seguridad
-
-No añadas atributos ARIA incorrectos o redundantes para aparentar accesibilidad técnica ("aria theater") si rompen la experiencia real del lector.
-
-## Formato de Entrega
-
-El entregable debe ser minimalista. Produce únicamente:
+## Output
 
 ```text
-✅ Mejoras de accesibilidad aplicadas. / [o] ⚠️ Completado con advertencias.
+Done. / Done with warnings.
 
-Cambios aplicados:
-- [Breve lista de 1-3 viñetas con las mejoras de accesibilidad aplicadas]
+Changes applied:
+- 1-3 bullets with the exact changes
 
-Acciones manuales necesarias:
-- Ninguna. / [o especificar acciones]
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
 ```
-*No generes informes extensos ni explicaciones teóricas.*

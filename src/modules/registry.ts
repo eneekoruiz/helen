@@ -12,6 +12,7 @@ import { pwaModule } from './pwa/index.js';
 import { i18nModule } from './i18n/index.js';
 import { sentryModule } from './sentry/index.js';
 import { cmsModule } from './cms/index.js';
+import { guardrailsModule } from './guardrails/index.js';
 // Note: `tailwind` and `shadcn` are not registered by default yet.
 
 /**
@@ -44,6 +45,7 @@ register(pwaModule);
 register(i18nModule);
 register(sentryModule);
 register(cmsModule);
+register(guardrailsModule);
 // Do not register Tailwind / Shadcn here to keep the stable set of modules
 // registered by default. They can be added later when promoted from planned.
 

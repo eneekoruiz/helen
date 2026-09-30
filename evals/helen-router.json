@@ -1,0 +1,32 @@
+{
+  "skill": "helen-router",
+  "cases": [
+    {
+      "id": "phase",
+      "prompt": "Here is my repository: package.json with dev/build scripts, src/ with a React app, no tests folder, no CI workflows, no CHANGELOG. What phase am I in and what should I do next? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Identifies the building phase (02) or equivalent with evidence from the listed files",
+        "Mentions that tests and CI are missing",
+        "Recommends a concrete next step or prompt (e.g. quality gates, tests, CI)",
+        "Keeps the answer short"
+      ]
+    },
+    {
+      "id": "ambiguous",
+      "prompt": "What should I do next with my project? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Asks to inspect the repository or for information rather than guessing",
+        "Does not invent project details",
+        "Explains briefly what it would look at to decide"
+      ]
+    },
+    {
+      "id": "release-phase",
+      "prompt": "My repo has tests, CI, a CHANGELOG, vercel.json and an AGENTS.md. The client signed off last week. Where am I? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Places the project in maintenance (08) or post-handoff with evidence",
+        "Recommends maintenance-type next steps (dependencies, backups, monitoring)"
+      ]
+    }
+  ]
+}

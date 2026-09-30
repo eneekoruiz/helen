@@ -7,8 +7,17 @@ import { runModules, printSummary } from './core/moduleRunner.js';
 import { getAllModuleIds, getModule, getAllModules } from './modules/registry.js';
 import { showMainMenu, showModuleSelector, showExplainSelector, printModuleExplanation, printModuleList } from './menu/mainMenu.js';
 import { generateModuleDocs } from './core/docs.js';
-import { printPromptContent, printPromptList, printPromptPath, type PromptKind } from './core/prompts.js';
+import { printPromptContent, printPromptList, printPromptPath, searchPrompts, shortId, type PromptKind } from './core/prompts.js';
+import { updatePhaseIndexes } from './core/promptIndex.js';
 import { ejectModule } from './core/moduleRunner.js';
+import { buildPlan, detectPhase, formatBrief, formatPlan, readPlaybooks, suggestedGoals, installedSkillNames, validatePlaybooks } from './core/apply.js';
+import { getCatalogItem, listCatalog, validateCatalog } from './core/catalog.js';
+import { formatNext, formatStatus, markDone, readProgress, runChecks, skipStep, startProgress } from './core/progress.js';
+import { runAgentDoctor, updateAgentSetup } from './core/agentDoctor.js';
+import { readGuide } from './core/guide.js';
+import { setupProject, type SetupAgent } from './core/setup.js';
+import { lintPrompts } from './core/promptLint.js';
+import { SKILL_TARGETS, installSkills, listFlowSkills, listSkills, validateSkills, type SkillTarget } from './core/skills.js';
 import { readConfig, updateConfig } from './core/config.js';
 import { scaffoldProject } from './core/scaffold.js';
 import { generateEntity } from './core/generator.js';
@@ -18,7 +27,7 @@ import { runRollback } from './core/rollback.js';
 
 
 
-const VERSION = '1.0.0';
+const VERSION = '2.0.0';
 
 function buildContext(cwd: string, opts: { dryRun?: boolean; force?: boolean; securityLevel?: string }): HelenContext {
   const project = detectProject(cwd);
@@ -75,6 +84,21 @@ function persistResults(results: any[], ctx: HelenContext): void {
     installedModules: results.map(r => r.moduleId),
     createdFiles: createdFiles,
   });
+}
+
+function runLint(): number {
+  const errors = [
+    ...lintPrompts().map(issue => `${issue.file}: ${issue.message}`),
+    ...validatePlaybooks().map(issue => `playbooks.json: ${issue}`),
+    ...validateSkills().map(issue => `skills: ${issue}`),
+  ];
+  const catalog = validateCatalog();
+  errors.push(...catalog.filter(issue => issue.level === 'error').map(issue => `catalog ${issue.id}: ${issue.message}`));
+  for (const issue of catalog.filter(item => item.level === 'warn')) logger.warn(`catalog ${issue.id}: ${issue.message}`);
+  for (const error of errors) logger.error(error);
+  if (errors.length > 0) return 1;
+  logger.success('HELEN library is valid (prompts, indexes, playbooks, skills, catalog).');
+  return 0;
 }
 
 export function createProgram(): Command {
@@ -165,8 +189,7 @@ export function createProgram(): Command {
             printModuleList();
             break;
           case 'doctor': {
-            const checks = runDoctor(cwd);
-            printDoctorResults(checks, project);
+            printDoctorResults([...runDoctor(cwd), ...runAgentDoctor(cwd)], project);
             break;
           }
           case 'explain': {
@@ -181,6 +204,15 @@ export function createProgram(): Command {
             break;
           case 'prompts':
             printPromptList();
+            break;
+          case 'apply': {
+            const detection = detectPhase(cwd);
+            console.log(`Detected phase: ${detection.phase} (estimate). Suggested goals: ${suggestedGoals(detection.phase).join(', ')}`);
+            console.log('Run: helen apply <goal>');
+            break;
+          }
+          case 'guide':
+            console.log(readGuide());
             break;
         }
       }
@@ -386,8 +418,7 @@ export function createProgram(): Command {
     .action(() => {
       const cwd = process.cwd();
       const project = detectProject(cwd);
-      const checks = runDoctor(cwd);
-      printDoctorResults(checks, project);
+      printDoctorResults([...runDoctor(cwd), ...runAgentDoctor(cwd)], project);
     });
 
   // helen dry-run
@@ -426,9 +457,38 @@ export function createProgram(): Command {
   prompts
     .command('list')
     .description('List available prompts and flows')
-    .option('--kind <kind>', 'Filter by kind: master, guide, flow, step, checkpoint, prompt')
+    .option('--kind <kind>', 'Filter by kind: master, guide, flow, checkpoint, prompt')
     .action((opts: { kind?: PromptKind }) => {
       printPromptList(opts.kind);
+    });
+
+  prompts
+    .command('search <words...>')
+    .description('Find prompts by words in their id, title, summary or aliases')
+    .action((words: string[]) => {
+      const results = searchPrompts(words.join(' '));
+      if (results.length === 0) {
+        logger.warn('No prompt matches. Try other words or: helen prompts list');
+        return;
+      }
+      for (const entry of results.slice(0, 15)) {
+        console.log(`${shortId(entry).padEnd(46)} ${entry.summary}`);
+      }
+    });
+
+  prompts
+    .command('index')
+    .description('Regenerate the prompt index in every phase README from prompt frontmatter')
+    .action(() => {
+      const changed = updatePhaseIndexes(true);
+      logger.success(changed.length ? `Updated: ${changed.join(', ')}` : 'All phase indexes are up to date.');
+    });
+
+  prompts
+    .command('lint')
+    .description('Same as `helen lint`')
+    .action(() => {
+      process.exitCode = runLint();
     });
 
   prompts
@@ -461,6 +521,243 @@ export function createProgram(): Command {
     .action((flow: string) => {
       try {
         printPromptContent(flow);
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  // helen next / done / skip / status / check
+  program
+    .command('next')
+    .description('Show the current step of the tracked plan, with the prompt or commands to use')
+    .option('--short', 'Do not print the prompt text', false)
+    .action((opts: { short: boolean }) => {
+      try {
+        const progress = readProgress(process.cwd());
+        if (!progress) throw new Error('Nothing is being tracked. Start with: helen apply <goal> --track');
+        console.log(formatNext(progress, !opts.short));
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  program
+    .command('done [note...]')
+    .description('Mark the current step as done (checkpoints need a passing helen check)')
+    .option('--force', 'Allow a checkpoint without a passing check (say why in the note)', false)
+    .action((note: string[], opts: { force: boolean }) => {
+      try {
+        console.log(formatStatus(markDone(process.cwd(), note.join(' ') || undefined, opts.force)));
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  program
+    .command('skip <reason...>')
+    .description('Skip the current step, recording why')
+    .action((reason: string[]) => {
+      try {
+        console.log(formatStatus(skipStep(process.cwd(), reason.join(' '))));
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  program
+    .command('status')
+    .description('Show progress of the tracked plan')
+    .action(() => {
+      const progress = readProgress(process.cwd());
+      console.log(progress ? formatStatus(progress) : 'Nothing is being tracked. Start with: helen apply <goal> --track');
+    });
+
+  program
+    .command('check')
+    .description("Run the project's own typecheck, lint, test and build scripts as a gate")
+    .action(() => {
+      const run = runChecks(process.cwd());
+      if (run.results.length === 0) {
+        logger.warn('No typecheck, lint, test or build scripts found in package.json.');
+      }
+      run.ok ? logger.success('Checks passed.') : logger.error('Checks failed.');
+      process.exitCode = run.ok ? 0 : 1;
+    });
+
+  // helen setup
+  program
+    .command('setup')
+    .description('One command: install HELEN skills for your agents and add HELEN instructions to AGENTS.md / CLAUDE.md')
+    .option('--agents <agents...>', 'claude, codex, antigravity', ['claude', 'codex', 'antigravity'])
+    .option('--flows', 'Also install every executable flow as a skill', false)
+    .option('--dry-run', 'Preview without writing files', false)
+    .option('--force', 'Overwrite existing skill files', false)
+    .action((opts: { agents: string[]; flows: boolean; dryRun: boolean; force: boolean }) => {
+      try {
+        const invalid = opts.agents.filter(agent => !['claude', 'codex', 'antigravity'].includes(agent));
+        if (invalid.length > 0) throw new Error(`Unknown agent(s): ${invalid.join(', ')}. Valid: claude, codex, antigravity`);
+        const result = setupProject({ cwd: process.cwd(), agents: opts.agents as SetupAgent[], flows: opts.flows, dryRun: opts.dryRun, force: opts.force });
+        logger.success(`Skills: ${result.skills.created.length} created, ${result.skills.skipped.length} already there. Instructions: ${result.instructionFiles.join(', ')}.`);
+        console.log('\nNext: tell your AI "Use HELEN: analyze where the project is and what to apply", or run: helen apply');
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  // helen lint
+  program
+    .command('lint')
+    .description('Validate the whole HELEN library: prompts, indexes, playbooks, skills and catalog')
+    .action(() => {
+      process.exitCode = runLint();
+    });
+
+  // helen guide
+  program
+    .command('guide')
+    .description('Print the user guide: what prompts, skills, catalog and playbooks are and how to use them')
+    .action(() => {
+      console.log(readGuide());
+    });
+
+  // helen apply
+  program
+    .command('apply [goal...]')
+    .description('Analyze the project, detect its phase, and plan which HELEN prompts, skills and tools to use for a goal (e.g. "design", "release", "mejora el diseño")')
+    .option('--brief', 'Print a paste-ready brief for an AI agent instead of the plan', false)
+    .option('--track', 'Follow the plan step by step: then use helen next / done / skip / status / check', false)
+    .option('--force', 'With --track: restart even if another plan is in progress', false)
+    .option('--install', 'Install the bundled skills the goal needs into --target', false)
+    .option('--target <targets...>', 'Where to install skills: claude, codex, custom', ['claude'])
+    .option('--dir <path>', 'Project-relative directory for the "custom" target')
+    .action((goalWords: string[], opts: { brief: boolean; track: boolean; force: boolean; install: boolean; target: string[]; dir?: string }) => {
+      try {
+        const playbooks = readPlaybooks();
+        const cwd = process.cwd();
+        if (goalWords.length === 0) {
+          const detection = detectPhase(cwd);
+          console.log(`Detected phase: ${detection.phase} (confidence ${detection.confidence}; estimate, please confirm)`);
+          console.log(`Evidence: ${detection.evidence.join('; ')}`);
+          console.log(`Suggested goals for this phase: ${suggestedGoals(detection.phase, playbooks).join(', ')}`);
+          console.log('\nAll goals:');
+          for (const [id, goal] of Object.entries(playbooks.goals)) console.log(`  ${id.padEnd(13)} ${goal.title}`);
+          console.log('\nRun: helen apply <goal>   (add --brief for an AI-ready brief, --install to install the needed skills)');
+          return;
+        }
+        const plan = buildPlan(cwd, goalWords.join(' '), playbooks);
+        console.log(opts.brief ? formatBrief(plan) : formatPlan(plan));
+        if (opts.track) {
+          startProgress(cwd, plan, opts.force);
+          console.log('\nTracking started (.helen/progress.json; add .helen/ to .gitignore if you do not want it in git). Next: helen next');
+        }
+        if (opts.install && plan.missingSkills.length > 0) {
+          const result = installSkills({ cwd, targets: opts.target as SkillTarget[], customDir: opts.dir, skills: plan.missingSkills });
+          logger.success(`Skills: ${result.created.length} created, ${result.skipped.length} skipped.`);
+        }
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  // helen skills
+  const skills = program
+    .command('skills')
+    .description('Browse and install agent skills (SKILL.md folders)');
+
+  skills
+    .command('list')
+    .description('List bundled skills (add --flows to include prompt flows)')
+    .option('--flows', 'Include executable prompt flows as skills', false)
+    .action((opts: { flows: boolean }) => {
+      for (const skill of [...listSkills(), ...(opts.flows ? listFlowSkills() : [])]) {
+        console.log(skill.name);
+      }
+    });
+
+  skills
+    .command('install [names...]')
+    .description('Install skills into the current project for one or more agents')
+    .option('--target <targets...>', `Targets: ${Object.keys(SKILL_TARGETS).join(', ')}, custom`, ['claude'])
+    .option('--dir <path>', 'Project-relative directory for the "custom" target (any agent that scans a skills folder)')
+    .option('--flows', 'Also install executable prompt flows as helen-flow-<id> skills', false)
+    .option('--dry-run', 'Preview without writing files', false)
+    .option('--force', 'Overwrite existing files', false)
+    .action((names: string[], opts: { target: string[]; dir?: string; flows: boolean; dryRun: boolean; force: boolean }) => {
+      try {
+        const valid = [...Object.keys(SKILL_TARGETS), 'custom'];
+        const invalid = opts.target.filter(t => !valid.includes(t));
+        if (invalid.length > 0) {
+          throw new Error(`Unknown target(s): ${invalid.join(', ')}. Valid: ${valid.join(', ')}`);
+        }
+        const result = installSkills({
+          cwd: process.cwd(),
+          targets: opts.target as SkillTarget[],
+          customDir: opts.dir,
+          skills: names,
+          flows: opts.flows,
+          dryRun: opts.dryRun,
+          force: opts.force,
+        });
+        logger.success(`Skills: ${result.created.length} created, ${result.overwritten.length} overwritten, ${result.skipped.length} skipped.`);
+      } catch (err) {
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  skills
+    .command('update')
+    .description('Update installed HELEN skills and the HELEN block in AGENTS.md / CLAUDE.md to this HELEN version (backs up changed files)')
+    .option('--dry-run', 'Preview without writing files', false)
+    .action((opts: { dryRun: boolean }) => {
+      const result = updateAgentSetup(process.cwd(), opts.dryRun);
+      if (result.skills.length === 0 && result.instructionFiles.length === 0) {
+        logger.success('Everything is already up to date.');
+        return;
+      }
+      logger.success(`Updated skills: ${result.skills.join(', ') || 'none'}. Instruction files: ${result.instructionFiles.join(', ') || 'none'}.`);
+    });
+
+  skills
+    .command('installed')
+    .description('Show which skills are installed in this project')
+    .action(() => {
+      const names = installedSkillNames(process.cwd());
+      console.log(names.length > 0 ? names.join('\n') : 'No skills installed in .claude/skills or .agents/skills.');
+    });
+
+  skills
+    .command('catalog')
+    .description('List recommended third-party skills and tools (HELEN never installs them for you)')
+    .option('--category <category>', 'Filter: design, quality, copy, seo, motion, components, verify, deploy, workflow, docs, data')
+    .option('--kind <kind>', 'Filter: skill, plugin, cli, reference, service, mcp')
+    .action((opts: { category?: string; kind?: string }) => {
+      for (const item of listCatalog(opts.category, undefined, opts.kind)) {
+        console.log(`${item.id.padEnd(22)} ${item.category.padEnd(11)} ${item.kind.padEnd(10)} ${item.status.padEnd(12)} ${item.summary}`);
+      }
+    });
+
+  skills
+    .command('external <id>')
+    .description('Show what a catalog item is and the exact commands to install it (prints only, runs nothing)')
+    .action((id: string) => {
+      try {
+        const item = getCatalogItem(id);
+        console.log(`${item.name} [${item.kind}, ${item.status}]`);
+        if (item.status === 'discontinued') console.log('WARNING: discontinued. Do not install.');
+        console.log(item.summary);
+        console.log(`Source:  ${item.source}`);
+        console.log(`License: ${item.license}`);
+        console.log(`Phases:  ${item.phases.join(', ')}`);
+        console.log('\nInstall (review, then run yourself):');
+        for (const command of item.install) console.log(`  ${command}`);
+        if (item.notes) console.log(`\nNote: ${item.notes}`);
       } catch (err) {
         logger.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;

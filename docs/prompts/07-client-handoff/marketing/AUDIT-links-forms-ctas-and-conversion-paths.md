@@ -1,77 +1,38 @@
-# [AUDIT] - Links, Forms, CTAs, and Conversion Paths Audit
+---
+action: AUDIT
+phase: 07-client-handoff
+summary: Verify every important path works: CTAs, links, routes, forms, validation, success states and conversion measurement.
+modifies_code: false
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Links, Forms, CTAs and Conversion Paths Audit
 
+## Goal
 
-**Intención**: AUDIT (No modificar código, buscar problemas)
+Verify that people can actually complete the important journeys (click CTAs, submit forms, navigate, contact the business, recover from errors), as if paid traffic starts tomorrow.
 
-Purpose: Verify that users can actually complete the important journeys: click CTAs, submit forms, navigate pages, contact the business, and recover from errors.
+## Use when
 
-Use this before demo, laúnch, client handoff, paid traffic, portfolio publication, or any moment where broken interaction would look careless.
+- Before a demo, launch, handoff, paid traffic or portfolio publication.
 
-## Prompt
+## Requirements
 
-Act as a QA Lead, Growth Engineer, Product Manager, UX researcher, accessibility reviewer, and conversion-focused Staff Frontend Engineer.
+1. **Inventory:** primary and secondary CTAs, navigation, footer, social, contact (mailto, tel), download, auth, booking, checkout and internal links; the intended conversion path per audience.
+2. **Links and routes:** broken links, placeholder URLs, `#`, empty `href`, dead buttons, wrong targets, missing `rel` on external links; consistency between desktop and mobile navigation.
+3. **Forms:** labels, required fields, validation, error, success, loading and disabled states, keyboard use, autocomplete, spam protection, real submission destination; failed submissions give useful feedback and never lose input.
+4. **CTAs:** clear visual and semantic priority; copy matches destination; no competing CTAs; no dead-end pages.
+5. **Measurement:** key conversion events, thank-you states, confirmation emails, CRM or webhook assumptions.
 
-Inspect the full project and audit every important click path, form, CTA, link, and conversion action.
+## Beyond the checklist
 
-## Requisitos mínimos obligatorios
+Hidden leaks: low-trust form placement, no proof near the CTA, no sticky action on mobile, contact buried, slow feedback, unclear next step after submit.
 
-1. Inventory interactive paths
-- Find primary CTAs, secondary CTAs, nav links, footer links, social links, contact links, email/phone links, download links, auth links, booking links, checkout links, and internal route links.
-- Identify the intended conversion paths for each audience.
+## Limits
 
-2. Validate links and routes
-- Check for broken links, placeholder URLs, `#`, empty hrefs, dead buttons, wrong targets, wrong external link behavior, and missing `rel` attributes where needed.
-- Check route consistency across desktop and mobile navigation.
+- Audit only. Do not wire forms to new external services, collect extra personal data, bypass validation, consent or security, or create fake analytics events.
 
-3. Validate forms
-- Check field labels, required fields, validation, error states, success states, loading states, disabled states, keyboard navigation, autocomplete, spam protection assumptions, and submission destination.
-- Ensure failed submissions give useful feedback.
-- Check that forms do not silently lose user input.
+## Output
 
-4. Validate CTAs and conversion hierarchy
-- Ensure primary CTAs are visually and semantically clear.
-- Check that CTA copy matches destination and intent.
-- Find competing CTAs that dilute conversion.
-- Ensure important pages do not end in dead ends.
-
-5. Validate analytics and follow-up hooks where applicable
-- Check whether key conversion actions can be measured.
-- Flag missing event names, lead attribution, thank-you states, confirmation emails, or CRM/webhook assumptions when relevant.
-
-## Más allá de estos criterios
-
-Think like someone paying for traffic tomorrow.
-
-Look for hidden conversion leaks: confusing button labels, low-trust form placement, no proof near the CTA, missing mobile sticky action, contact options buried too deep, slow interaction feedback, unclear next step after submit, or a form that technically works but feels risky to use.
-
-Recommend the smallest changes that make the path feel reliable, intentional, and premium.
-
-## Límites de seguridad
-
-- Do not wire forms to a new external service without confirmation.
-- Do not collect extra personal data unless justified.
-- Do not bypass validation, consent, privacy, or security protections.
-- Do not create fake analytics events that imply tracking exists when it does not.
-- Do not change business logic without owner confirmation.
-
-## Checks finales
-
-- All primary CTAs reviewed.
-- All forms reviewed.
-- Broken or placeholder links found.
-- Mobile navigation paths reviewed.
-- Error/success states considered.
-- Measurement/follow-up gaps flagged.
-
-## Formato de entrega
-
-1. Critical broken paths and link issues (classified by severity: Críticos, Importantes, Opcionales).
-2. Forms reviewed and recommended fixes.
-3. CTA/conversion improvements.
-4. Links/routes checked.
-5. Analytics/follow-up gaps.
-6. Remaining risks before laúnch or delivery.
+1. Findings grouped as **Critical**, **Important** and **Optional**. For each: evidence (file, line, screen or command), impact, recommended fix and effort.
+2. Forms reviewed with fixes; links and routes checked; CTA improvements.
+3. Measurement gaps and remaining risks before launch.

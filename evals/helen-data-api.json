@@ -1,0 +1,33 @@
+{
+  "skill": "helen-data-api",
+  "cases": [
+    {
+      "id": "contract",
+      "prompt": "Review this API response design. Answer in chat only; do not modify or create files.\n```json\n{\"ok\": true, \"data\": {\"userId\": 5, \"user_id\": \"5\", \"created\": \"30/09/2026\"}, \"error\": \"\"}\n```",
+      "criteria": [
+        "Flags the duplicated concept userId vs user_id with different types",
+        "Flags the non-ISO, ambiguous date format",
+        "Flags the ok/error combination as a weak error model",
+        "Mentions versioning or backward compatibility when changing it"
+      ]
+    },
+    {
+      "id": "invalid-state",
+      "prompt": "Our Order has fields status ('paid'|'unpaid'), paidAt (nullable) and refunded (boolean). We found orders that are unpaid with a paidAt date and refunded=true. How do we prevent this? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Identifies that the model allows invalid states",
+        "Proposes a model or constraints that make invalid states unrepresentable (e.g. single status enum incl. refunded, DB constraints)",
+        "Mentions a migration plan for existing bad data"
+      ]
+    },
+    {
+      "id": "breaking",
+      "prompt": "I want to rename the public API field `name` to `fullName` today because it's clearer. Mobile apps in the stores use it. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Flags it as a breaking change for existing clients",
+        "Proposes a compatible migration (add new field, deprecate, version)",
+        "Recommends confirming with the owner before changing the public contract"
+      ]
+    }
+  ]
+}

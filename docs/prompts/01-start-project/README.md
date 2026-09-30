@@ -1,54 +1,42 @@
-# Fase 1: Start Project (Inicio de Proyecto)
+# 01 · Start project
 
-**Objetivo de la fase**: 
-Establecer las bases metodológicas, analizar riesgos iniciales, evaluar la arquitectura técnica de partida, identificar puntos ciegos y posicionar el proyecto estratégicamente frente a alternativas/competidores antes de escribir código masivamente.
+Understand the business before building: offer, audience, conversion goal, creative direction, initial risks, competitors and a prioritized roadmap. Use it for new projects and for inherited repositories whose state is unclear.
 
-**Cuándo se utiliza**:
-- Al inicio de un nuevo desarrollo.
-- Al heredar o retomar un repositorio existente cuyo estado es incierto o desordenado.
-- Antes de planificar el roadmap de desarrollo para las siguientes semanas.
+## Quick decisions
 
-**Qué problemas resuelve**:
-- Falta de dirección técnica clara o arquitectura inadecuada al inicio.
-- Riesgos ocultos y deuda técnica temprana no detectados.
-- Desarrollo reactivo de features irrelevantes por falta de benchmarking competitivo.
-- Dificultades o fricción para incorporar a nuevos desarrolladores (onboarding).
+- Blank canvas or new AI builder project: `init-business-core`.
+- Business brief exists, look undecided: `init-creative-direction-and-design-md`.
+- Brief and design exist, structure missing: `init-architecture-and-scaffold`.
+- Repository exists but its state is uncertain: `audit-project-risk-and-architecture` (quick scan).
+- Concrete competitors to study: `research-competitive-benchmark`, then `generate-competitive-advantage`.
+- Too many ideas, not enough time: `plan-roadmap-roi-prioritization`.
+- Stop: do not generate UI or code without an offer, an audience, a conversion goal and minimum constraints.
 
----
+## Exit checklist
 
-## Diferencia Operativa de Etiquetas
+Before moving on to 02-building:
 
-- **INIT**: úsalo cuando no existe base suficiente; define negocio, scaffold y reglas premium.
-- **AUDIT**: úsalo para observar mercado, riesgos o arquitectura sin modificar archivos.
-- **GENERATE**: úsalo cuando el análisis ya existe y toca construir algo nuevo.
-- **ENHANCE**: en esta fase solo aplica si ya hay una base existente que deba mejorarse sin romperla.
+- [ ] The offer is written clearly and sells.
+- [ ] Audience and objections are defined.
+- [ ] There is a primary and a secondary conversion.
+- [ ] Relevant competitors or references were reviewed.
+- [ ] Creative direction and `DESIGN.md` exist for visual projects.
+- [ ] The roadmap prioritizes sales, trust and less friction.
+- [ ] No critical placeholders remain unresolved.
+- [ ] The initial architecture does not contradict the business goal.
 
-## Prompts Incluidos en esta Fase
+## Prompts
 
-| Prompt / Flow | Intención | Propósito / Cuándo usarlo | Frecuencia |
-|---|---|---|---|
-| [init-master-business-core.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/init/init-master-business-core.md) | **INIT** | Inyectar ADN de negocio, tono premium y arquitectura de conversión antes del scaffold. | Alta (Cada proyecto nuevo) |
-| [init-architecture-and-scaffold.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/init/init-architecture-and-scaffold.md) | **INIT** | Convertir el briefing en estructura visual, layout base, tokens y sistema inicial UI UX PRO MAX. | Alta (Cada proyecto nuevo) |
-| [audit-competitor-analysis.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/market/audit-competitor-analysis.md) | **AUDIT** | Escanear competidores para extraer UX, CRO, flujos, trust signals y gaps accionables. | Media |
-| [generate-competitive-cloning.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/market/generate-competitive-cloning.md) | **GENERATE** | Implementar funcionalidades competitivas faltantes en nuestro stack, mejoradas y sin copiar marca. | Media |
-| [initial-project-risk-scan.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/audit/audit-initial-project-risk-scan.md) | **AUDIT** | Diagnóstico rápido y ligero de riesgos de build, UX, docs y seguridad. | Alta (Cada inicio de iteración amplia) |
-| [methodology-and-blind-spots-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/audit/audit-methodology-and-blind-spots.md) | **AUDIT** | Detectar qué partes del ciclo de vida o de la estructura no estamos viendo. | Media (Una vez por sprint largo) |
-| [architecture-operations-and-risk-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/audit/audit-architecture-operations-and-risk.md) | **AUDIT** | Evalúar la solidez de límites, dependencias y modularidad. | Media |
-| [developer-onboarding-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/audit/audit-developer-onboarding.md) | **AUDIT** | Analizar la fricción del setup del repositorio para un nuevo colaborador. | Baja |
-| [competitive-benchmark.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/market/research-competitive-benchmark.md) | **REPORT** | Comparar features y UX frente a alternativas para encontrar oportunidades premium. | Media |
-| [roadmap-roi-prioritization.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/strategy/plan-roadmap-roi-prioritization.md) | **PLAN** | Priorizar tareas por valor de usuario, ROI y esfuerzo estimado. | Alta |
-| [market-analysis-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/market/research-market-analysis-flow.md) | **PLAN flow** | Flujo ejecutable que conecta el benchmarking con la priorización del roadmap. | Baja |
-
----
-
-## Checklist de Transición: ¿Ya estoy preparado para pasar a la siguiente fase?
-
-Antes de pasar a la fase de **Building (02-building)**, asegúrate de responder afirmativamente a las siguientes preguntas:
-
-- [ ] ¿He identificado los riesgos técnicos iniciales y sé cómo mitigarlos?
-- [ ] ¿Está clara la arquitectura y la modularidad de base?
-- [ ] ¿Tengo una lista priorizada de funcionalidades y quick wins en un roadmap?
-- [ ] ¿El setup del repositorio es reproducible por cualquier colaborador sin fricción crítica?
-
-**Siguiente Fase**:
-Si la respuesta es **Sí** a todas las anteriores, estás listo para entrar en la fase **[02-building](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/README.md)**.
+<!-- HELEN:INDEX:START (generated by `helen prompts index`, do not edit) -->
+| Prompt | Type | Summary |
+|---|---|---|
+| [audit-project-risk-and-architecture](audit/AUDIT-project-risk-and-architecture.md) | AUDIT | Find the risks that could break users, data or future work: quick scan first, deep architecture and operations audit when needed. |
+| [init-architecture-and-scaffold](init/INIT-architecture-and-scaffold.md) | INIT | Translate the business brief and DESIGN.md into information architecture, base layout, tokens and an initial component system. |
+| [init-business-core](init/INIT-business-core.md) | INIT | Define the business DNA before any UI: positioning, audience and objections, conversion architecture, tone and copy rules. |
+| [init-creative-direction-and-design-md](init/INIT-creative-direction-and-design-md.md) | INIT | Collect real inspiration and set the art direction in a validated DESIGN.md that any agent can read, so the UI is coherent from the first line. |
+| [generate-competitive-advantage](market/GENERATE-competitive-advantage.md) | GENERATE | Build the highest-impact features found in the competitive benchmark, improved rather than copied, in the current stack. |
+| [research-competitive-benchmark](market/RESEARCH-competitive-benchmark.md) | RESEARCH | Compare the project with real competitors and substitutes: UX, conversion, features, trust and gaps worth closing. |
+| [research-market-analysis-flow](market/RESEARCH-market-analysis-flow.md) | RESEARCH flow | Flow: competitive benchmark, then roadmap prioritization, ending in decisions rather than automatic changes. |
+| [plan-roadmap-roi-prioritization](strategy/PLAN-roadmap-roi-prioritization.md) | PLAN | Turn ideas and audit findings into a now/next/later roadmap ranked by value, risk, effort and confidence, with kill criteria. |
+| [plan-technology-lifecycle-strategy](strategy/PLAN-technology-lifecycle-strategy.md) | PLAN | Plan the lifecycle of core technologies: support windows, deprecation criteria, major-upgrade strategy and upgrade budget. |
+<!-- HELEN:INDEX:END -->

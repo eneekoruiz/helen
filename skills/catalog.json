@@ -1,0 +1,657 @@
+{
+  "version": 1,
+  "note": "Third-party tools HELEN recommends. HELEN never installs them: 'helen skills external <id>' prints the official commands; review them, then run them yourself. Each entry has the date it was last verified against its own documentation; 'helen lint' warns when an entry is older than 180 days.",
+  "items": [
+    {
+      "id": "taste-skill",
+      "name": "Taste Skill",
+      "category": "design",
+      "kind": "skill",
+      "source": "https://github.com/Leonxlnx/taste-skill",
+      "summary": "Anti-slop frontend design: typography, color, motion with good taste. Several variants in one repo (design-taste-frontend, redesign-existing-projects, high-end-visual-design, minimalist-ui...).",
+      "install": [
+        "npx skills add https://github.com/Leonxlnx/taste-skill --skill design-taste-frontend"
+      ],
+      "license": "MIT",
+      "phases": [
+        "03-finish-features"
+      ],
+      "notes": "Use only ONE of taste-skill / impeccable / ui-ux-pro-max as your main design skill. Other repos named taste-skill exist (forks and a 'tasteskill' org whose README points to a different owner): install from the repo linked here.",
+      "status": "active",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "image-to-code",
+      "name": "Image to Code (Taste Skill)",
+      "category": "design",
+      "kind": "skill",
+      "source": "https://github.com/Leonxlnx/taste-skill",
+      "summary": "Image-first pipeline: generate or take a reference image, then implement the frontend from it.",
+      "install": [
+        "npx skills add https://github.com/Leonxlnx/taste-skill --skill image-to-code"
+      ],
+      "license": "MIT",
+      "phases": [
+        "03-finish-features"
+      ],
+      "notes": "Assumed to be the 'Image To Code' shown in the video, because it is a skill of this repo; the video only shows a GitHub logo.",
+      "status": "active",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "impeccable",
+      "name": "Impeccable",
+      "category": "design",
+      "kind": "skill",
+      "source": "https://github.com/pbakaus/impeccable",
+      "summary": "Design guidance for coding agents: commands, live browser iteration and deterministic detector rules against AI design anti-patterns.",
+      "install": [
+        "npx impeccable install"
+      ],
+      "license": "Apache-2.0",
+      "phases": [
+        "03-finish-features"
+      ],
+      "notes": "Alternative to taste-skill; the carousel recommends using only one. Runs an installer: read it first.",
+      "status": "active",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "ui-ux-pro-max",
+      "name": "UI UX Pro Max",
+      "category": "design",
+      "kind": "skill",
+      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+      "summary": "Searchable database of UI styles, palettes, font pairings, UX guidelines and reasoning rules; supports many agents.",
+      "install": [
+        "npx ui-ux-pro-max-cli init --ai claude",
+        "npx ui-ux-pro-max-cli init --ai <platform>   # its README lists other agents (Codex, Antigravity, Cursor...); check the exact platform name there"
+      ],
+      "license": "MIT",
+      "phases": [
+        "03-finish-features"
+      ],
+      "notes": "This is the 'UI UX PRO MAX' skill older HELEN prompts referred to.",
+      "status": "active",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "frontend-design",
+      "name": "frontend-design (Anthropic)",
+      "category": "design",
+      "kind": "plugin",
+      "source": "https://github.com/anthropics/skills",
+      "summary": "Anthropic's skill for distinctive, production-grade frontend design that avoids generic AI aesthetics.",
+      "install": [
+        "/plugin marketplace add anthropics/skills"
+      ],
+      "license": "See the skill's own SKILL.md (the repo is mostly Apache-2.0; some document skills are source-available)",
+      "phases": [
+        "03-finish-features"
+      ],
+      "notes": "After adding the marketplace, pick the plugin that contains frontend-design with /plugin; not verified which one.",
+      "status": "active",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "web-design-guidelines",
+      "name": "web-design-guidelines (Vercel)",
+      "category": "quality",
+      "kind": "skill",
+      "source": "https://github.com/vercel-labs/agent-skills",
+      "summary": "Reviews UI code against 100+ web interface rules: accessibility, contrast, mobile, performance, UX.",
+      "install": [
+        "npx skills add vercel-labs/agent-skills --skill web-design-guidelines"
+      ],
+      "license": "MIT",
+      "phases": [
+        "03-finish-features",
+        "04-before-production"
+      ],
+      "notes": "Complements the bundled helen-a11y-perf skill.",
+      "status": "active",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "humanizer",
+      "name": "Humanizer",
+      "category": "copy",
+      "kind": "skill",
+      "source": "https://github.com/blader/humanizer",
+      "summary": "Removes AI-writing patterns from text without changing its meaning (based on Wikipedia's 'Signs of AI writing').",
+      "install": [
+        "/plugin marketplace add blader/humanizer   # Claude Code",
+        "/plugin install humanizer@humanizer",
+        "npx skills add blader/humanizer --global --agent codex   # Codex"
+      ],
+      "license": "MIT",
+      "phases": [
+        "03-finish-features",
+        "07-client-handoff"
+      ],
+      "notes": "Pairs with HELEN's AUDIT-ai-trace-erasure-and-human-craft prompt.",
+      "status": "active",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "cro-optimization",
+      "name": "cro-optimization (founder-skills)",
+      "category": "copy",
+      "kind": "skill",
+      "source": "https://github.com/ognjengt/founder-skills",
+      "summary": "Analyzes landing pages against 13 conversion-rate-optimization principles: headlines, buttons, forms.",
+      "install": [
+        "npx skills add https://github.com/ognjengt/founder-skills --skill cro-optimization"
+      ],
+      "license": "MIT",
+      "phases": [
+        "03-finish-features",
+        "07-client-handoff"
+      ],
+      "notes": "Install only this skill; the repo has many marketing skills you may not need.",
+      "status": "active",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "seo",
+      "name": "seo (ECC)",
+      "category": "seo",
+      "kind": "skill",
+      "source": "https://github.com/affaan-m/ECC",
+      "summary": "Technical SEO skill, per the carousel. The ECC repo bundles hundreds of skills: install only this one.",
+      "install": [
+        "./install.sh --target claude --skills seo   # run from a clone of the repo; pattern from ECC's README, skill name taken from the carousel, not verified"
+      ],
+      "license": "MIT",
+      "phases": [
+        "04-before-production",
+        "05-final-audit"
+      ],
+      "notes": "ECC warns to install only from its official channels (github.com/affaan-m/ECC, npm ecc-universal, plugin ecc@ecc, ecc.tools); re-uploads and mirrors may contain malware. Do not stack several install methods. HELEN already has audit-final-seo. ECC itself is catalogued as `ecc`.",
+      "status": "active",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "scroll-craft",
+      "name": "scroll-craft",
+      "category": "motion",
+      "kind": "plugin",
+      "source": "https://github.com/nateherkai/scroll-craft",
+      "summary": "Builds premium scroll-driven websites: page grammars, signature interactions, automated verification.",
+      "install": [
+        "/plugin marketplace add nateherkai/scroll-craft   # Claude Code",
+        "/plugin install nateherk-design",
+        "# Codex and others: copy the scroll-craft folder into .agents/skills/"
+      ],
+      "license": "MIT",
+      "phases": [
+        "03-finish-features"
+      ],
+      "notes": "Ships executable scripts (doctor.mjs, workspace.mjs): read them before running. Respect the performance budget from helen-a11y-perf.",
+      "status": "active",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "21st-dev",
+      "name": "21st.dev",
+      "category": "components",
+      "kind": "cli",
+      "source": "https://21st.dev",
+      "summary": "Registry of 12,000+ React + Tailwind components (shadcn registry format). You pick a block and it lands in your repo as editable code.",
+      "install": [
+        "npx @21st-dev/cli@latest init --client claude   # also: cursor, codex, vscode, devin"
+      ],
+      "license": "Free tier limited (2 copies/day); paid membership for more. Check per-component terms.",
+      "phases": [
+        "03-finish-features"
+      ],
+      "notes": "Related HELEN prompt: GENERATE-modern-ui-libraries-aceternity-magic-ui.",
+      "status": "active",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "playwright-cli",
+      "name": "Playwright CLI (Microsoft)",
+      "category": "verify",
+      "kind": "cli",
+      "source": "https://github.com/microsoft/playwright-cli",
+      "summary": "Token-efficient browser control for coding agents: screenshots, selectors, recorded code. Lets the agent actually look at your page.",
+      "install": [
+        "npm install -g @playwright/cli@latest",
+        "playwright-cli install --skills   # or --skills=claude / --skills=agents"
+      ],
+      "license": "Apache-2.0",
+      "phases": [
+        "03-finish-features",
+        "07-client-handoff"
+      ],
+      "notes": "Useful for HELEN's visual regression and browser smoke test prompts. MCP alternative: playwright-mcp.",
+      "status": "active",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "awesome-design-md",
+      "name": "awesome-design-md (DESIGN.md files)",
+      "category": "design",
+      "kind": "reference",
+      "source": "https://github.com/VoltAgent/awesome-design-md",
+      "summary": "Collection of DESIGN.md files analyzing popular brand design systems (also at getdesign.md). Not a skill: a markdown file the agent reads.",
+      "install": [
+        "# Copy a site's DESIGN.md into your project root, then tell the agent to use it."
+      ],
+      "license": "MIT (files extracted from public sites, provided as is)",
+      "phases": [
+        "01-start-project",
+        "03-finish-features"
+      ],
+      "notes": "Use as inspiration for structure and tokens; do not clone another brand's identity for a client.",
+      "status": "active",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "github-cli",
+      "name": "GitHub CLI (gh)",
+      "category": "deploy",
+      "kind": "cli",
+      "source": "https://cli.github.com",
+      "summary": "Uploads your code to GitHub from the terminal. Step before connecting a host.",
+      "install": [
+        "gh auth login",
+        "gh repo create <name> --private --source=. --push"
+      ],
+      "license": "MIT",
+      "phases": [
+        "06-release"
+      ],
+      "notes": "Create the repo private first; make it public only on purpose.",
+      "status": "active",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "hosting",
+      "name": "Hosting: Vercel or Cloudflare",
+      "category": "deploy",
+      "kind": "service",
+      "source": "https://vercel.com",
+      "summary": "Connect the GitHub repository and the site goes online on every push. Cloudflare (Pages) is the alternative.",
+      "install": [
+        "# Web dashboard: import the repository. No command from HELEN."
+      ],
+      "license": "Free and paid plans; check current terms.",
+      "phases": [
+        "06-release",
+        "07-client-handoff"
+      ],
+      "notes": "Set environment variables in the host dashboard, never in the repo. An official Vercel MCP exists: vercel-mcp.",
+      "status": "active",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "google-design-md",
+      "name": "DESIGN.md format (Google Labs)",
+      "category": "design",
+      "kind": "cli",
+      "status": "active",
+      "source": "https://github.com/google-labs-code/design.md",
+      "summary": "Format spec for describing a visual identity to coding agents (YAML tokens + Markdown rationale) plus a linter for broken token references, contrast and section order.",
+      "install": [
+        "npx @google/design.md lint DESIGN.md"
+      ],
+      "license": "Apache-2.0",
+      "phases": [
+        "01-start-project",
+        "03-finish-features"
+      ],
+      "notes": "Used by the HELEN prompt init-creative-direction-and-design-md. Runs from npx without installing globally.",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "inspiration-sources",
+      "name": "Inspiration sources (Dribbble, Awwwards, Behance, Pinterest)",
+      "category": "design",
+      "kind": "reference",
+      "status": "active",
+      "source": "https://dribbble.com",
+      "summary": "Where the carousel takes the idea from before writing a line: Dribbble, Awwwards, Behance and Pinterest.",
+      "install": [
+        "# Websites: browse them, save references with URL and a note on what you take from each."
+      ],
+      "license": "Each site has its own terms; references are inspiration, not assets to copy.",
+      "phases": [
+        "01-start-project",
+        "03-finish-features"
+      ],
+      "notes": "Record the URL and the reason for each reference in your DESIGN.md notes.",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "godly",
+      "name": "Godly",
+      "category": "design",
+      "kind": "reference",
+      "status": "caution",
+      "source": "https://godly.website",
+      "summary": "Curated web design inspiration gallery.",
+      "install": [
+        "# Website: browse it."
+      ],
+      "license": "Site terms apply.",
+      "phases": [
+        "01-start-project",
+        "03-finish-features"
+      ],
+      "notes": "When verified, godly.website redirected to recent.design, a design inspiration platform that did not mention Godly. Confirm the site is what you expect before relying on it.",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "transitions-dev",
+      "name": "transitions.dev",
+      "category": "motion",
+      "kind": "cli",
+      "status": "active",
+      "source": "https://transitions.dev",
+      "summary": "Library of 43+ UI transitions (modals, cards, skeletons, text) and an agent CLI that scans your codebase, scores its motion 0-100 and proposes fixes as pull requests.",
+      "install": [
+        "npx transitions-agent   # scans the codebase and shows a motion score and findings; applies fixes only after approval"
+      ],
+      "license": "Not stated on the site; has a free tier and a paid Pro. Check terms.",
+      "phases": [
+        "03-finish-features"
+      ],
+      "notes": "Review the diffs it proposes like any other pull request. Pairs with the prompt enhance-motion-polish-and-transitions.",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "animos-app",
+      "name": "Animos",
+      "category": "motion",
+      "kind": "service",
+      "status": "active",
+      "source": "https://animos.app",
+      "summary": "Browser tool to turn static mockups into web-ready animations for portfolios: pick a template, drop assets, export MP4/WebM.",
+      "install": [
+        "# Web app: no command from HELEN."
+      ],
+      "license": "Free at the time of verification; check current terms.",
+      "phases": [
+        "03-finish-features"
+      ],
+      "notes": "Assumed to be the 'ánimos.app' from your message (dictation was unclear). Useful for showcase videos of designs.",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "deck-gallery",
+      "name": "deck.gallery",
+      "category": "design",
+      "kind": "reference",
+      "status": "active",
+      "source": "https://deck.gallery",
+      "summary": "Curated archive of 200+ presentation decks (brand guidelines, pitch decks, agency portfolios) for inspiration.",
+      "install": [
+        "# Website: free preview with email; full archive is a paid Pro membership."
+      ],
+      "license": "Paid membership for the full archive; decks belong to their authors.",
+      "phases": [
+        "01-start-project",
+        "07-client-handoff"
+      ],
+      "notes": "Inspiration for structure and storytelling; do not reuse other people's slides.",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "gsd-core",
+      "name": "GSD Core (Get Shit Done)",
+      "category": "workflow",
+      "kind": "cli",
+      "status": "active",
+      "source": "https://github.com/open-gsd/gsd-core",
+      "summary": "Spec-driven development for coding agents: discuss, plan, execute in fresh contexts, verify, ship. Works with Claude Code, Codex, Antigravity, Cursor and more.",
+      "install": [
+        "npx @opengsd/gsd-core@latest"
+      ],
+      "license": "MIT",
+      "phases": [
+        "02-building"
+      ],
+      "notes": "The original get-shit-done repository was archived in June 2026 and continues here. Use the installer: its README says not to copy files by hand. Slash commands: /gsd-new-project, /gsd-onboard. Beware of unofficial ports with the same name.",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "ralph-loop",
+      "name": "Ralph Loop",
+      "category": "workflow",
+      "kind": "plugin",
+      "status": "active",
+      "source": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/ralph-loop",
+      "summary": "Claude Code plugin that keeps the agent iterating on one prompt until a completion phrase appears or an iteration limit is hit.",
+      "install": [
+        "# Part of the official plugins repository anthropics/claude-plugins-official. Add and install it with /plugin (exact command not verified).",
+        "/ralph-loop \"<prompt>\" --max-iterations 20 --completion-promise \"DONE\""
+      ],
+      "license": "See the repository.",
+      "phases": [
+        "02-building"
+      ],
+      "notes": "Always set --max-iterations: it is the real safety net; the completion phrase is an exact-string match. Cancel with /cancel-ralph. Third-party variants exist; prefer the official one.",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "coderabbit",
+      "name": "CodeRabbit",
+      "category": "workflow",
+      "kind": "service",
+      "status": "caution",
+      "source": "https://www.coderabbit.ai",
+      "summary": "AI code reviews on pull requests and in the CLI. Your code is processed by a third-party service.",
+      "install": [
+        "# Its docs suggest: curl -fsSL https://cli.coderabbit.ai/install.sh | sh   -> download and read the script first instead of piping it to a shell."
+      ],
+      "license": "Proprietary SaaS; free for open source; the free CLI tier is rate-limited (3 reviews/hour at verification time).",
+      "phases": [
+        "05-final-audit"
+      ],
+      "notes": "Not open source. Do not send private client repositories without permission. See the prompt audit-automated-code-review-setup.",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "roo-code",
+      "name": "Roo Code",
+      "category": "workflow",
+      "kind": "plugin",
+      "status": "discontinued",
+      "source": "https://github.com/RooCodeInc/Roo-Code",
+      "summary": "Agent-based coding extension for VS Code. The repository was archived and the extension shut down on 15 May 2026.",
+      "install": [
+        "# Do not install. Its README points to alternatives: ZooCode (community fork) and Cline."
+      ],
+      "license": "Apache-2.0",
+      "phases": [
+        "02-building"
+      ],
+      "notes": "Shown in a video as a tool for Antigravity; it is no longer maintained. Kept in the catalog so it is not re-added by mistake.",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "playwright-mcp",
+      "name": "Playwright MCP (Microsoft)",
+      "category": "verify",
+      "kind": "mcp",
+      "status": "active",
+      "source": "https://github.com/microsoft/playwright-mcp",
+      "summary": "MCP server that lets the agent drive a real browser: open pages, click, take screenshots, check what the user sees.",
+      "install": [
+        "claude mcp add playwright npx @playwright/mcp@latest",
+        "codex mcp add playwright npx \"@playwright/mcp@latest\"",
+        "# Any client, JSON: {\"mcpServers\":{\"playwright\":{\"command\":\"npx\",\"args\":[\"@playwright/mcp@latest\"]}}}"
+      ],
+      "license": "Apache-2.0",
+      "phases": [
+        "03-finish-features",
+        "07-client-handoff"
+      ],
+      "notes": "Its README says it is not a security boundary: do not point it at sites with sensitive sessions. Prefer playwright-cli when a CLI is enough (fewer tokens).",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "chrome-devtools-mcp",
+      "name": "Chrome DevTools MCP (Google)",
+      "category": "verify",
+      "kind": "mcp",
+      "status": "active",
+      "source": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
+      "summary": "Lets the agent inspect a live Chrome: performance traces (LCP, CLS), network, console, automation. Its README names Antigravity, Claude, Cursor and Copilot as clients.",
+      "install": [
+        "# Any client, JSON: {\"mcpServers\":{\"chrome-devtools\":{\"command\":\"npx\",\"args\":[\"-y\",\"chrome-devtools-mcp@latest\"]}}}",
+        "# Add --no-usage-statistics to the args to opt out of Google usage statistics."
+      ],
+      "license": "Apache-2.0",
+      "phases": [
+        "03-finish-features",
+        "04-before-production"
+      ],
+      "notes": "Collects usage statistics unless you opt out. Do not open sensitive or personal pages while it is connected. Good evidence source for the audit-performance-budget prompts.",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "context7",
+      "name": "Context7 (Upstash)",
+      "category": "docs",
+      "kind": "mcp",
+      "status": "active",
+      "source": "https://github.com/upstash/context7",
+      "summary": "Brings current, version-specific library documentation into the agent so it stops inventing outdated APIs.",
+      "install": [
+        "npx ctx7 setup --claude   # or: npx ctx7 setup",
+        "# Manual: server URL https://mcp.context7.com/mcp with header Authorization: Bearer <API_KEY>"
+      ],
+      "license": "MIT",
+      "phases": [
+        "02-building",
+        "03-finish-features"
+      ],
+      "notes": "A free API key gives higher rate limits: keep it in an environment variable, never in the repo.",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "github-mcp",
+      "name": "GitHub MCP Server",
+      "category": "deploy",
+      "kind": "mcp",
+      "status": "active",
+      "source": "https://github.com/github/github-mcp-server",
+      "summary": "Official GitHub MCP: read and change repositories, issues and pull requests from the agent.",
+      "install": [
+        "# Remote (HTTP): {\"servers\":{\"github\":{\"type\":\"http\",\"url\":\"https://api.githubcopilot.com/mcp/\"}}}",
+        "# Local: docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN ghcr.io/github/github-mcp-server",
+        "# Claude Code/Desktop: see the install guide in the repository docs (not reproduced here)."
+      ],
+      "license": "MIT",
+      "phases": [
+        "05-final-audit",
+        "06-release"
+      ],
+      "notes": "Least privilege: minimum token scopes, a separate token per project, never commit it, use read-only mode when you only need to look. Writing tools (merge, delete) should require your confirmation.",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "supabase-mcp",
+      "name": "Supabase MCP",
+      "category": "data",
+      "kind": "mcp",
+      "status": "active",
+      "source": "https://github.com/supabase-community/supabase-mcp",
+      "summary": "Connects the agent to Supabase projects: tables, SQL, migrations, logs, docs.",
+      "install": [
+        "# Any client, JSON: {\"mcpServers\":{\"supabase\":{\"type\":\"http\",\"url\":\"https://mcp.supabase.com/mcp\"}}}",
+        "# Safer URL parameters: ?read_only=true&project_ref=<project-ref>&features=database,docs"
+      ],
+      "license": "Apache-2.0",
+      "phases": [
+        "02-building"
+      ],
+      "notes": "Use it against a development project, not production. Prefer read_only=true and project_ref scoping; never share service credentials across environments.",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "vercel-mcp",
+      "name": "Vercel MCP",
+      "category": "deploy",
+      "kind": "mcp",
+      "status": "active",
+      "source": "https://vercel.com/docs/agent-resources/vercel-mcp",
+      "summary": "Vercel's official remote MCP (OAuth): search docs, manage projects and deployments, read logs, query analytics.",
+      "install": [
+        "claude mcp add --transport http vercel https://mcp.vercel.com   # then /mcp to authenticate",
+        "codex mcp add vercel --url https://mcp.vercel.com",
+        "npx add-mcp https://mcp.vercel.com   # detects your installed agents and configures each"
+      ],
+      "license": "Service (Vercel terms). Beta at verification time.",
+      "phases": [
+        "06-release",
+        "07-client-handoff"
+      ],
+      "notes": "Connecting it gives the agent the same access as your Vercel user. Keep human confirmation on for deploys and purchases, and only trust the official URL https://mcp.vercel.com. Beware prompt injection through logs or web content.",
+      "verified": "2026-09-29"
+    },
+    {
+      "id": "ecc",
+      "name": "ECC (Everything Claude Code harness)",
+      "category": "workflow",
+      "kind": "plugin",
+      "status": "caution",
+      "source": "https://github.com/affaan-m/ECC",
+      "summary": "Large agent harness: ~68 agents, ~290 skills, command shims, hooks, rules, memory and the AgentShield scanner, for Claude Code, Codex, Cursor, OpenCode and (experimental) Antigravity.",
+      "install": [
+        "npx ecc-universal@<version> setup   # official universal installer; pin the version (README example 2.2.2, npm latest 2.2.1 at verification)",
+        "/plugin marketplace add https://github.com/affaan-m/ECC   # Claude Code plugin alternative",
+        "/plugin install ecc@ecc",
+        "./install.sh --profile minimal --target claude --no-hooks   # from a clone: smallest footprint"
+      ],
+      "license": "MIT",
+      "phases": [
+        "02-building",
+        "08-maintenance"
+      ],
+      "notes": "Overlaps heavily with HELEN (skills, rules, hooks, memory). Do not install it whole on top of HELEN: pick single skills (e.g. seo) or the minimal profile without hooks. Install from official channels only (GitHub repo, npm ecc-universal / ecc-agentshield, plugin ecc@ecc, ecc.tools) and never stack two install methods in the same harness.",
+      "verified": "2026-09-30"
+    },
+    {
+      "id": "agentshield",
+      "name": "AgentShield (ECC security scanner)",
+      "category": "quality",
+      "kind": "cli",
+      "status": "active",
+      "source": "https://github.com/affaan-m/ECC",
+      "summary": "Security auditor for AI agent configurations: scans prompts, hooks, MCP configs, permissions, secrets and agent files for vulnerabilities, misconfigurations and injection risks.",
+      "install": [
+        "npx ecc-agentshield@<version> scan --path .   # pin the version (1.6.0 at verification); binary: agentshield; confirm flags with --help"
+      ],
+      "license": "MIT",
+      "phases": [
+        "04-before-production",
+        "08-maintenance"
+      ],
+      "notes": "Complements `helen doctor` (which only checks HELEN setup and inline MCP secrets) and the audit-third-party-tools-and-mcp prompt.",
+      "verified": "2026-09-30"
+    },
+    {
+      "id": "portfolio-references",
+      "name": "Portfolio references",
+      "category": "design",
+      "kind": "reference",
+      "status": "active",
+      "source": "https://danilodemarco.com",
+      "summary": "Real designer portfolios to study for layout, typography and presentation. Current list: danilodemarco.com (creative director, type designer, Awwwards judge: image-led grids, thematic sections, restrained navigation).",
+      "install": [
+        "# Websites: study principles (hierarchy, rhythm, project order), never copy design or text."
+      ],
+      "license": "Each site belongs to its author.",
+      "phases": [
+        "01-start-project",
+        "03-finish-features"
+      ],
+      "notes": "Pairs with generate-portfolio-layout-patterns. nicolodemarca.com did not resolve at verification time; add sites here as you find them.",
+      "verified": "2026-09-30"
+    }
+  ]
+}

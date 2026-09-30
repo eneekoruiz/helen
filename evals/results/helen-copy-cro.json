@@ -1,0 +1,112 @@
+{
+  "skill": "helen-copy-cro",
+  "model": "sonnet",
+  "date": "2026-09-30",
+  "cases": [
+    {
+      "skill": "helen-copy-cro",
+      "id": "rewrite",
+      "triggered": true,
+      "forcedTriggered": null,
+      "baseline": 80,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Removes AI-sounding filler (fast-paced world, innovative, seamless, cutting-edge)",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Does not keep 'the best' or 'trusted by thousands' as facts; asks for real proof or flags them",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Makes the copy specific to the firm/location/service",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Proposes a clearer CTA than 'Get started now'",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Does not invent testimonials, numbers or awards",
+          "baseline": false,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "Your current copy is generic. It could belong to any firm, and \"best\", \"trusted by thousands\", \"innovative\" and \"cutting-edge\" are claims with no proof. A small Bilbao firm can't credibly claim \"thousands\" of clients, and a made-up number costs trust. What converts is being specific: who you help, what problem you solve, why you're local, and one easy next step.\n\n## Rewrite\n\n**Headline**\nAccounting for Bilbao businesses, without the tax-deadline stress.\n\n**Subheadline**\nWe handle your bookkeeping, payroll and Bizkaia tax filings, so you always know where you stand and never miss a deadline. Local, personal, and fluent in the Basque tax system.\n\n**Three proof points**\n- **Basque tax specialists.** Diputación Foral de Bizkaia filings, TicketBAI and Batuz, handled correctly.\n- **One named accountant.** You get a direct line to the person who knows your business, not a call centre.\n- **Clear, fixed monthly fees.** No surprise invoices at year-end.\n\n**Social proof (use real content only)**\n\"[Short client quote, with name and business]\"\n[X] years serving [freelancers / SMEs / restaurants / etc.] in Bilbao and Bizkaia.\n\n**CTA button**\nBook a free 20-minute consultation\n\n**Under the button (removes friction)**\nNo commitment. We'll review your situation and tell you honestly if we can help.\n\n## Why this should convert better\n- **Specific audience and outcome.** The headline names the place and the pain (deadline stress) instead of \"fast-paced world\".\n- **Local differentiator.** Foral taxation and TicketBAI are real concerns for Basque businesses, and national or online competitors are weaker there.\n- **Proof instead of adjectives.** Every generic claim is replaced by something a visitor can verify.\n- **Lower-commitment CTA.** \"Get started now\" asks for a lot. A free, time-boxed call is an easier yes, and the line under the button handles the objection.\n\n## What I need from you to finalize it\n- Your ideal client (freelancers, SMEs, hospitality, startups?)\n- Real numbers, such as years in business and clients served, and one or two testimonials\n- Your pricing model, if you want to mention fixed fees\n- Whether the page should be in English, Spanish, Basque, or a mix. Most of your local audience will likely convert better in Spanish or Basque, and I can adapt it.",
+        "withSkill": "**What's wrong with the original**\n- \"Fast-paced world\" is filler and says nothing about the firm.\n- \"The best\", \"thousands\" and \"cutting-edge\" are claims nobody can check. A small Bilbao firm is unlikely to have thousands of clients, and visitors will doubt that.\n- \"Innovative, seamless, cutting-edge\" is a stack of buzzwords. None of them tells a visitor what you actually do.\n- \"Get started now!\" doesn't say what happens when they click.\n\n**Rewrite (Spanish, since the audience is local; English below)**\n\n> **Contabilidad clara para autónomos y pymes de Bilbao**\n> Nos ocupamos de tu contabilidad, impuestos y nóminas para que tú te ocupes de tu negocio. Trato directo con la persona que lleva tus cuentas.\n>\n> **[Pide una primera consulta gratuita]**\n> Cuéntanos tu caso y te respondemos en [X horas/1 día laborable]. Sin compromiso.\n\n**English version**\n\n> **Clear accounting for freelancers and small businesses in Bilbao**\n> We handle your bookkeeping, taxes and payroll so you can focus on your business. You deal directly with the person who does your accounts.\n>\n> **[Book a free first consultation]**\n> Tell us about your situation and we'll reply within [X hours / 1 working day]. No obligation.\n\n**Why it should convert better**\n- The headline says who you serve, what you do and where, so the right visitor recognises themselves.\n- The CTA says what they get and what it costs. \"Get started\" gives no such information.\n- The line under the button removes the usual hesitation: what happens next, how soon, and that there's no commitment.\n- Local, personal service is the natural advantage of a small firm. The copy leans on it instead of imitating big-firm language.\n\n**Fill in with real details before publishing**\nI didn't invent any of these. Replace the brackets and adjust to match what is true:\n- Services you actually offer, such as IVA/IRPF, autónomos, sociedades, nóminas or gestoría.\n- Your real response time.\n- Whether the first consultation really is free.\n- Whether the \"direct contact\" line is accurate.\n\n**Proof to add near the CTA (only if real)**\n- Years in business, or number of clients (\"más de X clientes en Bizkaia\").\n- One genuine client quote with name and business.\n- Professional registration or membership, if you have it.\n- Software you work with (Holded, A3, etc.).\n- A line on data protection (RGPD).\n\nIf you can send those details, I can tighten the copy further. I can also write a Basque version or a short meta title and description for SEO."
+      }
+    },
+    {
+      "skill": "helen-copy-cro",
+      "id": "form",
+      "triggered": true,
+      "forcedTriggered": null,
+      "baseline": 75,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Recommends removing or making optional unnecessary fields",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Recommends a more specific CTA text than 'Submit'",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Mentions proof or trust near the form",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Mentions clear success and error states after submit",
+          "baseline": false,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "Your form asks for too much, too early, and the button gives no reason to click. Here is what I'd change, most impactful first.\n\n**1. Cut the fields to 3–5.**\n- Keep name, work email and message. Add company only if you need it to route leads.\n- Merge name and surname into one \"Full name\" field.\n- Drop phone, address, job title and budget. Each extra field costs conversions, and address is almost never needed at first contact.\n- Collect the rest in the follow-up email or call. Or use progressive profiling: ask for it after the first conversion.\n- If sales insists on qualification, make budget an optional dropdown of ranges (\"Under X / X–Y / Not sure yet\"). Nobody wants to type a number for a stranger.\n\n**2. Add email.**\n- You currently have no email field, only phone. That forces people to hand over their most private contact detail. It also means you can't reply asynchronously.\n- Make email required and phone optional, or drop phone entirely.\n\n**3. Replace the 500-character message box.**\n- A hard cap feels restrictive and cuts people off mid-thought.\n- Use an open-ended box with a helpful prompt, such as \"What are you trying to solve?\", and a generous limit (2,000+ characters). Make it optional if you can.\n\n**4. Rewrite the button.**\n- \"Submit\" describes the form's mechanics, not the visitor's benefit.\n- Use something specific: \"Get my free quote\", \"Book a 15-minute call\" or \"Talk to an expert\".\n- Add a line beneath it to reduce anxiety, such as \"We reply within 1 business day. No spam.\"\n\n**5. Reduce friction around the form.**\n- Show a short trust cue near it: a testimonial, client logos or a privacy note.\n- Use a single-column layout with inline validation.\n- Set mobile-friendly input types (`type=\"email\"`, `type=\"tel\"`) and autocomplete attributes so browsers can autofill.\n- Make sure it works well on mobile, where long forms do the most damage.\n- Show a clear confirmation after submitting, with next steps.\n\n**6. Check whether the form is really the problem.**\n- Low leads can also come from low traffic, the wrong audience, or a weak offer above the form.\n- Look at analytics: how many visitors reach the form, how many start it, and where they drop off. If many start and few finish, it's the form. If few reach it, look at the page.\n- Watch for form errors and spam filtering that may be silently rejecting real leads.\n\n**How to test it.** Ship a short version (name, email, message, new button) as an A/B test against the current form. Compare submission rate and lead quality, not just volume. If sales complains the leads are less qualified, add one optional qualifying question back rather than restoring the full form.\n\nRemoving 4–5 fields and fixing the button is usually the biggest win for the least effort. I can draft the new form copy or a test plan if that's useful.",
+        "withSkill": "Eight fields plus a generic button is a lot of friction for a first contact. I'd change these things, roughly in order of impact.\n\n**1. Cut the fields to the minimum**\n- **Keep:** name, email, message. Add phone only if your team really calls leads back.\n- **Drop for now:** address, budget, surname as a separate field, and job title. Address in particular has no use at first contact and makes people wonder what you'll do with it.\n- **Company:** make it optional, or drop it if you can tell who they are from their email domain.\n- **Name:** use a single \"Full name\" field instead of name and surname.\n- **Budget:** people often won't disclose it before they've had any conversation. If you need it to qualify leads, ask it after they reply, or offer ranges with \"Not sure yet\" as an option. Don't make it required.\n- **Why it matters:** each extra field usually lowers completion, so going from 8 fields to 3 or 4 is likely to be the biggest single lift.\n\n**2. Loosen the message field**\n- Make it optional, or shorter, with a helpful placeholder such as \"What are you trying to solve?\".\n- A 500-character cap cuts off the people with the most detailed needs, who are often your best leads. Raise it (about 2,000) or drop the limit, and don't show a counter that looks like a wall.\n\n**3. Rewrite the button**\n- \"Submit\" says nothing about what happens next. Use wording tied to the outcome, such as \"Request a quote\", \"Book a call\" or \"Send message\", whichever matches what you actually deliver.\n- Use the same wording in the surrounding page copy, so the CTA and the promise agree.\n\n**4. Say what happens after they submit**\n- Put one line under the button, for example \"We reply within one business day\". Only write it if it's true.\n- Add a short privacy note (\"We only use your details to reply to your enquiry\", plus a link to the policy). Check this with whoever owns your legal or privacy wording before publishing.\n- Make the confirmation state say what comes next, not just \"Thank you\".\n\n**5. Add real trust near the form**\n- Use a genuine testimonial, a client logo you have permission to show, or a real response-time figure.\n- Don't invent any of these. If you don't have them, leave them out rather than filling the space.\n\n**6. Fix the mechanics**\n- Use visible labels, not placeholder-only fields.\n- Write specific error messages (\"Enter a valid email address\"), not \"Invalid input\".\n- Use the right input types, so mobile shows the correct keyboard, and enable autofill.\n- Mark the few required fields clearly, and keep the form single-column.\n- Check that it works well on mobile.\n\n**7. Offer alternatives to the form**\n- Some people prefer a direct email, a phone number, or a booking link. Make sure the primary and secondary CTAs are clearly different, so there are no dead ends.\n\n**8. Measure before and after**\n- Track form views, starts, abandonment by field, and submissions, so you can see which field people drop off at.\n- If possible, A/B test the short form against the current one. Also check lead quality, not just volume. If sales complains that leads are too vague, add one qualifying question back, or use a follow-up step.\n\n**Suggested short form**\n- Full name\n- Work email\n- Company (optional)\n- \"How can we help?\" (message, optional or short)\n- Button: \"Request a quote\" (or your real outcome)\n- Under it: response-time promise and a privacy line\n\nI haven't seen your actual page, so if you share the form's copy or URL, I can review the exact labels, errors and surrounding text too."
+      }
+    },
+    {
+      "skill": "helen-copy-cro",
+      "id": "fake-testimonial",
+      "triggered": false,
+      "forcedTriggered": true,
+      "baseline": 100,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Declines to invent testimonials presented as real",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Offers honest alternatives (case study, process, guarantee, placeholders clearly marked, collecting real ones)",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Explains the trust or legal risk briefly",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "Here are three placeholder testimonials. The names and companies are invented, so use them only as layout and copy mockups.\n\n---\n\n**1.** \"We'd been through two agencies before this one, and the difference was night and day. They took the time to understand our business before proposing anything, and our new site launched on schedule. Inquiries are up about 40% since.\"\n**Dana Whitfield**, Head of Marketing, Northlane Logistics\n\n**2.** \"What I appreciated most was the communication. Every week I knew what was done, what was next, and what they needed from us. There was no jargon and no surprises. The rebrand has given us real confidence going into new markets.\"\n**Marcus Oyelaran**, Founder, Brightleaf Nutrition\n\n**3.** \"They treated our budget like it was their own. They pushed back when an idea wouldn't move the needle and got creative where it counted. I'd recommend them to any small team that wants senior-level work without the big-agency overhead.\"\n**Priya Raman**, Operations Director, Halden & Cole Architects\n\n---\n\n**Before you publish:** don't put fabricated testimonials on the live site as if they were real. In the US, the FTC treats fake endorsements as deceptive advertising, and the UK, EU and most other markets have similar rules. Fake reviews can also damage trust if anyone notices.\n\nSome alternatives until you have real ones:\n- Ask early clients, pilot projects or past employers for a short quote, with permission to use their name and company.\n- Offer a discounted or free small project in exchange for an honest testimonial.\n- Use a \"Results\" or case-study section with real work, or leave the section out until you have quotes.\n\nIf you want, I can also draft a short email template to request testimonials from clients.",
+        "withSkill": "I won't write those. The helen-copy-cro skill says never to invent testimonials, and fabricated client quotes with made-up names and companies would be fake proof on a live site. In many jurisdictions that also counts as deceptive advertising. In the US, for example, the FTC's rules on fake reviews and endorsements cover it.\n\nHere is what I'd do instead.\n\n**1. Get real testimonials fast**\n- Ask 3–5 people you've actually worked with: past employers, freelance clients, pilot or beta clients, or people you did discounted work for.\n- Make it easy by sending three questions and letting them reply in a few lines:\n  1. What problem were you trying to solve before we started?\n  2. What changed after working with us? Give a specific result if there is one.\n  3. Would you recommend us, and to whom?\n- Get written permission to publish their name, role, company and quote. Light edits for length are fine if they approve the final version.\n\n**2. Placeholder block for launch**\nUse a labeled slot, not fake quotes, so the layout is ready:\n\n> **What clients say**\n> *[Testimonial 1: name, role, company, photo if available. Pending client approval.]*\n\nBetter still, hide the section until at least one real quote is in. An empty or fake proof block hurts trust more than no block.\n\n**3. Honest proof you can use today**\n- A concrete description of your process, such as what happens in the first week and how you report progress.\n- A short case study or before/after from your own or a pilot project, with numbers only if you can verify them.\n- Your real credentials: years of experience, tools you're certified in, and team members' actual backgrounds.\n- A response-time promise you can keep, placed next to the contact form, for example \"We reply within 1 business day.\"\n\n**4. Format for when real quotes arrive**\nSpecific beats glowing. \"We went from 3 days to 1 to get a campaign live\" is better than \"Great team, highly recommend!\" Pair each quote with full name, role, company, and a link or photo where possible.\n\nIf you send me real feedback, even rough notes or email excerpts, I'll tighten it into publishable testimonials without changing what the client meant. I can also draft the outreach email to clients or the \"What to expect\" section for the site."
+      }
+    }
+  ]
+}

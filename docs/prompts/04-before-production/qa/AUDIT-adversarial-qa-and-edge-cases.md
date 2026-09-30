@@ -1,36 +1,38 @@
-# [AUDIT] - Adversarial QA and Edge Cases Audit
+---
+action: AUDIT
+phase: 04-before-production
+summary: Attack the product with edge cases: malformed, empty and huge data, duplicates, slow network, cancellations, races and partial failures.
+modifies_code: false
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Adversarial QA and Edge Cases
 
+## Goal
 
-**Intención**: AUDIT (No modificar código, buscar problemas)
+Find the bugs that happy-path testing misses, before users do.
 
-Purpose: Find bugs that normal happy-path testing misses.
+## Use when
 
-## Prompt
+- Before production or a release candidate, and after large feature work.
 
-Act as a QA Lead, Security Engineer, Staff Engineer, and impatient real user.
-
-Attack the project with edge cases.
-
-## Requisitos mínimos obligatorios
+## Requirements
 
 1. Identify critical flows and risky inputs.
-2. Test or reason through malformed data, empty data, huge data, duplicate actions, slow network, cancelled actions, permission failures, partial failures, and repeated retries.
+2. Test or reason through malformed, empty and huge data; duplicate actions; slow or dropped network; cancelled actions; permission failures; partial failures; repeated retries.
 3. Review destructive flows and rollback behavior.
-4. Check race conditions, concurrency, idempotency, and state recovery.
-5. Identify missing regression tests.
+4. Race conditions, concurrency, idempotency and state recovery.
+5. Missing regression tests.
 
-## Más allá de estos criterios
+## Beyond the checklist
 
-Think of weird but plausible user behavior, integration failures, time-based bugs, browser differences, file-system oddities, and state combinations nobody designed for.
+Weird but plausible behavior: double clicks, back button mid-flow, two tabs, time zones and DST, browser differences, file-system oddities, state combinations nobody designed for.
 
-## Formato de entrega
+## Limits
+
+- Audit only: do not modify files. Never run destructive tests against production data.
+
+## Output
 
 1. Edge-case matrix.
-2. Bugs found or potential risks (classified by severity: Críticos, Importantes, Opcionales).
-3. Missing tests.
-4. Manual QA script.
-5. Must-fix before release.
+2. Findings grouped as **Critical**, **Important** and **Optional**. For each: evidence (file, line, screen or command), impact, recommended fix and effort.
+3. Missing tests, a manual QA script, and must-fix items before release.

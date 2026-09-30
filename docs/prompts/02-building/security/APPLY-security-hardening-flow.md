@@ -1,52 +1,49 @@
-# [APPLY] - Security Hardening Flow
+---
+action: APPLY
+phase: 02-building
+summary: Flow: find and fix secrets, injection risks, vulnerable dependencies and unsafe permissions before public exposure or release.
+modifies_code: true
+repeatable: true
+stage: hardening
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Security Hardening Flow
 
+## Goal
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+Review and mitigate security risks before public exposure, client delivery or release.
 
-## Objetivo
+## Use when
 
-Revisar y mitigar riesgos de seguridad antes de exposición pública, entrega o release.
+- During building and before stabilization; again before release or handoff.
 
-## Fase Ideal
+## Steps
 
-Durante el desarrollo (Building) y antes de estabilización.
+1. [audit-security-risk-checkpoint](../../04-before-production/flow/AUDIT-security-risk-checkpoint.md): know the current risk level.
+2. **Secrets and configuration:** hardcoded credentials, tokens, passwords, exposed environment variables, committed `.env` files.
+3. **Input and injection:** validation, path traversal, command and query injection, unsafe HTML rendering.
+4. **Dependencies:** run the ecosystem audit (`npm audit` or equivalent); fix by severity, not by count.
+5. **Permissions and destructive operations:** filesystem calls, subprocesses, unnecessary privileges.
+6. **Third-party code and MCP servers:** see `audit-third-party-tools-and-mcp`.
+7. Apply safe mitigations in code, then [audit-quality-gates-checkpoint](../checkpoint/AUDIT-quality-gates-checkpoint.md).
 
-## Criterios de Auditoría y Mitigación
+## Stop when
 
-1. **Secretos y Configuración**:
-   - Buscar credenciales, tokens, contraseñas hardcoded y variables de entorno expuestas.
-2. **Entrada de Datos e Inyecciones**:
-   - Revisar validación de entradas, path traversal, inyecciones de comandos, consultas, etc.
-3. **Dependencias**:
-   - Ejecutar auditoría rápida de vulnerabilidades en dependencias (`npm audit` si aplica).
-4. **Permisos y Operaciones Destructivas**:
-   - Revisar llamadas a filesystem, subprocesos y privilegios innecesarios.
+- A fix requires changing network or authentication architecture: get explicit confirmation first.
 
-## Checkpoints Requeridos
+## Limits
 
-- **Inicio**: Cargar [security-risk-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/flow/audit-security-risk-checkpoint.md)
-- **Fixes**: Aplicar mitigaciones automáticas directamente en el código de forma segura.
-- **Validación**: Ejecutar [lint-and-typecheck-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-lint-and-typecheck-checkpoint.md) y confirmar que la compilación continúa siendo correcta.
+- Never print secrets in chat or in reports; say where they are, not what they are.
+- Never hide a vulnerability to get a green check.
 
-## Límites de Seguridad
-
-No imprimas secretos en los logs del chat ni en archivos de reporte. No realices cambios estructurales de arquitectura de red o auth sin confirmación explícita.
-
-## Formato de Entrega
-
-El entregable debe ser minimalista. Produce únicamente:
+## Output
 
 ```text
-✅ Mitigaciones aplicadas. / [o] ⚠️ Mitigaciones aplicadas con advertencias.
+Done. / Done with warnings.
 
-Cambios aplicados:
-- [Breve lista de 1-3 viñetas con las correcciones aplicadas]
+Changes applied:
+- 1-3 bullets with the exact changes
 
-Acciones manuales necesarias:
-- Ninguna. / [o detallar variables a configurar, comando npm audit fix, etc.]
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
 ```
-*No generes informes extensos ni explicaciones teóricas.*

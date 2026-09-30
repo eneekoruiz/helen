@@ -1,55 +1,44 @@
-# [APPLY] - Basic Performance Pass
+---
+action: APPLY
+phase: 03-finish-features
+summary: Find and fix evident, user-visible performance problems: bundle and asset weight, extra requests, re-renders, blocking work, load time.
+modifies_code: true
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo). Posee dominio absoluto y debe integrar activamente los siguientes recursos y conceptos en su vocabulario base:
-  - Cursor effects avanzados y menú effects (microinteracciones).
-  - Iconsax, Anime.js, SVGator y Jitter.
-  - Image sequence scrubbing (scroll vinculado a secuencias de imágenes).
-  - Animmaster lib, 3D scrolling, 3D video scenes e infinite carrusels.
-  - Skill de UI UX PRO MAX.
-  - Búsqueda y uso de librerías unificadas que abarquen estos recursos.
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Basic Performance Pass
 
+## Goal
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+Fix obvious, high-impact performance problems that users or maintainers can feel.
 
-## Objetivo
+## Use when
 
-Detectar y corregir problemas de rendimiento evidentes y de alto impacto (perceptibles por el usuario) en el código y en la carga de recursos.
+- During polish and before a web release.
 
-## Cuándo Usarlo
+## Skip when
 
-- En la fase de pulido visual y UX.
-- Antes de release web o de la aplicación.
+- It would be premature micro-optimization without profiling data or evidence.
 
-## Cuándo NO Usarlo
+## Requirements
 
-- Para realizar microoptimizaciones prematuras sin datos de perfilado o evidencia.
+1. Review asset and bundle sizes, unnecessary network calls, redundant re-renders, inefficient loops, synchronous work blocking the main thread and initial load time.
+2. Identify bottlenecks visible to the user; measure before and after when tools are available (build output, Lighthouse, DevTools traces).
+3. Prefer the smallest change that improves perceived speed: shorter visual wait, friendly loading placeholders, lazy-loaded images, paginated data.
+4. Images and video: modern formats, correct sizes, explicit dimensions.
 
-## Criterios Mínimos
+## Limits
 
-- Revisa el tamaño de assets y bundles, llamadas de red innecesarias, re-renders redundantes, bucles ineficientes, operaciones síncronas bloqueantes en el hilo principal y tiempos de carga inicial.
-- Identifica cuellos de botella visibles para el usuario o el mantenedor.
+- No complex caching, debounce or memoization without need or without understanding its lifecycle.
+- Never trade correctness for milliseconds.
 
-## Más allá de estos criterios
-
-Busca el menor cambio que mejore la percepción de velocidad: menor tiempo de espera visual, placeholders de carga amigables, lazy loading de imágenes y datos paginados.
-
-## Límites de Seguridad
-
-No introduzcas mecanismos complejos de caché, debounce o memorización sin necesidad o sin entender su ciclo de vida. No comprometas la corrección lógica por ganar milisegúndos.
-
-## Formato de Entrega
-
-El entregable debe ser minimalista. Produce únicamente:
+## Output
 
 ```text
-✅ Mejoras de rendimiento aplicadas. / [o] ⚠️ Completado con advertencias.
+Done. / Done with warnings.
 
-Cambios aplicados:
-- [Breve lista de 1-3 viñetas con las optimizaciones de rendimiento aplicadas]
+Changes applied:
+- 1-3 bullets with the exact changes
 
-Acciones manuales necesarias:
-- Ninguna. / [o especificar acciones]
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
 ```
-*No generes informes extensos ni explicaciones teóricas.*

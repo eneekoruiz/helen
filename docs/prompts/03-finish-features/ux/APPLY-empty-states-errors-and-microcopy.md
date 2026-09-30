@@ -1,47 +1,40 @@
-# [APPLY] - Empty States, Errors, and Microcopy Pass
+---
+action: APPLY
+phase: 03-finish-features
+summary: Add or fix loading, empty, error, success, disabled and destructive states, with messages that say what happened and what to do next.
+modifies_code: true
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Empty States, Errors and Microcopy Pass
 
+## Goal
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+Make the product feel finished beyond the happy path: every state explains what happened and what to do next, clearly and accessibly.
 
-## Objetivo
+## Use when
 
-Revisar e implementar estados loading, error, empty, success, disabled y destructive, asegurando que los mensajes expliquen qué pasó y qué hacer a continuación de forma clara y accesible.
+- During UX and UI polish, when the product only works well on the happy path.
 
-## Cuándo Usarlo
+## Requirements
 
-- Durante la fase de pulido de UX/UI.
-- Cuando el producto parece correcto sólo en el "happy path" y carece de feedback en casos de error o vacíos.
+1. **Find or add states:** long loads (skeletons that match the final layout), empty data with a contextual first-action CTA, network failures, permission denials, disabled controls and destructive confirmations.
+2. **Forms:** what happens if the network fails on submit; real-time, specific field errors instead of generic alerts.
+3. **Copy:** precise, friendly, solution-focused; no jargon, no blaming the user, no vague "An error occurred".
+4. Every state has a recovery action or link.
+5. Error messages never expose secrets, credentials or stack traces.
 
-## Criterios Mínimos
+## Limits
 
-1. **Identificación de Estados**:
-   - Encontrar o añadir vistas/mensajes para cargas largas, datos vacíos, fallos de red, denegaciones de permisos, deshabilitados y confirmaciones destructivas.
-2. **Copy y Tono**:
-   - Redactar mensajes precisos, amigables y enfocados en la solución. Evitar términos técnicos oscuros, culpabilización del usuario o copy vago como "Ocurrió un error".
-3. **Seguridad e Invariantes**:
-   - Asegurar que los mensajes de error no expongan secretos, credenciales o trazas de código internas del servidor/cliente.
+- Do not change business logic to create states; keep i18n and CMS structure intact.
 
-## Checks Finales
-
-- Estados de UI críticos cubiertos.
-- Mensajes de error seguros (no filtran datos).
-- Botones de acción o enlaces de recuperación presentes en cada estado.
-
-## Formato de Entrega
-
-El entregable debe ser minimalista. Produce únicamente:
+## Output
 
 ```text
-✅ Estados de usuario y microcopy actualizados. / [o] ⚠️ Completado con advertencias.
+Done. / Done with warnings.
 
-Cambios aplicados:
-- [Breve lista de 1-3 viñetas con estados agregados o textos corregidos]
+Changes applied:
+- 1-3 bullets with the exact changes
 
-Acciones manuales necesarias:
-- Ninguna. / [o especificar acciones]
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
 ```
-*No generes informes extensos ni explicaciones teóricas.*

@@ -1,0 +1,97 @@
+{
+  "skill": "helen-router",
+  "model": "sonnet",
+  "date": "2026-09-30",
+  "cases": [
+    {
+      "skill": "helen-router",
+      "id": "phase",
+      "triggered": true,
+      "forcedTriggered": null,
+      "baseline": 75,
+      "withSkill": 75,
+      "criteria": [
+        {
+          "text": "Identifies the building phase (02) or equivalent with evidence from the listed files",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Mentions that tests and CI are missing",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Recommends a concrete next step or prompt (e.g. quality gates, tests, CI)",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Keeps the answer short",
+          "baseline": false,
+          "withSkill": false
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "**Phase: early development, or prototype to MVP.** You have a working dev/build setup and an app in `src/`, but nothing yet guards quality (tests), automates checks (CI) or records change history (CHANGELOG). This is based only on your description, so I haven't inspected the repo.\n\n**What to do next, in order:**\n\n1. **Add a minimal test setup.**\n   - If you use Vite, add Vitest and React Testing Library. Otherwise use Jest.\n   - Write a few smoke tests for your most important components and logic, not full coverage.\n   - Add a `test` script to `package.json`.\n\n2. **Add linting and type checking.** Set up ESLint, and TypeScript's `tsc --noEmit` if you use TS. Add `lint` and `typecheck` scripts.\n\n3. **Add a basic CI workflow.** Create `.github/workflows/ci.yml` that runs install, lint, test and build on every push and PR. Once it passes, turn on branch protection for `main`.\n\n4. **Before the first release:**\n   - Add a README with setup and run instructions.\n   - Add a `.env.example` if you use environment variables.\n   - Pick a deploy target (Vercel, Netlify or GitHub Pages) and set up preview deploys.\n\n5. **Start a CHANGELOG last.** It only pays off once you cut versions. Then adopt Keep a Changelog, or automate it with Changesets or release-please, and use conventional commits.\n\nThe order matters because tests come first: CI is only worth having once it has something meaningful to run, and a changelog only matters once you're releasing.\n\nIf you want, I can look at the actual repo to check what's there, such as the framework, TS or JS, and existing lint config, and give more specific steps.",
+        "withSkill": "The repo at `/tmp/helen-eval-7PvADh` contains only `README.md`, `.claude/` and `.git`. It has no `package.json`, no `src/` and no HELEN docs, so I'm working from your description instead.\n\n**Detected phase: 02-building.**\n- **Evidence:** You have a React app in `src/` with dev and build scripts, so there is working code. You also have no tests, no CI and no CHANGELOG. The router's signal for this is \"code in progress; tests, CI or lint gates missing\".\n- **Gaps that matter:**\n  1. There are no tests, so nothing catches regressions. Start with a few tests on core logic and the main user flow.\n  2. There is no CI, so build, lint and test checks aren't enforced. Add a workflow that runs install, lint, test and build on each push and PR.\n  3. There is no lint or typecheck script that you mentioned. Add these as checkpoints too if they're missing.\n- **Not yet relevant:** The CHANGELOG belongs to phase 06 (release), so ignore it for now.\n- **Exit checklist:** I couldn't read the phase README because `docs/prompts/` isn't installed here. I'm assuming the exit condition is that build, lint and test pass in CI.\n\n**Next step:** Run `helen prompts list` and `helen prompts flow` for the building phase. If the CLI isn't installed, install it from the HELEN repo at a pinned version. After the checkpoints pass, move to 03-finish-features (UX, responsive, accessibility).\n\nIf you point me at the real project directory, I can confirm this against the actual files."
+      }
+    },
+    {
+      "skill": "helen-router",
+      "id": "ambiguous",
+      "triggered": true,
+      "forcedTriggered": null,
+      "baseline": 100,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Asks to inspect the repository or for information rather than guessing",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Does not invent project details",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Explains briefly what it would look at to decide",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "Your repo is essentially empty. It has no commits yet, and the only file is an untracked `README.md` containing `# Sample project`. There's no code, no TODOs, and no config to work from, so I can't tell where the project is headed. Here's what I'd do, in order:\n\n1. **Make the first commit.** Commit the README so the repo has a baseline. Add a `.gitignore` that fits your language first.\n2. **Decide what the project is.** Write a sentence or two in the README covering what it does, who it's for, and the language or stack. Everything else depends on this.\n3. **Set up the skeleton.** That means a package manifest (`package.json`, `pyproject.toml`, `Cargo.toml` or similar), a `src/` directory and a `tests/` directory. Add one trivial passing test so the test command works from day one.\n4. **Build the smallest end-to-end slice.** Get one narrow feature working from input to output before adding breadth.\n5. **Add CI.** A simple GitHub Actions workflow that runs the tests and a linter is enough.\n6. **Run `/init` once there's some code.** It generates a `CLAUDE.md` that helps future sessions.\n\nIf you tell me what you want to build and in which language, I can scaffold steps 1–3 for you. You asked me not to modify files, so I haven't touched anything.",
+        "withSkill": "**Detected phase: 01 `01-start-project`.**\n\nEvidence:\n- The repo has no commits.\n- The only files are a one-line `README.md` (\"# Sample project\") and the `helen-router` skill.\n- There's no `package.json`, no source, no tests, no CI and no `docs/`.\n- The `helen` CLI isn't installed, and `docs/prompts/` isn't present locally. I couldn't check the phase 01 exit checklist against a README, so this is judged from the repo state alone.\n\nGaps that matter:\n1. **The project isn't defined.** Nothing says what it is, who it's for, or what the main risks are, so there's no risk scan, benchmark or roadmap yet.\n2. **There's no scaffold and no history.** You need a first commit, a stack choice, and a build/lint/test skeleton before phase 02.\n3. **HELEN itself isn't set up.** Without the CLI or the prompts, I can't point you at exact prompt IDs. I won't guess them.\n\nNext steps:\n1. Install the HELEN CLI from its repository, pinned to a version rather than an unpinned URL. Then run `helen prompts list` and `helen prompts show` for the `01-start-project` prompts. These should cover the initial risk scan, benchmark, roadmap and technology lifecycle.\n2. Meanwhile, tell me what you're building (purpose, users, intended stack). I can then draft the phase 01 outputs, or make the first commit and scaffold once you say so.\n\nOnce phase 01's exit checklist is met, move to `02-building`. I haven't changed or created any files."
+      }
+    },
+    {
+      "skill": "helen-router",
+      "id": "release-phase",
+      "triggered": true,
+      "forcedTriggered": null,
+      "baseline": 0,
+      "withSkill": 50,
+      "criteria": [
+        {
+          "text": "Places the project in maintenance (08) or post-handoff with evidence",
+          "baseline": false,
+          "withSkill": false
+        },
+        {
+          "text": "Recommends maintenance-type next steps (dependencies, backups, monitoring)",
+          "baseline": false,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "Your repo doesn't match that description, so you are not where you think you are.\n\nWhat's in `/tmp/helen-eval-OThDun`:\n- **Git:** it's initialised on `master` with no commits, no remote, no tags and no other branches.\n- **Files:** the only file is `README.md`, which contains \"# Sample project\". It's untracked.\n- **Missing:** there are no tests, no CI config (`.github/workflows`), no `CHANGELOG.md`, no `vercel.json` and no `AGENTS.md`. There's no source code either.\n\nSo nothing has been committed, and nothing in the directory is ready to ship or deploy.\n\nSome possible explanations:\n- **Wrong directory:** the real project may be somewhere else, and this is a scratch folder.\n- **Unpushed work:** the real repo may not have been cloned or checked out into this environment.\n- **Missing files:** if this is the right place, those files were never created here, or were lost.\n\nI can't tell which from inside this directory. If you tell me where the real repo lives, or give me a remote to clone, I can check its actual state: uncommitted changes, whether CI is green, what's unreleased in the CHANGELOG, and whether the Vercel config is sound.",
+        "withSkill": "**I can't confirm where you are from the repo. What you described isn't in it.**\n\n**What's in `/tmp/helen-eval-mqYIWW`:**\n- The git repo has no commits and no tags.\n- Untracked files: a one-line `README.md` (\"# Sample project\") and the `.claude/skills/helen-router` skill.\n- Not present: tests, CI (`.github/workflows`), `CHANGELOG.md`, `vercel.json`, `AGENTS.md`, `package.json`, source code and `docs/prompts/`.\n\nI'm not going to invent a phase from that. Either the real project lives somewhere else, or this checkout is the wrong one.\n\n**Going only by your description:**\n- **Likely phase:** `07-client-handoff`, with a possible early start on `08-maintenance`. Tests, CI, a CHANGELOG and `vercel.json` suggest 05 and 06 are done, and the client sign-off suggests you're past release.\n- **Unconfirmed:** I haven't seen a tag, release notes or a live deploy, so 06 may not be fully closed. I also can't tell whether the delivery package and last-mile checks (forms, CTAs, links) are done.\n- **Gaps that usually matter at this point:**\n  1. A delivery package: credentials and ownership transfer, a handoff doc, and a domain/DNS and Vercel account handover.\n  2. The last-mile pass over forms, CTAs and links on the production URL.\n  3. Post-sign-off maintenance: backups, dependency updates, monitoring and uptime alerts, and who owns them.\n\n**Next step:** `helen prompts flow` for the client-handoff phase (`helen prompts list` shows the IDs). The HELEN prompts aren't installed locally, so use the CLI. Then `helen apply <goal>` once the phase is confirmed.\n\nIf you point me at the real repo path, or push the commits into this one, I'll re-run the check against actual evidence."
+      }
+    }
+  ]
+}

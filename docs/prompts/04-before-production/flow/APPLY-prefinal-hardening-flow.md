@@ -1,52 +1,48 @@
-# [APPLY] - Prefinal Hardening Flow
+---
+action: APPLY
+phase: 04-before-production
+summary: Flow: harden security, robustness and technical quality before packaging a release candidate.
+modifies_code: true
+repeatable: true
+stage: hardening
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Prefinal Hardening Flow
 
+## Goal
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+Harden security, robustness and technical quality before the code is packaged and marked as a release candidate.
 
-## Objetivo
+## Use when
 
-Endurecer la seguridad, robustez y calidad técnica del proyecto antes de empaquetar y marcar el código como release candidate.
+- Building and visual polish are done; production is next.
 
-## Fase Ideal
+## Steps
 
-Al finalizar la construcción y pulido visual (Before Production).
+1. [audit-quality-gates-checkpoint](../../02-building/checkpoint/AUDIT-quality-gates-checkpoint.md).
+2. [apply-clean-code-pass-flow](../../02-building/clean-code/APPLY-clean-code-pass-flow.md).
+3. [apply-security-hardening-flow](../../02-building/security/APPLY-security-hardening-flow.md), then [audit-security-risk-checkpoint](AUDIT-security-risk-checkpoint.md).
+4. [audit-adversarial-qa-and-edge-cases](../qa/AUDIT-adversarial-qa-and-edge-cases.md); fix what blocks release.
+5. [apply-basic-performance-pass](../../03-finish-features/performance/APPLY-basic-performance-pass.md) and [apply-basic-accessibility-pass](../../03-finish-features/performance/APPLY-basic-accessibility-pass.md).
+6. [apply-empty-states-errors-and-microcopy](../../03-finish-features/ux/APPLY-empty-states-errors-and-microcopy.md).
+7. [audit-quality-gates-checkpoint](../../02-building/checkpoint/AUDIT-quality-gates-checkpoint.md).
 
-## Prompts Incluidos
+## Stop when
 
-1. [fast-build-test-verification.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/qa/audit-fast-build-test-verification.md)
-2. [safe-clean-code-simplification-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/clean-code/apply-safe-clean-code-simplification-pass.md)
-3. [security-hardening.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/security/apply-security-hardening-flow.md)
-4. [basic-performance-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/performance/apply-basic-performance-pass.md)
-5. [basic-accessibility-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/performance/apply-basic-accessibility-pass.md)
-6. [empty-states-errors-and-microcopy.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/ux/apply-empty-states-errors-and-microcopy.md)
+- A critical security risk cannot be fixed within the flow, or a gate fails for reasons outside your changes.
 
-## Checkpoints Entre Pasos
+## Limits
 
-- **Inicio**: Cargar [build-and-compile-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-build-and-compile-checkpoint.md).
-- **Post-refactor**: Cargar [lint-and-typecheck-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-lint-and-typecheck-checkpoint.md).
-- **Post-seguridad**: Cargar [security-risk-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/flow/audit-security-risk-checkpoint.md).
-- **Final**: Cargar [test-suite-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-test-suite-checkpoint.md).
+- Build and environment setup must succeed after every step; no critical security risk left open.
 
-## Condiciones para Avanzar
-
-- La compilación e inicialización del entorno son exitosas.
-- No quedan abiertos riesgos de seguridad críticos.
-
-## Formato de Entrega
-
-El entregable debe ser minimalista. Produce únicamente:
+## Output
 
 ```text
-✅ Prefinal hardening completado con éxito. / [o] ⚠️ Completado con advertencias.
+Done. / Done with warnings.
 
-Mejoras aplicadas:
-- [Breve lista de 1-3 viñetas con los parches de seguridad/robustez aplicados]
+Changes applied:
+- 1-3 bullets with the exact changes
 
-Acciones manuales necesarias:
-- Ninguna. / [o especificar acciones]
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
 ```
-*No generes informes extensos ni explicaciones teóricas.*

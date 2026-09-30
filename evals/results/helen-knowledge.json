@@ -1,0 +1,122 @@
+{
+  "skill": "helen-knowledge",
+  "model": "sonnet",
+  "date": "2026-09-30",
+  "cases": [
+    {
+      "skill": "helen-knowledge",
+      "id": "adr",
+      "triggered": true,
+      "forcedTriggered": null,
+      "baseline": 100,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Uses an ADR structure with Context, Decision, Consequences and Status",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Includes negative consequences or tradeoffs, not only benefits",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Mentions alternatives considered or rejected",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Is limited to this single decision",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "# ADR: Adopt tRPC in place of REST for frontend–backend communication\n\n**Status:** Accepted\n**Date:** 2026-09-30\n**Deciders:** Engineering team\n\n## Context\n\nOur frontend and backend are both written in TypeScript. Under REST, the API contract lives outside the type system: it is expressed in route conventions, hand-written request/response types, and possibly OpenAPI docs. Each side keeps its own copy of these types, so the copies drift apart. We have repeatedly broken contracts, for example by renaming or removing a field, changing a response shape, or altering validation rules. These breaks were usually found at runtime or in QA instead of at compile time.\n\n## Decision\n\nWe will replace our REST API with tRPC. Backend procedures will define the API. The frontend will consume the router's inferred types directly, so the contract is a single TypeScript definition shared by both sides. Input validation will be declared once (e.g. with Zod) on each procedure and will serve as both the runtime check and the static type.\n\n## Rationale\n\n- **End-to-end type safety:** Changing a procedure's input or output causes compile errors at every affected call site, so breaking changes are caught before they ship.\n- **Single source of truth:** There are no duplicated DTOs and no separate spec to keep in sync.\n- **Better developer experience:** Autocomplete and go-to-definition work across the client/server boundary, and refactors and renames are safe.\n- **Less boilerplate:** We no longer need hand-written fetch wrappers, route definitions, or code generation steps.\n\n## Consequences\n\n**Positive**\n- Contract-breaking changes become build failures instead of production bugs.\n- Faster iteration and safer refactoring.\n\n**Negative / trade-offs**\n- **TypeScript coupling:** Both sides must stay in TypeScript and share types, typically via a monorepo or a published types package. Non-TS clients (mobile apps, third parties, partner integrations) cannot consume the API natively.\n- **Not a public API:** tRPC is not designed for external consumers. If we need a public API, we will need to expose a REST or OpenAPI layer separately (e.g. via trpc-openapi) or maintain both.\n- **Loss of REST tooling:** HTTP caching semantics, generic API tooling, and curl-friendly endpoints are less straightforward.\n- **Tighter client/server version coupling:** Deployments must be coordinated so that the client and server stay compatible, and we need a strategy for deprecating procedures.\n- **Migration cost:** Existing endpoints and consumers must be ported, and the team needs to learn tRPC conventions.\n\n## Alternatives considered\n\n- **Stay on REST with an OpenAPI spec and generated types/clients:** This would also give type safety, and it supports non-TS consumers. It was rejected because it adds a spec and codegen step to maintain and is more prone to drift than inferring types directly.\n- **GraphQL with codegen:** It provides a typed contract and flexible queries, but it brings more infrastructure and complexity than we need for a TS-to-TS system.\n- **Shared types package with REST:** This is lighter than the other options, but it does not enforce that the server actually conforms to the types, so it only partly solves the problem.\n\n## Migration approach (outline)\n\n1. Set up the tRPC router and shared type access (monorepo or package).\n2. Migrate endpoints incrementally, running REST and tRPC side by side.\n3. Move frontend call sites to the tRPC client as each endpoint is ported.\n4. Remove the legacy REST routes once no consumers remain.\n\n## Open questions\n\n- Do any external or non-TypeScript consumers exist, or are they expected? If so, how will we serve them?\n- Which validation library will we standardize on?\n- What is the timeline and ownership for the migration?\n\nI don't have your codebase's specifics, so the alternatives, migration steps, and open questions are reasonable defaults. Edit them to match what you actually discussed.",
+        "withSkill": "# ADR: Move from REST to tRPC for frontend–backend communication\n\n**Status:** Accepted\n\n**Date:** 2026-09-30\n\n## Context\n\nOur frontend and backend are both written in TypeScript. With REST, the API contract lives outside the type system, in hand-written client types, docs, or an OpenAPI spec that has to be kept in sync by hand. We kept breaking that contract. Examples are renamed or removed fields, changed response shapes, and mismatched request payloads. These breaks usually surfaced at runtime or in QA, not at compile time.\n\nBecause both sides share a language, we can share types directly instead of describing them through an intermediate format.\n\n## Decision\n\nWe will use tRPC as the API layer between our TypeScript frontend and backend, replacing new and existing REST endpoints.\n\n- Backend procedures define input validation (e.g. with Zod) and return types. The frontend infers its client types from the exported router type.\n- A contract change that breaks a caller fails type-checking in CI.\n- Migration is incremental. REST and tRPC run side by side, and endpoints move over one at a time. New endpoints are written in tRPC only.\n\n## Consequences\n\n**Benefits**\n- Contract drift is caught at compile time, not in production.\n- We no longer maintain hand-written client types or a separate schema file for internal calls.\n- Input validation and types come from a single definition.\n- Refactors are safer, because renaming a field surfaces every affected call site.\n\n**Debts and trade-offs taken**\n- The frontend and backend are now coupled through the shared router type, so they must live in one monorepo or share a versioned package.\n- tRPC is TypeScript-only. Non-TypeScript clients (mobile apps, third-party integrations, partners) cannot consume it directly. Anything public or external needs to stay on REST or get a separate adapter such as OpenAPI generation.\n- We lose the generic HTTP tooling REST gives us, such as curl-friendly URLs, standard HTTP caching semantics, and off-the-shelf API gateways and docs. Debugging needs tRPC-aware tooling.\n- The team must learn tRPC conventions (routers, procedures, context, error handling).\n- The migration period runs two API styles, which adds temporary complexity and a risk of stalling half-migrated.\n- We take on a dependency on the tRPC ecosystem and its major-version changes.\n\n**Follow-ups**\n- List existing endpoints and mark which have non-TypeScript consumers, since those stay on REST.\n- Set an order for migrating the remaining endpoints.\n- Decide how auth, error mapping, and logging carry over to tRPC middleware.\n- Add a CI type-check step that covers both the frontend and backend so contract breaks fail the build.\n\n## Alternatives considered\n\n*Only the first two are inferred from your description. Please confirm or correct them.*\n- **Keep REST and add OpenAPI with generated types.** This would fix the drift and keep language-agnostic clients. It adds a codegen step and a spec to maintain.\n- **Keep REST and rely on discipline and tests.** This is what we had, and it kept failing.\n\nI couldn't tell whether there are external API consumers, so please check that before finalizing. The migration order and the alternatives are also my assumptions. Nothing was written to disk."
+      }
+    },
+    {
+      "skill": "helen-knowledge",
+      "id": "bus",
+      "triggered": true,
+      "forcedTriggered": null,
+      "baseline": 100,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Moves domain and accounts to organization-owned accounts",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Moves the password to a team password manager / secrets store and rotates it",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Documents or automates the deploy (runbook / CI)",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Prioritizes by urgency given the two-week deadline",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Does not ask to write the password into documentation",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "This is a bus-factor and key-person risk, and two weeks is enough to fix the worst of it if you start now. The order below puts the things that can't be recovered first.\n\n**Days 1–2: secure the things you can't get back**\n1. **Domain ownership.** This is the highest-stakes item. Have Ana transfer the domain to a company-owned registrar account. Use a shared role address such as `domains@yourco.com`, not a person's inbox, and turn on 2FA with recovery codes held by at least two people. If a registrar-to-registrar transfer is needed, start it now, since it can take 5–7 days and needs an auth code. Turn on registrar lock and auto-renew afterward.\n2. **Email account.** If her personal Gmail is the recovery or admin contact for the domain, DNS, hosting or anything else, change all of those to company addresses.\n3. **Credentials.** Move the deploy password out of her notes into a team password manager (1Password, Bitwarden and similar) as a shared vault entry. Then rotate it once the handover is done, because it has lived in personal notes.\n\n**Days 2–7: get the deploy out of Ana's laptop**\n1. **Read the script.** Have Ana walk someone through it while that person writes down what it does, what it assumes (local env vars, tools, SSH keys, paths) and what can go wrong.\n2. **Move it into the repo.** Commit the script, or a cleaned-up version, with a README covering prerequisites and steps.\n3. **Move it to CI.** Set up a GitHub Actions or GitLab CI job, or whatever fits your stack. Secrets go in the CI secret store, and deploys run from a clean environment, not a person's machine. This removes the dependency on any one person, and it also makes the deploy reproducible.\n4. **Use scoped credentials.** Give CI a dedicated deploy key or service account, not Ana's personal credentials.\n\n**Days 7–12: prove it works without her**\n1. **Two other people deploy.** Ana watches but doesn't touch anything. Fix the gaps in the docs as they surface.\n2. **Try a rollback.** Confirm someone else can revert a bad deploy.\n3. **Check for other hidden access.** Look at DNS, hosting or cloud console, SSL certs, monitoring and third-party services. Ask Ana what else only she can do, such as cron jobs, manual steps and accounts under her name.\n\n**Days 12–14: close out**\n1. **Audit access.** Confirm every account has at least two admins on company identities.\n2. **Revoke Ana's access** on her last day, including her personal keys and tokens.\n3. **Write a short runbook** covering how to deploy, roll back, renew the domain and rotate secrets, and say who owns each.\n\n**Two cautions**\n- Handle the password with care. Don't paste it into Slack or email while moving it, and rotate it afterward.\n- Be considerate with the domain transfer, since it involves her personal account. Ask her to cooperate before she leaves, and have it done and confirmed while she is still available. Getting a domain back from a departed employee's personal account can be slow or impossible.\n\nIf you tell me the stack (hosting, CI, registrar), I can be more specific, for example by drafting the CI pipeline or the runbook.",
+        "withSkill": "This is a bus-factor problem with a two-week deadline. Order the work by what is hardest to recover if Ana leaves first.\n\n## Week 1: remove the single points of failure\n\n**1. Domain (highest risk, do it first).**\n- Ana starts a registrar transfer, or an account-ownership change, to a company-owned account. The account should sit behind a shared role address such as `domains@company`, with at least two admins and MFA that isn't tied to one person's phone.\n- Transfers can take days. Some registrars also lock a domain for 60 days after a contact change, so start now.\n- Also check who controls the DNS, since it may be hosted elsewhere. Check whether the domain has auto-renew on and whose card pays for it.\n\n**2. The password in her notes.**\n- Treat it as compromised-by-design. Put a team password manager in place (1Password, Bitwarden or similar) and move the credential into a shared vault.\n- Then **rotate it**, so the copy in her personal notes becomes worthless. Do this after the deploy is working from the new setup.\n- Find out what the password actually unlocks (server, registry, cloud, DNS?). Replace it with scoped credentials for each system, not one shared login.\n\n**3. The laptop script.**\n- Ana walks someone through a deploy, and that person then does one alone while Ana watches. Record the session.\n- Commit the script to the repo, or read it and rewrite it as a CI/CD pipeline (GitHub Actions or similar). Secrets go in the CI secret store, not in the script.\n- Deploys should run from CI, with no laptop involved. Even a crude pipeline beats the current state.\n\n## Week 2: verify and document\n\n**4. Prove it works without her.**\n- A second person deploys to production end to end using only the docs and the vault. Fix the gaps this exposes.\n- Test rollback too, not just deploy.\n\n**5. Write a short runbook.** It should cover:\n- how to deploy and roll back\n- how to rotate credentials\n- how to recover if something breaks\n- where each account lives and who owns it (never the secrets themselves, only which manager holds them)\n\n**6. Audit everything else Ana owns.** Ask her to list every account, service and integration she personally controls. Common ones are:\n- hosting and cloud consoles\n- databases and backups\n- the CI, container registry and git org\n- SaaS tools, API keys and OAuth apps\n- monitoring and alerts\n- email for transactional mail or certificate notices\n\nFor each one, add a company owner, a backup owner, and a company-controlled recovery email.\n\n**7. Record decisions and quirks.** Have Ana write down anything she knows that isn't in code, such as workarounds, \"never do X\" rules and why things are configured the way they are. Short decision records work well for this.\n\n## Before her last day\n\n- The domain is under company control, or at minimum the transfer is initiated and confirmed.\n- A non-Ana person has done a real production deploy.\n- Old credentials are rotated and her personal-email access is removed from every service.\n- The runbook exists and someone other than Ana has followed it.\n- She is reachable for a short period afterward. Consider a paid-consultant arrangement for questions.\n\n## If time runs short\n\nPrioritize in this order: domain, then CI-based deploy, then credential rotation, then documentation. The domain is the one that can lock you out for good.\n\nI've stayed chat-only as you asked and haven't created any files. If it would help, I can look through the repo for the deploy script, hardcoded credentials or existing docs, or draft the runbook and ownership map as a separate step."
+      }
+    },
+    {
+      "skill": "helen-knowledge",
+      "id": "agents-md",
+      "triggered": false,
+      "forcedTriggered": true,
+      "baseline": 80,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Includes the stack and key commands (install, dev, build, test, lint)",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Includes the main folder structure or where logic lives",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Includes limits on what the agent must not do (e.g. major upgrades, skipping tests, committing secrets)",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Is concise rather than a long essay",
+          "baseline": false,
+          "withSkill": true
+        },
+        {
+          "text": "Contains no secrets",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "```markdown\n# AGENTS.md\n\nGuidance for AI coding agents working in this repository.\n\n## Stack\n\n- Vite (bundler/dev server), React, TypeScript\n- pnpm (package manager), Vitest (tests), ESLint (linting)\n\n## Setup and commands\n\nUse **pnpm only**. Do not use npm or yarn, and do not commit `package-lock.json` or `yarn.lock`.\n\n| Task                | Command                          |\n| ------------------- | -------------------------------- |\n| Install deps        | `pnpm install`                   |\n| Dev server          | `pnpm dev`                       |\n| Production build    | `pnpm build`                     |\n| Preview build       | `pnpm preview`                   |\n| Type check          | `pnpm tsc --noEmit`              |\n| Lint                | `pnpm lint`                      |\n| Lint with autofix   | `pnpm lint --fix`                |\n| Run all tests       | `pnpm test --run`                |\n| Run one test file   | `pnpm vitest run path/to/file`   |\n| Watch tests         | `pnpm test`                      |\n\nCheck `package.json` `scripts` for the source of truth; if a script above is missing or differs, follow `package.json`.\n\n## Before finishing any change\n\nRun, and make sure all pass:\n\n1. `pnpm tsc --noEmit`\n2. `pnpm lint`\n3. `pnpm test --run`\n4. `pnpm build` (for changes affecting config, imports, or bundling)\n\nNever report a task as done if any of these fail. Report failures with their output.\n\n## Project layout\n\nFollow the existing structure. Typical layout:\n\n- `src/` – application code\n  - `components/` – reusable UI components\n  - `pages/` or `routes/` – route-level components\n  - `hooks/` – custom hooks\n  - `lib/` or `utils/` – pure helpers\n  - `types/` – shared types\n- `public/` – static assets served as-is\n- `vite.config.ts` – Vite and Vitest config\n- `eslint.config.js` – ESLint flat config\n\nLook at neighboring files before adding new ones and match their conventions.\n\n## Code style\n\n- TypeScript strict mode. Avoid `any`; prefer `unknown` plus narrowing. Do not use `@ts-ignore`; if unavoidable, use `@ts-expect-error` with a reason.\n- Function components and hooks only; no class components.\n- Type component props explicitly (`interface Props` or `type Props`).\n- Follow the Rules of Hooks and keep `useEffect` dependency arrays correct. Do not silence `react-hooks/exhaustive-deps` without justification.\n- Prefer named exports unless the surrounding code uses default exports.\n- Keep components small; extract logic into hooks or utilities.\n- Do not disable ESLint rules inline unless necessary, and add a comment explaining why.\n- Use the formatter/lint config already in the repo; do not reformat unrelated code.\n\n## Testing\n\n- Tests use Vitest, with React Testing Library where present. Colocate as `*.test.ts(x)` next to the source, or follow the existing pattern.\n- Test behavior as the user sees it (roles, text), not implementation details.\n- Add or update tests for every bug fix and new feature.\n- Keep tests deterministic: mock network, timers, and randomness.\n- Do not skip (`it.skip`, `.only`) or delete tests to make the suite pass.\n\n## Dependencies\n\n- Add with `pnpm add <pkg>` (or `pnpm add -D <pkg>` for dev dependencies). Commit the updated `pnpm-lock.yaml`.\n- Prefer existing dependencies and the platform over adding new packages. Justify any new dependency.\n- Do not upgrade major versions unless asked.\n\n## Environment and secrets\n\n- Client-exposed env vars must be prefixed `VITE_` and read via `import.meta.env`. Never put secrets in `VITE_` variables; they ship to the browser.\n- Never commit `.env` files with real values. Update `.env.example` when adding variables.\n\n## Git and PRs\n\n- Keep changes focused and minimal; avoid drive-by refactors.\n- Use clear, imperative commit messages.\n- Do not edit generated or build output (`dist/`, `coverage/`).\n\n## Boundaries\n\n- Ask before: changing build/tooling config, adding major dependencies, restructuring directories, or modifying CI.\n- Never: commit secrets, force-push, or bypass lint/type/test checks.\n```",
+        "withSkill": "Here is a compact `AGENTS.md` (chat only, no files created):\n\n```markdown\n# AGENTS.md\n\nVite + React + TypeScript app. Package manager: pnpm. Tests: Vitest. Lint: ESLint.\nKeep this file short; it is loaded every session. No secrets here.\n\n## Commands\n- Install: `pnpm install` (commit `pnpm-lock.yaml`; never use npm or yarn)\n- Dev: `pnpm dev`\n- Build: `pnpm build`\n- Test: `pnpm test` (single file: `pnpm vitest run path/to/file.test.tsx`)\n- Lint: `pnpm lint`\n- Typecheck: `pnpm tsc --noEmit`\n- Checkpoint before every commit: lint + typecheck + test + build must all pass.\n\n## Stack and style\n- TypeScript strict; no `any` without a comment explaining why.\n- Function components and hooks only; one component per file, PascalCase filenames.\n- Named exports; colocate a component's tests and styles next to it.\n- Follow the existing ESLint config; fix warnings rather than disabling rules.\n- Env vars must be prefixed `VITE_` to reach the client. Never commit `.env*`\n  files; document required variable names in `.env.example` (names only).\n\n## Folder map\n- `src/` application code\n  - `components/` reusable UI\n  - `features/` or `pages/` domain and route-level code\n  - `hooks/`, `lib/` shared helpers\n- `public/` static assets\n- `docs/decisions/` ADRs (one decision per file: Context, Decision, Consequences, Status)\n- `docs/runbook.md` deploy, rollback, credential rotation, recovery\n\n## Testing rules\n- Vitest + Testing Library; test behavior, not implementation details.\n- New logic and bug fixes ship with tests.\n- Never skip, `.skip`, or delete a failing test to get green. Fix the cause or ask.\n\n## Operational limits\n- No destructive or major-version upgrades (React, Vite, TypeScript, ESLint,\n  Vitest) without an ADR and explicit approval.\n- Add dependencies sparingly; explain why in the PR.\n- Never skip test checkpoints or bypass hooks (`--no-verify`).\n- No force-push to the main branch. No manual production deploys; use the\n  documented pipeline in `docs/runbook.md`.\n- Never write credentials, tokens or personal emails into code, docs or commits.\n  State only which secrets manager holds them.\n\n## Knowledge preservation (HELEN)\n- Record significant decisions as ADRs (`generate-decision-log`).\n- Keep `docs/runbook.md` current (`generate-operations-runbook`).\n- Periodic audits: `audit-bus-factor-and-ownership`,\n  `audit-developer-onboarding-and-knowledge-gaps`.\n- Regenerate this file with `generate-ai-context` when the stack changes.\n\n## Ownership (fill in; roles and systems only, no secrets)\n- Repo / hosting / domain / DNS / CI / SaaS owners: TODO\n- Secrets manager: TODO\n```\n\nFill in the TODO ownership section with team roles and systems, not personal accounts, so the project doesn't depend on one person."
+      }
+    }
+  ]
+}

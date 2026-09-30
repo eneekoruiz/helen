@@ -1,50 +1,37 @@
-# [RESEARCH] - Market Analysis Flow
+---
+action: RESEARCH
+phase: 01-start-project
+summary: Flow: competitive benchmark, then roadmap prioritization, ending in decisions rather than automatic changes.
+modifies_code: false
+repeatable: true
+stage: strategy
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Market Analysis Flow
 
+## Goal
 
-**Intención**: PLAN (Diseñar estrategias y fases)
+Compare the project with its alternatives and turn the findings into a prioritized roadmap.
 
-## Objetivo
+## Use when
 
-Comparar el proyecto con alternativas y detectar oportunidades estratégicas.
+- Before roadmap planning, repositioning, a launch or a product redesign.
 
-## Fase Ideal
+## Steps
 
-Antes de roadmap, reposicionamiento, laúnch o rediseño de producto.
+1. [research-competitive-benchmark](RESEARCH-competitive-benchmark.md). Checkpoint: is the external information backed by sources?
+2. [plan-roadmap-roi-prioritization](../strategy/PLAN-roadmap-roi-prioritization.md).
+3. Summarize decisions; do not apply large changes automatically.
 
-## Prompts Incluidos
+## Stop when
 
-1. [competitive-benchmark.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/market/research-competitive-benchmark.md)
-2. [roadmap-roi-prioritization.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/strategy/plan-roadmap-roi-prioritization.md)
+- There is not enough data, or web research is needed and unavailable: mark the uncertainty and ask.
+- Recommendations imply a strong pivot: that is the user's decision.
 
-## Checkpoints Entre Pasos
+## Limits
 
-- Después del competitive benchmark: validar si la información externa está suficientemente respaldada.
-- Final: resumir decisiones, no aplicar cambios grandes automáticamente.
+- Separate real gaps from personal taste. Do not invent competitor facts.
 
-## Condiciones para Avanzar
+## Output
 
-- Competidores o sustitutos identificados.
-- Gaps separados de gustos personales.
-- Oportunidades priorizadas por impacto.
-
-## Cuándo Detenerse
-
-- No hay datos suficientes.
-- Se requiere investigación web y el entorno no tiene acceso.
-- Las recomendaciones implican pivot fuerte.
-
-## Qué Hacer si Falla Algo
-
-Marcar incertidumbre y pedir autorización para investigación adicional o decisión estratégica.
-
-## Resumen Final
-
-1. Landscape.
-2. Gaps.
-3. Oportunidades.
-4. Roadmap sugerido.
-5. Decisiones necesarias.
+1. Landscape. 2. Gaps. 3. Opportunities ranked by impact. 4. Suggested roadmap. 5. Decisions the user must take.

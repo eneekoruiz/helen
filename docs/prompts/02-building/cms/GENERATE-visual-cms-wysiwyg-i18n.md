@@ -1,58 +1,53 @@
-# [GENERATE] - Visual CMS WYSIWYG i18n
+---
+action: GENERATE
+phase: 02-building
+summary: Build a protected visual CMS so the client edits sales content without code, separating universal and translatable fields.
+modifies_code: true
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo). Posee dominio absoluto y debe integrar activamente los siguientes recursos y conceptos en su vocabulario base:
-  - Cursor effects avanzados y menú effects (microinteracciones).
-  - Iconsax, Anime.js, SVGator y Jitter.
-  - Image sequence scrubbing (scroll vinculado a secuencias de imágenes).
-  - Animmaster lib, 3D scrolling, 3D video scenes e infinite carrusels.
-  - Skill de UI UX PRO MAX.
-  - Búsqueda y uso de librerías unificadas que abarquen estos recursos.
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Visual CMS (WYSIWYG) with i18n
 
+## Goal
 
-## Proposito e intención
-Implementar un CMS visual protegido para que el cliente final edite contenido comercial sin tocar codigo, con soporte i18n diferenciando campos universales y traducibles.
+Let the client manage the site's sales content safely, without seeing code or breaking the design, with correct multilingual behavior.
 
-## Cuando usarlo
-- Durante Building, cuando el sitio ya tiene estructura comercial estable.
-- Cuando el cliente necesita editar textos, imagenes, CTAs o bloques de venta.
-- Antes del handoff si habra mantenimiento por parte de negocio.
+## Use when
 
-## Prompt
-Actúa como Principal CMS Architect, Product Engineer y i18n Lead. Implementa un CMS WYSIWYG seguro, claro y mantenible para contenido de ventas. El cliente debe poder gestionar la web sin ver codigo ni romper el diseno.
+- The site's commercial structure is stable and the client needs to edit text, images, CTAs or sales blocks.
+- Before handoff when the business will maintain content.
 
-Entradas:
-- Stack actual: `{{STACK}}`
-- Idiomas soportados: `{{IDIOMAS}}`
-- Roles de edicion: `{{ROLES}}`
-- Modelo de contenido deseado: `{{MODELO_CONTENIDO}}`
-- Restricciones de persistencia: `{{PERSISTENCIA}}`
+## Requirements
 
-## Requisitos minimos obligatorios
-- Audita primero que contenido debe ser editable y que debe permanecer fijo.
-- Separa campos universales de campos traducibles.
-- Campos universales: slugs tecnicos, orden, visibilidad, relaciones, layout, media compartida, flags de campana.
-- Campos traducibles: titulares, subtitulos, body copy, CTAs, alt text, SEO title, SEO description, FAQs y mensajes de formulario.
-- Protege el diseno: limites de longitud, tipos de campo, validaciones, previews y fallback por idioma.
-- Incluye permisos o modo protegido para evitar edicion accidental de componentes criticos.
-- Anade preview visual y estados de borrador/publicado si el stack lo permite.
-- Mantén el CMS orientado a ventas: CTAs, pruebas, objeciónes y bloques de confianza deben ser editables con intención.
+Inputs: current stack, supported languages, editing roles, desired content model, persistence constraints.
 
-## Mas alla de estos criterios
-Si el proyecto no necesita un CMS completo, implementa una capa editorial minima pero robusta. La simplicidad que protege la conversion vale mas que un panel enorme que el cliente no usara.
+1. First decide what must be editable and what stays fixed.
+2. Separate **universal fields** (technical slugs, order, visibility, relations, layout, shared media, campaign flags) from **translatable fields** (headlines, subtitles, body copy, CTAs, alt text, SEO title and description, FAQs, form messages).
+3. Protect the design: length limits, field types, validation, previews, per-language fallback.
+4. Permissions or a protected mode so critical components cannot be edited by accident.
+5. Visual preview and draft/published states when the stack allows.
+6. Keep it sales-oriented: CTAs, proof, objections and trust blocks are editable on purpose.
 
-## Limites de seguridad
-- No expongas secretos, tokens ni configuracion sensible en el cliente.
-- No permitas HTML libre sin sanitizacion.
-- No rompas rutas ni SEO existente al introducir i18n.
-- No generes traducciones inventadas como contenido definitivo.
+## Beyond the checklist
 
-## Formato de entrega
-Entrega:
-- Modelo de contenido.
-- Implementacion del CMS.
-- Matriz universal/traducible.
-- Validaciones.
-- Instrucciones minimas para el cliente.
-- Verificacion ejecutada.
+If a full CMS is not needed, build a minimal but robust editorial layer. Simplicity that protects conversion beats a huge panel the client will not use.
+
+## Limits
+
+- Never expose secrets, tokens or sensitive configuration to the client.
+- No free HTML without sanitization.
+- Do not break routes or existing SEO when adding i18n.
+- Never ship invented translations as final content.
+
+## Output
+
+```text
+Done. / Done with warnings.
+
+Changes applied:
+- 1-3 bullets with the exact changes
+
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
+```
+
+Also include the content model, the universal/translatable matrix and short editor instructions.

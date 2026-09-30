@@ -1,64 +1,42 @@
-# [ENHANCE] - Microinteraction Sensory Detail Pass
+---
+action: ENHANCE
+phase: 03-finish-features
+summary: Make buttons, inputs, cards, menus and feedback feel crafted: consistent states and motion, optional subtle UI sound with a mute toggle.
+modifies_code: true
+aliases:
+  - enhance-ui-audio-micro-feedback
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo). Posee dominio absoluto y debe integrar activamente los siguientes recursos y conceptos en su vocabulario base:
-  - Cursor effects avanzados y menú effects (microinteracciones).
-  - Iconsax, Anime.js, SVGator y Jitter.
-  - Image sequence scrubbing (scroll vinculado a secuencias de imágenes).
-  - Animmaster lib, 3D scrolling, 3D video scenes e infinite carrusels.
-  - Skill de UI UX PRO MAX.
-  - Búsqueda y uso de librerías unificadas que abarquen estos recursos.
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Microinteraction and Sensory Detail Pass
 
+## Goal
 
-**Intención**: ENHANCE (pulir microinteracciones y detalles sensoriales)
+Make the interface feel handmade, expensive and human. People should not be able to name every detail, but they should feel them.
 
-## Objetivo
+## Use when
 
-Elevar botones, inputs, cards, menús, estados, hover, focus, drag, selection y feedback para que la interfaz se sienta hecha a mano, cara y humana. Cero rastro de IA, 100% conversional, humano y calidad Awwwards.
+- The layout is right but the interface feels flat (SaaS, portfolio, dashboard, e-commerce, premium landing), before the final visual audit.
 
-## Cuándo Usarlo
+## Requirements
 
-- Cuando el layout esta bien pero la interfaz se siente plana.
-- En productos SaaS, portfolios, dashboards, ecommerce y landings premium.
-- Antes de auditoria visual final.
+1. **Audit** buttons, links, inputs, cards, menus, tooltips, toggles and media controls.
+2. **States:** hover, focus, active, disabled, success and error feedback for each, with one consistent easing or spring language; cursor-aware highlights only when they add something.
+3. **Optional sound** (only if it suits the brand): 50-250 ms cues at 5-15% gain, synthesized with the Web Audio API or tiny preloaded files (64 kbps mono); soft tick for hover, two rising tones for success, one low damped tone for error. A global mute toggle saved in `localStorage` is mandatory; start muted when in doubt.
+4. Keep visible focus, hit targets, reduced motion and contrast.
 
-## Rol de la IA
+## Limits
 
-Actúa como Interaction Designer obsesionado con tactilidad, respuesta y calidad percibida.
+- Never move critical elements; never remove outlines without a replacement; never put essential information behind hover.
+- No sound that autoplays loudly or cannot be muted.
 
-## Requisitos mínimos obligatorios
-
-1. Audita buttons, links, inputs, cards, menús, tooltips, toggles y media controls.
-2. Aplica hover/focus/active, spring o easing consistente, cursor-aware highlights si aporta y feedback de exito/error.
-3. Mantiene focus visible, hit targets, reduced motion y contraste.
-
-## Más allá de estos criterios
-
-El usuario no debe poder nombrar todos los detalles, pero debe sentirlos. Esa es la diferencia entre plantilla y producto de alto valor.
-
-## Límites de seguridad
-
-- No uses microinteracciones que muevan elementos críticos de sitio.
-- No elimines outlines sin reemplazo.
-- No dependas de hover para informacion esencial.
-
-## Checks finales
-
-- [ ] Todos los estados interactivos estan cubiertos.
-- [ ] El movimiento tiene un lenguaje único.
-- [ ] Accesibilidad intacta.
-- [ ] No hay ruido visual.
-
-## Formato de entrega
+## Output
 
 ```text
-Pase de microinteracciones aplicado.
-Superficies:
-- ...
-Detalles:
-- ...
-Acciones manuales necesarias:
-- ...
-```
+Done. / Done with warnings.
 
+Changes applied:
+- 1-3 bullets with the exact changes
+
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
+```

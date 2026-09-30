@@ -1,0 +1,107 @@
+{
+  "skill": "helen-release",
+  "model": "sonnet",
+  "date": "2026-09-30",
+  "cases": [
+    {
+      "skill": "helen-release",
+      "id": "rc",
+      "triggered": false,
+      "forcedTriggered": true,
+      "baseline": 100,
+      "withSkill": 80,
+      "criteria": [
+        {
+          "text": "Gives a clear verdict that it is not release-ready (NOT RC READY / FAIL or equivalent)",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Treats failing CI tests as a blocker",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Flags the outdated README as a blocker",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Flags the release notes claim about the unfinished payment flow as misleading",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Gives the smallest next actions",
+          "baseline": true,
+          "withSkill": false
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "No, I wouldn't tag v2.0.0 today. Three separate problems block it, and one of them is a real risk.\n\n1. **Two tests fail in CI.** Passing locally doesn't outweigh that. CI is the shared, clean environment, and a local pass with a CI failure usually means something environment-dependent: a missing dependency, a timezone or locale difference, test ordering, a hardcoded path, or a version mismatch. It could be a real bug that only shows up there. Find the cause before you tag. Don't skip or retry the tests to get green.\n\n2. **The payment flow is unfinished, but the release notes call it complete.** This is the most serious one. Users would see a claim that isn't true, and payment code is the last place you want a half-built feature. There are two ways to fix it:\n   - Finish the flow, test it, and remove the TODO.\n   - Correct the release notes, and either gate the feature off or label it as beta or not yet available.\n\n   Don't ship it with notes that say \"complete.\"\n\n3. **The README still describes v1 setup.** A major version usually changes setup, so users following the README will hit failures on day one. It's a smaller problem than the other two, but it should be fixed before a 2.0 release, not after.\n\n**Can you still release today?** Only if the fixes are quick. The README update and the release notes correction are probably an hour or two of work. The CI failures depend on the cause, and the payment flow depends on how much is left. If the flow is close to done, you can still make it. If it isn't, cut the payment feature from the 2.0 scope and tag without it, or tag `v2.0.0-rc.1` today. A release candidate lets people try it without you promising a stable 2.0.\n\nTags are easy to create but awkward to retract once people have pulled them. Shipping a day late costs far less than shipping a broken payment claim.\n\nIf you'd like, I can look at the CI logs and the payment TODO to see how far away you actually are. I'd only read files and logs, not change anything.",
+        "withSkill": "**Verdict: NOT RC READY. Don't tag v2.0.0 today.**\n\nYour three problems each break one of the skill's conditions to advance:\n\n1. **2 tests fail in CI.** The skill requires the test suite to pass \"with no exceptions\", and CI is the environment that counts. A local pass doesn't override it. Find out why CI differs from local. Common causes are environment, dependency versions, timezone, or test ordering. Fix the cause. Don't skip or loosen the tests.\n2. **The README describes v1 setup.** The skill requires documentation and quickstarts to match the real state of the software. A v2.0.0 with v1 install instructions would send new users down a broken path. This matters more for a major version, since v2 probably has breaking changes that need migration notes.\n3. **The release notes call the payment flow \"complete\", but a TODO says it's unfinished.** This is the most serious of the three. The release notes would be making a false claim about payments. Either finish the flow, or change the notes to say it's partial, disabled, or deferred. Don't tag while the notes and the code disagree.\n\n**What I haven't done:** I stopped at loading the skill, and I haven't run the build, lint, typecheck, or security checks. I haven't opened the repo or the CI logs, so the cause of the CI failures is unknown. There may be more blockers beyond these three. The skill also requires checks on security, i18n/SEO, and lint/typecheck before any verdict other than NOT RC READY.\n\n**Path to a tag, in order:**\n1. Fix the 2 CI failures and get CI green.\n2. Resolve the payment flow, either by finishing it or by correcting the release notes to match reality.\n3. Rewrite the README for v2 setup, with migration notes.\n4. Re-run the full release checklist. That covers build, lint, typecheck, tests, security, i18n/SEO, and the repo audit.\n5. Tag v2.0.0.\n\nWhether this can be done today depends on the payment flow and the CI cause. If the payment flow is genuinely finishable, or you're happy to ship it labelled as incomplete, and the CI failures are environmental, it's possible. Otherwise, tag a v2.0.0-rc.1 with honest notes instead.\n\nIf you want, I can investigate the CI failures and the TODO and report back. That would be read-only, and I won't change any files."
+      }
+    },
+    {
+      "skill": "helen-release",
+      "id": "skip-tests",
+      "triggered": false,
+      "forcedTriggered": true,
+      "baseline": 100,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Does not recommend silently skipping the test to ship",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Recommends investigating or documenting the flake and its risk",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Suggests an honest caveat or owner decision if releasing with a known issue",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "Technically yes, but only if you first check that the failure isn't a real bug. `.skip` is a reasonable release-day move when the test is flaky and the code it covers is fine. It's a bad one if the flakiness is hiding a real race condition or intermittent failure that users could hit.\n\n**Before you skip it, spend a few minutes on these:**\n\n1. **Look at the failure output.** A timeout, an ordering assumption, or a shared-state or network dependency points to a test problem. A wrong value, a null, or a crash in product code points to a real bug, and you shouldn't skip it.\n2. **Check whether it started failing recently.** Run `git log` on the test and on the code it covers. If a change from this release window lines up with the first failure, treat it as a regression candidate.\n3. **Run it about 20 times in isolation, then in the full suite.** If it only fails in the full suite, the cause is probably test pollution or shared state, not the code under test.\n\n**If you skip it, do it safely:**\n\n- Add a comment with the reason and a ticket link, for example `// FLAKY: see JIRA-123`, so the skip doesn't become permanent.\n- Create the follow-up ticket now, with an owner, before you release.\n- Make sure nothing else covers only what that test covers. If it's your only check for a critical path, do a manual check of that path before shipping.\n- Tell whoever approves the release that you skipped it, and why.\n\n**Alternatives that may fit better:**\n\n- Quarantine it in a separate non-blocking CI job, if your setup supports that.\n- Add a bounded retry for this test only, if the flakiness is timing-related.\n\nIf you paste the test name and the failure output, I can help work out whether it's a test problem or a real bug. I haven't looked at your repo, so I'm going on the general pattern here.",
+        "withSkill": "No, not under this release process. Marking the test `.skip` to get the release out doesn't meet the skill's conditions.\n\n- **The gate allows no exceptions.** The skill requires the build, linter and test suite to pass \"with no exceptions\". A skipped test is an exception, and it hides the failure without fixing it.\n- **A flaky test can still be a real bug.** Flakiness is often a race condition, a timing dependency or shared state, and the same problem can show up in production. Skipping it removes the signal you'd use to find that out.\n- **The skill says to stop on a failed checkpoint.** It says never to hide or cosmetically fix a failure, so a skip would push the verdict past a gate that hasn't actually passed.\n\nHere is what I'd do today, in order:\n\n1. **Find out why it fails.** Run it repeatedly (for example 20–50 times) and read the failure output. Check for timing or `sleep`-based waits, ordering dependence between tests, shared or leaked state, network or clock use, and CI resource limits.\n2. **Fix the root cause if it's quick.** Typical fixes are replacing fixed waits with proper awaits or condition polling, isolating state, and mocking the clock or network.\n3. **If the cause is in the test and the product code is fine, and it can't be fixed today,** you can quarantine it, but only as an explicit, documented decision:\n   - Record the reason and an owner, and link a tracking issue.\n   - Check that the behaviour it covers is verified some other way (another test, or a manual check).\n   - Ship as `RC WITH CAVEATS`, with the skipped test listed under remaining blockers in the release notes. That is not `RC READY`.\n4. **Don't use retry-until-green in CI as a substitute.** It has the same hiding effect as a skip.\n\nI haven't looked at the test or the repo yet, so I can't say whether it's a test bug or a product bug. If you tell me which test it is, I can investigate the flakiness. You've asked me not to modify files, so I'd only read code and run tests."
+      }
+    },
+    {
+      "skill": "helen-release",
+      "id": "changelog",
+      "triggered": false,
+      "forcedTriggered": true,
+      "baseline": 67,
+      "withSkill": 67,
+      "criteria": [
+        {
+          "text": "Groups changes by type (added, fixed, removed/breaking)",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Clearly marks removing /v1/users as a breaking change with migration guidance",
+          "baseline": false,
+          "withSkill": false
+        },
+        {
+          "text": "Does not invent features beyond the three listed",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "## Release Notes\n\n### New\n- **CSV export**: You can now export your data as a CSV file for use in spreadsheets and other tools.\n\n### Fixed\n- **Login redirect loop**: Fixed an issue where users could get stuck in an endless redirect loop when signing in.\n\n### Removed\n- **Legacy `/v1/users` endpoint**: This endpoint has been removed. Any integrations still calling it will need to migrate to the current users API.",
+        "withSkill": "# Release notes (draft)\n\n## Highlights\n- **CSV export**: you can now export your data as CSV.\n\n## Fixes\n- **Login redirect loop**: fixed a bug where sign-in could redirect repeatedly and stop you from reaching the app.\n\n## Breaking changes\n- **Removed the legacy `/v1/users` endpoint.** Requests to it will now fail. Clients still calling it must move to its replacement. I don't know what the replacement is, so please fill it in, along with a migration link.\n\n## Verdict\n**No verdict (RC READY / RC WITH CAVEATS / NOT RC READY).** You asked only for release notes, in chat and without touching files. So I skipped the skill's other steps: the build, lint, test, security, i18n and SEO checks, and the repository audit. These notes are a draft and don't mean the project is release-ready.\n\n## Pending items\n- Confirm which version number to release. The removed endpoint is a breaking change, so this likely needs a major bump, or a minor bump with a deprecation note if you follow 0.x semver.\n- Name the `/v1/users` replacement and add a migration note.\n- Run the full release-candidate flow if you want an actual verdict."
+      }
+    }
+  ]
+}

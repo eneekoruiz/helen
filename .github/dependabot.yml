@@ -3,31 +3,16 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: monthly
-    ignore:
-      - dependency-name: '*'
-        update-types:
-          - version-update:semver-major
-      - dependency-name: '*vitest*'
-        update-types:
-          - version-update:semver-major
+      interval: weekly
+    open-pull-requests-limit: 5
     groups:
-      dependencies:
-        patterns:
-          - '*'
-    open-pull-requests-limit: 1
-    rebase-strategy: auto
+      minor-and-patch:
+        update-types: [minor, patch]
+    # Major updates arrive as separate PRs so breaking changes are reviewed one by one.
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: monthly
-    ignore:
-      - dependency-name: '*'
-        update-types:
-          - version-update:semver-major
+      interval: weekly
     groups:
       actions:
-        patterns:
-          - '*'
-    open-pull-requests-limit: 1
-    rebase-strategy: auto
+        patterns: ['*']

@@ -1,54 +1,55 @@
-# [APPLY] - Clean Code Pass Flow
+---
+action: APPLY
+phase: 02-building
+summary: Flow: simplify code safely (zero dead code, less duplication, clearer names) without changing behavior, gated by build, lint and tests.
+modifies_code: true
+repeatable: true
+stage: hardening
+aliases:
+  - apply-safe-clean-code-simplification-pass
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Clean Code Pass Flow
 
+## Goal
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+Reduce complexity, duplication and technical risk without changing behavior. Dead code removal is the top priority.
 
-## Objetivo
+## Use when
 
-Simplificar y mejorar el código de forma segura sin alterar el comportamiento funcional del proyecto.
+- The code works but feels fragile, after a quick audit, or before hardening or a release candidate.
 
-## Fase Ideal
+## Skip when
 
-Durante el desarrollo de funcionalidades (Building).
+- The project does not build: run the quality gates and fix that first.
+- The change would be a large aesthetic refactor with no clear value.
 
-## Prompts Incluidos
+## Steps
 
-1. [initial-project-risk-scan.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/audit/audit-initial-project-risk-scan.md)
-2. [safe-clean-code-simplification-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/clean-code/apply-safe-clean-code-simplification-pass.md)
-3. [fast-build-test-verification.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/qa/audit-fast-build-test-verification.md)
+1. [audit-quality-gates-checkpoint](../checkpoint/AUDIT-quality-gates-checkpoint.md): start from a passing build.
+2. **Zero dead code:** remove unused variables, imports, functions, classes, components and files. Confirm they are unused (search references, exports, dynamic usage) before deleting.
+3. Review responsibilities, naming, duplication, coupling, silent error handling and abstractions; apply small, safe changes only.
+4. Simplify for lower cognitive load: delete code, merge helpers, clarify boundaries, remove magic conventions, make the correct path obvious.
+5. [audit-quality-gates-checkpoint](../checkpoint/AUDIT-quality-gates-checkpoint.md) again: lint, types and tests must pass.
 
-## Checkpoints Entre Pasos
+## Stop when
 
-- **Inicio**: Cargar [build-and-compile-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-build-and-compile-checkpoint.md).
-- **Post-refactor**: Cargar [lint-and-typecheck-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-lint-and-typecheck-checkpoint.md).
-- **Final**: Cargar [test-suite-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-test-suite-checkpoint.md).
+- A simplification needs an architectural redesign: stop and propose it separately (see `audit-code-quality`).
+- Tests or typecheck fail and the cause is not in your change.
 
-## Condiciones para Avanzar
+## Limits
 
-- No se realizan refactorizaciones masivas.
-- Se conserva todo el comportamiento existente.
-- Todos los checkpoints pasan sin fallos de compilación.
+- Keep existing behavior. Do not change public APIs or contracts without justification and confirmation.
+- No mass refactors or directory restructures.
 
-## Cuándo Detenerse
-
-- Si los cambios de simplificación requieren rediseño arquitectónico.
-- Si los tests o los typechecks fallan.
-
-## Formato de Entrega
-
-El entregable debe ser minimalista. Produce únicamente:
+## Output
 
 ```text
-✅ Clean code pass completado. / [o] ⚠️ Completado con advertencias.
+Done. / Done with warnings.
 
-Cambios aplicados:
-- [Breve lista de 1-3 viñetas con simplificaciones de código aplicadas]
+Changes applied:
+- 1-3 bullets with the exact changes
 
-Acciones manuales necesarias:
-- Ninguna. / [o detallar acciones como correr tests manualmente]
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
 ```
-*No generes informes extensos ni explicaciones teóricas.*

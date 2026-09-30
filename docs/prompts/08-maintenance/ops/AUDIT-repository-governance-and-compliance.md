@@ -1,31 +1,32 @@
-# [AUDIT] - AUDIT — Repository Governance & Compliance
+---
+action: AUDIT
+phase: 08-maintenance
+summary: Audit branch protection, PR rules, community files, dependency licenses and GitHub security features with least privilege.
+modifies_code: false
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Repository Governance and Compliance
 
+## Goal
 
-**Rol**: Security Lead & Governance Architect.
+Check that the repository's rules protect it: protected branches, reviewed changes, clear contribution policies and license compliance.
 
-Este prompt audita las reglas de gobernanza del repositorio, permisos de ramas, políticas de contribución y cumplimiento de estándares organizacionales.
+## Use when
 
-## Requisitos mínimos obligatorios
-1. **Reglas de Rama Principal (Branch Protection Rules)**: Verificar que la rama `main` o `master` cuenta con reglas estrictas que prohíban la inserción directa de commits (push directo) sin Pull Request previo o aprobación de tests.
-2. **Políticas de Pull Request (PR)**: Validar la obligatoriedad de que cada Pull Request sea revisado por al menos un par técnico y pase satisfactoriamente el build y suite de pruebas de CI.
-3. **Licenciamiento e Higiene**: Comprobar que los archivos `LICENSE`, `CODE_OF_CONDUCT.md` y `CONTRIBUTING.md` estén presentes y actualizados con las directrices correctas.
-4. **Cumplimiento Legal y Dependencias**: Verificar que no se utilicen dependencias con licencias altamente restrictivas (como GPLv3 no autorizadas en productos SaaS comerciales cerrados).
+- Before opening a repository to collaborators, before a commercial release, or yearly.
 
-## Más allá de estos criterios
-- Evalúar si las configuraciones de seguridad automatizadas de GitHub (CodeQL, Dependabot alert, secret scanning) están activas.
-- Auditar los permisos del equipo para asegurar el principio de mínimo privilegio (Least Privilege).
+## Requirements
 
-## Límites de seguridad
-- No modificar directamente las reglas de la plataforma de hosting (GitHub/GitLab) durante la ejecución de la auditoría; limitarse a señalar vulnerabilidades.
+1. **Branch protection:** no direct pushes to `main`; pull requests with passing CI (and review when there is a team).
+2. **Pull request policy:** at least one technical review where a team exists; build and tests required.
+3. **Community files:** `LICENSE`, `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SECURITY.md` present and accurate.
+4. **Licenses:** no dependency licenses incompatible with the product (e.g. unapproved GPLv3 in closed commercial SaaS).
+5. **Security features:** CodeQL or equivalent, Dependabot alerts, secret scanning; team permissions follow least privilege.
 
-## Checks finales
-- El veredicto técnico debe estructurarse obligatoriamente bajo los niveles de severidad: **Críticos**, **Importantes**, **Opcionales**.
+## Limits
 
-## Formato de entrega
-El informe de auditoría final se estructurará con:
-- **Resumen Ejecutivo**: Nota global de cumplimiento (ej. Cumple, Cumple con reservas, No cumple).
-- **Vulnerabilidades de Gobernanza Detectadas**: Detalle numerado con nivel de riesgo y recomendación de mitigación.
+- Audit only: never change hosting-platform settings during the audit; list them as manual actions.
+
+## Output
+
+Compliance summary (`COMPLIANT`, `COMPLIANT WITH RESERVATIONS`, `NOT COMPLIANT`), then Findings grouped as **Critical**, **Important** and **Optional**. For each: evidence (file, line, screen or command), impact, recommended fix and effort.

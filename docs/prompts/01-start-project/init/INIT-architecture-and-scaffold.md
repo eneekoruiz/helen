@@ -1,51 +1,41 @@
-# [INIT] - Arquitectura y Scaffold
+---
+action: INIT
+phase: 01-start-project
+summary: Translate the business brief and DESIGN.md into information architecture, base layout, tokens and an initial component system.
+modifies_code: true
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Architecture and Scaffold
 
+## Goal
 
-## Proposito e intención
-Crear la estructura visual, tecnica y comercial base de un proyecto nuevo con criterio de UI UX PRO MAX. Este prompt traduce el ADN de negocio en layout, paleta, navegacion y sistema de componentes inicial.
+Create the base technical, visual and commercial structure of a new web project: pages and sections with a sales purpose, design tokens, and reusable components, without a generic template look.
 
-## Cuando usarlo
-- Después de `init-master-business-core.md`.
-- Antes de generar el primer proyecto real en un AI builder.
-- Cuando se necesita un scaffold premium orientado a venta, no una plantilla generica.
+## Use when
 
-## Prompt
-Actúa como UI UX PRO MAX, Principal Frontend Architect y CRO Designer. Disena el scaffold inicial de una experiencia web premium que parezca artesanal, cara y estrategicamente construida para convertir.
+- After `init-business-core` (and ideally `init-creative-direction-and-design-md`).
+- Before generating the first real project in an editor agent or AI builder.
 
-Contexto de negocio:
-- Briefing estrategico: `{{BRIEFING_MASTER_BUSINESS_CORE}}`
-- Stack deseado: `{{STACK}}`
-- Tipo de conversion: `{{TIPO_CONVERSION}}`
-- Referencias visuales: `{{REFERENCIAS_VISUALES}}`
-- Restricciones de marca: `{{RESTRICCIONES_MARCA}}`
+## Requirements
 
-## Requisitos minimos obligatorios
-- Define una paleta con contraste real, jerarquia clara y ausencia de estetica generica de plantilla.
-- Disena un layout base con intención comercial: primer viewport, prueba, mecanismo, objeciónes, proceso, casos, cierre.
-- Crea navegacion, footer, CTAs, formularios, estados vacíos y estados de carga desde el inicio.
-- Establece tokens de diseno: color, tipografía, espaciado, radios, sombras, motion y breakpoints.
-- Propón componentes reutilizables sin sobrediseñar abstracciones.
-- Anade micro-interacciones sobrias: hover, focus, reveal, scroll, validacion y confirmacion.
-- Asegura que el primer viewport muestre la promesa y deje visible una pista de la siguiente seccion.
+Inputs: the business brief, stack, conversion type, visual references or `DESIGN.md`, brand constraints.
 
-## Mas alla de estos criterios
-Si una seccion no ayuda a vender, eliminala o fusionala. Si una interaccion aumenta friccion, simplificala. El objetivo es una experiencia premium que cierre negocio, no una demo visual.
+1. **Information architecture** with commercial intent: first viewport, proof, mechanism, objections, process, cases, closing.
+2. **Design tokens:** color, typography, spacing, radii, shadows, motion, breakpoints (take them from `DESIGN.md` when it exists).
+3. Navigation, footer, CTAs, forms, empty states and loading states from the start.
+4. Reusable components without over-designed abstractions.
+5. Restrained micro-interactions: hover, focus, reveal, scroll, validation, confirmation.
+6. The first viewport shows the promise and hints at the next section.
 
-## Limites de seguridad
-- No uses copy final si el briefing no aporta pruebas suficientes.
-- No inventes claims cuantitativos.
-- No generes layouts con hero partido tipo plantilla SaaS si la marca necesita percepcion artesanal.
+## Beyond the checklist
 
-## Formato de entrega
-Entrega:
-- Arquitectura de informacion.
-- Sistema visual.
-- Componentes base.
-- Layout responsive.
-- Reglas de motion.
-- Checklist de implementacion inicial.
+If a section does not help sell, remove or merge it. If an interaction adds friction, simplify it.
 
+## Limits
+
+- No final copy without enough proof in the brief; never invent quantitative claims.
+- Avoid template patterns (split SaaS hero) when the brand needs a crafted feel.
+
+## Output
+
+Information architecture, visual system, base components, responsive layout, motion rules, and an implementation checklist. When writing code, report it as: files created, how to run, what is still placeholder.

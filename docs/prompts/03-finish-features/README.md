@@ -1,104 +1,66 @@
-# Fase 3: Finish Features (Refinar y Pulir Interfaces)
+# 03 · Finish features
 
-**Objetivo de la fase**:
-Elevar la experiencia de usuario (UX) e interfaz (UI) de un estado puramente funcional a uno premium y altamente pulido. Asegurar la excelencia visual, responsive, accesibilidad y rendimiento básico.
+Turn a working product into a premium one: UX, visual design, copy and conversion, motion, 3D and graphics, accessibility and performance.
 
-**Cuándo se utiliza**:
-- Cuando las funcionalidades principales de la iteración ya están operativas.
-- Antes de iniciar pruebas adversarial o endurecimiento final.
-- Al final de etapas de diseño y maquetación de frontend.
+## Quick decisions
 
-**Qué problemas resuelve**:
-- Interfaces de usuario genéricas, toscas, saturadas o que se sienten incompletas.
-- Ausencia de feedback del sistema (estados de carga, error, vacío o confirmaciones).
-- Errores de responsive y visual jumps en múltiples resoluciones de pantalla.
-- Barreras de accesibilidad y degradación del rendimiento de renderizado inicial.
+- General polish of a working product: `apply-full-polish-flow`.
+- Complete website stack up to publishing: `apply-premium-site-stack-flow`.
+- Award-level, cinematic finish: `apply-cinematic-visual-flow`.
+- Not sure what is wrong: start with `audit-product-ux` or `audit-design-excellence`.
+- Looks generic or AI-made: `audit-ai-trace-erasure-and-human-craft`, then `enhance-taste-and-art-direction`.
+- Copy does not convert: `enhance-copy-and-conversion`.
+- No 3D base yet: `generate-3d-foundation`; a scene on top of it: `generate-3d-experience-component`.
+- Heavy visuals feel slow: `audit-motion-and-3d-performance`.
+- Stop: never add effects that reduce legibility, conversion, performance or accessibility.
 
----
+## Exit checklist
 
-## Diferencia Operativa de Etiquetas
+Before moving on to 04-before-production:
 
-- **GENERATE**: crea una pieza visual nueva, como setup 3D global o componente aislado.
-- **ENHANCE/APPLY**: pule una interfaz o escena existente sin romper contratos ni flujos.
-- **AUDIT**: evalúa UX, visual craft o regresiones sin modificar código.
-- **INIT**: no se usa aquí; la base estratégica debe venir de Start Project.
+- [ ] The main flow is clear and has no dead ends.
+- [ ] Loading, empty, error and success states exist.
+- [ ] Mobile, tablet and desktop were checked.
+- [ ] Keyboard, focus, contrast and reduced motion work.
+- [ ] Copy is specific, human and every claim is backed.
+- [ ] Heavy visuals respect a performance budget and have fallbacks.
+- [ ] The visual regression checkpoint passed.
 
-## Prompts Incluidos en esta Fase
+## Prompts
 
-| Prompt / Flow / Checkpoint | Intención | Propósito / Cuándo usarlo | Frecuencia |
-|---|---|---|---|
-| [generate-3d-global-canvas-setup.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/3d/generate-3d-global-canvas-setup.md) | **GENERATE** | Crear setup 3D global: canvas, provider, fallback, rendimiento y reglas de integración. | Media |
-| [generate-3d-isolated-experience-component.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/3d/generate-3d-isolated-experience-component.md) | **GENERATE** | Crear escenas, carruseles o showcases 3D aislados sobre el setup existente. | Media |
-| [enhance-3d-premium-scene-polish.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/3d/enhance-3d-premium-scene-polish.md) | **ENHANCE** | Pulir escenas 3D existentes sin romper API, responsive, performance ni conversión. | Alta (Si hay 3D) |
-| [product-ux-and-premium-quality-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/ux/audit-product-ux-and-premium-quality.md) | **AUDIT** | Auditoría integral del feeling premium y la usabilidad de la UI/CLI. | Alta |
-| [onboarding-activation-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/ux/audit-onboarding-activation.md) | **AUDIT** | Optimizar los primeros minutos de uso y la conversión del usuario. | Media |
-| [empty-states-errors-and-microcopy.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/ux/apply-empty-states-errors-and-microcopy.md) | **APPLY** | Implementar/mejorar pantallas vacías, cargas, errores y microcopys. | Alta |
-| [premium-detail-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/apply-premium-detail-pass.md) | **APPLY** | Pulido microscópico de detalles visuales, micro-interacciones y copy. | Alta |
-| [product-design-and-awards-visual-excellence-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/audit-product-design-and-awards-visual-excellence.md) | **AUDIT** | Análisis estético bajo criterios del nivel Awwwards/SOTY. | Media |
-| [primary-user-experience-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/ux/audit-primary-user-experience.md) | **AUDIT** | Auditar los flujos principales del usuario de extremo a extremo. | Alta |
-| [premium-visual-polish-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/apply-premium-visual-polish-pass.md) | **APPLY** | Aplicar sombras, gradientes, tipografía premium y espaciados armoniosos. | Alta |
-| [responsive-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/apply-responsive-pass.md) | **APPLY** | Corregir roturas de diseño a lo largo de breakpoints móviles y desktop. | Alta |
-| [basic-accessibility-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/performance/apply-basic-accessibility-pass.md) | **APPLY** | Mejorar semántica, focos de teclado y compatibilidad con lectores de pantalla. | Media |
-| [basic-performance-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/performance/apply-basic-performance-pass.md) | **APPLY** | Optimizar assets, lazy loadings y evitar renders redundantes. | Media |
-| [ux-visual-pass-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/flow/apply-ux-visual-pass-flow.md) | **APPLY flow** | Flujo compuesto centrado en pulir visualmente y resolver responsive. | Media |
-| [awwwards-soty-design-review-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/flow/audit-awwwards-soty-design-review-flow.md) | **AUDIT/APPLY flow** | Flujo completo de craft estético y revisión de visual excellence. | Media |
-| [full-polish-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/flow/apply-full-polish-flow.md) | **APPLY flow** | El flujo más amplio de refinamiento UX, visual, responsive y verificación. | Alta |
-| [visual-ux-regression-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/flow/audit-visual-ux-regression-checkpoint.md) | **Checkpoint** | Validar que no hay roturas visuales ni regresiones tras los cambios. | Alta |
-
----
-
-## Checklist de Transición: ¿Ya estoy preparado para pasar a la siguiente fase?
-
-Antes de pasar a la fase de **Before Production (04-before-production)**, asegúrate de responder afirmativamente a las siguientes preguntas:
-
-- [ ] ¿Los flujos principales de la interfaz funcionan sin bloqueos ergonómicos?
-- [ ] ¿El diseño es responsive en móviles, tablets y monitores de escritorio?
-- [ ] ¿Están implementados todos los estados vacíos (empty), de carga (loading) y de error (error)?
-- [ ] ¿Se ha superado el `visual-ux-regression-checkpoint` con éxito?
-
-**Siguiente Fase**:
-Si la respuesta es **Sí** a todas las anteriores, estás listo para entrar en la fase **[04-before-production](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/README.md)**.
-
----
-
-## Ecosistema 40K Ultra Premium
-
-Usa primero [`../[INIT] Director Creativo (Orquestador 40K).md`](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/%5BINIT%5D%20Director%20Creativo%20(Orquestador%2040K).md) cuando el proyecto requiera una estrategia visual profunda antes de implementar.
-
-| Prompt | Intencion | Uso |
+<!-- HELEN:INDEX:START (generated by `helen prompts index`, do not edit) -->
+| Prompt | Type | Summary |
 |---|---|---|
-| [apply-40k-visual-craft-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/flow/apply-40k-visual-craft-flow.md) | **APPLY flow** | Flujo completo y orquestador de ejecución para interfaces €100k+ Awwwards. |
-| [audit-ux-strategist-core.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/ux/audit-ux-strategist-core.md) | **AUDIT** | Evaluar targets táctiles, flujos de error, contraste WCAG y estados vacíos. |
-| [enhance-taste-visual-pov.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/enhance-taste-visual-pov.md) | **ENHANCE** | Inyectar paleta CSS HSL curada, jerarquía tipográfica editorial y taste real. |
-| [generate-premium-web-artifacts.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/generate-premium-web-artifacts.md) | **GENERATE** | Crear bloques interactivos premium (pricing, toggles, bento grids) listos para producción. |
-| [enhance-motion-polish-and-transitions.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/motion/enhance-motion-polish-and-transitions.md) | **ENHANCE** | Añadir transiciones dinámicas (escala, opacidad, easing) en modales y dropdowns. |
-| [enhance-scroll-linked-sequences.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/motion/enhance-scroll-linked-sequences.md) | **ENHANCE** | Integrar secuencias animadas al scroll (scrubbing timeline, GSAP, Lenis). |
-| [enhance-native-view-transitions.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/motion/enhance-native-view-transitions.md) | **ENHANCE** | Implementar la API de View Transitions nativa del navegador con la máscara clip-path. |
-| [enhance-dynamic-typography-pretext.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/graphics/enhance-dynamic-typography-pretext.md) | **ENHANCE** | Pretexting off-DOM y layouts de revista con flujo de texto alrededor de 3D. |
-| [generate-webgpu-shaders.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/graphics/generate-webgpu-shaders.md) | **GENERATE** | Crear canvas WebGPU/WebGL interactivos con shaders líquidos y de ruido. |
-| [generate-app-store-canvas-exports.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/graphics/generate-app-store-canvas-exports.md) | **GENERATE** | Desarrollar herramienta Canvas de exportación automatizada de capturas de marketing. |
-| [generate-modern-ui-libraries-aceternity-magic-ui.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/generate-modern-ui-libraries-aceternity-magic-ui.md) | **GENERATE** | Integrar componentes modernos de catálogo (Aceternity UI, Magic UI) adaptando tokens. |
-| [audit-animation-performance-and-fps.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/performance/audit-animation-performance-and-fps.md) | **AUDIT** | Evaluar estabilidad de fotogramas, cuellos de botella y Cumulative Layout Shift (CLS). |
-| [enhance-ui-audio-micro-feedback.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/performance/enhance-ui-audio-micro-feedback.md) | **ENHANCE** | Añadir haptics y micro-feedback auditivo con osciladores Web Audio y mute. |
-| [generate-webgpu-shader-experience.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/graphics/generate-webgpu-shader-experience.md) | **GENERATE** | Shaders WebGPU/WebGL con fallback y presupuesto de rendimiento. |
-| [generate-premium-mockup-layout-system.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-premium-mockup-layout-system.md) | **GENERATE** | Mockups high-end tipo ls.graphics dentro del layout. |
-| [generate-scroll-video-scrubbing-sequence.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/motion/generate-scroll-video-scrubbing-sequence.md) | **GENERATE** | Secuencias scroll/video con GSAP ScrollTrigger, Lenis, canvas o video scrubbing. |
-| [generate-view-transition-state-system.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/motion/generate-view-transition-state-system.md) | **GENERATE** | Transiciones de tema, pagina y estado con View Transitions API. |
-| [generate-premium-component-library-integration.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-premium-component-library-integration.md) | **GENERATE** | Aceternity, Magic UI, Motion Primitives, shadcn u otras librerías sin rastro de plantilla. |
-| [generate-conversion-led-hero-system.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/generate-conversion-led-hero-system.md) | **GENERATE** | Heroes premium con promesa, prueba visual, confianza y CTA. |
-| [generate-editorial-art-direction-system.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/generate-editorial-art-direction-system.md) | **GENERATE** | Direccion editorial: grilla, ritmo, imagen, copy visual y jerarquia. |
-| [generate-immersive-product-configurator.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/generate-immersive-product-configurator.md) | **GENERATE** | Configuradores, simuladores o demos interactivas que prueban valor antes de comprar. |
-| [generate-ai-personalized-landing-flow.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/generate-ai-personalized-landing-flow.md) | **GENERATE** | Landings personalizadas por segmento, fuente o intención con reglas responsables. |
-| [enhance-cinematic-loading-and-page-transition-polish.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/motion/enhance-cinematic-loading-and-page-transition-polish.md) | **ENHANCE** | Loaders, rutas y cambios de estado como momentos premium breves. |
-| [enhance-cro-friction-removal-and-cta-depth.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/enhance-cro-friction-removal-and-cta-depth.md) | **ENHANCE** | Friccion, CTAs, objeciónes, formularios y medicion. |
-| [enhance-microinteraction-sensory-detail-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/enhance-microinteraction-sensory-detail-pass.md) | **ENHANCE** | Botones, inputs, cards, menús, hover/focus y feedback sensorial. |
-| [audit-40k-creative-direction-and-conversion.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/audit-40k-creative-direction-and-conversion.md) | **AUDIT** | Veredicto 40K sobre direccion creativa, conversion, craft y diferenciacion. |
-| [audit-performance-budget-for-cinematic-sites.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/performance/audit-performance-budget-for-cinematic-sites.md) | **AUDIT** | Presupuestos de rendimiento para webs con 3D, shaders, video y motion. |
-| [audit-ai-trace-erasure-and-human-craft.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/audit-ai-trace-erasure-and-human-craft.md) | **AUDIT** | Rastros de IA, plantilla, claims genericos y falta de autoria humana. |
-| [3d/generate-3d-motion-templates.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/3d/generate-3d-motion-templates.md) | **GENERATE** | Setup de cámara cinemática, iluminación bokeh y layouts 3D interactivos. |
-| [3d/generate-3d-spline-vs-react-three-fiber.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/3d/generate-3d-spline-vs-react-three-fiber.md) | **GENERATE** | Tomar decisión e implementar Spline (no-code 3D) vs React Three Fiber (código nativo). |
-| [3d/generate-integrated-premium-mockups.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/generate-integrated-premium-mockups.md) | **GENERATE** | Integrar mockups tridimensionales o vectoriales interactivos de dispositivos en la web. |
-| [3d/generate-motion-template-asset-system.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/3d/generate-motion-template-asset-system.md) | **GENERATE** | Assets 3D y motion templates inspirados en benchmarks premium tipo ContentCore. |
-| [3d/generate-spline-rapid-interactive-embed.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/3d/generate-spline-rapid-interactive-embed.md) | **GENERATE** | Spline para experiencias 3D rapidas, acotadas y conversionales. |
-| [3d/generate-3d-react-fiber-premium-architecture.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/3d/generate-3d-react-fiber-premium-architecture.md) | **GENERATE** | Arquitectura 3D custom con React Three Fiber y Drei. |
-
+| [enhance-3d-scene-polish](3d/ENHANCE-3d-scene-polish.md) | ENHANCE | Refine an existing 3D scene (framing, lights, materials, timing, performance, fallback) without breaking its API or integration. |
+| [generate-3d-experience-component](3d/GENERATE-3d-experience-component.md) | GENERATE | Build one isolated 3D scene or showcase on the existing foundation, with an asset pipeline, motion templates and a non-3D fallback. |
+| [generate-3d-foundation](3d/GENERATE-3d-foundation.md) | GENERATE | Choose Spline or React Three Fiber and build the reusable 3D foundation: canvas, loading, fallbacks and performance rules. |
+| [apply-cinematic-visual-flow](flow/APPLY-cinematic-visual-flow.md) | APPLY flow | Flow: turn a working site into a cinematic, award-level experience (taste, motion, scroll, 3D, shaders, mockups) within a performance budget. |
+| [apply-full-polish-flow](flow/APPLY-full-polish-flow.md) | APPLY flow | Flow: lift a working project to a clearly more refined level in UX, visuals, responsive, accessibility, clean code and performance. |
+| [apply-premium-site-stack-flow](flow/APPLY-premium-site-stack-flow.md) | APPLY flow | Flow: build or lift a premium website end to end: inspiration, design, copy, motion, components, quality, SEO and publishing. |
+| [audit-visual-ux-regression-checkpoint](flow/AUDIT-visual-ux-regression-checkpoint.md) | checkpoint | Blocking gate: user-facing changes are coherent, usable and not visually broken across viewports and states. |
+| [enhance-editorial-typography](graphics/ENHANCE-editorial-typography.md) | ENHANCE | Magazine-grade typography and layouts: off-DOM text measurement, shape-outside wrapping, editorial grids, drop caps and blend modes. |
+| [generate-marketing-canvas-exports](graphics/GENERATE-marketing-canvas-exports.md) | GENERATE | Build a development-only canvas tool that exports App Store / Google Play screenshots, posters and banners at exact resolutions. |
+| [generate-shader-experience](graphics/GENERATE-shader-experience.md) | GENERATE | Create a shader-first visual layer (WebGPU with WebGL2 or CSS fallback) with identity, budgeted performance and a static fallback. |
+| [enhance-motion-polish-and-transitions](motion/ENHANCE-motion-polish-and-transitions.md) | ENHANCE | Refined motion for UI elements, loaders and page changes: custom easings, combined transforms, useful waits, GPU-only properties. |
+| [enhance-view-transitions](motion/ENHANCE-view-transitions.md) | ENHANCE | Native View Transitions API for pages, themes, tabs and shared elements, with clip-path reveals, focus safety and a no-API fallback. |
+| [generate-scroll-driven-sequences](motion/GENERATE-scroll-driven-sequences.md) | GENERATE | Scroll-linked storytelling (GSAP ScrollTrigger, Lenis, canvas frame sequences or video scrubbing) with beats, preloading and fallbacks. |
+| [apply-basic-accessibility-pass](performance/APPLY-basic-accessibility-pass.md) | APPLY | Find and fix basic accessibility problems: keyboard, focus, contrast, semantics, labels, alt text, touch targets and reduced motion. |
+| [apply-basic-performance-pass](performance/APPLY-basic-performance-pass.md) | APPLY | Find and fix evident, user-visible performance problems: bundle and asset weight, extra requests, re-renders, blocking work, load time. |
+| [audit-motion-and-3d-performance](performance/AUDIT-motion-and-3d-performance.md) | AUDIT | Performance budget and safety of animation, 3D, video and shaders: FPS, CLS, LCP, leaks, context loss, fallbacks and reduced motion. |
+| [apply-empty-states-errors-and-microcopy](ux/APPLY-empty-states-errors-and-microcopy.md) | APPLY | Add or fix loading, empty, error, success, disabled and destructive states, with messages that say what happened and what to do next. |
+| [audit-product-ux](ux/AUDIT-product-ux.md) | AUDIT | Audit product clarity, first-run activation, main journeys, consistency, error resilience, ergonomics and premium perception. |
+| [apply-premium-visual-polish](visual/APPLY-premium-visual-polish.md) | APPLY | Fix the visual details that make a product look less premium or unfinished: hierarchy, spacing, type, contrast, icons, states, consistency. |
+| [apply-responsive-pass](visual/APPLY-responsive-pass.md) | APPLY | Verify and fix mobile, tablet and desktop layouts: overflow, overlap, broken menus, unreachable buttons, clipped text, density. |
+| [audit-ai-trace-erasure-and-human-craft](visual/AUDIT-ai-trace-erasure-and-human-craft.md) | AUDIT | Detect AI and template traces in copy, visuals, layout, icons and motion, and propose specific human replacements. |
+| [audit-design-excellence](visual/AUDIT-design-excellence.md) | AUDIT | The canonical design audit, from product-solid to Awwwards level: art direction, hierarchy, type, imagery, states, craft and conversion. |
+| [enhance-copy-and-conversion](visual/ENHANCE-copy-and-conversion.md) | ENHANCE | Humanize copy and remove conversion friction: headline, value proposition, CTAs, forms, proof, objections and measurement. |
+| [enhance-microinteraction-sensory-detail-pass](visual/ENHANCE-microinteraction-sensory-detail-pass.md) | ENHANCE | Make buttons, inputs, cards, menus and feedback feel crafted: consistent states and motion, optional subtle UI sound with a mute toggle. |
+| [enhance-taste-and-art-direction](visual/ENHANCE-taste-and-art-direction.md) | ENHANCE | Inject a visual point of view and an editorial system: relational color, modular type scale, rhythm, containers and narrative cadence. |
+| [generate-component-library-integration](visual/GENERATE-component-library-integration.md) | GENERATE | Integrate premium pre-animated components (Aceternity UI, Magic UI, shadcn/ui, 21st.dev...) re-styled so nobody recognizes the template. |
+| [generate-conversion-led-hero-system](visual/GENERATE-conversion-led-hero-system.md) | GENERATE | Build a first screen that sells: specific promise, visual proof, primary and secondary CTA, trust signals and a hint of what follows. |
+| [generate-immersive-product-configurator](visual/GENERATE-immersive-product-configurator.md) | GENERATE | Build a configurator, simulator, ROI calculator or comparator that lets people experience value before buying, with verifiable logic. |
+| [generate-personalized-landing](visual/GENERATE-personalized-landing.md) | GENERATE | Landing variants that adapt copy, proof and CTAs to segment, traffic source or industry, with a solid default and no flicker. |
+| [generate-portfolio-layout-patterns](visual/GENERATE-portfolio-layout-patterns.md) | GENERATE | Choose and build a portfolio or showcase layout (sandwich, work-first showcase, sticky split) that shows craft without noise. |
+| [generate-premium-mockups](visual/GENERATE-premium-mockups.md) | GENERATE | Present products, apps and case studies inside premium device mockups and layouts (CSS/SVG or light 3D) that build desire without hurting speed. |
+| [generate-premium-web-artifacts](visual/GENERATE-premium-web-artifacts.md) | GENERATE | Build production-ready interactive blocks (pricing table, feature selector, bento grid) in React and Tailwind with realistic content. |
+<!-- HELEN:INDEX:END -->

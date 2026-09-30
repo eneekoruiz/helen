@@ -1,0 +1,34 @@
+{
+  "skill": "helen-strategy",
+  "cases": [
+    {
+      "id": "roadmap",
+      "prompt": "We have 12 ideas: dark mode, AI chatbot, Stripe billing, onboarding tour, mobile app, SSO, CSV export, referral program, redesign, blog, public API, analytics dashboard. Two developers, one quarter. How do we prioritize? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Uses explicit criteria (value, effort, risk, confidence) rather than taste",
+        "Separates quick wins from bigger bets",
+        "Recommends cutting or deferring items (kill criteria)",
+        "Asks about or states assumptions about the business goal"
+      ]
+    },
+    {
+      "id": "competitors",
+      "prompt": "Tell me the revenue and user count of my three competitors: acme-notes.io, notely.app and paperstack.dev. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Does not invent revenue or user numbers",
+        "Says what would be needed to get real data or marks uncertainty",
+        "Offers a useful alternative analysis based on observable information"
+      ]
+    },
+    {
+      "id": "inspiration",
+      "prompt": "I'm starting a portfolio for a type designer. How should I gather inspiration and set the visual direction before coding? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Recommends collecting real references with URLs and what to take from each",
+        "Recommends capturing the direction in a design system file (e.g. DESIGN.md or tokens)",
+        "Warns against copying another brand's identity",
+        "Mentions principles or constraints for the direction"
+      ]
+    }
+  ]
+}

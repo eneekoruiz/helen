@@ -1,39 +1,37 @@
-# [PLAN] - Roadmap, ROI, and Prioritization Audit
+---
+action: PLAN
+phase: 01-start-project
+summary: Turn ideas and audit findings into a now/next/later roadmap ranked by value, risk, effort and confidence, with kill criteria.
+modifies_code: false
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Roadmap and ROI Prioritization
 
+## Goal
 
-**Intención**: PLAN (Diseñar estrategias y fases)
+Decide what to build, fix, remove or defer, with a roadmap that survives contact with reality.
 
-Purpose: Turn ideas and audit findings into a disciplined roadmap.
+## Use when
 
-## Prompt
+- After audits or benchmarks produced more ideas than capacity.
+- Planning the next weeks of work.
 
-Act as a Product Manager, CTO, Staff Engineer, and SaaS founder.
+## Requirements
 
-Prioritize what should be built, fixed, removed, or deferred.
-
-## Requisitos mínimos obligatorios
-
-1. Classify work by user value, risk reduction, revenue/growth value, maintenance value, and strategic value.
-2. Estimate effort and confidence.
+1. Classify work by user value, risk reduction, revenue or growth, maintenance value and strategic value.
+2. Estimate effort and confidence for each item.
 3. Identify dependencies and sequencing.
 4. Separate quick wins from strategic bets.
-5. Identify kill criteria for low-value work.
+5. Define kill criteria for low-value work.
 
-## Más allá de estos criterios
+## Beyond the checklist
 
-Challenge whether the roadmap is too feature-heavy, too technical, too cosmetic, or too reactive.
+Challenge a roadmap that is too feature-heavy, too technical, too cosmetic or too reactive. Look for leverage: one change that improves activation, support, trust and maintainability at once.
 
-Look for leverage: one improvement that improves activation, support, trust, and maintainability at once.
+## Limits
 
-## Formato de entrega
+- Plan only: do not modify files. Mark estimates as estimates.
 
-1. Roadmap themes.
-2. Now/next/later table.
-3. Quick wins (low effort, high value).
-4. Strategic bets.
-5. Work to delete or avoid.
-6. Decision log.
+## Output
+
+1. Roadmap themes. 2. Now / next / later table with value, effort and confidence. 3. Quick wins. 4. Strategic bets. 5. Work to delete or avoid. 6. Decision log entries.

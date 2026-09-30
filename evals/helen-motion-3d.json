@@ -1,0 +1,34 @@
+{
+  "skill": "helen-motion-3d",
+  "cases": [
+    {
+      "id": "modal",
+      "prompt": "Make this modal animation feel premium. Answer in chat only; do not modify or create files.\n```css\n.modal { transition: all 0.3s ease; }\n.modal.open { height: auto; top: 20%; }\n```",
+      "criteria": [
+        "Replaces animating height/top/all with transform and opacity",
+        "Proposes a custom easing curve instead of plain ease",
+        "Adds a prefers-reduced-motion alternative",
+        "Keeps durations short for a repeated UI action"
+      ]
+    },
+    {
+      "id": "three",
+      "prompt": "I want a Three.js hero with a 60 MB GLB model loading before anything else shows. Good idea? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Flags the model size / blocking first paint as a problem",
+        "Recommends compression (Draco/Meshopt/KTX2) and lazy loading with a poster",
+        "Recommends a fallback for low-power devices, WebGL failure or reduced motion",
+        "Mentions a performance budget or measuring LCP/FPS"
+      ]
+    },
+    {
+      "id": "scroll",
+      "prompt": "Should I hijack native scrolling so each wheel event snaps to the next full-screen section on my portfolio? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Warns about scroll-jacking harming usability/accessibility",
+        "Suggests native alternatives (CSS scroll snap, scroll-driven animations) or a restrained approach",
+        "Mentions touch devices / keyboard users / reduced motion"
+      ]
+    }
+  ]
+}

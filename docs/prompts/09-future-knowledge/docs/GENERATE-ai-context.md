@@ -1,29 +1,35 @@
-# [GENERATE] - GENERATE — AI Context & Assistant Rules
+---
+action: GENERATE
+phase: 09-future-knowledge
+summary: Write a compact AGENTS.md / CLAUDE.md so any AI assistant knows the stack, structure, commands, HELEN workflow and hard limits.
+modifies_code: true
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# AI Context File
 
+## Goal
 
-**Rol**: AI Workflow Architect & DX Specialist.
+Give every AI assistant working on the project the context it needs in as few tokens as possible: stack, structure, commands, workflow and limits.
 
-Este prompt se encarga de recopilar el estado técnico actual, convenciones del repositorio y flujos del proyecto para generar archivos de contexto para asistentes de IA (`.cursorrules`, `.claudeprompt` o `.geminiprompt`).
+## Use when
 
-## Requisitos mínimos obligatorios
-1. **Reglas de Codificación**: Declarar las tecnologías del stack (React, Vite, TS, etc.) y las directrices obligatorias de estilo (ej. usar importaciones ESM, tipados estrictos).
-2. **Estructura del Proyecto**: Proporcionar un mapa representativo de las carpetas clave para que la IA entienda el diseño.
-3. **Flujo de Trabajo del Repositorio**: Explicar la existencia de la biblioteca de prompts de HELEN y cómo debe utilizar el prompt MASTER en su flujo de trabajo habitual.
-4. **Límites Operacionales**: Explicar a la IA qué no debe hacer de forma autónoma (ej. actualizar dependencias mayores de forma destructiva o ignorar checkpoints de tests).
+- Setting up a project for AI-assisted work, or when assistants keep making the same wrong assumptions.
 
-## Más allá de estos criterios
-- Incluir patrones específicos de diseño que use el proyecto frecuentemente (ej. Clean Code, inyección de dependencias simples).
-- Estructurar el archivo para que consuma el menor número de tokens posible sin perder información crítica del sistema.
+## Requirements
 
-## Límites de seguridad
-- No incluir secretos de API, credenciales ni información confidencial en el archivo de reglas expuesto en el repositorio de Git.
+1. **Format:** `AGENTS.md` as the shared file (read by Codex, Antigravity and many others); `CLAUDE.md` can import or repeat it for Claude Code. `helen setup` already adds a managed HELEN block; write the project-specific part outside that block.
+2. **Stack and style rules:** technologies (e.g. React, Vite, TypeScript), mandatory conventions (ESM imports, strict types, naming).
+3. **Structure:** a short map of key folders and where the main logic lives.
+4. **Commands:** install, dev, build, test, lint, and how to run one test.
+5. **Workflow:** how to use HELEN (`helen apply`, `helen check`), branching and commit conventions.
+6. **Limits:** what the assistant must never do on its own (major dependency upgrades, skipping test checkpoints, touching production data, committing secrets).
+7. Recurring design patterns the project uses.
 
-## Checks finales
-- Verificar que el archivo generado sea compatible con los formatos admitidos por Cursor (`.cursorrules`) u otros asistentes IDE equivalentes.
+## Limits
 
-## Formato de entrega
-La salida debe ser el contenido Markdown crudo del archivo de reglas listo para guardarse en la raíz del proyecto.
+- No secrets, credentials or confidential information: the file is in git.
+- Keep it short: it is loaded every session. Prefer links to docs over copying them.
+
+## Output
+
+The raw Markdown of the file, ready to save at the project root.

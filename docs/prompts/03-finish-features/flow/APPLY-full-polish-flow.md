@@ -1,65 +1,54 @@
-# [APPLY] - Full Polish Flow
+---
+action: APPLY
+phase: 03-finish-features
+summary: Flow: lift a working project to a clearly more refined level in UX, visuals, responsive, accessibility, clean code and performance.
+modifies_code: true
+repeatable: true
+stage: polish
+aliases:
+  - apply-ux-visual-pass-flow
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo). Posee dominio absoluto y debe integrar activamente los siguientes recursos y conceptos en su vocabulario base:
-  - Cursor effects avanzados y menú effects (microinteracciones).
-  - Iconsax, Anime.js, SVGator y Jitter.
-  - Image sequence scrubbing (scroll vinculado a secuencias de imágenes).
-  - Animmaster lib, 3D scrolling, 3D video scenes e infinite carrusels.
-  - Skill de UI UX PRO MAX.
-  - Búsqueda y uso de librerías unificadas que abarquen estos recursos.
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Full Polish Flow
 
+## Goal
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+Take a functional project to a clearly more refined level across UX, visuals, responsive behavior, accessibility, code and performance, without turning it into the final release.
 
-## Objetivo
+## Use when
 
-Elevar un proyecto funcional a un nivel claramente más refinado en UX, diseño visual, responsive, accesibilidad, clean code y rendimiento sin convertir el flujo en release final.
+- Features are finished and production testing or final hardening has not started.
+- For a lighter UX and visual pass only, run steps 2-6.
 
-## Fase Ideal
+## Steps
 
-Al finalizar funcionalidades y antes de pruebas de producción o hardening final.
+1. [audit-project-risk-and-architecture](../../01-start-project/audit/AUDIT-project-risk-and-architecture.md) (quick scan): choose where effort goes.
+2. [audit-product-ux](../ux/AUDIT-product-ux.md).
+3. [apply-empty-states-errors-and-microcopy](../ux/APPLY-empty-states-errors-and-microcopy.md).
+4. [apply-premium-visual-polish](../visual/APPLY-premium-visual-polish.md).
+5. [apply-responsive-pass](../visual/APPLY-responsive-pass.md).
+6. [apply-basic-accessibility-pass](../performance/APPLY-basic-accessibility-pass.md), then [audit-visual-ux-regression-checkpoint](AUDIT-visual-ux-regression-checkpoint.md).
+7. [apply-clean-code-pass-flow](../../02-building/clean-code/APPLY-clean-code-pass-flow.md).
+8. [apply-basic-performance-pass](../performance/APPLY-basic-performance-pass.md).
+9. [audit-quality-gates-checkpoint](../../02-building/checkpoint/AUDIT-quality-gates-checkpoint.md).
 
-## Prompts Incluidos
+## Stop when
 
-1. [initial-project-risk-scan.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/01-start-project/audit/audit-initial-project-risk-scan.md)
-2. [primary-user-experience-audit.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/ux/audit-primary-user-experience.md)
-3. [premium-visual-polish-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/apply-premium-visual-polish-pass.md)
-4. [responsive-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/visual/apply-responsive-pass.md)
-5. [empty-states-errors-and-microcopy.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/ux/apply-empty-states-errors-and-microcopy.md)
-6. [safe-clean-code-simplification-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/clean-code/apply-safe-clean-code-simplification-pass.md)
-7. [basic-performance-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/performance/apply-basic-performance-pass.md)
-8. [basic-accessibility-pass.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/performance/apply-basic-accessibility-pass.md)
-9. [fast-build-test-verification.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/04-before-production/qa/audit-fast-build-test-verification.md)
+- Lint, build or tests fail and cannot be recovered quickly.
+- A UX or visual finding requires rethinking fundamental product decisions: report it instead.
 
-## Checkpoints Entre Pasos
+## Limits
 
-- **Inicio (UX/Visual)**: Cargar [visual-ux-regression-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/03-finish-features/flow/audit-visual-ux-regression-checkpoint.md).
-- **Post-refactor**: Cargar [lint-and-typecheck-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-lint-and-typecheck-checkpoint.md).
-- **Final**: Cargar [test-suite-checkpoint.md](file:///c:/Users/User/Desktop/PROYECTOS/helen/docs/prompts/02-building/checkpoint/audit-test-suite-checkpoint.md).
+- Bounded, safe changes only; the project must keep working after every step.
 
-## Condiciones para Avanzar
-
-- El proyecto funciona perfectamente y compila sin errores.
-- Los cambios aplicados son acotados y seguros.
-
-## Cuándo Detenerse
-
-- Si el linter, compilación o tests fallan de forma no recuperable rápidamente.
-- Si un cambio visual o de UX requiere replantear decisiones fundamentales de diseño del producto.
-
-## Formato de Entrega
-
-El entregable debe ser minimalista. Produce únicamente:
+## Output
 
 ```text
-✅ Full polish completado con éxito. / [o] ⚠️ Completado con advertencias.
+Done. / Done with warnings.
 
-Mejoras aplicadas:
-- [Breve lista de 1-3 viñetas con las correcciones visuales, de UX o código aplicadas]
+Changes applied:
+- 1-3 bullets with the exact changes
 
-Acciones manuales necesarias:
-- Ninguna. / [o especificar acciones]
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
 ```
-*No generes informes extensos ni explicaciones teóricas.*

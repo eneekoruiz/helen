@@ -1,36 +1,39 @@
-# [GENERATE] - Release Notes, Changelog, and Demo Package Audit
+---
+action: GENERATE
+phase: 06-release
+summary: Write the changelog, release notes, migration notes, demo script and announcement copy that match what actually ships.
+modifies_code: true
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Release Notes, Changelog and Demo Package
 
+## Goal
 
-**Intención**: GENERATE (Generar plantillas, notas, checklists o documentación)
+Make releases understandable, credible and reusable: notes, changelog and demo material that match what actually ships.
 
-Purpose: Make releases understandable, credible, and reusable by generating notes, changelogs, and demo guides.
+## Use when
 
-## Prompt
+- Preparing a release, a launch or a client demo.
 
-Act as a release manager, product marketer, technical writer, and founder.
+## Requirements
 
-Audit and generate release communication and demo materials.
+1. Review or generate the changelog, release notes, migration notes, README updates, demo script, screenshot guidance and social preview text.
+2. Explain user value, breaking changes, known issues and verification commands.
+3. Flag missing screenshots or demo steps.
+4. Remove inflated claims and vague release language.
+5. Every artifact matches the shipped state (check against git history and the code).
 
-## Requisitos mínimos obligatorios
+## Beyond the checklist
 
-1. Review or generate changelog, release notes, demo script, screenshots guidance, social preview text, README updates, and migration notes.
-2. Check whether release communication explains user value, breaking changes, known issues, and verification commands.
-3. Identify missing screenshots or demo steps.
-4. Flag inflated claims or vague release language.
-5. Ensure generated artifacts match the actual shipped state.
+Reusable launch assets: short and long demo, screenshot set, social card, FAQ, post-release follow-up checklist.
 
-## Más allá de estos criterios
+## Limits
 
-Look for reusable laúnch assets: short demo, long demo, screenshot set, social card, release summary, migration guide, FAQ, and post-release follow-up checklist.
+- Never announce features that are partial or absent; mark anything unverified.
 
-## Formato de entrega
+## Output
 
-1. Release communication gaps (in current documents).
-2. Proposed/Generated Changelog (markdown format).
-3. Demo Script/Package (exact steps to demonstrate the release).
-4. Public announcement text/copy.
-5. Recommended release narrative.
+1. Communication gaps in current documents.
+2. Changelog (Markdown, grouped by type).
+3. Demo script with exact steps.
+4. Announcement copy and the recommended release narrative.

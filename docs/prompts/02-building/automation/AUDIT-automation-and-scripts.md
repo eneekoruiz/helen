@@ -1,38 +1,40 @@
-# [AUDIT] - Automation and Scripts Audit
+---
+action: AUDIT
+phase: 02-building
+summary: Check that scripts, CI jobs and automation do what their names say, fail loudly and save real time instead of creating false confidence.
+modifies_code: false
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Automation and Scripts Audit
 
+## Goal
 
-**Intención**: AUDIT (No modificar código, buscar problemas)
+Make sure automation saves time instead of creating false confidence.
 
-Purpose: Ensure scripts and automation save time instead of creating false confidence.
+## Use when
 
-## Prompt
+- Scripts, Makefiles, package scripts, CI jobs, codegen or release automation have grown without review.
+- Before relying on automation in a release or handoff.
 
-Act as a DevOps-minded Staff Engineer and maintainer.
+## Requirements
 
-Audit all scripts, Makefiles, package scripts, CI jobs, codegen, release automation, and local helpers.
+1. Inventory the automation and what each script actually does.
+2. Check that names match behavior.
+3. Find broken, stale, dangerous, duplicated or ceremonial automation.
+4. Find missing scripts that would remove repeated manual work.
+5. Verify scripts fail loudly (non-zero exit) and are safe by default (no destructive default action, dry-run where it matters).
 
-## Requisitos mínimos obligatorios
+## Beyond the checklist
 
-1. List available automation and what each script actually does.
-2. Check whether script names match behavior.
-3. Identify broken, stale, dangerous, duplicated, or ceremonial automation.
-4. Find missing scripts that would prevent repeated manual work.
-5. Verify scripts fail loudly and are safe by default.
+High-leverage candidates: one-command verification, fixture reset, screenshot capture, release notes, dependency audit, docs link check, project health report. Do not add automation nobody will maintain.
 
-## Más allá de estos criterios
+## Limits
 
-Look for automation that saves hours: one-command verification, screenshot capture, fixture reset, release notes generation, dependency audit, docs link checking, or project health report.
+- Audit only: do not modify files. Do not run destructive scripts to "test" them.
 
-Do not add automation that will not be maintained.
-
-## Formato de entrega
+## Output
 
 1. Automation inventory.
-2. Broken, dangerous, or misleading scripts (classified by severity: Críticos, Importantes, Opcionales).
-3. Missing high-leverage scripts.
-4. Safety improvements.
-5. Recommended command suite.
+2. Findings grouped as **Critical**, **Important** and **Optional**. For each: evidence (file, line, screen or command), impact, recommended fix and effort.
+3. Missing high-leverage scripts and safety improvements.
+4. Recommended command suite.

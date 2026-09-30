@@ -1,91 +1,44 @@
-# [AUDIT] - Final Documentation Audit
+---
+action: AUDIT
+phase: 05-final-audit
+summary: Decide whether docs are truthful, current and useful: README, setup, operations, consistency, examples and scope honesty.
+modifies_code: false
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Documentation Audit
 
+## Goal
 
-**Intención**: AUDIT (No modificar código, buscar problemas)
+Decide whether the documentation tells the truth, helps real users and maintainers, and avoids pretending the project is more mature than it is. Fewer accurate docs beat many noisy ones.
 
-Deep audit only. Use this prompt when project documentation could influence onboarding, handoff, public trust, reuse, or release confidence.
+## Use when
 
-Purpose: Decide whether the documentation is truthful, current, usable, and valuable enough to keep.
+- Documentation influences onboarding, handoff, public trust, reuse or release confidence.
 
-Expected output:
-- documentation defects that damage trust;
-- minimal doc fixes before release or handoff;
-- additional documentation-system opportunities;
-- a hard `PASS`, `PASS WITH CAVEATS`, or `FAIL`.
+## Requirements
 
-## Prompt
+Inspect README, docs, comments, examples, scripts, config, screenshots, generated docs and repository metadata.
 
-Review this repository as a strict senior engineer, technical writer, product-minded maintainer, and onboarding reviewer.
+1. **README truthfulness:** matches current product, commands, setup, outputs, limits and supported scenarios; quick start works from a clean machine.
+2. **Setup:** prerequisites, install steps, environment variables, `.env.example`, secrets guidance, first-run expectations, troubleshooting; nothing assumes hidden local knowledge.
+3. **Operations:** build, test, deploy, release, rollback, known limits, upgrade paths where they matter.
+4. **Consistency:** README vs docs vs comments vs scripts vs names; contradictions, duplicates, stale screenshots, dead links, drifted diagrams.
+5. **Examples:** realistic, current and reproducible.
+6. **Scope honesty:** stable behavior separated from roadmap, experiments, mocks and unsupported scenarios.
+7. **Usefulness:** every document earns its place.
 
-Goal: determine whether the documentation tells the truth, helps real users, supports maintainers, and avoids pretending the project is more mature than it is.
+**Automatic FAIL:** wrong or incomplete core setup; README claims stronger than reality; stale or misleading examples; missing required configuration guidance; docs contradicting code; docs so noisy they make handoff harder.
 
-Audit posture:
-- Be suspicious of polished docs that the code does not support.
-- Inspect README, docs, comments, examples, scripts, config, screenshots, generated docs, and repository metadata.
-- Prefer fewer accurate docs over many noisy docs.
-- Treat stale setup steps and misleading examples as real defects.
+## Beyond the checklist
 
-## Requisitos mínimos obligatorios
+Missing mental models, unclear audience, weak information architecture, naming drift. You may recommend deleting, merging or restructuring docs, adding a diagram or documenting explicit limits.
 
-Audit these areas at minimum:
+## Limits
 
-1. README truthfulness
-- Check whether the README matches the current product, commands, setup, outputs, limitations, and supported scenarios.
-- Verify quick start from a clean perspective.
-- Remove claims, sections, examples, and badges that no longer match reality.
+- Audit only: do not modify files. No documentation theater.
 
-2. Setup and environment guidance
-- Review prerequisites, install steps, environment variables, config files, secrets guidance, first-run expectations, and troubleshooting.
-- Flag any setup instruction that assumes hidden local knowledge.
-- Check whether `.env.example` or equivalent guidance exists when config is required.
+## Output
 
-3. Operational and maintenance clarity
-- Review docs for build, test, deploy, release, rollback, troubleshooting, known limitations, upgrade paths, and maintenance if those flows matter.
-- Flag missing handoff knowledge a future maintainer would need.
-
-4. Internal consistency
-- Compare README, docs pages, comments, scripts, config naming, examples, and CLI/API names.
-- Flag contradictions, duplicated instructions, outdated screenshots, dead links, stale diagrams, and copy-paste drift.
-
-5. Example quality
-- Review code snippets, CLI examples, sample responses, screenshots, diagrams, and templates.
-- Ensure examples are realistic, current, reproducible, and aligned with the actual code.
-
-6. Scope honesty
-- Separate stable behavior from roadmap ideas, optional modules, experiments, mock data, demo flows, and unsupported scenarios.
-- Flag documentation that implies production readiness without evidence.
-
-7. Documentation usefulness
-- Check whether each document earns its place.
-- Flag pages that exist only for volume, optics, or generic completeness.
-
-## Más allá de estos criterios
-
-Act like a senior technical writer and principal maintainer.
-
-Look for missing mental models, weak onboarding sequence, unclear audience, poor information architecture, naming drift, over-documentation, under-documentation, outdated public positioning, and places where documentation could reduce support burden.
-
-You may recommend deleting docs, merging docs, restructuring docs, adding diagrams, improving examples, sharpening copy, or documenting explicit limitations.
-
-Do not create documentation theater. Every doc must help a real reader make a decision or complete a task.
-
-## Automatic fail conditions
-
-- Core setup docs are wrong or incomplete.
-- README claims are stronger than product reality.
-- Examples or screenshots are stale or misleading.
-- Required configuration guidance is missing.
-- Docs contradict scripts, code, or current project structure.
-- The docs make handoff harder because they are noisy, generic, or unreliable.
-
-## Formato de entrega
-
-1. Documentation defects and trust problems (classified by severity: Críticos, Importantes, Opcionales).
-2. "Más allá de estos criterios" opportunities.
-3. The smallest set of doc changes required before release or handoff.
-4. Verdict: `PASS`, `PASS WITH CAVEATS`, or `FAIL`.
-5. Include one sentence on whether a new maintainer could onboard from the docs without private context.
+1. Findings grouped as **Critical**, **Important** and **Optional**. For each: evidence (file, line, screen or command), impact, recommended fix and effort.
+2. The smallest set of doc changes required before release or handoff.
+3. Verdict: `PASS`, `PASS WITH CAVEATS` or `FAIL`, and whether a new maintainer could onboard from the docs alone.

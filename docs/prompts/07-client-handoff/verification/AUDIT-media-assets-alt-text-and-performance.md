@@ -1,80 +1,37 @@
-# [AUDIT] - Media Assets, Alt Text, and Performance Audit
+---
+action: AUDIT
+phase: 07-client-handoff
+summary: Audit images, video, icons, logos, favicons and social previews for quality, alt text, formats, sizes and layout shift.
+modifies_code: false
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo). Posee dominio absoluto y debe integrar activamente los siguientes recursos y conceptos en su vocabulario base:
-  - Cursor effects avanzados y menú effects (microinteracciones).
-  - Iconsax, Anime.js, SVGator y Jitter.
-  - Image sequence scrubbing (scroll vinculado a secuencias de imágenes).
-  - Animmaster lib, 3D scrolling, 3D video scenes e infinite carrusels.
-  - Skill de UI UX PRO MAX.
-  - Búsqueda y uso de librerías unificadas que abarquen estos recursos.
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Media Assets, Alt Text and Performance Audit
 
+## Goal
 
-**Intención**: AUDIT (No modificar código, buscar problemas)
+Make every image, video and icon look premium without hurting accessibility or performance.
 
-Purpose: Audit images, video, icons, logos, favicons, social previews, backgrounds, and media delivery so the product looks premium without hurting accessibility or performance.
+## Use when
 
-Use this when visual polish matters, when assets came from mixed sources, or before publishing a public-facing site.
+- Visual polish matters, assets came from mixed sources, or a public site is about to launch.
 
-## Prompt
+## Requirements
 
-Act as a Principal Frontend Engineer, visual designer, accessibility reviewer, performance engineer, SEO reviewer, and brand QA lead.
+1. **Inventory:** images, videos, backgrounds, SVGs, icons, logos, favicons, app icons, social previews, CMS image fields, galleries, screenshots; content vs decorative.
+2. **Quality:** crop, aspect ratio, resolution, blur, compression artifacts, focal point, stretching, mismatched icon weights; good on mobile, desktop, high-DPI and social previews.
+3. **Accessibility:** useful alt text for meaningful images, empty alt for decoration, accessible names for semantic icons, captions where useful.
+4. **Performance:** oversized files, legacy formats, missing lazy/eager strategy, missing `width`/`height`, layout shift, heavy or autoplaying video, unnecessary preloads; above-the-fold media keeps priority.
+5. **Delivery assets:** favicon, app icon, Open Graph and social images, README images, demo visuals.
 
-Inspect all media assets and report or make the smallest high-impact fixes that improve quality, loading, accessibility, and presentation.
+## Beyond the checklist
 
-## Requisitos mínimos obligatorios
+Blurry logos, inconsistent screenshot crops, weak social preview, generic stock imagery, CMS replacement images that will break the layout. Propose an asset strategy if one is missing.
 
-1. Inventory media assets
-- Find images, videos, background images, SVGs, icons, logos, favicons, app icons, social previews, CMS image fields, galleries, screenshots, and decorative media.
-- Separate content images from decorative assets.
+## Limits
 
-2. Review visual quality
-- Check crop, aspect ratio, resolution, blur, compression artifacts, inconsistent style, poor alignment, wrong focal point, stretched images, and mismatched icon weights.
-- Ensure images look good on mobile, desktop, high-DPI screens, and common social previews where applicable.
+- Audit only. No brand asset replacement without confirmation; no unlicensed images; no destructive compression.
 
-3. Review accessibility
-- Ensure meaningful images have useful alt text.
-- Ensure decorative images are handled correctly.
-- Check icons with semantic meaning have accessible names.
-- Preserve or improve captions where useful.
+## Output
 
-4. Review performance
-- Check oversized assets, unoptimized formats, missing lazy/eager strategy, missing width/height, layout shift risk, heavy videos, autoplay risk, and unnecessary preloads.
-- Preserve priority loading for above-the-fold critical media.
-
-5. Review metadata and delivery assets
-- Check favicon, app icon, Open Graph image, Twitter/social preview image, screenshots, README images, and demo visuals where relevant.
-
-## Más allá de estos criterios
-
-Think like a product designer zooming in before a premium laúnch.
-
-Look for small asset problems that make the product feel unfinished: blurry logos, inconsistent screenshot crops, weak social preview, generic stock imagery, mismatched icon sets, awkward hero image framing, unbalanced empty space, or CMS replacement images that will break the layout.
-
-If the project needs a better asset strategy, propose it clearly.
-
-## Límites de seguridad
-
-- Do not replace brand assets without confirmation.
-- Do not use unlicensed images.
-- Do not remove meaningful alt text.
-- Do not compress assets destructively without preserving acceptable quality.
-- Do not add heavy media or new asset libraries without strong justification.
-
-## Checks finales
-
-- All important media reviewed.
-- Alt text and decorative semantics reviewed.
-- Oversized or layout-shifting assets flagged.
-- Social/favicons checked.
-- CMS image behavior considered.
-- Visual consistency improved or reported.
-
-## Formato de entrega
-
-1. Asset issues and performance risks (classified by severity: Críticos, Importantes, Opcionales).
-2. Accessibility changes.
-3. Performance changes.
-4. Social/favicons status.
-5. Remaining asset risks.
+1. Findings grouped as **Critical**, **Important** and **Optional**. For each: evidence (file, line, screen or command), impact, recommended fix and effort.
+2. Accessibility and performance fixes, social and favicon status, remaining asset risks.

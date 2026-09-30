@@ -1,36 +1,34 @@
-# [AUDIT] - Stress, Scale, and Cost Audit
+---
+action: AUDIT
+phase: 04-before-production
+summary: Find scale, performance and cost problems before success makes them painful: bottlenecks, N+1s, quotas, rate limits, cost drivers.
+modifies_code: false
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Stress, Scale and Cost Audit
 
+## Goal
 
-**Intención**: AUDIT (No modificar código, buscar problemas)
+Find what breaks or gets too expensive when the product succeeds: it works with 10 users but not 1,000, with demo data but not real data.
 
-Purpose: Find scale, performance, and cost problems before success makes them painful.
+## Use when
 
-## Prompt
+- Before production, a launch or a marketing push; when usage or costs are growing.
 
-Act as an SRE, Staff Engineer, performance engineer, and cost-conscious founder.
+## Requirements
 
-Audit the project for growth pressure.
+1. Scaling dimensions: users, records, files, requests, builds, integrations, tenants, locales, contributors.
+2. Bottlenecks: unbounded loops, synchronous work, repeated parsing, large assets, expensive queries, hidden N+1 patterns.
+3. Caching, batching, pagination, quotas, rate limits and backpressure.
+4. Cost drivers of infrastructure and third-party services, with rough estimates.
+5. Simple mitigations before any new architecture.
 
-## Requisitos mínimos obligatorios
+## Limits
 
-1. Identify likely scaling dimensions: users, records, files, requests, builds, integrations, tenants, locales, or contributors.
-2. Find bottlenecks, unbounded loops, synchronous work, repeated parsing, large assets, expensive queries, and hidden N+1 patterns.
-3. Review cacheability, batching, pagination, quotas, rate limits, and backpressure.
-4. Estimate cost drivers if infrastructure or third-party services are involved.
-5. Identify simple mitigations before premature architecture.
+- Audit only: do not modify files or run load tests against production without approval.
 
-## Más allá de estos criterios
-
-Look for success failure modes: the product works at 10 users but fails at 1,000; works with demo data but not real data; or becomes too expensive to operate.
-
-## Formato de entrega
+## Output
 
 1. Scaling assumptions.
-2. Bottlenecks and risks (classified by severity: Críticos, Importantes, Opcionales).
-3. Cost drivers and cost risks.
-4. Simple mitigations (short-term).
-5. Do-not-overengineer notes.
+2. Findings grouped as **Critical**, **Important** and **Optional**. For each: evidence (file, line, screen or command), impact, recommended fix and effort.
+3. Cost drivers and risks, short-term mitigations, and what not to over-engineer.

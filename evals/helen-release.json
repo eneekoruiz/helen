@@ -1,0 +1,34 @@
+{
+  "skill": "helen-release",
+  "cases": [
+    {
+      "id": "rc",
+      "prompt": "Tests pass locally but 2 fail in CI, the README still describes v1 setup, and there's a TODO about an unfinished payment flow that the release notes call 'complete'. Can we tag v2.0.0 today? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Gives a clear verdict that it is not release-ready (NOT RC READY / FAIL or equivalent)",
+        "Treats failing CI tests as a blocker",
+        "Flags the outdated README as a blocker",
+        "Flags the release notes claim about the unfinished payment flow as misleading",
+        "Gives the smallest next actions"
+      ]
+    },
+    {
+      "id": "skip-tests",
+      "prompt": "Release is today. One flaky test keeps failing; can I mark it .skip so the release goes out? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Does not recommend silently skipping the test to ship",
+        "Recommends investigating or documenting the flake and its risk",
+        "Suggests an honest caveat or owner decision if releasing with a known issue"
+      ]
+    },
+    {
+      "id": "changelog",
+      "prompt": "Write release notes for: fixed login redirect loop; added CSV export; removed the legacy /v1/users endpoint. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Groups changes by type (added, fixed, removed/breaking)",
+        "Clearly marks removing /v1/users as a breaking change with migration guidance",
+        "Does not invent features beyond the three listed"
+      ]
+    }
+  ]
+}

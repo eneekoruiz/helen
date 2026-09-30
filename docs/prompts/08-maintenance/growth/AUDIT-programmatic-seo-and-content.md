@@ -1,37 +1,38 @@
-# [AUDIT] - Programmatic SEO and Content Audit
+---
+action: AUDIT
+phase: 08-maintenance
+summary: Find searchable intents and content that can scale without becoming spam: templates, comparisons, examples, calculators, guides.
+modifies_code: false
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Programmatic SEO and Content Audit
 
+## Goal
 
-**Intención**: AUDIT (No modificar código, buscar problemas)
+Discover whether the project can grow through useful, scalable, search-friendly content.
 
-Purpose: Discover whether the project can grow through useful, scalable, search-friendly content.
+## Use when
 
-## Prompt
+- The product has a real searchable demand and a content or template surface.
 
-Act as an SEO strategist, Growth Engineer, content designer, and technical founder.
+## Requirements
 
-Audit the project for content and programmatic SEO opportunities.
+1. Searchable user intents.
+2. Existing pages, docs, metadata, headings, internal links, schema and indexability.
+3. Content templates that could scale without becoming spam.
+4. Examples, templates, integrations or comparisons that could become useful landing pages.
+5. SEO claims without technical support.
 
-## Requisitos mínimos obligatorios
+## Beyond the checklist
 
-1. Identify searchable user intents.
-2. Review existing pages, docs, metadata, headings, internal links, schema, and indexability.
-3. Identify content templates that could scale without becoming spam.
-4. Check whether examples, templates, integrations, or comparisons can become useful landing pages.
-5. Flag SEO claims without technical support.
+Content moats: calculators, galleries, examples, benchmarks, comparisons, migration guides, changelog-driven pages, community artifacts. Reject thin pages and keyword stuffing.
 
-## Más allá de estos criterios
+## Limits
 
-Look for content moats: calculators, galleries, examples, templates, benchmarks, comparisons, migration guides, changelog-driven pages, or community artifacts.
+- Audit only.
 
-Reject thin pages and keyword stuffing.
-
-## Formato de entrega
+## Output
 
 1. Search opportunity map.
-2. Technical SEO blockers and content gaps (classified by severity: Críticos, Importantes, Opcionales).
-3. Programmatic page ideas and content templates.
-4. Prioritized experiments.
+2. Findings grouped as **Critical**, **Important** and **Optional**. For each: evidence (file, line, screen or command), impact, recommended fix and effort.
+3. Programmatic page ideas, content templates and prioritized experiments.

@@ -1,48 +1,44 @@
-# [AUDIT] - Final SEO Audit
+---
+action: AUDIT
+phase: 04-before-production
+summary: Verify technical SEO before publishing: titles, descriptions, Open Graph, canonicals, robots, sitemap, headings and indexability.
+modifies_code: false
+---
 
-## Nivel 0 y Mente Abierta (Hacia el Nivel 100)
-- **Nivel 0**: Se asume como conocimiento mínimo indispensable la excelencia absoluta en el campo (código limpio, "Skill de UI UX PRO MAX", accesibilidad y rendimiento óptimo).
-- **Mente Abierta**: Se prohíbe limitar el desarrollo a lo estrictamente pedido. Se exige proactividad extrema: si existe una tecnología más moderna, un enfoque más óptimo o mejores recursos disponibles, deben proponerse y aplicarse sin dudarlo para alcanzar el Nivel 100 de calidad.
+# Final SEO Audit
 
+## Goal
 
-**Intención**: AUDIT (No modificar código, buscar problemas)
+Make sure a public site is indexable, correctly described and shareable before it goes live.
 
-## Objetivo
+## Use when
 
-Verificar SEO básico, metadatos y configuraciones de indexabilidad antes de la publicación o release.
+- Before publishing public web projects, landing pages, docs or portfolios.
 
-## Cuándo Usarlo
+## Skip when
 
-- En la fase de preparación de releases para proyectos web públicos.
-- Antes de compartir landing pages, documentación pública o portfolios.
+- SEO is explicitly out of scope, or there is no indexable content.
 
-## Cuándo NO Usarlo
+## Requirements
 
-- Si el posicionamiento SEO está explícitamente fuera de alcance del proyecto.
-- Si no hay superficie de contenido indexable en buscadores.
+1. `title` and meta description per key page, unique and matching the real content.
+2. Open Graph (`og:title`, `og:type`, `og:image`, `og:url`, plus `og:description`, `og:image:alt`) and Twitter cards; social images readable at small sizes.
+3. Canonical URLs, `robots.txt`, XML sitemap, no accidental `noindex` in production, no duplicate content.
+4. One `h1` per page and a logical heading order; descriptive link text; image alt text.
+5. Language and alternates (`lang`, `hreflang`) when multilingual; structured data where it clearly applies.
+6. Core Web Vitals risks that affect ranking (coordinate with the performance prompts).
 
-## Criterios Mínimos
+## Beyond the checklist
 
-- Revisa `title`, `meta description`, Open Graph (OG), URLs canónicas, directivas `robots.txt`, sitemaps, estructura de headings (`h1`), indexabilidad y prevención de contenido duplicado.
-- Comprueba que los metadatos e indexaciones coincidan estrictamente con el producto real.
+Organic discoverability: comparison pages, documentation keywords, clean sitemaps, attractive share snippets. External help: `helen skills external seo`.
 
-## Más allá de estos criterios
+## Limits
 
-Busca oportunidades de discoverability orgánica: páginas comparativas, optimización de palabras clave en la documentación, sitemaps limpios y snippets atractivos para compartir.
+- Audit only: do not modify files.
+- No SEO claims, keyword stuffing or misleading marketing text the product cannot back.
 
-## Límites de Seguridad
+## Output
 
-No añadas claims de SEO, keywords de spam o textos de marketing engañosos que el producto no sostenga con evidencia.
-
-## Checks Finales
-
-- Metadatos esenciales presentes en todas las páginas clave.
-- Claims SEO verificables con el contenido.
-- Sin directivas `noindex` accidentales en producción.
-
-## Formato de Entrega
-
-1. Bloqueadores y problemas SEO críticos (clasificados por severidad: Críticos, Importantes, Opcionales).
-2. Propuestas de optimización (meta tags, headings).
-3. Oportunidades orgánicas.
-4. Warnings y advertencias.
+1. Findings grouped as **Critical**, **Important** and **Optional**. For each: evidence (file, line, screen or command), impact, recommended fix and effort.
+2. Proposed meta tags and heading fixes, ready to paste.
+3. Organic opportunities.
