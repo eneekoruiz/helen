@@ -1,56 +1,39 @@
 ---
 action: GENERATE
-label: GENERATE-
 phase: 06-release
+summary: Write the changelog, release notes, migration notes, demo script and announcement copy that match what actually ships.
 modifies_code: true
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
 ---
 
-# [GENERATE] - Release Notes, Changelog, and Demo Package Audit
+# Release Notes, Changelog and Demo Package
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Make releases understandable, credible and reusable: notes, changelog and demo material that match what actually ships.
 
-**Intención**: GENERATE (Generar plantillas, notas, checklists o documentación)
+## Use when
 
-Purpose: Make releases understandable, credible, and reusable by generating notes, changelogs, and demo guides.
+- Preparing a release, a launch or a client demo.
 
-## Prompt
+## Requirements
 
-Act as a release manager, product marketer, technical writer, and founder.
+1. Review or generate the changelog, release notes, migration notes, README updates, demo script, screenshot guidance and social preview text.
+2. Explain user value, breaking changes, known issues and verification commands.
+3. Flag missing screenshots or demo steps.
+4. Remove inflated claims and vague release language.
+5. Every artifact matches the shipped state (check against git history and the code).
 
-Audit and generate release communication and demo materials.
+## Beyond the checklist
 
-## Requisitos mínimos obligatorios
+Reusable launch assets: short and long demo, screenshot set, social card, FAQ, post-release follow-up checklist.
 
-1. Review or generate changelog, release notes, demo script, screenshots guidance, social preview text, README updates, and migration notes.
-2. Check whether release communication explains user value, breaking changes, known issues, and verification commands.
-3. Identify missing screenshots or demo steps.
-4. Flag inflated claims or vague release language.
-5. Ensure generated artifacts match the actual shipped state.
+## Limits
 
-## Más allá de estos criterios
+- Never announce features that are partial or absent; mark anything unverified.
 
-Look for reusable launch assets: short demo, long demo, screenshot set, social card, release summary, migration guide, FAQ, and post-release follow-up checklist.
+## Output
 
-## Formato de entrega
-
-1. Release communication gaps (in current documents).
-2. Proposed/Generated Changelog (markdown format).
-3. Demo Script/Package (exact steps to demonstrate the release).
-4. Public announcement text/copy.
-5. Recommended release narrative.
+1. Communication gaps in current documents.
+2. Changelog (Markdown, grouped by type).
+3. Demo script with exact steps.
+4. Announcement copy and the recommended release narrative.

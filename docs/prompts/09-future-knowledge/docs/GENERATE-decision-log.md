@@ -1,66 +1,46 @@
 ---
 action: GENERATE
-label: GENERATE-
 phase: 09-future-knowledge
+summary: Write Architecture Decision Records (one decision each: context, decision, consequences, status) and an ADR index.
 modifies_code: true
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
 ---
 
-# [GENERATE] - GENERATE — Architecture Decision Record (ADR) Log
+# Decision Log (ADR)
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Record the "why" behind technical decisions so future readers do not have to guess or repeat old debates.
 
-**Rol**: Lead Architect & Product Owner.
+## Use when
 
-Este prompt genera entradas estructuradas para el registro de decisiones arquitectónicas (Decision Log) a fin de documentar de forma inequívoca el "por qué" detrás del diseño técnico del software.
+- After any decision that is costly to reverse: architecture, stack, data model, hosting, major dependencies.
 
-## Requisitos mínimos obligatorios
-1. **Contexto**: Explicar los antecedentes y las fuerzas que empujan a tomar una decisión (problemas de rendimiento, coste, límites de la plataforma, etc.).
-2. **Decisión propuesta**: Definir con precisión la alternativa técnica elegida.
-3. **Consecuencias**: Detallar tanto los beneficios obtenidos (ventajas operativas) como las desventajas o deudas técnicas asumidas (compromisos).
-4. **Estado**: Indicar claramente el estado actual de la decisión: `Prouesta`, `Aceptada`, `Rechazada` o `Superada` (con referencia al ADR sucesor).
+## Requirements
 
-## Más allá de estos criterios
-- Enlazar cada ADR con los commits o ramas de Git específicos donde se implementó dicho diseño técnico.
-- Generar un índice en formato Markdown (`docs/adr/README.md`) para facilitar la lectura secuencial de los registros históricos.
+1. One decision per record, Michael Nygard format.
+2. **Context:** forces behind the decision (performance, cost, platform limits, team skills).
+3. **Decision:** the chosen alternative and the main alternatives rejected.
+4. **Consequences:** benefits and the debts or tradeoffs accepted.
+5. **Status:** Proposed, Accepted, Rejected or Superseded (with a link to the successor).
+6. Link the commits or branches that implemented it; keep an index at `docs/adr/README.md`.
 
-## Límites de seguridad
-- Limitar cada ADR a una sola decisión puntual para evitar la creación de documentos de arquitectura inmanejables y gigantescos.
+## Limits
 
-## Checks finales
-- Validar que el formato cumpla rigurosamente con la plantilla clásica de Michael Nygard para registros de decisión (ADRs).
+- Never rewrite history: supersede old ADRs instead of editing their decision.
 
-## Formato de entrega
-La salida debe ser el archivo Markdown formateado listo para copiar en la carpeta `docs/adr/ADR-XXX-[nombre-kebab].md` con la estructura:
+## Output
+
+A file ready for `docs/adr/ADR-NNN-short-title.md`:
+
 ```markdown
-# ADR [Número]: [Título corto]
+# ADR NNN: Short title
+- Date: YYYY-MM-DD
+- Status: Proposed | Accepted | Rejected | Superseded by ADR-XXX
+- Authors: names
 
-- **Fecha**: [AAAA-MM-DD]
-- **Estado**: [Propuesta | Aceptada | Superada]
-- **Autores**: [Nombre/s]
-
-## Contexto
-[Explicación de las necesidades y restricciones]
-
-## Decisión
-[Detalle de la alternativa elegida]
-
-## Consecuencias
-- **Positivas**: [Efectos positivos]
-- **Negativas**: [Riesgos, compromisos o deudas]
+## Context
+## Decision
+## Consequences
+- Positive:
+- Negative:
 ```

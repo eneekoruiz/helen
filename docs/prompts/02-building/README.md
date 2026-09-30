@@ -1,57 +1,41 @@
-# Fase 2: Building (Construcción y Desarrollo)
+# 02 · Building
 
-**Objetivo de la fase**:
-Escribir código limpio, modular, robusto y seguro mientras se implementan las funcionalidades del proyecto. Asegurar la consistencia del modelo de datos, la integridad de los límites arquitectónicos y los contratos de API a nivel local.
+Build real features with clean, modular, safe code: automation, quality gates, clean code, CMS and i18n, data and API contracts, and security.
 
-**Cuándo se utiliza**:
-- Durante el ciclo de desarrollo activo de nuevas funcionalidades.
-- Al refactorizar o simplificar código para mejorar su maintainability.
-- Al integrar nuevas APIs, módulos, o esquemas de base de datos.
+## Quick decisions
 
-**Qué problemas resuelve**:
-- Código fragmentado, sobreacoplado o con duplicación excesiva.
-- Introducción involuntaria de secretos o malas prácticas de seguridad en el código nuevo.
-- Schema drift, APIs inconsistentes o dependencias mal gestionadas.
-- Lentitud en el ciclo de feedback de desarrollo.
+- Before letting an agent iterate alone: `plan-agentic-loop-and-spec-driven-workflow`.
+- At any point, to know if you can continue: `audit-quality-gates-checkpoint` (or `helen check`).
+- Code works but feels fragile: `apply-clean-code-pass-flow`.
+- Doubts about data, API or integrations: `audit-data-and-api-contracts`.
+- Client must edit sales content without code: `generate-visual-cms-wysiwyg-i18n`, then `apply-cms-editable-content-conversion-flow` and `audit-content-model-and-editorial-workflow`.
+- Before exposing anything publicly: `apply-security-hardening-flow`.
+- Stop: do not change code without reading its structure, tests, conventions and public contracts.
 
----
+## Exit checklist
 
-## Diferencia Operativa de Etiquetas
+Before moving on to 03-finish-features:
 
-- **GENERATE**: crea una funcionalidad nueva dentro de un proyecto iniciado, como CMS, modelos o componentes.
-- **ENHANCE/APPLY**: mejora código existente con restricciones de compatibilidad y sin reescrituras gratuitas.
-- **AUDIT**: revisa arquitectura, CMS, APIs o datos sin tocar archivos.
-- **INIT**: no corresponde a esta fase salvo que el proyecto se reinicie desde cero.
+- [ ] The main features exist and are usable.
+- [ ] No secrets or credentials are exposed.
+- [ ] Data models and API contracts are coherent.
+- [ ] The CMS separates editable content from fixed structure.
+- [ ] With i18n, translatable and universal fields are distinct.
+- [ ] Build, lint, types and relevant tests pass.
+- [ ] The implementation adds no debt out of proportion to its value.
 
-## Prompts Incluidos en esta Fase
+## Prompts
 
-| Prompt / Flow / Checkpoint | Intención | Propósito / Cuándo usarlo | Frecuencia |
-|---|---|---|---|
-| [generate-visual-cms-wysiwyg-i18n.md](cms/GENERATE-visual-cms-wysiwyg-i18n.md) | **GENERATE** | Implementar CMS WYSIWYG protegido con matriz de campos universales/traducibles para i18n. | Media (Si aplica CMS cliente) |
-| [safe-clean-code-simplification-pass.md](clean-code/APPLY-safe-clean-code-simplification-pass.md) | **APPLY** | Simplificación y refactorización local segura (clean code). | Alta (Antes de cada commit importante) |
-| [agentic-loop-and-spec-driven-workflow.md](automation/PLAN-agentic-loop-and-spec-driven-workflow.md) | **PLAN** | Decidir cuándo usar bucles autónomos o flujos por especificación, con límites y puntos de control. | Media (Construcciones largas) |
-| [security-hardening.md](security/APPLY-security-hardening-flow.md) | **APPLY flow** | Mitigar riesgos de secretos, inyecciones, dependencias inseguras y malas prácticas. | Media |
-| [cms-editable-content-conversion.md](cms/APPLY-cms-editable-content-conversion-flow.md) | **APPLY flow** | Flujo para mover textos e imágenes estáticas a campos editables del CMS. | Baja (Sólo si aplica CMS) |
-| [content-model-and-editorial-workflow-audit.md](data-api/AUDIT-content-model-and-editorial-workflow.md) | **AUDIT** | Revisar la estructura y el flujo editorial del CMS. | Baja |
-| [data-model-and-domain-integrity-audit.md](data-api/AUDIT-data-model-and-domain-integrity.md) | **AUDIT** | Auditar invariantes del dominio, validaciones y modelos de datos. | Media |
-| [api-integration-and-contract-audit.md](data-api/AUDIT-api-integration-and-contract.md) | **AUDIT** | Validar contratos de API, compatibilidad con SDKs y webhooks. | Media |
-| [automation-and-scripts-audit.md](automation/AUDIT-automation-and-scripts.md) | **AUDIT** | Inspeccionar scripts locales, herramientas del desarrollador y automatización. | Baja |
-| [clean-code-pass-flow.md](clean-code/APPLY-clean-code-pass-flow.md) | **APPLY flow** | Ejecución compuesta para mejorar código y validar que siga compilando. | Media |
-| [clean-code-architecture-audit-flow.md](clean-code/AUDIT-clean-code-architecture-flow.md) | **AUDIT/APPLY flow** | Revisión profunda de clean code cruzada con arquitectura técnica general. | Media |
-| [build-and-compile-checkpoint.md](checkpoint/AUDIT-build-and-compile-checkpoint.md) | **Checkpoint** | Puerta de calidad para validar que el código compila localmente. | Alta |
-| [lint-and-typecheck-checkpoint.md](checkpoint/AUDIT-lint-and-typecheck-checkpoint.md) | **Checkpoint** | Validar que no hay errores de tipado o de linter. | Alta |
-| [test-suite-checkpoint.md](checkpoint/AUDIT-test-suite-checkpoint.md) | **Checkpoint** | Puerta de verificación de la suite de tests locales. | Alta |
-
----
-
-## Checklist de Transición: ¿Ya estoy preparado para pasar a la siguiente fase?
-
-Antes de pasar a la fase de **Finish Features (03-finish-features)**, asegúrate de responder afirmativamente a las siguientes preguntas:
-
-- [ ] ¿Están implementadas todas las funcionalidades clave previstas para la iteración?
-- [ ] ¿El proyecto compila sin errores (`build-and-compile-checkpoint` superado)?
-- [ ] ¿Se han ejecutado y corregido los errores de lint y tipado (`lint-and-typecheck-checkpoint` superado)?
-- [ ] ¿Se han simplificado las dependencias y duplicidades detectadas durante la construcción?
-
-**Siguiente Fase**:
-Si la respuesta es **Sí** a todas las anteriores, estás listo para entrar en la fase **[03-finish-features](../03-finish-features/README.md)**.
+<!-- HELEN:INDEX:START (generated by `helen prompts index`, do not edit) -->
+| Prompt | Type | Summary |
+|---|---|---|
+| [audit-automation-and-scripts](automation/AUDIT-automation-and-scripts.md) | AUDIT | Check that scripts, CI jobs and automation do what their names say, fail loudly and save real time instead of creating false confidence. |
+| [plan-agentic-loop-and-spec-driven-workflow](automation/PLAN-agentic-loop-and-spec-driven-workflow.md) | PLAN | Decide when an agent may iterate on its own (loops, spec-driven flows) and with which success criteria, limits and human checkpoints. |
+| [audit-quality-gates-checkpoint](checkpoint/AUDIT-quality-gates-checkpoint.md) | checkpoint | Blocking gate: build, typecheck, lint and tests must pass (run `helen check`) before a flow continues. |
+| [apply-clean-code-pass-flow](clean-code/APPLY-clean-code-pass-flow.md) | APPLY flow | Flow: simplify code safely (zero dead code, less duplication, clearer names) without changing behavior, gated by build, lint and tests. |
+| [apply-cms-editable-content-conversion-flow](cms/APPLY-cms-editable-content-conversion-flow.md) | APPLY flow | Flow: convert static pages so texts, links and images use the inline Visual CMS components, with i18n-aware keys. |
+| [audit-content-model-and-editorial-workflow](cms/AUDIT-content-model-and-editorial-workflow.md) | AUDIT | Check that editable content is usable and safe for the person editing it: fields, validation, repeatable blocks and handoff notes. |
+| [generate-visual-cms-wysiwyg-i18n](cms/GENERATE-visual-cms-wysiwyg-i18n.md) | GENERATE | Build a protected visual CMS so the client edits sales content without code, separating universal and translatable fields. |
+| [audit-data-and-api-contracts](data-api/AUDIT-data-and-api-contracts.md) | AUDIT | Audit the data model and every contract (APIs, schemas, webhooks, CLI, integrations) for invariants, drift and breaking-change risk. |
+| [apply-security-hardening-flow](security/APPLY-security-hardening-flow.md) | APPLY flow | Flow: find and fix secrets, injection risks, vulnerable dependencies and unsafe permissions before public exposure or release. |
+<!-- HELEN:INDEX:END -->

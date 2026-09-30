@@ -22,4 +22,4 @@ description: Use at the start of a project or when prioritizing work - initial r
 
 ## Inspiration and design foundation
 
-Collect references (Dribbble, Awwwards, Behance, Pinterest) and capture the design system in a `DESIGN.md` (see prompt `init-design-md-and-inspiration`). Inspire; never clone another brand's identity for a client.
+Collect references (Dribbble, Awwwards, Behance, Pinterest) and capture the design system in a `DESIGN.md` (see prompt `init-creative-direction-and-design-md`). Inspire; never clone another brand's identity for a client.

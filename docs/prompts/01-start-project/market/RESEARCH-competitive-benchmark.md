@@ -1,59 +1,50 @@
 ---
 action: RESEARCH
-label: RESEARCH-
 phase: 01-start-project
+summary: Compare the project with real competitors and substitutes: UX, conversion, features, trust and gaps worth closing.
 modifies_code: false
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
+aliases:
+  - audit-competitor-analysis
 ---
 
-# [RESEARCH] - Competitive Benchmark Audit
+# Competitive Benchmark
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Understand what competitors and alternatives do well, where they create friction, and which gaps or premium details matter to users, so the roadmap is driven by evidence instead of taste.
 
-**Intención**: REPORT (Generar conocimiento, benchmarks, oportunidades)
+## Use when
 
-Purpose: Compare the project against relevant alternatives/competitors and discover missing premium opportunities.
+- Before deciding roadmap or features, repositioning or redesigning.
+- There are concrete competitors or reference sites that already sell well.
 
-## Prompt
+## Requirements
 
-Act as a Product Strategist, Staff Product Engineer, UX Researcher, and founder.
+Inputs: competitor URLs or names, our niche and offer, target audience, our stack.
 
-Compare this project with the best relevant competitors, adjacent products, open-source alternatives, and user expectations.
+1. Identify competitors, adjacent products, open-source alternatives and substitutes.
+2. For each, review first viewport, narrative, CTAs, forms, social proof, pricing or packaging, onboarding, integrations, trust signals, docs, performance and polish. Review mobile and desktop separately.
+3. Extract concrete features and patterns, not vague descriptions.
+4. Patterns repeated across competitors, and opportunities none of them solve well.
+5. Commercial friction: unnecessary steps, weak claims, poor forms, missing proof, confusing navigation.
+6. Differentiators the project already has.
+7. Rank findings by conversion impact and estimated effort.
 
-## Requisitos mínimos obligatorios
+## Beyond the checklist
 
-1. Identify competitors and substitutes.
-2. Compare feature parity, UX quality, onboarding, pricing or packaging if relevant, integrations, trust signals, docs, performance, and polish.
-3. Identify gaps that matter to users, not just feature count.
-4. Identify differentiators the project already has.
-5. Identify premium features or details users would expect from a top-tier product.
+Look for second-order opportunities: fewer features with a better flow, better defaults, stronger trust, faster time-to-value, a sharper niche. Separate patterns that convert from decoration that only looks expensive.
 
-## Más allá de estos criterios
+## Limits
 
-Look for second-order opportunities: fewer features with better flow, better defaults, stronger trust, faster time-to-value, better examples, better migration story, stronger ecosystem fit, or a sharper niche.
+- Research only: do not modify files.
+- Never invent traffic, revenue, performance or other facts about competitors. If a site cannot be accessed, say so and work with what is available.
+- Do not recommend copying competitors blindly.
 
-Do not recommend copying competitors blindly. If requiring live internet data, ensure references are valid (do not invent facts about competitors).
+## Output
 
-## Formato de entrega
-
-1. Competitive landscape (competidores y alternativas comparable).
-2. Feature and UX parity table.
-3. Gaps and weaknesses identified (classified by severity/importance).
-4. Differentiation opportunities & differentiators we have.
-5. Missing premium details we should adopt.
-6. Recommended action plan / Quick wins.
+1. Landscape: competitors and substitutes.
+2. Comparison table (features, UX, trust, pricing where relevant).
+3. Gaps and weaknesses, ranked.
+4. Our differentiators and opportunities.
+5. Premium details worth adopting and quick wins.
+6. What to hand to `generate-competitive-advantage`.

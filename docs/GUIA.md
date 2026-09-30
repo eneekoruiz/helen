@@ -104,7 +104,7 @@ helen apply design --track     # seguir el plan paso a paso (ver abajo)
 
 Los pasos de tipo *checkpoint* no se pueden dar por hechos hasta que `helen check` pase (salvo `--force` con nota). Una IA puede llevar todo el proceso solo con `helen next` / `helen done`.
 
-**C) Manual.** Elige un prompt con `helen prompts list` o el `ROUTER.md` de la fase y ejecútalo con `helen prompts show <id>`.
+**C) Manual.** Elige un prompt con `helen prompts list` o las "Quick decisions" del README de la fase y ejecútalo con `helen prompts show <id>`.
 
 ## 4. Las fases del proyecto
 
@@ -154,7 +154,7 @@ Cada entrada tiene **estado**: `active`, `caution` (léelo antes) o `discontinue
 
 Reglas:
 
-1. Una skill ejecuta instrucciones y a veces scripts con tus permisos: revísala con el prompt `audit-third-party-skills-supply-chain` antes de instalarla.
+1. Una skill ejecuta instrucciones y a veces scripts con tus permisos: revísala con el prompt `audit-third-party-tools-and-mcp` antes de instalarla.
 2. Usa **una sola** skill de diseño principal (taste-skill, impeccable o ui-ux-pro-max).
 3. Instala solo la skill que necesitas, no repositorios enteros; evita `curl ... | sh` a ciegas.
 4. Los comandos del catálogo salen del README de cada proyecto en el momento de la verificación: compruébalos antes de ejecutarlos.
@@ -171,11 +171,11 @@ Un **servidor MCP** es un programa o servicio remoto que da a tu IA herramientas
 
 Incluidos en el catálogo: `playwright-mcp` y `chrome-devtools-mcp` (ver y medir la web), `context7` (documentación actual), `github-mcp`, `vercel-mcp` y `supabase-mcp`. `helen skills external <id>` muestra los comandos oficiales y sus avisos.
 
-Reglas por defecto: endpoint oficial, permisos mínimos, **solo lectura** cuando solo necesites mirar, base de datos y hosting de **desarrollo** (no producción), tokens fuera del repositorio, y confirmación humana para escribir, desplegar o gastar. La meta `helen apply connect-tools` empieza por el prompt `audit-mcp-servers-security-and-scope`.
+Reglas por defecto: endpoint oficial, permisos mínimos, **solo lectura** cuando solo necesites mirar, base de datos y hosting de **desarrollo** (no producción), tokens fuera del repositorio, y confirmación humana para escribir, desplegar o gastar. La meta `helen apply connect-tools` empieza por el prompt `audit-third-party-tools-and-mcp`.
 
 ## 9. Mantener y ampliar HELEN
 
-- **Nuevo prompt**: crea el archivo en su fase con el frontmatter del contrato (`docs/prompts/PREMIUM_PROMPT_CONTRACT.md`) y añádelo al README y ROUTER de la fase.
+- **Nuevo prompt**: crea el archivo en su fase siguiendo `docs/prompts/CONTRACT.md` (en inglés) y ejecuta `helen prompts index`; el índice de la fase se genera solo.
 - **Nueva skill**: carpeta `skills/<nombre>/SKILL.md` con `name` (igual que la carpeta) y `description`.
 - **Nueva meta o paso**: edita `docs/prompts/playbooks.json`.
 - **Nueva herramienta externa**: entrada en `skills/catalog.json` con `source`, `install`, `license`, `status`.

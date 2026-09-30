@@ -1,69 +1,49 @@
 ---
 action: APPLY
-label: APPLY-
 phase: 03-finish-features
+summary: Find and fix basic accessibility problems: keyboard, focus, contrast, semantics, labels, alt text, touch targets and reduced motion.
 modifies_code: true
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
 ---
 
-# [APPLY] - Basic Accessibility Pass
+# Basic Accessibility Pass
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Fix the accessibility problems that block real people before release or a public presentation.
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+## Use when
 
-## Objetivo
+- During visual and UX polish, and before publishing a web UI or delivering to a client.
 
-Detectar y corregir problemas básicos de accesibilidad en la UI antes de release o presentación pública.
+## Skip when
 
-## Cuándo Usarlo
+- The project has no user interface or interactive content.
 
-- En la fase de pulido visual y UX.
-- Antes de publicar una UI web o entregar a cliente.
+## Requirements
 
-## Cuándo NO Usarlo
+1. Keyboard navigation reaches every interactive element in a sensible order; focus is always visible (a designed focus ring, not the browser default removed).
+2. Text contrast at least 4.5:1 (3:1 for large text, 18px bold or more); the main flow never depends only on color or hover.
+3. Semantic HTML: landmarks, one `h1` and ordered headings, buttons vs links used correctly.
+4. Labelled form fields, descriptive errors linked to their fields, alt text for content images (empty alt for decoration).
+5. Touch targets at least 44-48px (or an expanded hit area), with at least 8px between adjacent targets.
+6. Basic screen reader support and `prefers-reduced-motion` respected.
 
-- Si el proyecto no tiene interfaz de usuario ni contenido interactivo.
+## Beyond the checklist
 
-## Criterios Mínimos
+Accessibility as product quality: clear error text, predictable interfaces, easy recovery, plain language. The external `web-design-guidelines` skill adds 100+ rules (`helen skills external web-design-guidelines`).
 
-- Revisa navegación por teclado, visibilidad del focus, contrastes de color, etiquetas semánticas HTML, alt texts de imágenes de contenido, etiquetas de formularios y soporte básico para lectores de pantalla.
-- Comprueba que el flujo principal no dependa únicamente de colores o de eventos hover.
+## Limits
 
-## Más allá de estos criterios
+- No wrong or redundant ARIA to look accessible ("aria theater"); native semantics first.
 
-Busca la accesibilidad como calidad de producto: claridad en textos de error, interfaces predecibles, facilidades de recuperación ante errores y lenguaje sencillo.
-
-## Límites de Seguridad
-
-No añadas atributos ARIA incorrectos o redundantes para aparentar accesibilidad técnica ("aria theater") si rompen la experiencia real del lector.
-
-## Formato de Entrega
-
-El entregable debe ser minimalista. Produce únicamente:
+## Output
 
 ```text
-✅ Mejoras de accesibilidad aplicadas. / [o] ⚠️ Completado con advertencias.
+Done. / Done with warnings.
 
-Cambios aplicados:
-- [Breve lista de 1-3 viñetas con las mejoras de accesibilidad aplicadas]
+Changes applied:
+- 1-3 bullets with the exact changes
 
-Acciones manuales necesarias:
-- Ninguna. / [o especificar acciones]
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
 ```
-*No generes informes extensos ni explicaciones teóricas.*

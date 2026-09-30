@@ -1,17 +1,23 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { getPromptsRoot } from './prompts.js';
+import { parseFrontmatter } from './frontmatter.js';
+import { updatePhaseIndexes } from './promptIndex.js';
+import { PHASE_PATTERN, getPromptsRoot, idFromRelativePath } from './prompts.js';
 
 export interface PromptIssue {
   file: string;
   message: string;
 }
 
-const NON_ATOMIC = new Set(['README.md', 'ROUTER.md', 'HUMAN_CHECKLIST.md']);
-const REQUIRED_KEYS = ['action', 'label', 'phase', 'modifies_code', 'stop_conditions'];
-/** Legacy file prefixes and the canonical actions the contract maps them to. */
-const PREFIX_ACTIONS: Record<string, string[]> = { APPLY: ['APPLY', 'ENHANCE'] };
+const REQUIRED_KEYS = ['action', 'phase', 'summary', 'modifies_code'];
+const REQUIRED_SECTIONS = ['## Goal', '## Use when', '## Limits', '## Output'];
+const BODY_SECTIONS = ['## Requirements', '## Steps'];
 const LINK_PATTERN = /\]\(((?:[^()\s#]|\([^)]*\))+)\)/g;
+const MAX_SUMMARY = 160;
+
+const SPANISH = ['que', 'para', 'los', 'las', 'del', 'una', 'con', 'por', 'como', 'cuando', 'sin', 'más', 'también', 'según'];
+const ENGLISH = ['the', 'and', 'for', 'with', 'that', 'this', 'from', 'when', 'without', 'into', 'each', 'before'];
+const LEGACY_MARKERS = ['Nivel 0', 'Mente Abierta', 'file:///', '## Objetivo', '## Cuándo', '## Requisitos', '## Formato', '## Límites'];
 
 function walk(dir: string): string[] {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
@@ -20,60 +26,87 @@ function walk(dir: string): string[] {
   });
 }
 
-function frontmatterKeys(content: string): Map<string, string> | null {
-  const match = /^---\n([\s\S]*?)\n---/.exec(content);
-  if (!match) return null;
-  const keys = new Map<string, string>();
-  for (const line of match[1]!.split('\n')) {
-    const kv = /^([a-z_]+):\s*(.*)$/.exec(line);
-    if (kv) keys.set(kv[1]!, kv[2]!.trim());
-  }
-  return keys;
+function count(words: string[], text: string): number {
+  return words.reduce((total, word) => total + (text.match(new RegExp(`(?<![\\p{L}])${word}(?![\\p{L}])`, 'giu'))?.length ?? 0), 0);
+}
+
+/** Prose outside code blocks and inline code, which is where the language is judged. */
+function prose(text: string): string {
+  return text.replace(/```[\s\S]*?```/g, ' ').replace(/`[^`]*`/g, ' ');
+}
+
+export function looksSpanish(text: string): boolean {
+  const body = prose(text);
+  const spanish = count(SPANISH, body);
+  return spanish >= 6 && spanish > count(ENGLISH, body) * 0.5;
 }
 
 /**
- * Enforces the Premium Prompt Contract mechanically: frontmatter on atomic
- * prompts, action/phase consistent with file name and directory, and
- * relative Markdown links that resolve (case-sensitively, as on Linux).
+ * Mechanical enforcement of docs/prompts/CONTRACT.md: frontmatter, required
+ * sections, English, no legacy boilerplate, unique aliases, working relative
+ * links (case-sensitive) and up-to-date phase indexes.
  */
 export function lintPrompts(root: string = getPromptsRoot()): PromptIssue[] {
   const issues: PromptIssue[] = [];
+  const ids = new Map<string, string>();
+  const aliases = new Map<string, string>();
 
   for (const file of walk(root)) {
     const rel = path.relative(root, file).split(path.sep).join('/');
     const base = path.basename(file);
     const content = fs.readFileSync(file, 'utf-8');
-    const phase = /^\d{2}-[^/]+/.exec(rel)?.[0];
+    const phase = rel.split('/')[0]!;
+    const isPrompt = PHASE_PATTERN.test(phase) && base !== 'README.md';
+    const add = (message: string) => issues.push({ file: rel, message });
 
-    if (phase && !NON_ATOMIC.has(base)) {
-      const keys = frontmatterKeys(content);
-      if (!keys) {
-        issues.push({ file: rel, message: 'missing YAML frontmatter' });
-      } else {
-        for (const key of REQUIRED_KEYS) {
-          if (!keys.has(key)) issues.push({ file: rel, message: `frontmatter missing "${key}"` });
-        }
-        const prefix = /^([A-Z]+)-/.exec(base)?.[1];
-        if (prefix && !(PREFIX_ACTIONS[prefix] ?? [prefix]).includes(keys.get('action') ?? '')) {
-          issues.push({ file: rel, message: `action "${keys.get('action')}" does not match file prefix "${prefix}"` });
-        }
-        if (keys.get('phase') && keys.get('phase') !== phase) {
-          issues.push({ file: rel, message: `phase "${keys.get('phase')}" does not match directory "${phase}"` });
-        }
-      }
+    for (const marker of LEGACY_MARKERS) {
+      if (content.includes(marker)) add(`contains legacy text "${marker}"`);
     }
-
-    if (content.includes('file:///')) {
-      issues.push({ file: rel, message: 'contains an absolute file:/// link' });
-    }
+    if (looksSpanish(content)) add('prose looks Spanish: HELEN prompts are written in English');
 
     for (const match of content.matchAll(LINK_PATTERN)) {
       const target = decodeURIComponent(match[1]!);
       if (/^[a-z][a-z0-9+.-]*:/i.test(target)) continue;
-      if (!fs.existsSync(path.resolve(path.dirname(file), target))) {
-        issues.push({ file: rel, message: `broken link: ${target}` });
-      }
+      if (!fs.existsSync(path.resolve(path.dirname(file), target))) add(`broken link: ${target}`);
     }
+
+    if (!isPrompt) continue;
+
+    const { data, body, hasFrontmatter } = parseFrontmatter(content);
+    if (!hasFrontmatter) {
+      add('missing YAML frontmatter');
+      continue;
+    }
+    for (const key of REQUIRED_KEYS) {
+      if (data[key] === undefined || data[key] === '') add(`frontmatter missing "${key}"`);
+    }
+    const prefix = /^([A-Z]+)-/.exec(base)?.[1];
+    if (!prefix) add('file name must start with its action, e.g. AUDIT-');
+    else if (data.action !== prefix) add(`action "${String(data.action)}" does not match file prefix "${prefix}"`);
+    if (data.phase !== phase) add(`phase "${String(data.phase)}" does not match directory "${phase}"`);
+    if (typeof data.summary === 'string' && data.summary.length > MAX_SUMMARY) add(`summary longer than ${MAX_SUMMARY} characters`);
+    if (base.endsWith('-flow.md') && (typeof data.repeatable !== 'boolean' || !data.stage)) add('flows need "repeatable" and "stage"');
+
+    if (!/^#\s+\S/m.test(body)) add('missing "# Title"');
+    for (const section of REQUIRED_SECTIONS) {
+      if (!new RegExp(`^${section}\\s*$`, 'm').test(body)) add(`missing section "${section}"`);
+    }
+    if (!BODY_SECTIONS.some(section => new RegExp(`^${section}\\s*$`, 'm').test(body))) add('missing section "## Requirements" or "## Steps"');
+
+    const id = idFromRelativePath(rel).split('/').at(-1)!;
+    if (ids.has(id)) add(`short id "${id}" also used by ${ids.get(id)}`);
+    ids.set(id, rel);
+    for (const alias of Array.isArray(data.aliases) ? data.aliases : []) {
+      if (aliases.has(alias)) add(`alias "${alias}" also used by ${aliases.get(alias)}`);
+      aliases.set(alias, rel);
+    }
+  }
+
+  for (const [alias, rel] of aliases) {
+    if (ids.has(alias)) issues.push({ file: rel, message: `alias "${alias}" collides with an existing prompt id` });
+  }
+  for (const readme of updatePhaseIndexes(false, root)) {
+    issues.push({ file: readme, message: 'prompt index is out of date: run `helen prompts index`' });
   }
 
   return issues;

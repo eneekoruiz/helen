@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { detectProject } from './projectDetector.js';
+import { parseFrontmatter } from './frontmatter.js';
 import { readPrompt } from './prompts.js';
 import { getCatalogItem } from './catalog.js';
 import type { ApplyPlan, StepKind } from './apply.js';
@@ -155,6 +156,11 @@ export function formatStatus(progress: Progress): string {
   return lines.join('\n');
 }
 
+/** Prompt text without frontmatter: what the agent needs, fewer tokens. */
+function promptBody(ref: string): string {
+  return parseFrontmatter(readPrompt(ref)).body.trim();
+}
+
 /** What to do now: everything an AI or a person needs for the current step. */
 export function formatNext(progress: Progress, includeContent = true): string {
   const index = currentIndex(progress);
@@ -169,12 +175,12 @@ export function formatNext(progress: Progress, includeContent = true): string {
     lines.push(`External tool (${item.status}): ${item.name}`, item.summary, `Source: ${item.source}  License: ${item.license}`, 'Commands (review, then run yourself):');
     for (const command of item.install) lines.push(`  ${command}`);
     if (item.notes) lines.push(`Note: ${item.notes}`);
-    lines.push('', 'Do not install without explicit approval and a look at audit-third-party-skills-supply-chain. Skip it if the user declines: helen skip "<reason>"');
+    lines.push('', 'Do not install without explicit approval and a look at audit-third-party-tools-and-mcp. Skip it if the user declines: helen skip "<reason>"');
   } else if (step.kind === 'checkpoint') {
     lines.push('Run `helen check` (build, lint, tests). It must pass before `helen done`.');
-    if (includeContent) lines.push('', readPrompt(step.ref));
+    if (includeContent) lines.push('', promptBody(step.ref));
   } else if (includeContent) {
-    lines.push(readPrompt(step.ref));
+    lines.push(promptBody(step.ref));
   } else {
     lines.push(`Read it with: helen prompts show ${step.ref}`);
   }

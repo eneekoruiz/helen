@@ -1,72 +1,51 @@
 ---
 action: GENERATE
-label: GENERATE-
 phase: 03-finish-features
+summary: Choose and build a portfolio or showcase layout (sandwich, work-first showcase, sticky split) that shows craft without noise.
 modifies_code: true
-requires_context:
-  - project_state
-  - business_goal
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
 ---
 
-# [GENERATE] - Portfolio and Showcase Layout Patterns
+# Portfolio and Showcase Layout Patterns
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
-**Intención**: GENERATE (crear piezas nuevas en un proyecto ya iniciado)
+Pick and build a portfolio or showcase layout that conveys craft without noise and belongs to this person or studio, not to a template.
 
-## Objetivo
+## Use when
 
-Elegir e implementar un patrón de layout para portfolio o showcase que transmita oficio sin ruido, y que sea específico del cliente en lugar de una plantilla.
+- Portfolios, studio pages, case studies and personal landings; when the site works but looks generic.
 
-## Cuándo Usarlo
+## Requirements
 
-- Portfolios, páginas de estudio, casos de trabajo y landings personales.
-- Cuando el sitio funciona pero se ve genérico.
+Reference patterns (starting points, not templates):
 
-## Patrones de referencia
+- **Sandwich:** large centered name on top, featured work in the middle (cards slightly rotated or overlapping), discipline or role below. Instant presence; needs excellent images.
+- **Showcase (work first):** no fluff; one short positioning line, then straight to a row or grid of projects (horizontal scroll works well).
+- **Sticky split:** fixed left column with name, role, short about and links; scrolling project grid on the right. Premium feel and clear hierarchy; collapses to one column with a compact header on mobile.
 
-Tres patrones observados en piezas de referencia (úsalos como punto de partida, no como plantilla cerrada):
+1. Choose by the real material: number and strength of projects, brand tone, goal (hiring, selling, prestige). Explain the choice.
+2. Define hierarchy, vertical rhythm, typography and responsive behavior.
+3. Build with the project's design system (`DESIGN.md` when present) and reusable components.
+4. Subtle motion with a function; respect `prefers-reduced-motion`.
+5. Real content only: no invented names, logos or clients.
 
-1. **Sandwich**: nombre grande centrado arriba, trabajo destacado en el medio (tarjetas ligeramente rotadas o solapadas) y disciplina o rol abajo. Da presencia inmediata; requiere imágenes excelentes.
-2. **Showcase (trabajo primero)**: sin relleno; una frase corta de posicionamiento y directamente una fila o cuadrícula de proyectos con desplazamiento horizontal. Ideal cuando el trabajo habla solo.
-3. **Sticky split**: columna izquierda fija con nombre, rol, breve "sobre mí" y enlaces; columna derecha con cuadrícula de proyectos que se desplaza. Sensación premium y buena jerarquía.
+## Beyond the checklist
 
-## Requisitos mínimos obligatorios
+Add one authorship detail (a typographic gesture, a transition, a considered project order) a competitor cannot copy as is.
 
-1. Decide el patrón según el material real: cantidad y calidad de proyectos, tono de marca y objetivo (contratación, venta, prestigio).
-2. Define jerarquía, ritmo vertical, tipografía y comportamiento responsive (en móvil el sticky split colapsa a una columna con cabecera compacta).
-3. Implementa con el sistema de diseño del proyecto (`DESIGN.md` si existe) y componentes reutilizables.
-4. Motion sutil y con función; respeta `prefers-reduced-motion`.
-5. Contenido real: nada de nombres, logos ni clientes inventados.
+## Limits
 
-## Más allá de estos criterios
+- Never reproduce a specific site's design or text: extract layout principles.
+- No effect that costs performance or accessibility.
 
-Añade un detalle de autoría (un gesto tipográfico, una transición o un orden de proyectos con criterio) que un competidor no pueda copiar tal cual.
+## Output
 
-## Límites de Seguridad
+```text
+Done. / Done with warnings.
 
-- No reproduzcas el diseño ni los textos de ningún sitio concreto: extrae principios de layout.
-- No sacrifiques rendimiento ni accesibilidad por el efecto (ver `helen-a11y-perf`).
+Changes applied:
+- 1-3 bullets with the exact changes
 
-## Checks Finales
-
-- [ ] Patrón elegido y justificado.
-- [ ] Responsive real en móvil, tablet y escritorio.
-- [ ] Sin contenido inventado.
-
-## Formato de Entrega
-
-Cambios aplicados en 1-3 viñetas y acciones manuales necesarias (por ejemplo, aportar imágenes reales).
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
+```

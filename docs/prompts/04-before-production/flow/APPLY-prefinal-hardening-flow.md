@@ -1,72 +1,48 @@
 ---
 action: APPLY
-label: APPLY-
 phase: 04-before-production
+summary: Flow: harden security, robustness and technical quality before packaging a release candidate.
 modifies_code: true
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
+repeatable: true
+stage: hardening
 ---
 
-# [APPLY] - Prefinal Hardening Flow
+# Prefinal Hardening Flow
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Harden security, robustness and technical quality before the code is packaged and marked as a release candidate.
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+## Use when
 
-## Objetivo
+- Building and visual polish are done; production is next.
 
-Endurecer la seguridad, robustez y calidad técnica del proyecto antes de empaquetar y marcar el código como release candidate.
+## Steps
 
-## Fase Ideal
+1. [audit-quality-gates-checkpoint](../../02-building/checkpoint/AUDIT-quality-gates-checkpoint.md).
+2. [apply-clean-code-pass-flow](../../02-building/clean-code/APPLY-clean-code-pass-flow.md).
+3. [apply-security-hardening-flow](../../02-building/security/APPLY-security-hardening-flow.md), then [audit-security-risk-checkpoint](AUDIT-security-risk-checkpoint.md).
+4. [audit-adversarial-qa-and-edge-cases](../qa/AUDIT-adversarial-qa-and-edge-cases.md); fix what blocks release.
+5. [apply-basic-performance-pass](../../03-finish-features/performance/APPLY-basic-performance-pass.md) and [apply-basic-accessibility-pass](../../03-finish-features/performance/APPLY-basic-accessibility-pass.md).
+6. [apply-empty-states-errors-and-microcopy](../../03-finish-features/ux/APPLY-empty-states-errors-and-microcopy.md).
+7. [audit-quality-gates-checkpoint](../../02-building/checkpoint/AUDIT-quality-gates-checkpoint.md).
 
-Al finalizar la construcción y pulido visual (Before Production).
+## Stop when
 
-## Prompts Incluidos
+- A critical security risk cannot be fixed within the flow, or a gate fails for reasons outside your changes.
 
-1. [fast-build-test-verification.md](../qa/AUDIT-fast-build-test-verification.md)
-2. [safe-clean-code-simplification-pass.md](../../02-building/clean-code/APPLY-safe-clean-code-simplification-pass.md)
-3. [security-hardening.md](../../02-building/security/APPLY-security-hardening-flow.md)
-4. [basic-performance-pass.md](../../03-finish-features/performance/APPLY-basic-performance-pass.md)
-5. [basic-accessibility-pass.md](../../03-finish-features/performance/APPLY-basic-accessibility-pass.md)
-6. [empty-states-errors-and-microcopy.md](../../03-finish-features/ux/APPLY-empty-states-errors-and-microcopy.md)
+## Limits
 
-## Checkpoints Entre Pasos
+- Build and environment setup must succeed after every step; no critical security risk left open.
 
-- **Inicio**: Cargar [build-and-compile-checkpoint.md](../../02-building/checkpoint/AUDIT-build-and-compile-checkpoint.md).
-- **Post-refactor**: Cargar [lint-and-typecheck-checkpoint.md](../../02-building/checkpoint/AUDIT-lint-and-typecheck-checkpoint.md).
-- **Post-seguridad**: Cargar [security-risk-checkpoint.md](AUDIT-security-risk-checkpoint.md).
-- **Final**: Cargar [test-suite-checkpoint.md](../../02-building/checkpoint/AUDIT-test-suite-checkpoint.md).
-
-## Condiciones para Avanzar
-
-- La compilación e inicialización del entorno son exitosas.
-- No quedan abiertos riesgos de seguridad críticos.
-
-## Formato de Entrega
-
-El entregable debe ser minimalista. Produce únicamente:
+## Output
 
 ```text
-✅ Prefinal hardening completado con éxito. / [o] ⚠️ Completado con advertencias.
+Done. / Done with warnings.
 
-Mejoras aplicadas:
-- [Breve lista de 1-3 viñetas con los parches de seguridad/robustez aplicados]
+Changes applied:
+- 1-3 bullets with the exact changes
 
-Acciones manuales necesarias:
-- Ninguna. / [o especificar acciones]
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
 ```
-*No generes informes extensos ni explicaciones teóricas.*

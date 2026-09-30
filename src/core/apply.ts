@@ -160,7 +160,7 @@ export function formatPlan(plan: ApplyPlan): string {
   } else {
     lines.push('All bundled skills this goal needs are installed (or none are needed).');
   }
-  lines.push('External tools are never installed by HELEN: review each with `helen skills external <id>` and the audit-third-party-skills-supply-chain prompt.');
+  lines.push('External tools are never installed by HELEN: review each with `helen skills external <id>` and the audit-third-party-tools-and-mcp prompt.');
   return lines.join('\n');
 }
 

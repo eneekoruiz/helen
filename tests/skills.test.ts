@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { installSkills, listFlowSkills, listSkills, resolveTargetDir } from '../src/core/skills.js';
+import { installSkills, listFlowSkills, listSkills, resolveTargetDir, validateSkills } from '../src/core/skills.js';
 
 describe('Skills installer', () => {
   let tmp: string;
@@ -32,6 +32,10 @@ describe('Skills installer', () => {
       expect(description.length).toBeLessThanOrEqual(1024);
       expect(content.split('\n').length).toBeLessThan(500);
     }
+  });
+
+  it('bundled skills pass structural validation', () => {
+    expect(validateSkills()).toEqual([]);
   });
 
   it('installs into the claude and codex directories', () => {
@@ -73,12 +77,13 @@ describe('Skills installer', () => {
     const flows = listFlowSkills();
     const names = flows.map(skill => skill.name);
 
-    expect(flows.length).toBeGreaterThanOrEqual(16);
+    expect(flows.length).toBeGreaterThanOrEqual(10);
     expect(new Set(names).size).toBe(names.length);
     for (const flow of flows) {
       const content = flow.files!['SKILL.md']!;
       expect(content).toMatch(new RegExp(`^---\\nname: ${flow.name}\\ndescription: ".+"\\n---`));
       expect(content).not.toMatch(/\]\([^)]*\.md\)/);
+      expect(content).not.toContain('## Objetivo');
     }
   });
 

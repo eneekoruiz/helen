@@ -24,4 +24,4 @@ Generate a compact rules file (for example `AGENTS.md` or `CLAUDE.md`) with: sta
 
 Operational steps to deploy, roll back, rotate credentials, and recover.
 
-Prompts: `generate-decision-log`, `audit-bus-factor`, `generate-ai-context`, `generate-runbook`.
+Prompts: `generate-decision-log`, `audit-bus-factor-and-ownership`, `generate-ai-context`, `generate-operations-runbook`, `audit-developer-onboarding-and-knowledge-gaps`.

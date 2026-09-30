@@ -1,90 +1,48 @@
 ---
 action: APPLY
-label: APPLY-
 phase: 06-release
+summary: Set up GitHub Actions for tagged releases, verified builds, SemVer and PR-based changelog drafts, with least-privilege tokens.
 modifies_code: true
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
 ---
 
-# [APPLY] - Automated Release and Changelog Workflows
+# Automated Release and Changelog Workflows
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Automate releases so versions, artifacts and changelogs are consistent: tagged releases, verified builds, semantic versioning and changelog drafts from pull requests.
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+## Use when
 
-## Objetivo
+- Preparing releases for open-source or commercial projects that need a consistent version history.
 
-Implementar workflows automáticos de GitHub Actions para gestionar lanzamientos (releases), empaquetado de producción, etiquetado semántico de versiones (semver) y generación interactiva de changelogs basados en PRs.
+## Skip when
 
-## Cuándo Usarlo
+- Early discovery or prototyping, or the repository does not use pull requests with descriptive titles.
 
-- En la fase de preparación de releases (`06-release`) o antes de publicar el proyecto a producción.
-- Para proyectos open-source o productos comerciales donde se requiere consistencia en el historial de versiones y notas de lanzamiento.
+## Requirements
 
-## Cuándo NO Usarlo
+1. **Release workflow** (`.github/workflows/release.yml`) triggered by version tags (`v*`): runs tests, typecheck and the production build before attaching artifacts to the GitHub release.
+2. **Release drafts:** configuration that groups pull requests by label (`feat` to Features, `fix` to Bug Fixes, `chore` to Maintenance) and a workflow that updates a draft release on every merge to main.
+3. **SemVer:** `MAJOR.MINOR.PATCH`, with breaking changes called out.
+4. Correct main branch mapping and labels that match the configuration.
 
-- Durante las fases tempranas de descubrimiento o prototipado rápido.
-- Si el repositorio no sigue un flujo estructurado de Pull Requests con títulos descriptivos.
+## Beyond the checklist
 
-## Rol de la IA
+Publish to registries (npm, container registries) when a draft is published, with provenance or signed commits where supported.
 
-Actúas como un DevOps Engineer y Lead Release Manager.
+## Limits
 
-## Requisitos mínimos obligatorios
+- Never hardcode tokens: use `GITHUB_TOKEN` or repository secrets (`secrets.NPM_TOKEN`).
+- Least privilege (`permissions: contents: write` only where needed); valid YAML.
 
-1. **Configuración de Workflow de Release (`.github/workflows/release.yml`)**:
-   - Crear o modificar el archivo de flujo de GitHub Actions para que se active en la publicación de una nueva tag de versión (ej. `v*`).
-   - El workflow debe correr tests, typecheck y compilar el paquete de producción antes de subir los artefactos a la release de GitHub.
-
-2. **Automatización de Borradores (Release Drafter)**:
-   - Configurar un archivo de configuración para categorizar los Pull Requests según etiquetas (ej. `feat` -> Features, `fix` -> Bug Fixes, `chore` -> Maintenance).
-   - Crear un workflow que actualice automáticamente un borrador (draft) de release cada vez que se fusione un PR en la rama principal.
-
-3. **Versionamiento Semántico (SemVer)**:
-   - Asegurar que la nomenclatura siga las reglas de SemVer (`MAJOR.MINOR.PATCH`).
-
-## Más allá de estos criterios
-
-Implementa flujos de publicación automática a registros de paquetes (como npm o Docker Hub) cuando la release se marque como publicada desde el borrador inicial, con verificación de firmas criptográficas de commits.
-
-## Límites de Seguridad
-
-- Nunca hardcodear tokens de publicación o acceso al repositorio; usar siempre `GITHUB_TOKEN` nativo o secretos configurados en GitHub (`secrets.NPM_TOKEN`, etc.).
-- Asegurar que el workflow requiera permisos de escritura mínimos (`contents: write`).
-
-## Checks Finales
-
-- Sintaxis de los archivos YAML de GitHub Actions válida.
-- Mapeo correcto de ramas principales (ej. `main` o `master`).
-- Las etiquetas de PRs requeridas coinciden con las del workflow.
-
-## Formato de Entrega
-
-El entregable debe ser minimalista. Produce únicamente:
+## Output
 
 ```text
-✅ Flujos de release automatizada configurados con éxito. / [o] ⚠️ Configurados con advertencias.
+Done. / Done with warnings.
 
-Configuración realizada:
-- [Creación o parche de .github/workflows/release.yml y config de changelog/drafter]
-- [Instrucciones de etiquetado o labels requeridos en el repo]
+Changes applied:
+- 1-3 bullets with the exact changes
 
-Acciones manuales adicionales:
-- [Configurar secretos de registro (ej. NPM_TOKEN, DOCKER_PASSWORD) en GitHub Settings, si aplica]
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
 ```
-*No generes informes extensos ni explicaciones teóricas.*

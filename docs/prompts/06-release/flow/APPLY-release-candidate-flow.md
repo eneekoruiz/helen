@@ -1,72 +1,42 @@
 ---
 action: APPLY
-label: APPLY-
 phase: 06-release
+summary: Flow: decide whether the project can become a release candidate and package it with guarantees. RC READY, RC WITH CAVEATS or NOT RC READY.
 modifies_code: true
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
+repeatable: false
+stage: final
 ---
 
-# [APPLY] - Release Candidate Flow
+# Release Candidate Flow
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Decide whether the project can become a release candidate and package it with guarantees.
 
-**Intención**: PLAN (Diseñar estrategias y fases)
+## Use when
 
-## Objetivo
+- Stabilization is finished and a release is planned.
 
-Decidir si el proyecto puede convertirse en candidato de release y empaquetarse con garantías.
+## Steps
 
-## Fase Ideal
+1. [audit-quality-gates-checkpoint](../../02-building/checkpoint/AUDIT-quality-gates-checkpoint.md).
+2. [apply-security-hardening-flow](../../02-building/security/APPLY-security-hardening-flow.md), then [audit-security-risk-checkpoint](../../04-before-production/flow/AUDIT-security-risk-checkpoint.md).
+3. [audit-i18n](../../05-final-audit/code/AUDIT-i18n.md) if multilingual, and [audit-final-seo](../../04-before-production/compliance/AUDIT-final-seo.md) for public web projects.
+4. [audit-public-presentation](../../05-final-audit/presentation/AUDIT-public-presentation.md).
+5. [generate-release-notes-changelog-and-demo-package](../notes/GENERATE-release-notes-changelog-and-demo-package.md).
+6. [audit-quality-gates-checkpoint](../../02-building/checkpoint/AUDIT-quality-gates-checkpoint.md) and [audit-release-readiness-checkpoint](AUDIT-release-readiness-checkpoint.md).
 
-Al finalizar la estabilización (Release).
+## Stop when
 
-## Prompts Incluidos
+- Any checkpoint or critical test fails, or indexability directives or language fallbacks are broken.
 
-1. [fast-build-test-verification.md](../../04-before-production/qa/AUDIT-fast-build-test-verification.md)
-2. [security-hardening.md](../../02-building/security/APPLY-security-hardening-flow.md)
-3. [i18n-audit.md](../../05-final-audit/code/AUDIT-i18n-flow.md)
-4. [final-seo-audit.md](../../04-before-production/compliance/AUDIT-final-seo.md)
-5. [github-repository-audit.md](../../05-final-audit/presentation/AUDIT-github-repository-flow.md)
-6. [release-notes-changelog-and-demo-package.md](../notes/GENERATE-release-notes-changelog-and-demo-package.md)
+## Limits
 
-## Checkpoints Entre Pasos
+- Never hide or cosmetically fix a type, build or security error to reach RC.
 
-- **Inicio**: Cargar [build-and-compile-checkpoint.md](../../02-building/checkpoint/AUDIT-build-and-compile-checkpoint.md).
-- **Post-verificación**: Cargar [test-suite-checkpoint.md](../../02-building/checkpoint/AUDIT-test-suite-checkpoint.md).
-- **Post-seguridad**: Cargar [security-risk-checkpoint.md](../../04-before-production/flow/AUDIT-security-risk-checkpoint.md).
-- **Antes de documentar**: Cargar [lint-and-typecheck-checkpoint.md](../../02-building/checkpoint/AUDIT-lint-and-typecheck-checkpoint.md).
-- **Final**: Cargar [release-readiness-checkpoint.md](AUDIT-release-readiness-checkpoint.md).
+## Output
 
-## Condiciones para Avanzar
-
-- Compilación, linter y suite de tests pasan sin excepciones.
-- No quedan abiertos secretos ni brechas de seguridad críticas.
-- Toda la documentación y Quickstarts coinciden con el estado real del software.
-
-## Cuándo Detenerse
-
-- Si falla cualquier checkpoint o verificación crítica de la suite de tests.
-- Si las directivas de indexabilidad o fallbacks de idioma están rotas.
-
-## Resumen Final
-
-1. Veredicto: `RC READY`, `RC WITH CAVEATS` o `NOT RC READY`.
-2. Checks ejecutados.
-3. Cambios realizados durante el flujo.
-4. Bloqueadores restantes.
-5. Borrador de Release Notes o pendientes.
+1. Verdict: `RC READY`, `RC WITH CAVEATS` or `NOT RC READY`.
+2. Checks run and changes made during the flow.
+3. Remaining blockers.
+4. Draft release notes or what is still pending.

@@ -81,7 +81,7 @@ export function listFlowSkills(): SkillInfo[] {
           const stem = decodeURIComponent(target).split('/').at(-1)!.replace(/\.md$/i, '').toLowerCase();
           return `${label} (\`helen prompts show ${stem}\`)`;
         });
-      const objective = firstMatch(body, /## Objetivo\s+([^\n]+(?:\n(?!#)[^\n]+)*)/) ?? entry.title;
+      const objective = entry.summary || firstMatch(body, /## Goal\s+([^\n]+(?:\n(?!#)[^\n]+)*)/) || entry.title;
       const slug = entry.id.split('/').at(-1)!.replace(/^(apply|audit|generate|plan|research|init|enhance)-/, '').replace(/-flow$/, '');
       const name = `helen-flow-${slug}`;
       const description = `Use to run the HELEN "${slug}" flow. ${objective}`.replace(/\s+/g, ' ').slice(0, 500);
@@ -142,4 +142,22 @@ export function installSkills(options: InstallSkillsOptions, root: string = SKIL
   }
 
   return result;
+}
+
+/** Structural checks for bundled skills: frontmatter, name, description length, size. */
+export function validateSkills(root: string = SKILLS_ROOT): string[] {
+  const issues: string[] = [];
+  for (const skill of listSkills(root)) {
+    const content = fs.readFileSync(path.join(skill.dir!, 'SKILL.md'), 'utf-8');
+    const match = /^---\nname: (.+)\ndescription: (.+)\n---\n/.exec(content);
+    if (!match) {
+      issues.push(`${skill.name}: SKILL.md must start with name and description frontmatter`);
+      continue;
+    }
+    if (match[1] !== skill.name) issues.push(`${skill.name}: name "${match[1]}" does not match the folder`);
+    if (match[2]!.length > 1024) issues.push(`${skill.name}: description longer than 1024 characters`);
+    if (match[2]!.length < 80) issues.push(`${skill.name}: description too short to trigger reliably (under 80 characters)`);
+    if (content.split('\n').length > 500) issues.push(`${skill.name}: SKILL.md longer than 500 lines; move detail to references/`);
+  }
+  return issues;
 }

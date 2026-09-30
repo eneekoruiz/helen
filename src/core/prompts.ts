@@ -2,242 +2,180 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pc from 'picocolors';
+import { parseFrontmatter } from './frontmatter.js';
 
-export type PromptKind = 'master' | 'guide' | 'flow' | 'step' | 'checkpoint' | 'prompt';
+export type PromptKind = 'master' | 'guide' | 'flow' | 'checkpoint' | 'prompt';
 
 export interface PromptEntry {
   id: string;
   kind: PromptKind;
   title: string;
+  summary: string;
+  action?: string;
+  phase?: string;
+  aliases: string[];
   relativePath: string;
   absolutePath: string;
   repeatable?: boolean;
   stage?: string;
 }
 
-interface RegistryFlow {
-  id: string;
-  path: string;
-  repeatable?: boolean;
-  stage?: string;
-}
-
-interface RegistryGuide {
-  id: string;
-  path: string;
-  purpose?: string;
-}
-
-interface PromptRegistry {
-  guides?: RegistryGuide[];
-  executableFlows?: RegistryFlow[];
-}
-
 const PROMPTS_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'docs', 'prompts');
+
+/** Library-level documents, always available by id. */
+const GUIDES: { id: string; file: string; kind: PromptKind }[] = [
+  { id: 'master', file: 'MASTER.md', kind: 'master' },
+  { id: 'rules', file: 'RULES.md', kind: 'guide' },
+  { id: 'contract', file: 'CONTRACT.md', kind: 'guide' },
+];
+
+const ACTION_PREFIXES = ['APPLY', 'AUDIT', 'ENHANCE', 'GENERATE', 'INIT', 'PLAN', 'RESEARCH'];
+
+export const PHASE_PATTERN = /^\d{2}-[a-z0-9-]+$/;
 
 function toPosix(filePath: string): string {
   return filePath.split(path.sep).join('/');
 }
 
-function stripMarkdownExt(filePath: string): string {
-  return filePath.replace(/\.md$/i, '');
-}
-
-function titleFromId(id: string): string {
-  return id
-    .split('/')
-    .at(-1)!
-    .split('-')
-    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-}
-
-function readRegistry(): PromptRegistry {
-  const registryPath = path.join(PROMPTS_ROOT, 'registry.json');
-  if (!fs.existsSync(registryPath)) {
-    return {};
-  }
-
-  return JSON.parse(fs.readFileSync(registryPath, 'utf-8')) as PromptRegistry;
-}
-
-function walkMarkdownFiles(dir: string): string[] {
-  if (!fs.existsSync(dir)) {
-    return [];
-  }
-
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-  const files: string[] = [];
-
-  for (const entry of entries) {
+function walkMarkdown(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
     const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...walkMarkdownFiles(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith('.md') && entry.name !== 'README.md') {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
+    if (entry.isDirectory()) return walkMarkdown(fullPath);
+    return entry.isFile() && entry.name.endsWith('.md') && entry.name !== 'README.md' ? [fullPath] : [];
+  });
 }
+
+/** `02-building/clean-code/APPLY-clean-code-pass-flow.md` -> `02-building/clean-code/apply-clean-code-pass-flow`. */
+export function idFromRelativePath(relativeFromRoot: string): string {
+  const parts = relativeFromRoot.replace(/\.md$/i, '').split('/');
+  const file = parts.at(-1)!;
+  const prefix = ACTION_PREFIXES.find(candidate => file.startsWith(`${candidate}-`));
+  parts[parts.length - 1] = prefix ? `${prefix.toLowerCase()}${file.slice(prefix.length)}` : file;
+  return parts.join('/');
+}
+
+function kindFromFile(fileName: string): PromptKind {
+  if (fileName.endsWith('-flow.md')) return 'flow';
+  if (fileName.endsWith('-checkpoint.md')) return 'checkpoint';
+  return 'prompt';
+}
+
+function titleFrom(body: string, fallback: string): string {
+  return /^#\s+(.+)$/m.exec(body)?.[1]?.trim() ?? fallback;
+}
+
+function toEntry(root: string, absolutePath: string, id: string, kind: PromptKind): PromptEntry {
+  const { data, body } = parseFrontmatter(fs.readFileSync(absolutePath, 'utf-8'));
+  const aliases = Array.isArray(data.aliases) ? data.aliases : [];
+  return {
+    id,
+    kind,
+    title: titleFrom(body, id),
+    summary: typeof data.summary === 'string' ? data.summary : '',
+    action: typeof data.action === 'string' ? data.action : undefined,
+    phase: typeof data.phase === 'string' ? data.phase : undefined,
+    aliases,
+    relativePath: toPosix(path.relative(root, absolutePath)),
+    absolutePath,
+    repeatable: typeof data.repeatable === 'boolean' ? data.repeatable : undefined,
+    stage: typeof data.stage === 'string' ? data.stage : undefined,
+  };
+}
+
+const cache = new Map<string, PromptEntry[]>();
 
 export function getPromptsRoot(): string {
   return PROMPTS_ROOT;
 }
 
-export function listPromptEntries(): PromptEntry[] {
-  const registry = readRegistry();
-  const entries: PromptEntry[] = [
-    {
-      id: 'master',
-      kind: 'master',
-      title: 'MASTER',
-      relativePath: toPosix(path.relative(process.cwd(), path.join(PROMPTS_ROOT, 'MASTER.md'))),
-      absolutePath: path.join(PROMPTS_ROOT, 'MASTER.md'),
-    },
-  ];
+export function listPromptEntries(root: string = PROMPTS_ROOT): PromptEntry[] {
+  const cached = cache.get(root);
+  if (cached) return cached;
 
-  for (const guide of registry.guides ?? []) {
-    const absolutePath = path.resolve(PROMPTS_ROOT, path.relative('docs/prompts', guide.path));
-    entries.push({
-      id: guide.id,
-      kind: 'guide',
-      title: titleFromId(guide.id),
-      relativePath: toPosix(path.relative(process.cwd(), absolutePath)),
-      absolutePath,
-    });
-  }
+  const entries: PromptEntry[] = GUIDES.filter(guide => fs.existsSync(path.join(root, guide.file))).map(guide =>
+    toEntry(root, path.join(root, guide.file), guide.id, guide.kind),
+  );
 
-  // Scan phase subdirectories dynamically
-  const phaseDirs = fs.existsSync(PROMPTS_ROOT)
-    ? fs.readdirSync(PROMPTS_ROOT, { withFileTypes: true })
-        .filter(entry => entry.isDirectory() && /^\d{2}-/.test(entry.name))
-        .map(entry => entry.name)
+  const phases = fs.existsSync(root)
+    ? fs.readdirSync(root, { withFileTypes: true }).filter(entry => entry.isDirectory() && PHASE_PATTERN.test(entry.name))
     : [];
-
-  for (const dir of phaseDirs) {
-    const baseDir = path.join(PROMPTS_ROOT, dir);
-    for (const filePath of walkMarkdownFiles(baseDir)) {
-      const relativeFromRoot = toPosix(path.relative(PROMPTS_ROOT, filePath));
-      const parts = relativeFromRoot.split('/');
-      const fileName = parts.at(-1)!;
-      let normalizedFileName = fileName;
-      for (const pref of ['APPLY-', 'AUDIT-', 'GENERATE-', 'PLAN-', 'RESEARCH-', 'INIT-', 'ENHANCE-']) {
-        if (fileName.startsWith(pref)) {
-          normalizedFileName = pref.toLowerCase() + fileName.substring(pref.length);
-          break;
-        }
-      }
-      parts[parts.length - 1] = normalizedFileName;
-      const id = stripMarkdownExt(parts.join('/'));
-      const relativePath = toPosix(path.relative(process.cwd(), filePath));
-
-      let kind: PromptKind = 'prompt';
-      if (fileName.endsWith('-flow.md')) {
-        kind = 'flow';
-      } else if (fileName.endsWith('-checkpoint.md')) {
-        kind = 'checkpoint';
-      }
-
-      const entry: PromptEntry = {
-        id,
-        kind,
-        title: titleFromId(id),
-        relativePath,
-        absolutePath: filePath,
-      };
-
-      if (kind === 'flow') {
-        const flowMeta = registry.executableFlows?.find(f => {
-          const regRel = toPosix(f.path.replace(/^docs\/prompts\//, ''));
-          return relativeFromRoot === regRel || f.id === id || path.basename(f.path, '.md') === path.basename(filePath, '.md');
-        });
-        if (flowMeta) {
-          entry.repeatable = flowMeta.repeatable;
-          entry.stage = flowMeta.stage;
-        }
-      }
-
-      entries.push(entry);
+  for (const phase of phases) {
+    for (const file of walkMarkdown(path.join(root, phase.name))) {
+      const relative = toPosix(path.relative(root, file));
+      entries.push(toEntry(root, file, idFromRelativePath(relative), kindFromFile(path.basename(file))));
     }
   }
 
-  const seen = new Set<string>();
-  return entries
-    .filter(entry => {
-      const key = `${entry.kind}:${entry.absolutePath}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return fs.existsSync(entry.absolutePath);
+  entries.sort((a, b) => a.id.localeCompare(b.id));
+  cache.set(root, entries);
+  return entries;
+}
+
+/** Resolve by full id, short id (file name), relative path, or a legacy alias. */
+export function resolvePromptEntry(query: string, root: string = PROMPTS_ROOT): PromptEntry {
+  const normalized = query.replaceAll('\\', '/').replace(/^docs\/prompts\//, '').replace(/\.md$/i, '').toLowerCase();
+  const entries = listPromptEntries(root);
+  const short = (entry: PromptEntry) => entry.id.split('/').at(-1)!;
+
+  const found =
+    entries.find(entry => entry.id === normalized || entry.relativePath.replace(/\.md$/i, '').toLowerCase() === normalized) ??
+    entries.find(entry => short(entry) === normalized) ??
+    entries.find(entry => entry.aliases.map(alias => alias.toLowerCase()).includes(normalized));
+
+  if (!found) {
+    const suggestions = searchPrompts(query, root).slice(0, 3).map(entry => short(entry));
+    throw new Error(`Prompt "${query}" not found.${suggestions.length ? ` Did you mean: ${suggestions.join(', ')}?` : ''}`);
+  }
+  return found;
+}
+
+export function readPrompt(query: string, root: string = PROMPTS_ROOT): string {
+  return fs.readFileSync(resolvePromptEntry(query, root).absolutePath, 'utf-8');
+}
+
+/** Rank prompts by how many query words appear in their id, title, summary and aliases. */
+export function searchPrompts(query: string, root: string = PROMPTS_ROOT): PromptEntry[] {
+  const words = query.toLowerCase().split(/[^a-z0-9]+/).filter(word => word.length > 2);
+  if (words.length === 0) return [];
+  return listPromptEntries(root)
+    .map(entry => {
+      const haystack = `${entry.id} ${entry.title} ${entry.summary} ${entry.aliases.join(' ')}`.toLowerCase();
+      return { entry, score: words.filter(word => haystack.includes(word)).length };
     })
-    .sort((a, b) => a.kind.localeCompare(b.kind) || a.id.localeCompare(b.id));
+    .filter(result => result.score > 0)
+    .sort((a, b) => b.score - a.score || a.entry.id.localeCompare(b.entry.id))
+    .map(result => result.entry);
 }
 
-export function resolvePromptEntry(query: string): PromptEntry {
-  const normalized = stripMarkdownExt(query.replaceAll('\\', '/').replace(/^docs\/prompts\//, '')).toLowerCase();
-  const entries = listPromptEntries();
-
-  const exactMatches = entries.filter(entry => {
-    const relativeFromRoot = stripMarkdownExt(toPosix(path.relative(PROMPTS_ROOT, entry.absolutePath)));
-    return entry.id.toLowerCase() === normalized || relativeFromRoot.toLowerCase() === normalized;
-  });
-
-  if (exactMatches.length === 1) {
-    return exactMatches[0]!;
-  }
-
-  if (exactMatches.length > 1) {
-    return exactMatches[0]!; // Return first match if ambiguous but exact matches found (or handle appropriately)
-  }
-
-  const matches = entries.filter(entry => stripMarkdownExt(path.basename(entry.absolutePath)).toLowerCase() === normalized);
-
-  if (matches.length === 0) {
-    throw new Error(`Prompt "${query}" not found.`);
-  }
-
-  return matches[0]!;
-}
-
-export function readPrompt(query: string): string {
-  const entry = resolvePromptEntry(query);
-  return fs.readFileSync(entry.absolutePath, 'utf-8');
+export function shortId(entry: PromptEntry): string {
+  return entry.id.split('/').at(-1)!;
 }
 
 export function printPromptList(kind?: PromptKind): void {
   const entries = listPromptEntries().filter(entry => !kind || entry.kind === kind);
-  const grouped = new Map<PromptKind, PromptEntry[]>();
-
+  let phase = '';
+  console.log('');
   for (const entry of entries) {
-    grouped.set(entry.kind, [...(grouped.get(entry.kind) ?? []), entry]);
-  }
-
-  console.log('');
-  console.log(`  ${pc.bold('HELEN prompt library')}`);
-  console.log(`  ${pc.dim(getPromptsRoot())}`);
-  console.log('');
-
-  for (const [group, groupEntries] of grouped) {
-    console.log(`  ${pc.bold(pc.cyan(group))}`);
-    for (const entry of groupEntries) {
-      const meta = entry.kind === 'flow'
-        ? ` ${pc.dim(`[${entry.stage ?? 'flow'}${entry.repeatable === false ? ', final' : ', repeatable'}]`)}`
-        : '';
-      console.log(`    ${pc.green(entry.id.padEnd(34))} ${pc.dim(entry.relativePath)}${meta}`);
+    const group = entry.phase ?? 'library';
+    if (group !== phase) {
+      phase = group;
+      console.log(`  ${pc.bold(pc.cyan(group))}`);
     }
-    console.log('');
+    const tag = entry.kind === 'prompt' ? entry.action ?? '' : entry.kind;
+    console.log(`    ${pc.green(shortId(entry).padEnd(44))} ${pc.dim(tag.padEnd(10))} ${entry.summary}`);
   }
+  console.log(`\n  ${pc.dim('Read one: helen prompts show <id>   Search: helen prompts search <words>')}\n`);
 }
 
 export function printPromptPath(query: string): void {
-  const entry = resolvePromptEntry(query);
-  console.log(entry.absolutePath);
+  console.log(resolvePromptEntry(query).absolutePath);
 }
 
 export function printPromptContent(query: string): void {
   const entry = resolvePromptEntry(query);
-  console.log(`# ${entry.kind}:${entry.id}`);
-  console.log(`Path: ${entry.absolutePath}`);
-  console.log('');
   console.log(fs.readFileSync(entry.absolutePath, 'utf-8'));
+  if (entry.kind !== 'master' && entry.kind !== 'guide') {
+    console.log(pc.dim('Shared rules apply to every HELEN prompt: helen prompts show rules'));
+  }
 }

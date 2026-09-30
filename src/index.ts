@@ -7,15 +7,17 @@ import { runModules, printSummary } from './core/moduleRunner.js';
 import { getAllModuleIds, getModule, getAllModules } from './modules/registry.js';
 import { showMainMenu, showModuleSelector, showExplainSelector, printModuleExplanation, printModuleList } from './menu/mainMenu.js';
 import { generateModuleDocs } from './core/docs.js';
-import { printPromptContent, printPromptList, printPromptPath, type PromptKind } from './core/prompts.js';
+import { printPromptContent, printPromptList, printPromptPath, searchPrompts, shortId, type PromptKind } from './core/prompts.js';
+import { updatePhaseIndexes } from './core/promptIndex.js';
 import { ejectModule } from './core/moduleRunner.js';
 import { buildPlan, detectPhase, formatBrief, formatPlan, readPlaybooks, suggestedGoals, installedSkillNames, validatePlaybooks } from './core/apply.js';
-import { getCatalogItem, listCatalog } from './core/catalog.js';
+import { getCatalogItem, listCatalog, validateCatalog } from './core/catalog.js';
 import { formatNext, formatStatus, markDone, readProgress, runChecks, skipStep, startProgress } from './core/progress.js';
+import { runAgentDoctor, updateAgentSetup } from './core/agentDoctor.js';
 import { readGuide } from './core/guide.js';
 import { setupProject, type SetupAgent } from './core/setup.js';
 import { lintPrompts } from './core/promptLint.js';
-import { SKILL_TARGETS, installSkills, listFlowSkills, listSkills, type SkillTarget } from './core/skills.js';
+import { SKILL_TARGETS, installSkills, listFlowSkills, listSkills, validateSkills, type SkillTarget } from './core/skills.js';
 import { readConfig, updateConfig } from './core/config.js';
 import { scaffoldProject } from './core/scaffold.js';
 import { generateEntity } from './core/generator.js';
@@ -82,6 +84,21 @@ function persistResults(results: any[], ctx: HelenContext): void {
     installedModules: results.map(r => r.moduleId),
     createdFiles: createdFiles,
   });
+}
+
+function runLint(): number {
+  const errors = [
+    ...lintPrompts().map(issue => `${issue.file}: ${issue.message}`),
+    ...validatePlaybooks().map(issue => `playbooks.json: ${issue}`),
+    ...validateSkills().map(issue => `skills: ${issue}`),
+  ];
+  const catalog = validateCatalog();
+  errors.push(...catalog.filter(issue => issue.level === 'error').map(issue => `catalog ${issue.id}: ${issue.message}`));
+  for (const issue of catalog.filter(item => item.level === 'warn')) logger.warn(`catalog ${issue.id}: ${issue.message}`);
+  for (const error of errors) logger.error(error);
+  if (errors.length > 0) return 1;
+  logger.success('HELEN library is valid (prompts, indexes, playbooks, skills, catalog).');
+  return 0;
 }
 
 export function createProgram(): Command {
@@ -172,8 +189,7 @@ export function createProgram(): Command {
             printModuleList();
             break;
           case 'doctor': {
-            const checks = runDoctor(cwd);
-            printDoctorResults(checks, project);
+            printDoctorResults([...runDoctor(cwd), ...runAgentDoctor(cwd)], project);
             break;
           }
           case 'explain': {
@@ -402,8 +418,7 @@ export function createProgram(): Command {
     .action(() => {
       const cwd = process.cwd();
       const project = detectProject(cwd);
-      const checks = runDoctor(cwd);
-      printDoctorResults(checks, project);
+      printDoctorResults([...runDoctor(cwd), ...runAgentDoctor(cwd)], project);
     });
 
   // helen dry-run
@@ -442,28 +457,38 @@ export function createProgram(): Command {
   prompts
     .command('list')
     .description('List available prompts and flows')
-    .option('--kind <kind>', 'Filter by kind: master, guide, flow, step, checkpoint, prompt')
+    .option('--kind <kind>', 'Filter by kind: master, guide, flow, checkpoint, prompt')
     .action((opts: { kind?: PromptKind }) => {
       printPromptList(opts.kind);
     });
 
   prompts
-    .command('lint')
-    .description('Validate prompt frontmatter and links against the Premium Prompt Contract')
-    .action(() => {
-      const issues = lintPrompts();
-      const playbookIssues = validatePlaybooks();
-      for (const issue of issues) {
-        logger.error(`${issue.file}: ${issue.message}`);
-      }
-      for (const issue of playbookIssues) {
-        logger.error(`playbooks.json: ${issue}`);
-      }
-      if (issues.length > 0 || playbookIssues.length > 0) {
-        process.exitCode = 1;
+    .command('search <words...>')
+    .description('Find prompts by words in their id, title, summary or aliases')
+    .action((words: string[]) => {
+      const results = searchPrompts(words.join(' '));
+      if (results.length === 0) {
+        logger.warn('No prompt matches. Try other words or: helen prompts list');
         return;
       }
-      logger.success('Prompt library is valid.');
+      for (const entry of results.slice(0, 15)) {
+        console.log(`${shortId(entry).padEnd(46)} ${entry.summary}`);
+      }
+    });
+
+  prompts
+    .command('index')
+    .description('Regenerate the prompt index in every phase README from prompt frontmatter')
+    .action(() => {
+      const changed = updatePhaseIndexes(true);
+      logger.success(changed.length ? `Updated: ${changed.join(', ')}` : 'All phase indexes are up to date.');
+    });
+
+  prompts
+    .command('lint')
+    .description('Same as `helen lint`')
+    .action(() => {
+      process.exitCode = runLint();
     });
 
   prompts
@@ -584,6 +609,14 @@ export function createProgram(): Command {
       }
     });
 
+  // helen lint
+  program
+    .command('lint')
+    .description('Validate the whole HELEN library: prompts, indexes, playbooks, skills and catalog')
+    .action(() => {
+      process.exitCode = runLint();
+    });
+
   // helen guide
   program
     .command('guide')
@@ -676,6 +709,19 @@ export function createProgram(): Command {
         logger.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;
       }
+    });
+
+  skills
+    .command('update')
+    .description('Update installed HELEN skills and the HELEN block in AGENTS.md / CLAUDE.md to this HELEN version (backs up changed files)')
+    .option('--dry-run', 'Preview without writing files', false)
+    .action((opts: { dryRun: boolean }) => {
+      const result = updateAgentSetup(process.cwd(), opts.dryRun);
+      if (result.skills.length === 0 && result.instructionFiles.length === 0) {
+        logger.success('Everything is already up to date.');
+        return;
+      }
+      logger.success(`Updated skills: ${result.skills.join(', ') || 'none'}. Instruction files: ${result.instructionFiles.join(', ') || 'none'}.`);
     });
 
   skills

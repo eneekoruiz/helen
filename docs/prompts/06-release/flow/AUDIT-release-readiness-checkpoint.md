@@ -1,59 +1,43 @@
 ---
 action: AUDIT
-label: AUDIT-
 phase: 06-release
+summary: Final release gate: verification, honest docs and claims, no secrets, resolved or accepted findings. PASS, PASS WITH CAVEATS or FAIL.
 modifies_code: false
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
+aliases:
+  - plan-release-checklist
 ---
 
-# [AUDIT] - Release Readiness Checkpoint
+# Release Readiness Checkpoint
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Decide, as the accountable release owner, whether the project can honestly be marked finished, released, delivered or presented right now.
 
-**Intención**: CHECKPOINT (Puerta de calidad bloqueante)
+## Use when
 
-## Purpose
+- Right before tagging a release, delivering, publishing or archiving.
 
-Decide whether the project can move from polish/hardening into release or delivery.
+## Requirements
 
-## Required Evidence
+Confirm every applicable item, then apply senior judgment beyond the list:
 
-- Build passes.
-- Tests or smoke checks pass.
-- Lint/typecheck pass if available.
-- README and docs match reality.
-- No known secrets or private artifacts.
-- Release notes or handoff notes exist when needed.
-- Public claims are demonstrable.
+1. Works from a reasonably clean setup, not only on the original machine; build, lint, types and tests pass (`helen check`).
+2. The main user flow was exercised manually after the last meaningful change.
+3. README and docs match real commands, setup and limits; `.env.example` exists when configuration is required.
+4. Screenshots real and current; social preview, About box, description and topics accurate when the project is public; page-level Open Graph on live sites.
+5. No secrets, tokens, private URLs, machine-specific paths, generated junk or personal artifacts committed.
+6. No feature, performance, security, accessibility, scale, SEO or production-ready claim that cannot be demonstrated; demo-only behavior and mocks labeled.
+7. Earlier audit findings resolved or accepted with explicit rationale; required owner decisions taken.
+8. Release or handoff notes exist when needed.
 
-## Blocks Progress
+**Blocks release:** any core verification fails; misleading README or setup; public presentation that overstates the product; an unresolved critical issue; a missing owner decision. You may also block for an unlisted reason that materially affects quality, trust, security or presentation.
 
-- Any core verification fails.
-- README/setup is misleading.
-- Public presentation overstates the product.
-- Known critical issue is unresolved.
-- Required owner decision is missing.
+## Limits
 
-## Warning Only
+- Audit only. Recovery: return to the step that introduced the gap, fix it, rerun the required checkpoints, then retry.
 
-- Minor polish issue with explicit caveat.
-- Non-critical docs improvement already tracked.
+## Output
 
-## Recovery
-
-Return to the flow step that introduced the gap, fix it, rerun required checkpoints, then reattempt release.
+1. Verdict first: `PASS`, `PASS WITH CAVEATS` or `FAIL`.
+2. Unresolved blockers as **Critical**, **Important**, **Optional**, and accepted caveats.
+3. The smallest next action, and whether you would personally sign off today.

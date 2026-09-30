@@ -22,4 +22,4 @@ Spline for fast interactive embeds; React Three Fiber when you need code-level c
 
 Catalog entries that help: `scroll-craft` (scroll-driven sites), `21st-dev` (ready components). Review any script they ship before running.
 
-Prompts: `audit-performance-budget-for-cinematic-sites`, `enhance-native-view-transitions`, `enhance-scroll-linked-sequences`, `generate-3d-spline-vs-react-three-fiber`, `generate-webgpu-shaders`.
+Prompts: `audit-motion-and-3d-performance`, `enhance-view-transitions`, `generate-scroll-driven-sequences`, `generate-3d-foundation`, `generate-shader-experience`.

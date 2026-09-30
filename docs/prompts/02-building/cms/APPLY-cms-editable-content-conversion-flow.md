@@ -1,80 +1,49 @@
 ---
 action: APPLY
-label: APPLY-
 phase: 02-building
+summary: Flow: convert static pages so texts, links and images use the inline Visual CMS components, with i18n-aware keys.
 modifies_code: true
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
+repeatable: true
+stage: building
 ---
 
-# [APPLY] - CMS Editable Content Conversion Flow
+# CMS Editable Content Conversion Flow
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Convert a static page or site so relevant texts, links and images use the Visual CMS inline components (from the HELEN `cms` module), integrated with the `/admin` route and i18n when present.
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+## Use when
 
-## Objetivo
+- A static mockup becomes a client-editable site, during building or before handoff.
 
-Convertir una página o sitio web estático para que todos los textos, enlaces e imágenes relevantes utilicen componentes de edición inline del **Visual CMS**, integrándose con la ruta `/admin` y el sistema de internacionalización (i18n) si existe.
+## Steps
 
-## Fase Ideal
+1. [audit-quality-gates-checkpoint](../checkpoint/AUDIT-quality-gates-checkpoint.md): start from a passing build.
+2. **Provider and route:** wrap the app in `<CMSProvider>` and render `<CMSToolbar />` in the main layout; visual editing activates on `/admin`.
+3. **Inline editing:** replace hardcoded text with `<EditableText contentKey="key" />`, images with `<EditableImage contentKey="key" />`, links with `<EditableLink textKey="textKey" urlKey="urlKey" />`.
+4. **Content model:**
+   - With i18n: the toolbar shows a language selector; translatable fields (titles, paragraphs, descriptions) change only for the active language; universal fields (phones, emails, external links, structural images) sync across languages.
+   - Without i18n: modular, clean keys in `content.json` so going multilingual later is trivial.
+5. Keep SEO and accessibility: heading hierarchy, alt text, no layout shift in edit mode.
+6. [audit-quality-gates-checkpoint](../checkpoint/AUDIT-quality-gates-checkpoint.md), then check visually that edit-mode outlines do not break responsive layout.
 
-Durante el desarrollo (Building) o antes del handoff, cuando el proyecto pasa de maqueta estática a CMS editable.
+## Stop when
 
-## Criterios de Conversión
+- The project has no CMS module and the user has not asked to add one (`helen add cms`).
 
-1. **Ruta Protegida y Contexto**:
-   - Asegurar que la aplicación esté envuelta con `<CMSProvider>` (de `CMSContext`) y que renderice `<CMSToolbar />` en el layout principal.
-   - La edición visual se activa automáticamente al navegar a la ruta `/admin`.
+## Limits
 
-2. **Edición Inline**:
-   - Reemplazar textos estáticos hardcoded con `<EditableText contentKey="clave" />`.
-   - Reemplazar imágenes estáticas con `<EditableImage contentKey="clave" />`.
-   - Reemplazar enlaces estáticos con `<EditableLink textKey="claveTexto" urlKey="claveUrl" />`.
+- Stable, meaningful content keys; never make product-critical logic editable.
 
-3. **Adaptabilidad del Contexto (i18n y Modelo de Datos)**:
-   - **Escenario A (Con i18n detectado)**:
-     - El componente `<CMSToolbar>` debe presentar el selector de idioma.
-     - Clasificar y mapear los campos distinguiendo entre:
-       - **Campos Traducibles** (títulos, párrafos, descripciones; se actualizan solo para el idioma activo).
-       - **Campos Universales** (teléfonos, correos, enlaces externos, imágenes estructurales; se sincronizan automáticamente en todos los idiomas).
-   - **Escenario B (Sin i18n detectado)**:
-     - Estructurar el JSON de `content.json` con claves modulares y limpias, asegurando una transición trivial a multilingüe en el futuro.
-
-4. **Preservar SEO y Accesibilidad**:
-   - Mantener la jerarquía de encabezados (`h1` a `h6`), etiquetas alt accesibles y evitar layout shifts en modo de edición.
-
-## Checkpoints Requeridos
-
-- **Compilación**: Lanzar [build-and-compile-checkpoint.md](../checkpoint/AUDIT-build-and-compile-checkpoint.md).
-- **Linter/Tipados**: Lanzar [lint-and-typecheck-checkpoint.md](../checkpoint/AUDIT-lint-and-typecheck-checkpoint.md).
-- **Regresión**: Verificar visualmente que los bordes dashed temporales de edición no rompan el responsive ni el layout.
-
-## Formato de Entrega
-
-El entregable debe ser minimalista. Produce únicamente:
+## Output
 
 ```text
-✅ Conversión de Visual CMS aplicada con éxito. / [o] ⚠️ Conversión aplicada con advertencias.
+Done. / Done with warnings.
 
-Cambios aplicados:
-- [Breve lista de 1-3 viñetas con componentes/vistas convertidos a EditableText/EditableImage/EditableLink]
+Changes applied:
+- 1-3 bullets with the exact changes
 
-Acciones manuales necesarias:
-- Ninguna. / [o especificar acciones adicionales]
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
 ```
-*No generes informes extensos ni explicaciones teóricas.*

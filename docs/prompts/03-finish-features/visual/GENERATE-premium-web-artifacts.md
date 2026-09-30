@@ -1,43 +1,46 @@
 ---
 action: GENERATE
-label: GENERATE-
 phase: 03-finish-features
+summary: Build production-ready interactive blocks (pricing table, feature selector, bento grid) in React and Tailwind with realistic content.
 modifies_code: true
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
 ---
 
-# [GENERATE] - GENERATE- Web Artifacts Builder (React/Tailwind)
+# Premium Web Artifacts
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Build isolated, production-ready interactive blocks that support conversion.
 
-Actúas como un **Principal Frontend Engineer de Producto**. Tu objetivo es construir bloques interactivos y aislados de React y Tailwind CSS, listos para producción, que sirvan de base para conversiones y ventas de alto nivel.
+## Use when
 
----
+- The page needs an interactive pricing table, a feature selector or a bento grid.
 
-## 📦 Artefactos Admitidos
+## Requirements
 
-Elige o crea uno de los siguientes bloques visuales según la demanda:
-1. **Interactive Pricing Table (Tabla de Precios Inmersiva)**:
-   - Toggle anual/mensual animado de forma fluida.
-   - Destacado visual mediante degradado sutil de borde, badges flotantes o micro-interacciones.
-   - Botón CTA de compra con animación de carga interna o hover inmersivo.
-2. **Feature Selector Toggle (Selector de Características Inmersivo)**:
-   - Tabs con layouts interactivos donde la descripción del feature cambia con transiciones suaves de opacidad y desplazamiento.
-   - Indicador de tab activo flotante mediante transiciones físicas en la posición y anchura del fondo.
-3. **Bento Grid Layout**:
-   - Grid asimétrica de componentes con animaciones hover en cada celda (traducción sutil del contenido, revelado de controles adicionales o cambios en sombras).
+Pick the block the page needs:
 
----
+- **Pricing table:** smooth monthly/yearly toggle, subtle highlight of the recommended plan, CTA with loading state and clear hover.
+- **Feature selector:** tabs whose content changes with short opacity and offset transitions; an active indicator that moves physically (position and width).
+- **Bento grid:** asymmetric grid with per-cell hover (subtle content shift, extra controls, shadow change).
 
-## 📐 Reglas Estrictas de Código y Comportamiento
+1. Realistic content for the niche; no lorem ipsum or generic text. Prices and plans come from the user; use clear placeholders if missing.
+2. Typed props (TypeScript interfaces) and controlled components.
+3. Mobile-first: blocks stack gracefully on small screens.
+4. Keyboard accessible tabs and toggles with correct roles; reduced motion respected.
+5. Memoize only where profiling or obvious hot paths justify it.
 
-* **Cero Placeholders**: Todo el texto, nombres de planes y valores deben ser realistas para el nicho. Prohibido "Lorem Ipsum" o descripciones genéricas.
-* **Componente Controlado y Tipado**: Si usas TypeScript, define interfaces exactas para las props del componente.
-* **Rendimiento React**: Utiliza `useMemo` o `useCallback` en event handlers y operaciones complejas para evitar repintados innecesarios durante transiciones y animaciones.
-* **Compatibilidad responsive**: Diseña en Mobile-First. Asegura que los componentes se apilen elegantemente en pantallas móviles, reduciendo tamaños de padding o tipografía dinámicamente.
+## Limits
+
+- No invented prices, plans or features; integrate with existing tokens and components.
+
+## Output
+
+```text
+Done. / Done with warnings.
+
+Changes applied:
+- 1-3 bullets with the exact changes
+
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
+```

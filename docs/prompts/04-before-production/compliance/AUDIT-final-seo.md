@@ -1,68 +1,44 @@
 ---
 action: AUDIT
-label: AUDIT-
 phase: 04-before-production
+summary: Verify technical SEO before publishing: titles, descriptions, Open Graph, canonicals, robots, sitemap, headings and indexability.
 modifies_code: false
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
 ---
 
-# [AUDIT] - Final SEO Audit
+# Final SEO Audit
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Make sure a public site is indexable, correctly described and shareable before it goes live.
 
-**Intención**: AUDIT (No modificar código, buscar problemas)
+## Use when
 
-## Objetivo
+- Before publishing public web projects, landing pages, docs or portfolios.
 
-Verificar SEO básico, metadatos y configuraciones de indexabilidad antes de la publicación o release.
+## Skip when
 
-## Cuándo Usarlo
+- SEO is explicitly out of scope, or there is no indexable content.
 
-- En la fase de preparación de releases para proyectos web públicos.
-- Antes de compartir landing pages, documentación pública o portfolios.
+## Requirements
 
-## Cuándo NO Usarlo
+1. `title` and meta description per key page, unique and matching the real content.
+2. Open Graph (`og:title`, `og:type`, `og:image`, `og:url`, plus `og:description`, `og:image:alt`) and Twitter cards; social images readable at small sizes.
+3. Canonical URLs, `robots.txt`, XML sitemap, no accidental `noindex` in production, no duplicate content.
+4. One `h1` per page and a logical heading order; descriptive link text; image alt text.
+5. Language and alternates (`lang`, `hreflang`) when multilingual; structured data where it clearly applies.
+6. Core Web Vitals risks that affect ranking (coordinate with the performance prompts).
 
-- Si el posicionamiento SEO está explícitamente fuera de alcance del proyecto.
-- Si no hay superficie de contenido indexable en buscadores.
+## Beyond the checklist
 
-## Criterios Mínimos
+Organic discoverability: comparison pages, documentation keywords, clean sitemaps, attractive share snippets. External help: `helen skills external seo`.
 
-- Revisa `title`, `meta description`, Open Graph (OG), URLs canónicas, directivas `robots.txt`, sitemaps, estructura de headings (`h1`), indexabilidad y prevención de contenido duplicado.
-- Comprueba que los metadatos e indexaciones coincidan estrictamente con el producto real.
+## Limits
 
-## Más allá de estos criterios
+- Audit only: do not modify files.
+- No SEO claims, keyword stuffing or misleading marketing text the product cannot back.
 
-Busca oportunidades de discoverability orgánica: páginas comparativas, optimización de palabras clave en la documentación, sitemaps limpios y snippets atractivos para compartir.
+## Output
 
-## Límites de Seguridad
-
-No añadas claims de SEO, keywords de spam o textos de marketing engañosos que el producto no sostenga con evidencia.
-
-## Checks Finales
-
-- Metadatos esenciales presentes en todas las páginas clave.
-- Claims SEO verificables con el contenido.
-- Sin directivas `noindex` accidentales en producción.
-
-## Formato de Entrega
-
-1. Bloqueadores y problemas SEO críticos (clasificados por severidad: Críticos, Importantes, Opcionales).
-2. Propuestas de optimización (meta tags, headings).
-3. Oportunidades orgánicas.
-4. Warnings y advertencias.
+1. Findings grouped as **Critical**, **Important** and **Optional**. For each: evidence (file, line, screen or command), impact, recommended fix and effort.
+2. Proposed meta tags and heading fixes, ready to paste.
+3. Organic opportunities.

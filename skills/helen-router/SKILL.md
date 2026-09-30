@@ -23,7 +23,7 @@ Act as a development operating system: show the current state, recommend the nex
 
 1. Inspect the repository (structure, recent commits, scripts in `package.json`, CI, docs). Do not guess.
 2. Estimate the current phase and list critical friction on the happy path.
-3. Read that phase's `HUMAN_CHECKLIST.md` and answer the transition checklist briefly.
+3. Read that phase's README (`docs/prompts/<phase>/README.md`, section "Exit checklist") and answer it briefly.
 4. Recommend the next phase and the exact prompt/flow: `helen prompts list`, `helen prompts show <id>`, `helen prompts flow <flow>`.
 
 ## Output (short)

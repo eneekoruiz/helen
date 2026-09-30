@@ -1,70 +1,36 @@
 ---
 action: AUDIT
-label: AUDIT-
 phase: 05-final-audit
+summary: Decide whether and how to add automated code review (e.g. CodeRabbit or agent review) without leaking code or trusting it blindly.
 modifies_code: false
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
 ---
 
-# [AUDIT] - Automated Code Review Setup
+# Automated Code Review Setup
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
-**Intención**: AUDIT (analizar sin modificar archivos)
+Decide whether automated code review is worth adding and how to do it without leaking code or depending on it blindly.
 
-## Objetivo
+## Use when
 
-Evaluar si conviene añadir revisión de código automatizada (por ejemplo CodeRabbit, o la revisión integrada del agente) y cómo hacerlo sin filtrar código ni depender ciegamente de ella.
+- Before opening the repository to collaborators, or when pull requests are approved without real review.
 
-## Cuándo Usarlo
+## Requirements
 
-- Antes de abrir el repositorio a colaboradores.
-- Cuando los PR se aprueban sin revisión real.
+1. Describe the review that exists today (human, CI, linters, agent) and its gaps.
+2. For an external tool: what code leaves the repository, where it is processed, free-tier limits and heavy-use cost, retention policy (`helen skills external coderabbit`).
+3. Installation: many tools offer `curl ... | sh`; download the script, read it and pin a version first. Prefer package managers with versions or official extensions.
+4. Define which findings block (security, correctness) and which are optional, so automated review does not become noise.
+5. Automated review complements, never replaces, human review and tests.
 
-## Requisitos mínimos obligatorios
+## Beyond the checklist
 
-1. Describe qué revisión existe hoy (humana, CI, linters, agente) y qué huecos deja.
-2. Si se considera una herramienta externa: qué código sale del repositorio, dónde se procesa, límites del plan gratuito y coste de uso intensivo, y política de retención.
-3. Instalación: muchas herramientas ofrecen `curl … | sh`; descarga el script, léelo y fíjalo antes de ejecutarlo. Prefiere Homebrew, paquetes con versión o extensiones oficiales.
-4. Define qué hallazgos bloquean (seguridad, correctitud) y cuáles son opcionales, para que la revisión automática no genere ruido.
-5. La revisión automática complementa, no sustituye, la revisión humana ni los tests.
+Use automated review before committing (on local changes) to catch hallucinations and code smells before the pull request.
 
-## Más allá de estos criterios
+## Limits
 
-Usa la revisión automática como paso previo al commit (sobre cambios sin subir) para detectar alucinaciones y olores de código antes del PR.
+- Audit only. Never send a client's private repository to a service without the client's permission; never apply an automated finding without verifying it.
 
-## Límites de Seguridad
+## Output
 
-- No envíes repositorios privados de clientes a un servicio sin permiso del cliente.
-- No conviertas un hallazgo automático en cambio aplicado sin verificarlo.
-
-## Checks Finales
-
-- [ ] Riesgos de privacidad evaluados.
-- [ ] Instalación revisada (script leído y versión fijada).
-- [ ] Política de qué bloquea y qué no.
-
-## Formato de entrega
-
-```markdown
-## Críticos
-- ...
-## Importantes
-- ...
-## Opcionales
-- ...
-```
+Findings grouped as **Critical**, **Important** and **Optional**. For each: evidence (file, line, screen or command), impact, recommended fix and effort. End with a recommendation: adopt, adopt with limits, or skip.

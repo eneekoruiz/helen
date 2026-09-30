@@ -1,70 +1,37 @@
 ---
 action: RESEARCH
-label: RESEARCH-
 phase: 01-start-project
+summary: Flow: competitive benchmark, then roadmap prioritization, ending in decisions rather than automatic changes.
 modifies_code: false
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
+repeatable: true
+stage: strategy
 ---
 
-# [RESEARCH] - Market Analysis Flow
+# Market Analysis Flow
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Compare the project with its alternatives and turn the findings into a prioritized roadmap.
 
-**Intención**: PLAN (Diseñar estrategias y fases)
+## Use when
 
-## Objetivo
+- Before roadmap planning, repositioning, a launch or a product redesign.
 
-Comparar el proyecto con alternativas y detectar oportunidades estratégicas.
+## Steps
 
-## Fase Ideal
+1. [research-competitive-benchmark](RESEARCH-competitive-benchmark.md). Checkpoint: is the external information backed by sources?
+2. [plan-roadmap-roi-prioritization](../strategy/PLAN-roadmap-roi-prioritization.md).
+3. Summarize decisions; do not apply large changes automatically.
 
-Antes de roadmap, reposicionamiento, launch o rediseño de producto.
+## Stop when
 
-## Prompts Incluidos
+- There is not enough data, or web research is needed and unavailable: mark the uncertainty and ask.
+- Recommendations imply a strong pivot: that is the user's decision.
 
-1. [competitive-benchmark.md](RESEARCH-competitive-benchmark.md)
-2. [roadmap-roi-prioritization.md](../strategy/PLAN-roadmap-roi-prioritization.md)
+## Limits
 
-## Checkpoints Entre Pasos
+- Separate real gaps from personal taste. Do not invent competitor facts.
 
-- Después del competitive benchmark: validar si la información externa está suficientemente respaldada.
-- Final: resumir decisiones, no aplicar cambios grandes automáticamente.
+## Output
 
-## Condiciones para Avanzar
-
-- Competidores o sustitutos identificados.
-- Gaps separados de gustos personales.
-- Oportunidades priorizadas por impacto.
-
-## Cuándo Detenerse
-
-- No hay datos suficientes.
-- Se requiere investigación web y el entorno no tiene acceso.
-- Las recomendaciones implican pivot fuerte.
-
-## Qué Hacer si Falla Algo
-
-Marcar incertidumbre y pedir autorización para investigación adicional o decisión estratégica.
-
-## Resumen Final
-
-1. Landscape.
-2. Gaps.
-3. Oportunidades.
-4. Roadmap sugerido.
-5. Decisiones necesarias.
+1. Landscape. 2. Gaps. 3. Opportunities ranked by impact. 4. Suggested roadmap. 5. Decisions the user must take.

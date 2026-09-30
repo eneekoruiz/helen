@@ -1,74 +1,49 @@
 ---
 action: APPLY
-label: APPLY-
 phase: 06-release
+summary: Push the code to a private GitHub repository and connect a host (Vercel, Cloudflare...) with safe environment variables and a verified deploy.
 modifies_code: true
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
 ---
 
-# [APPLY] - Deploy with GitHub and Hosting
+# Deploy with GitHub and Hosting
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+Put the site online reproducibly: code on GitHub, a connected host, and a verified first deploy, without leaking secrets.
 
-## Objetivo
+## Use when
 
-Subir el código a GitHub y conectarlo a un hosting (Vercel, Cloudflare u otro) para que la página quede en línea de forma reproducible y sin filtrar secretos.
+- After the release readiness checkpoint, when publishing a new site or delivering one to a client.
 
-## Cuándo Usarlo
+## Skip when
 
-- Tras pasar el checkpoint de release readiness.
-- Al publicar una web nueva o entregar un sitio a un cliente.
+- Build, tests or the security checkpoint fail.
 
-## Cuándo NO Usarlo
+## Requirements
 
-- Si build, tests o el checkpoint de seguridad fallan.
+1. `.env` files and credentials are not versioned; `.env.example` exists without real values; no secrets in git history.
+2. Create the repository **private** (`gh repo create <name> --private --source=. --push`); make it public only on purpose.
+3. Connect the repository to the host from its dashboard (or its official MCP, `helen skills external vercel-mcp`); environment variables live in the host, never in the repository.
+4. Verify the first deploy at the real URL: pages load, links and forms work, no accidental `noindex`, correct domain and HTTPS.
+5. Document how to deploy and roll back (`generate-operations-runbook`).
 
-## Criterios Mínimos
+## Beyond the checklist
 
-- Comprueba que `.env` y credenciales no están versionados y que existe `.env.example` sin valores reales.
-- Crea el repositorio como **privado** (`gh repo create <nombre> --private --source=. --push`); hazlo público solo si se decide a propósito.
-- Conecta el repositorio al hosting desde su panel; las variables de entorno se configuran allí, nunca en el repositorio.
-- Verifica el primer despliegue: la página carga, los enlaces y formularios funcionan, no hay `noindex` accidental y el dominio y HTTPS son correctos.
-- Documenta cómo desplegar y hacer rollback (ver `helen-knowledge`).
+Preview deploys per branch and a protected main branch so nothing publishes without passing CI.
 
-## Más allá de estos criterios
+## Limits
 
-Activa despliegues de previsualización por rama y protege la rama principal para que un push no publique sin pasar CI.
+- No force pushes and no changes to visibility, domains or DNS without explicit confirmation.
+- Never print tokens in chat or reports.
 
-## Límites de Seguridad
-
-- No hagas push forzado ni cambies visibilidad, dominios o DNS sin confirmación explícita.
-- No imprimas tokens en el chat ni en archivos de reporte.
-
-## Checks Finales
-
-- Sin secretos en el historial.
-- Despliegue verificado en la URL real.
-
-## Formato de Entrega
+## Output
 
 ```text
-✅ Despliegue listo. / ⚠️ Completado con advertencias.
+Done. / Done with warnings.
 
-Cambios aplicados:
-- [1-3 viñetas]
+Changes applied:
+- 1-3 bullets with the exact changes
 
-Acciones manuales necesarias:
-- Ninguna. / [conectar el hosting, configurar variables, apuntar el dominio]
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
 ```

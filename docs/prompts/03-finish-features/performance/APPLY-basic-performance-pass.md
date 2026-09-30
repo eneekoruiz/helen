@@ -1,69 +1,44 @@
 ---
 action: APPLY
-label: APPLY-
 phase: 03-finish-features
+summary: Find and fix evident, user-visible performance problems: bundle and asset weight, extra requests, re-renders, blocking work, load time.
 modifies_code: true
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
 ---
 
-# [APPLY] - Basic Performance Pass
+# Basic Performance Pass
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Fix obvious, high-impact performance problems that users or maintainers can feel.
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+## Use when
 
-## Objetivo
+- During polish and before a web release.
 
-Detectar y corregir problemas de rendimiento evidentes y de alto impacto (perceptibles por el usuario) en el código y en la carga de recursos.
+## Skip when
 
-## Cuándo Usarlo
+- It would be premature micro-optimization without profiling data or evidence.
 
-- En la fase de pulido visual y UX.
-- Antes de release web o de la aplicación.
+## Requirements
 
-## Cuándo NO Usarlo
+1. Review asset and bundle sizes, unnecessary network calls, redundant re-renders, inefficient loops, synchronous work blocking the main thread and initial load time.
+2. Identify bottlenecks visible to the user; measure before and after when tools are available (build output, Lighthouse, DevTools traces).
+3. Prefer the smallest change that improves perceived speed: shorter visual wait, friendly loading placeholders, lazy-loaded images, paginated data.
+4. Images and video: modern formats, correct sizes, explicit dimensions.
 
-- Para realizar microoptimizaciones prematuras sin datos de perfilado o evidencia.
+## Limits
 
-## Criterios Mínimos
+- No complex caching, debounce or memoization without need or without understanding its lifecycle.
+- Never trade correctness for milliseconds.
 
-- Revisa el tamaño de assets y bundles, llamadas de red innecesarias, re-renders redundantes, bucles ineficientes, operaciones síncronas bloqueantes en el hilo principal y tiempos de carga inicial.
-- Identifica cuellos de botella visibles para el usuario o el mantenedor.
-
-## Más allá de estos criterios
-
-Busca el menor cambio que mejore la percepción de velocidad: menor tiempo de espera visual, placeholders de carga amigables, lazy loading de imágenes y datos paginados.
-
-## Límites de Seguridad
-
-No introduzcas mecanismos complejos de caché, debounce o memorización sin necesidad o sin entender su ciclo de vida. No comprometas la corrección lógica por ganar milisegúndos.
-
-## Formato de Entrega
-
-El entregable debe ser minimalista. Produce únicamente:
+## Output
 
 ```text
-✅ Mejoras de rendimiento aplicadas. / [o] ⚠️ Completado con advertencias.
+Done. / Done with warnings.
 
-Cambios aplicados:
-- [Breve lista de 1-3 viñetas con las optimizaciones de rendimiento aplicadas]
+Changes applied:
+- 1-3 bullets with the exact changes
 
-Acciones manuales necesarias:
-- Ninguna. / [o especificar acciones]
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
 ```
-*No generes informes extensos ni explicaciones teóricas.*

@@ -1,97 +1,39 @@
 ---
 action: AUDIT
-label: AUDIT-
 phase: 07-client-handoff
+summary: Review all visible copy for clarity, tone, brand fit, conversion, SEO and unsupported claims before demo, launch or delivery.
 modifies_code: false
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
 ---
 
-# [AUDIT] - Content, Copy, Brand, and Claims Audit
+# Content, Copy, Brand and Claims Audit
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Find every word, phrase or claim that makes the product feel less clear, trustworthy, premium or ready, as a founder would minutes before sending it to an important client.
 
-**Intención**: AUDIT (No modificar código, buscar problemas)
+## Use when
 
-Purpose: Audit all visible copy for clarity, consistency, credibility, conversion, brand fit, and unsupported claims before demo, launch, or client delivery.
+- The site or app is visually close to ready but needs the editorial pass that makes it feel finished.
 
-Use this when a site or app is visually close to ready but still needs the kind of editorial pass that makes it feel finished, trustworthy, and premium.
+## Requirements
 
-## Prompt
+1. **Visible copy:** headings, paragraphs, CTAs, labels, navigation, footer, badges, forms, errors, empty states, metadata, testimonials, FAQs, pricing and legal snippets; typos, awkward phrasing, mixed language, inconsistent casing, duplicates, vague promises, robotic AI-sounding text.
+2. **Brand and tone:** coherent across pages; matches the product's real maturity; no generic filler.
+3. **Claims:** flag unsupported "best", "secure", "guaranteed", "AI-powered", "enterprise-grade", "trusted by" and performance promises; suggest safer wording; testimonials, metrics, logos and awards must not mislead.
+4. **Conversion copy:** CTA text matches intent; primary and secondary CTAs differ; no dead-end wording.
+5. **SEO copy:** titles, descriptions, heading structure; no keyword stuffing.
 
-Act as a Staff Product Designer, senior copywriter, UX writer, brand strategist, legal-risk reviewer, SEO reviewer, and founder obsessed with quality.
+## Beyond the checklist
 
-Inspect the full project and report copy issues that weaken trust, clarity, conversion, or polish.
+If the copy reveals deeper problems (unclear audience, weak positioning, confusing offer, missing proof, visuals stronger than the message), name them.
 
-## Requisitos mínimos obligatorios
+## Limits
 
-1. Review visible copy
-- Check headings, paragraphs, CTAs, labels, nav items, footer copy, badges, form text, error text, empty states, metadata copy, testimonials, FAQs, pricing copy, and legal snippets.
-- Find typos, awkward phrasing, mixed language, inconsistent casing, duplicated wording, vague promises, and robotic AI-sounding copy.
-- Preserve the product's intended positioning and audience.
+- Audit only. Never invent facts, testimonials, metrics, logos, awards, certifications or guarantees.
+- Flag risky legal, privacy or pricing changes; preserve translations, i18n and CMS field identity.
 
-2. Review brand and tone
-- Check whether the tone is coherent across pages and components.
-- Align microcopy with the level of product maturity the UI is trying to signal.
-- Remove filler phrases that make the product feel generic.
+## Output
 
-3. Review claims and credibility
-- Flag unsupported claims such as "best", "secure", "guaranteed", "AI-powered", "enterprise-grade", "trusted by", or performance promises without evidence.
-- Suggest safer alternatives when a claim may create legal, trust, or credibility risk.
-- Ensure testimonials, metrics, logos, awards, and social proof are not misleading.
-
-4. Review conversion copy
-- Check whether CTA text matches the user's likely intent.
-- Ensure primary and secondary CTAs are differentiated.
-- Remove friction, ambiguity, and dead-end wording.
-
-5. Review SEO-critical copy
-- Check titles, descriptions, H1/H2 structure, landing page copy, repeated terms, and indexable content where applicable.
-- Avoid keyword stuffing or bland SEO text that hurts product quality.
-
-## Más allá de estos criterios
-
-Think like a founder reviewing the product minutes before sending it to an important client.
-
-Look for any word, phrase, section, CTA, legal phrase, testimonial, or claim that makes the product feel less premium, less trustworthy, less clear, less differentiated, or less ready.
-
-If the copy reveals deeper product problems, name them: unclear ICP, weak positioning, confusing offer, missing proof, missing differentiation, or mismatch between visual quality and message quality.
-
-## Límites de seguridad
-
-- Do not invent facts, testimonials, metrics, logos, awards, certifications, or guarantees.
-- Do not change legal, privacy, or pricing language in high-risk ways without flagging it.
-- Do not rewrite the whole brand voice unless the current one is broken and the change is justified.
-- Preserve translations and i18n structure.
-- If the project uses CMS/editable fields, preserve field identity and editability.
-
-## Checks finales
-
-- All visible copy reviewed.
-- Unsupported claims flagged or softened.
-- CTA copy reviewed.
-- Brand tone is consistent.
-- SEO-critical copy reviewed.
-- CMS/i18n implications considered.
-
-## Formato de entrega
-
-1. Copy risks and unsupported claims (classified by severity: Críticos, Importantes, Opcionales).
-2. Proposed copy changes.
-3. Brand/tone inconsistencies.
-4. Conversion copy improvements.
-5. Remaining decisions for owner/client.
+1. Findings grouped as **Critical**, **Important** and **Optional**. For each: evidence (file, line, screen or command), impact, recommended fix and effort.
+2. Proposed copy changes (before / after), tone inconsistencies and conversion improvements.
+3. Decisions left for the owner or client.

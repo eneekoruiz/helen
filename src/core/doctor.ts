@@ -2,7 +2,7 @@ import pc from 'picocolors';
 import { detectProject, type ProjectInfo } from './projectDetector.js';
 import { logger } from './logger.js';
 
-interface DoctorCheck {
+export interface DoctorCheck {
   label: string;
   status: 'ok' | 'warn' | 'error';
   message: string;

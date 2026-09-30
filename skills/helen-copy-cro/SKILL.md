@@ -23,4 +23,4 @@ AI traces to remove: staged run-ups, forced triples, inflated significance, sale
 - Do not change legal, privacy, or pricing language in risky ways without flagging it.
 - Preserve translations, i18n structure, and CMS field identity.
 
-Prompts: `audit-content-copy-brand-and-claims`, `audit-links-forms-ctas-and-conversion-paths`, `audit-ai-trace-erasure-and-human-craft`, `enhance-copy-humanization-and-cro`.
+Prompts: `audit-content-copy-brand-and-claims`, `audit-links-forms-ctas-and-conversion-paths`, `audit-ai-trace-erasure-and-human-craft`, `enhance-copy-and-conversion`.

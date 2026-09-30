@@ -1,64 +1,31 @@
 ---
 action: AUDIT
-label: AUDIT-
 phase: 03-finish-features
+summary: Blocking gate: user-facing changes are coherent, usable and not visually broken across viewports and states.
 modifies_code: false
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
 ---
 
-# [AUDIT] - Visual and UX Regression Checkpoint
+# Visual and UX Regression Checkpoint
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Confirm user-facing changes are coherent, usable and not visually broken before the flow continues.
 
-**Intención**: CHECKPOINT (Puerta de calidad bloqueante)
+## Use when
 
-## Purpose
+- After any change to layout, copy, motion or components, and at the end of visual flows.
 
-Confirm user-facing changes are coherent, usable, and not visually broken.
+## Requirements
 
-## Command
+1. Open the affected screens in a real browser when a dev server exists and capture screenshots (`helen skills external playwright-cli` helps); otherwise review the code and say that no visual check could run.
+2. Check the primary flow, responsive layout, loading, error and empty states, keyboard focus, text overflow, obvious contrast problems, visual hierarchy and public assets.
+3. **Blocks progress:** broken layout in the primary viewport; overlapping or unreadable text; the primary flow cannot be completed; a visual state contradicts product behavior.
+4. **Warning only:** minor spacing or copy polish outside the primary flow; improvements that need a design or product decision.
 
-If the app has a local dev server and browser tooling, open the relevant screen and capture screenshots.
+## Limits
 
-## Manual Review
+- Fix only the smallest visible issue, recheck the affected viewport and record what remains.
 
-Check:
-- primary flow;
-- responsive layout;
-- loading/error/empty states;
-- keyboard focus;
-- text overflow;
-- obvious contrast problems;
-- visual hierarchy;
-- screenshots or public assets if relevant.
+## Output
 
-## Blocks Progress
-
-- Broken layout in primary viewport.
-- Text overlap or unreadable UI.
-- Primary flow cannot be completed.
-- Visual state contradicts product behavior.
-
-## Warning Only
-
-- Minor spacing or copy polish outside the primary flow.
-- Visual improvement that requires design/product decision.
-
-## Recovery
-
-Fix the smallest visible issue, recheck the affected viewport, and record what remains.
+Screens and viewports checked, blockers and warnings with evidence, and the verdict `GATE PASSED` or `GATE BLOCKED`.

@@ -1,59 +1,37 @@
 ---
 action: PLAN
-label: PLAN-
 phase: 01-start-project
+summary: Turn ideas and audit findings into a now/next/later roadmap ranked by value, risk, effort and confidence, with kill criteria.
 modifies_code: false
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
 ---
 
-# [PLAN] - Roadmap, ROI, and Prioritization Audit
+# Roadmap and ROI Prioritization
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Decide what to build, fix, remove or defer, with a roadmap that survives contact with reality.
 
-**Intención**: PLAN (Diseñar estrategias y fases)
+## Use when
 
-Purpose: Turn ideas and audit findings into a disciplined roadmap.
+- After audits or benchmarks produced more ideas than capacity.
+- Planning the next weeks of work.
 
-## Prompt
+## Requirements
 
-Act as a Product Manager, CTO, Staff Engineer, and SaaS founder.
-
-Prioritize what should be built, fixed, removed, or deferred.
-
-## Requisitos mínimos obligatorios
-
-1. Classify work by user value, risk reduction, revenue/growth value, maintenance value, and strategic value.
-2. Estimate effort and confidence.
+1. Classify work by user value, risk reduction, revenue or growth, maintenance value and strategic value.
+2. Estimate effort and confidence for each item.
 3. Identify dependencies and sequencing.
 4. Separate quick wins from strategic bets.
-5. Identify kill criteria for low-value work.
+5. Define kill criteria for low-value work.
 
-## Más allá de estos criterios
+## Beyond the checklist
 
-Challenge whether the roadmap is too feature-heavy, too technical, too cosmetic, or too reactive.
+Challenge a roadmap that is too feature-heavy, too technical, too cosmetic or too reactive. Look for leverage: one change that improves activation, support, trust and maintainability at once.
 
-Look for leverage: one improvement that improves activation, support, trust, and maintainability at once.
+## Limits
 
-## Formato de entrega
+- Plan only: do not modify files. Mark estimates as estimates.
 
-1. Roadmap themes.
-2. Now/next/later table.
-3. Quick wins (low effort, high value).
-4. Strategic bets.
-5. Work to delete or avoid.
-6. Decision log.
+## Output
+
+1. Roadmap themes. 2. Now / next / later table with value, effort and confidence. 3. Quick wins. 4. Strategic bets. 5. Work to delete or avoid. 6. Decision log entries.

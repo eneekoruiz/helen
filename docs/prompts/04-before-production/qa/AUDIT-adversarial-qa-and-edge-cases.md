@@ -1,56 +1,38 @@
 ---
 action: AUDIT
-label: AUDIT-
 phase: 04-before-production
+summary: Attack the product with edge cases: malformed, empty and huge data, duplicates, slow network, cancellations, races and partial failures.
 modifies_code: false
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
 ---
 
-# [AUDIT] - Adversarial QA and Edge Cases Audit
+# Adversarial QA and Edge Cases
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Find the bugs that happy-path testing misses, before users do.
 
-**Intención**: AUDIT (No modificar código, buscar problemas)
+## Use when
 
-Purpose: Find bugs that normal happy-path testing misses.
+- Before production or a release candidate, and after large feature work.
 
-## Prompt
-
-Act as a QA Lead, Security Engineer, Staff Engineer, and impatient real user.
-
-Attack the project with edge cases.
-
-## Requisitos mínimos obligatorios
+## Requirements
 
 1. Identify critical flows and risky inputs.
-2. Test or reason through malformed data, empty data, huge data, duplicate actions, slow network, cancelled actions, permission failures, partial failures, and repeated retries.
+2. Test or reason through malformed, empty and huge data; duplicate actions; slow or dropped network; cancelled actions; permission failures; partial failures; repeated retries.
 3. Review destructive flows and rollback behavior.
-4. Check race conditions, concurrency, idempotency, and state recovery.
-5. Identify missing regression tests.
+4. Race conditions, concurrency, idempotency and state recovery.
+5. Missing regression tests.
 
-## Más allá de estos criterios
+## Beyond the checklist
 
-Think of weird but plausible user behavior, integration failures, time-based bugs, browser differences, file-system oddities, and state combinations nobody designed for.
+Weird but plausible behavior: double clicks, back button mid-flow, two tabs, time zones and DST, browser differences, file-system oddities, state combinations nobody designed for.
 
-## Formato de entrega
+## Limits
+
+- Audit only: do not modify files. Never run destructive tests against production data.
+
+## Output
 
 1. Edge-case matrix.
-2. Bugs found or potential risks (classified by severity: Críticos, Importantes, Opcionales).
-3. Missing tests.
-4. Manual QA script.
-5. Must-fix before release.
+2. Findings grouped as **Critical**, **Important** and **Optional**. For each: evidence (file, line, screen or command), impact, recommended fix and effort.
+3. Missing tests, a manual QA script, and must-fix items before release.

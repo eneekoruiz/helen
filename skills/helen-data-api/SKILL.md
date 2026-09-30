@@ -21,4 +21,4 @@ Check domain integrity, constraints, ownership of each field, migration path, an
 
 Do not change public contracts without justification and a migration path. Ask before destructive migrations.
 
-Prompts: `audit-api-integration-and-contract`, `audit-data-model-and-domain-integrity`, `audit-content-model-and-editorial-workflow`.
+Prompts: `audit-data-and-api-contracts`, `audit-content-model-and-editorial-workflow`.

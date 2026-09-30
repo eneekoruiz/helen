@@ -74,8 +74,9 @@ describe('progress tracking', () => {
   it('shows everything needed for the current step', () => {
     startProgress(tmp, buildPlan(tmp, 'safe-install'));
     const first = formatNext(readProgress(tmp)!);
-    expect(first).toContain('[prompt] audit-third-party-skills-supply-chain');
+    expect(first).toContain('[prompt] audit-third-party-tools-and-mcp');
     expect(first).toContain('helen done');
+    expect(first).not.toContain('modifies_code:');
 
     markDone(tmp);
     expect(formatNext(readProgress(tmp)!)).toContain('helen-security');

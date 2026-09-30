@@ -1,70 +1,47 @@
 ---
 action: APPLY
-label: APPLY-
 phase: 03-finish-features
+summary: Verify and fix mobile, tablet and desktop layouts: overflow, overlap, broken menus, unreachable buttons, clipped text, density.
 modifies_code: true
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
 ---
 
-# [APPLY] - Responsive Pass
+# Responsive Pass
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Make every surface work, and look designed, on mobile, tablet and desktop.
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+## Use when
 
-## Objetivo
+- During polish, and before public screenshots or a web release.
 
-Verificar y corregir de forma segura que las superficies de la UI funcionen correctamente en mobile, tablet y desktop.
+## Skip when
 
-## Cuándo Usarlo
+- The project has no responsive interface.
 
-- En la fase de pulido visual y UX.
-- Antes de capturas públicas o release web.
+## Requirements
 
-## Cuándo NO Usarlo
+1. Check small (360-414px), medium (768-1024px), large (1280-1440px) and wide (1920px) viewports; use a real browser when available (`helen skills external playwright-cli`).
+2. Fix horizontal overflow, overlap, broken menus, unreachable buttons, clipped text and wrong density.
+3. The main flow can be completed on every device.
+4. Touch targets and spacing work with fingers, not only with a mouse.
 
-- Si el proyecto no tiene interfaz de usuario responsive.
+## Beyond the checklist
 
-## Criterios Mínimos
+Each viewport should look natively designed, not just shrunk by CSS.
 
-- Revisa viewports pequeños (móvil), medianos (tablet) y grandes (desktop).
-- Corrige overflow horizontal, solapes, menús rotos, botones inaccesibles, textos cortados y densidades incorrectas.
-- Comprueba que el flujo principal se pueda completar en todos los dispositivos.
+## Limits
 
-## Más allá de estos criterios
+- Avoid restructuring large layouts; fix visible, blocking problems first.
 
-Evalúa si cada viewport parece diseñado de forma nativa e intencionada, no simplemente encogido o forzado por CSS.
-
-## Límites de Seguridad
-
-Evita reestructurar layouts grandes sin necesidad. Corrige primero los problemas de visualización e interacción visibles y bloqueantes.
-
-## Formato de Entrega
-
-El entregable debe ser minimalista. Produce únicamente:
+## Output
 
 ```text
-✅ Ajustes de responsive aplicados. / [o] ⚠️ Completado con advertencias.
+Done. / Done with warnings.
 
-Cambios aplicados:
-- [Breve lista de 1-3 viñetas con las correcciones responsive aplicadas]
+Changes applied:
+- 1-3 bullets with the exact changes
 
-Acciones manuales necesarias:
-- Ninguna. / [o detallar acciones]
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
 ```
-*No generes informes extensos ni explicaciones teóricas.*

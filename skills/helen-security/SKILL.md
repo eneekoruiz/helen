@@ -14,7 +14,7 @@ Review and mitigate security risk before public exposure, delivery, or release.
 3. **Dependencies.** Run a quick vulnerability audit (`npm audit` or the ecosystem equivalent) and report severity, not just counts.
 4. **Permissions and destructive operations.** Review filesystem calls, subprocesses, and unnecessary privileges.
 5. **Third-party code.** Treat any skill, plugin, or install script as code that runs with your permissions: read it, pin versions, prefer official channels.
-6. **MCP servers.** They give the agent real tools with your accounts: official endpoint only, least-privilege and read-only where possible, development environments not production, secrets outside the repo, human confirmation for writes and deploys (`audit-mcp-servers-security-and-scope`).
+6. **MCP servers.** They give the agent real tools with your accounts: official endpoint only, least-privilege and read-only where possible, development environments not production, secrets outside the repo, human confirmation for writes and deploys (`audit-third-party-tools-and-mcp`).
 
 ## Procedure
 

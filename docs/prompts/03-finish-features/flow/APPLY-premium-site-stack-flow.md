@@ -1,90 +1,66 @@
 ---
 action: APPLY
-label: APPLY-
 phase: 03-finish-features
+summary: Flow: build or lift a premium website end to end: inspiration, design, copy, motion, components, quality, SEO and publishing.
 modifies_code: true
-requires_context:
-  - project_state
-  - business_goal
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
+repeatable: true
+stage: polish
 ---
 
-# [APPLY] - Premium Site Stack Flow
+# Premium Site Stack Flow
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
-**Intención**: APPLY (Modificar el proyecto, salida mínima)
+Build or raise a premium website following a complete working stack, from inspiration to a published site.
 
-## Objetivo
+## Use when
 
-Construir o elevar una web premium siguiendo un stack de trabajo completo: inspiración, diseño, textos, animación y componentes, calidad, SEO y publicación.
+- Starting the polish of a visual website and taking it all the way to production.
 
-## Fase Ideal
+## Steps
 
-Al iniciar el pulido de una web visual y hasta dejarla publicada.
+1. [init-creative-direction-and-design-md](../../01-start-project/init/INIT-creative-direction-and-design-md.md): inspiration and `DESIGN.md`.
+2. [generate-portfolio-layout-patterns](../visual/GENERATE-portfolio-layout-patterns.md) or [generate-conversion-led-hero-system](../visual/GENERATE-conversion-led-hero-system.md): layout.
+3. [enhance-taste-and-art-direction](../visual/ENHANCE-taste-and-art-direction.md): visual point of view.
+4. [audit-ai-trace-erasure-and-human-craft](../visual/AUDIT-ai-trace-erasure-and-human-craft.md).
+5. [enhance-copy-and-conversion](../visual/ENHANCE-copy-and-conversion.md).
+6. [enhance-motion-polish-and-transitions](../motion/ENHANCE-motion-polish-and-transitions.md) and [generate-scroll-driven-sequences](../motion/GENERATE-scroll-driven-sequences.md).
+7. [generate-component-library-integration](../visual/GENERATE-component-library-integration.md).
+8. [apply-basic-accessibility-pass](../performance/APPLY-basic-accessibility-pass.md) and [apply-basic-performance-pass](../performance/APPLY-basic-performance-pass.md), then [audit-visual-ux-regression-checkpoint](AUDIT-visual-ux-regression-checkpoint.md).
+9. [audit-final-seo](../../04-before-production/compliance/AUDIT-final-seo.md).
+10. [audit-release-readiness-checkpoint](../../06-release/flow/AUDIT-release-readiness-checkpoint.md), then [apply-deploy-github-and-hosting](../../06-release/deploy/APPLY-deploy-github-and-hosting.md).
 
-## Prompts Incluidos
+Optional third-party tools (review each with [audit-third-party-tools-and-mcp](../../08-maintenance/ops/AUDIT-third-party-tools-and-mcp.md); use only one main design skill):
 
-1. [design-md-and-inspiration](../../01-start-project/init/INIT-design-md-and-inspiration.md): inspiración y `DESIGN.md`.
-2. [portfolio-layout-patterns](../visual/GENERATE-portfolio-layout-patterns.md): patrón de layout.
-3. [taste-visual-pov](../visual/ENHANCE-taste-visual-pov.md): criterio visual propio.
-4. [ai-trace-erasure-and-human-craft](../visual/AUDIT-ai-trace-erasure-and-human-craft.md): eliminar rastros de plantilla o IA.
-5. [copy-humanization-and-cro](../visual/ENHANCE-copy-humanization-and-cro.md): textos y conversión.
-6. [motion-polish-and-transitions](../motion/ENHANCE-motion-polish-and-transitions.md) y [scroll-linked-sequences](../motion/ENHANCE-scroll-linked-sequences.md): animación al hacer scroll.
-7. [modern-ui-libraries](../visual/GENERATE-modern-ui-libraries-aceternity-magic-ui.md): componentes listos.
-8. [basic-accessibility-pass](../performance/APPLY-basic-accessibility-pass.md) y [basic-performance-pass](../performance/APPLY-basic-performance-pass.md): calidad y rendimiento.
-9. [final-seo](../../04-before-production/compliance/AUDIT-final-seo.md): SEO técnico.
-10. [deploy-github-and-hosting](../../06-release/deploy/APPLY-deploy-github-and-hosting.md): publicación.
-
-## Herramientas opcionales (catálogo de skills)
-
-Cada paso puede apoyarse en una herramienta externa. Revísala antes con [third-party-skills-supply-chain](../../08-maintenance/ops/AUDIT-third-party-skills-supply-chain.md) y elige **una sola** skill de diseño principal:
-
-| Paso | Herramienta | Comando informativo |
+| Step | Tool | Command |
 |---|---|---|
-| Inspiración | awesome-design-md, google design.md | `helen skills external awesome-design-md` |
-| Diseño | taste-skill, impeccable o ui-ux-pro-max | `helen skills external taste-skill` |
-| Textos | humanizer, cro-optimization | `helen skills external humanizer` |
-| Animación | scroll-craft | `helen skills external scroll-craft` |
-| Componentes | 21st.dev | `helen skills external 21st-dev` |
-| Calidad | web-design-guidelines | `helen skills external web-design-guidelines` |
-| Verificación visual | playwright-cli | `helen skills external playwright-cli` |
+| Inspiration | awesome-design-md, google-design-md, godly | `helen skills external awesome-design-md` |
+| Design | taste-skill, impeccable or ui-ux-pro-max | `helen skills external taste-skill` |
+| Copy | humanizer, cro-optimization | `helen skills external humanizer` |
+| Motion | scroll-craft, transitions-dev | `helen skills external scroll-craft` |
+| Components | 21st.dev | `helen skills external 21st-dev` |
+| Quality | web-design-guidelines | `helen skills external web-design-guidelines` |
+| Visual check | playwright-cli or playwright-mcp | `helen skills external playwright-cli` |
 | SEO | seo (ECC) | `helen skills external seo` |
 
-## Checkpoints Entre Pasos
+## Stop when
 
-- **Inicio**: cargar [build-and-compile-checkpoint](../../02-building/checkpoint/AUDIT-build-and-compile-checkpoint.md).
-- **Tras animación**: cargar [visual-ux-regression-checkpoint](AUDIT-visual-ux-regression-checkpoint.md).
-- **Antes de publicar**: cargar [release-readiness-checkpoint](../../06-release/flow/AUDIT-release-readiness-checkpoint.md).
+- Performance leaves the agreed budget, a step would require inventing content, testimonials or metrics, or the client's real material (images, text, permissions) is missing.
 
-## Condiciones para Avanzar
+## Limits
 
-- La web compila y los tests pasan.
-- Sin regresiones visuales ni de accesibilidad.
-- Ninguna skill de terceros instalada sin revisión.
+- The site must build and pass tests after each step; no third-party skill installed without review.
 
-## Cuándo Detenerse
+## Output
 
-- Si el rendimiento cae fuera del presupuesto acordado.
-- Si un paso requiere inventar contenido, testimonios o métricas.
-- Si falta el material real del cliente (imágenes, textos, permisos).
+1. Steps done and skipped, with reasons.
+2. External tools used and their versions.
+3. ```text
+Done. / Done with warnings.
 
-## Resumen Final
+Changes applied:
+- 1-3 bullets with the exact changes
 
-1. Pasos completados y omitidos, con motivo.
-2. Herramientas externas usadas y su versión.
-3. Cambios aplicados.
-4. Riesgos pendientes.
-5. Acciones manuales (imágenes, dominio, variables de entorno).
+Manual actions:
+- None. / what the user must do (e.g. set a variable, provide real images)
+```

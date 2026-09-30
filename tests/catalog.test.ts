@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getCatalogItem, listCatalog, readCatalog } from '../src/core/catalog.js';
+import { getCatalogItem, listCatalog, readCatalog, validateCatalog } from '../src/core/catalog.js';
 
 describe('External skills catalog', () => {
   const items = readCatalog();
@@ -36,5 +36,13 @@ describe('External skills catalog', () => {
   it('filters by category and rejects unknown ids', () => {
     expect(listCatalog('design').every(item => item.category === 'design')).toBe(true);
     expect(() => getCatalogItem('nope')).toThrow(/not in the catalog/);
+  });
+
+  it('validates structure and warns about stale entries', () => {
+    expect(validateCatalog().filter(issue => issue.level === 'error')).toEqual([]);
+    const later = new Date(Date.parse('2026-09-29') + 200 * 86_400_000);
+    const stale = validateCatalog(undefined, later);
+    expect(stale.length).toBe(items.length);
+    expect(stale.every(issue => issue.level === 'warn')).toBe(true);
   });
 });

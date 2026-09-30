@@ -1,51 +1,37 @@
 ---
 action: PLAN
-label: PLAN-
 phase: 01-start-project
+summary: Plan the lifecycle of core technologies: support windows, deprecation criteria, major-upgrade strategy and upgrade budget.
 modifies_code: false
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
 ---
 
-# [PLAN] - PLAN — Technology Lifecycle Strategy
+# Technology Lifecycle Strategy
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Keep the core stack healthy over time: know when each key technology stops being supported, when to replace it, and how to upgrade safely.
 
-**Rol**: Staff Architect & Technical Strategist.
+## Use when
 
-Este prompt ayuda a trazar la estrategia tecnológica y el ciclo de vida de los componentes, frameworks y librerías Core seleccionados al inicio de un proyecto.
+- Choosing the stack of a new project, or reviewing an existing one once a year.
 
-## Requisitos mínimos obligatorios
-1. **Mapeo de Tecnologías Core**: Identificar las librerías base (ej. React, Vite, Tailwind, TypeScript) y documentar sus ciclos de soporte oficial (LTS, fecha estimada de fin de vida).
-2. **Criterios de Deprecación**: Definir bajo qué condiciónes una librería debe ser reemplazada (falta de mantenimiento por >12 meses, fallos de seguridad críticos no resueltos, desfase tecnológico).
-3. **Estrategia de Actúalizaciones Mayores**: Diseñar un plan de actualizaciones para saltos de versión mayor (major releases) de forma programada y segura (ej. React 18 a React 19).
-4. **Evalúación de Alternativas**: Mantener un registro breve de tecnologías alternativas evaluadas y descartadas en la fase inicial del proyecto.
+## Requirements
 
-## Más allá de estos criterios
-- Alinear el roadmap tecnológico con los ciclos de lanzamiento de dependencias críticas de terceros para evitar bloqueos del sistema.
-- Definir un presupuesto de tiempo técnico semestral para actualización preventiva de librerías.
+1. **Core technology map:** frameworks and libraries (e.g. React, Vite, Tailwind, TypeScript) with official support status and estimated end of life.
+2. **Deprecation criteria:** when a library must be replaced (no maintenance for over 12 months, unresolved critical vulnerabilities, technological lag).
+3. **Major upgrade strategy:** scheduled, safe plans for major version jumps (e.g. React 18 to 19), with tests and rollback.
+4. **Alternatives register:** technologies evaluated and discarded, and why.
+5. A recurring time budget for preventive upgrades.
 
-## Límites de seguridad
-- No forzar la adopción de tecnologías sangrientamente nuevas (bleeding edge) sin justificación de negocio o si carecen de soporte corporativo sólido.
+## Beyond the checklist
 
-## Checks finales
-- El plan resultante debe presentarse en un formato de checklist ejecutable ordenada cronológicamente.
+Align the technical roadmap with the release cycles of critical dependencies to avoid being blocked.
 
-## Formato de entrega
-La salida de este prompt de tipo **PLAN** debe ser una checklist clara y procesable:
-- **Estrategia de Ciclo de Vida**: Resumen tabular de tecnologías Core y soporte.
-- **Plan de Actúalización Preventivo**: Lista de tareas ordenadas por prioridad de riesgo de obsolescencia.
+## Limits
+
+- Do not push bleeding-edge technology without a business reason or solid backing.
+- Plan only: do not upgrade dependencies here.
+
+## Output
+
+A chronological, executable checklist: lifecycle table of core technologies and a preventive upgrade plan ordered by obsolescence risk.

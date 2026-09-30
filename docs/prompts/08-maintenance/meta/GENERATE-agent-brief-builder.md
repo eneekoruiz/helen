@@ -1,72 +1,37 @@
 ---
 action: GENERATE
-label: GENERATE-
 phase: 08-maintenance
-modifies_code: true
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
+summary: Turn an audit or goal into a precise brief a coding agent can execute independently: context, scope, criteria, verification, done.
+modifies_code: false
 ---
 
-# [GENERATE] - Agent Brief Builder
+# Agent Brief Builder
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Turn an audit result or product goal into a brief that lets a capable agent with repository access work independently without making arbitrary changes. For a HELEN goal, `helen apply <goal> --brief` produces a first draft.
 
-**Intención**: GENERATE (Generar plantillas, notas, checklists o documentación)
+## Use when
 
-Purpose: Turn an audit or product goal into a precise brief for an editor-integrated coding agent.
+- Delegating work to another agent or session, or to yourself later.
 
-## Prompt
+## Requirements
 
-Act as a Staff Engineer writing an execution brief for a capable agent with full repository access.
+1. **Objective:** the concrete outcome.
+2. **Context to inspect first:** files, folders, commands, docs, tests, UI surfaces, external constraints.
+3. **Scope:** what the agent may change, may only propose, and must not touch.
+4. **Quality criteria:** functional, UX, code, docs, security, performance, maintenance as applicable.
+5. **Verification:** commands, manual checks, screenshots or artifacts required before finishing.
+6. **Reporting:** final response format, risks, caveats, follow-ups.
 
-Create a brief that lets the agent work independently without making arbitrary changes.
+## Beyond the checklist
 
-## Requisitos mínimos obligatorios
+Add missing context, likely edge cases and hidden risks. If the goal is underspecified, propose a safe path and mark the assumptions.
 
-1. Objective
-- State the concrete outcome.
+## Limits
 
-2. Context to inspect
-- List files, folders, commands, docs, tests, UI surfaces, and external constraints the agent should inspect first.
+- Never put secrets or credentials in a brief.
 
-3. Scope boundaries
-- Define what the agent may change, may propose only, and must not touch.
+## Output
 
-4. Quality criteria
-- Include functional, UX, code, documentation, security, performance, and maintenance criteria as applicable.
-
-5. Verification
-- Define commands, manual checks, screenshots, fixtures, or artifacts required before completion.
-
-6. Reporting
-- Define final response format, risks, caveats, and follow-ups.
-
-## Más allá de estos criterios
-
-Use expert judgment to add missing context, likely edge cases, and hidden risks.
-
-If the goal is underspecified, propose a safe execution path and mark assumptions explicitly.
-
-## Formato de entrega
-
-Return a ready-to-use agent brief with:
-1. Mission.
-2. Context.
-3. Constraints.
-4. Work plan.
-5. Verification plan.
-6. Definition of done.
+A ready-to-use brief: Mission, Context, Constraints, Work plan, Verification plan, Definition of done.

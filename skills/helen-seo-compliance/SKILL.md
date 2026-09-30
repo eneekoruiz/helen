@@ -26,4 +26,4 @@ description: Use before publishing a public website - technical SEO and indexabi
 - Do not invent legal text or certifications; flag gaps and recommend review by the responsible person.
 - Stop and ask when a change affects legal, privacy, or pricing language.
 
-Related prompts: `audit-final-seo`, `audit-privacy-legal-and-compliance`, `audit-i18n-flow`. An external `seo` skill exists in the catalog (`helen skills external seo`).
+Related prompts: `audit-final-seo`, `enhance-privacy-and-legal-readiness`, `audit-i18n`. An external `seo` skill exists in the catalog (`helen skills external seo`).

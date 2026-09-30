@@ -1,67 +1,32 @@
 ---
 action: AUDIT
-label: AUDIT-
 phase: 04-before-production
+summary: Blocking gate: no exposed secrets, reachable critical dependency vulnerabilities, unsafe destructive behavior or data leaks.
 modifies_code: false
-requires_context:
-  - project_state
-stop_conditions:
-  - missing_required_context
-  - unsafe_to_continue
-reflection_loop:
-  mode: bounded
-  max_material_retries: 2
-  stop_when: success_criteria_met_or_no_material_gain
-memory_target: .quality_audit_log.md
-verification:
-  - inspect_relevant_files
-  - run_available_checks
 ---
 
-# [AUDIT] - Security Risk Checkpoint
+# Security Risk Checkpoint
 
-## Nivel 0 y Mente Abierta
-- **Nivel 0**: se asume excelencia en código limpio, UI/UX, accesibilidad y rendimiento (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
-- **Mente Abierta**: propón mejoras y tecnologías más modernas cuando aporten valor verificable, pero aplica solo lo que entra en el alcance pedido y respeta los Límites de Seguridad de este prompt.
+## Goal
 
+Stop unsafe changes before release, delivery or public exposure.
 
-**Intención**: CHECKPOINT (Puerta de calidad bloqueante)
+## Use when
 
-## Purpose
+- Before and after security work, and before any release, handoff or public launch.
 
-Stop unsafe changes before release, delivery, or public exposure.
+## Requirements
 
-## Command
+1. Run what exists: `npm audit` (or the ecosystem equivalent), configured dependency scanners, project security checks.
+2. Review secrets, private URLs, unsafe logs, path handling, input validation, auth and permissions, dependency risk and destructive operations.
+3. **Blocks progress:** a secret committed or exposed; a critical or high dependency issue with reachable impact; unsafe destructive behavior; a public release with known sensitive data leakage.
+4. **Warning only:** low-severity dependency issues with no reachable path; documented improvements that need larger architecture work.
 
-Use available commands:
-- `npm audit`
-- dependency scanner if configured;
-- project-specific security checks.
+## Limits
 
-## Manual Review
+- Never print secret values; say where they are.
+- Recovery: remove the exposure (rotate leaked secrets), patch or mitigate, document residual risk, repeat the checkpoint.
 
-Check:
-- secrets;
-- private URLs;
-- unsafe logs;
-- path handling;
-- input validation;
-- auth and permissions if applicable;
-- dependency risk;
-- destructive operations.
+## Output
 
-## Blocks Progress
-
-- Secret committed or exposed.
-- Critical/high dependency issue with reachable impact.
-- Unsafe destructive behavior.
-- Public release with known sensitive data leakage.
-
-## Warning Only
-
-- Low-severity dependency issue with no reachable path.
-- Security improvement that requires larger architecture work and is documented.
-
-## Recovery
-
-Remove exposure, patch or mitigate, document residual risk, and repeat the checkpoint.
+Checks run, blockers and warnings with evidence, residual risk, and `GATE PASSED` or `GATE BLOCKED`.
