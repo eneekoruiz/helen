@@ -1,5 +1,30 @@
 # Changelog
 
+## 2.1.0 — 2026-09-30
+
+Wave 1 implementation: automated project bootstrap, machine-readable JSON output for AI agents, statistically honest evaluation framework, npm publication pipeline, and cross-platform Windows compatibility.
+
+### Added
+- `helen init-project`: single-command idempotent project initialization chaining `setup`, `guardrails`, and goal tracking (`apply <goal> --track`). Supports `--dry-run`, `--json`, `--goal`, and `--agents`.
+- Global `--json` output across all commands (`apply`, `next`, `done`, `skip`, `status`, `check`, `doctor`, `lint`, `setup`, `init-project`, `prompts *`, `skills *`). Standard envelope: `{ ok, command, data, warnings, errors }` on `stdout`, with human/progress logs routed strictly to `stderr`.
+- Standard exit codes: `0` (Success), `1` (Error), `2` (Warnings present), `3` (Checkpoint gate failed). Interactive menus cleanly disabled in JSON mode.
+- Statistically honest eval framework:
+  - Multi-run sampling (`--runs N`, default 3) with mean, standard deviation, and 95% confidence intervals via Student's t-distribution.
+  - Paired delta confidence intervals with automatic `Noise*` labeling when the interval crosses 0 (no false letter grades).
+  - Negative test case support (`expectTrigger: false`) to measure and report false positive trigger rates.
+  - Eval runner CLI options: `--dry-run`, `--cases`, `--skill`, `--max-calls` budget enforcement, and run resumability.
+  - Strict schema validation in `helen lint` and documentation in `evals/README.md`.
+  - Expanded eval suite to 90 cases (6 per skill, including 2 negative cases each).
+- Publishing and Release Pipeline:
+  - npm trusted publishing with provenance via OIDC (`.github/workflows/publish.yml`).
+  - Automated versioning and changelog with Release Please (`.github/workflows/release-please.yml`, `release-please-config.json`, `.release-please-manifest.json`).
+  - Added `helen-cli` bin alias in `package.json` for seamless `npx helen-cli` usage.
+  - Added `SECURITY.md` (vulnerability disclosure policy) and `docs/RELEASING.md` (maintainer release checklist).
+- Windows portability: normalized CRLF vs LF in frontmatter parsing, unified forward-slash relative paths, and safe spawn handling.
+
+### Changed
+- Skill trigger descriptions tuned with concrete user trigger phrasing across all 15 skills to improve autonomous AI agent invocation.
+
 ## 2.0.0 — 2026-09-30
 
 HELEN becomes an AI agent workflow kit. Breaking: legacy prompt files, routers, `registry.json`, `USE_CASE_INDEX.md` and the remote `[PLAN]` orchestrator were removed; old prompt ids keep working through aliases.

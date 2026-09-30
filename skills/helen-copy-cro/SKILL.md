@@ -1,6 +1,6 @@
 ---
 name: helen-copy-cro
-description: Use when reviewing or writing website copy - removing AI-sounding text, checking brand tone and unsupported claims, and improving conversion (headlines, CTAs, forms, friction). Never invents facts, testimonials, or metrics.
+description: Use when writing, rewriting, or auditing website copy, headlines, and calls-to-action (CTAs) to improve conversion rate (CRO); eliminating AI buzzwords, generic filler, and unsupported marketing claims; optimizing contact forms and lead capture (reducing friction, specific button text); and handling requests for customer testimonials or social proof (declining to fabricate fake testimonials and offering honest alternatives).
 ---
 
 # Copy, Claims and Conversion

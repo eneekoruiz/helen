@@ -28,6 +28,36 @@
         "Proposes a compatible migration (add new field, deprecate, version)",
         "Recommends confirming with the owner before changing the public contract"
       ]
+    },
+    {
+      "id": "idempotency-key",
+      "prompt": "We are designing a POST /charges endpoint for credit card processing where network timeouts cause duplicate payment submissions. How should we design the API contract to handle this safely? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Recommends an Idempotency-Key header or unique client transaction identifier",
+        "Specifies storing initial response and returning cached result on replay",
+        "Mentions key expiration and payload mismatch validation",
+        "Distinguishes between retries in-flight vs completed requests"
+      ]
+    },
+    {
+      "id": "css-box-shadow",
+      "expectTrigger": false,
+      "prompt": "How can I create a soft, multi-layered realistic drop shadow in CSS for a card component? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Uses multiple comma-separated box-shadow layers",
+        "Uses low opacity colors (rgba or hsla)",
+        "Explains blur and spread radius usage"
+      ]
+    },
+    {
+      "id": "bash-loop-files",
+      "expectTrigger": false,
+      "prompt": "How do I loop over all .log files in a directory and compress them with gzip in bash? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Uses a for loop over *.log or find command",
+        "Quotes variables to handle spaces in filenames",
+        "Uses gzip command"
+      ]
     }
   ]
 }

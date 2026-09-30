@@ -1,6 +1,6 @@
 ---
 name: helen-strategy
-description: Use at the start of a project or when prioritizing work - initial risk scan, competitive benchmark, roadmap and ROI prioritization, technology lifecycle. Uses real references and never invents competitor facts.
+description: Use when starting a new project, setting visual direction, or gathering design inspiration (curating real references, moodboards, design tokens); prioritizing product roadmaps, features, and quarterly backlog items using value, effort, and kill criteria; conducting competitor benchmarking and market analysis (strictly refusing to fabricate private competitor financials or metrics); or scanning initial tech stack risks.
 ---
 
 # Strategy and Prioritization

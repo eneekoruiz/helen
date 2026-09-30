@@ -23,7 +23,7 @@ Grades are evaluated against explicit case criteria by an LLM judge with multi-r
 | helen-motion-3d | 3 | 1x | 1/3 | 0% | 92% | 100% | +8.3% [-27.5%, 44.2%] | Noise* | 0 |
 | helen-premium-design | 3 | 1x | 2/3 | 0% | 66% | 92% | +25.7% [-51.2%, 102.5%] | Noise* | 0 |
 | helen-qa-scale | 3 | 1x | 1/3 | 0% | 94% | 100% | +5.7% [-18.7%, 30.1%] | Noise* | 0 |
-| helen-release | 3 | 1x | 0/3 | 0% | 89% | 82% | -6.7% [-35.4%, 22%] | Noise* | 0 |
+| helen-release | 3 | 2x | 1/5 | 0% | 86% | 89% | +3.3% [-11%, 17.7%] | Noise* | 4 |
 | helen-router | 3 | 1x | 3/3 | 0% | 58% | 75% | +16.7% [-55%, 88.4%] | Noise* | 0 |
 | helen-security | 3 | 1x | 3/3 | 0% | 93% | 100% | +6.7% [-22%, 35.4%] | Noise* | 0 |
 | helen-seo-compliance | 3 | 1x | 2/3 | 0% | 100% | 100% | +0% [0%, 0%] | Noise* | 0 |
@@ -35,7 +35,6 @@ Grades are evaluated against explicit case criteria by an LLM judge with multi-r
 
 - helen-a11y-perf/form-a11y: Does not add redundant or wrong ARIA where native HTML suffices
 - helen-premium-design/generic-cards: Stays within the brand/product context rather than generic trends
-- helen-release/rc: Gives the smallest next actions
 - helen-release/changelog: Clearly marks removing /v1/users as a breaking change with migration guidance
 - helen-router/phase: Keeps the answer short
 - helen-router/release-phase: Places the project in maintenance (08) or post-handoff with evidence

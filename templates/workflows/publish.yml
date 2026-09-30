@@ -1,0 +1,52 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  verify-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run typecheck
+        run: npm run typecheck
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run test suite
+        run: npm test
+
+      - name: Build CLI
+        run: npm run build
+
+      - name: Run HELEN internal library validation
+        run: node dist/cli.js lint
+
+      - name: Verify package contents
+        run: npm pack --dry-run
+
+      # npm publish with provenance using GitHub OIDC (trusted publishing)
+      # If trusted publishing is configured in npmjs.com, no secret is needed.
+      # If using a classic token fallback, set NPM_TOKEN in repository secrets.
+      - name: Publish package to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

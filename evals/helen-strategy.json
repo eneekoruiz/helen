@@ -29,6 +29,36 @@
         "Warns against copying another brand's identity",
         "Mentions principles or constraints for the direction"
       ]
+    },
+    {
+      "id": "tech-debt-vs-features",
+      "prompt": "Our engineering team spends 80% of time fixing bugs and legacy outages, while founders demand 5 major new features this quarter. How do we strategically negotiate this roadmap conflict? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Frames technical debt in terms of business impact, developer velocity, and customer churn",
+        "Proposes a dedicated capacity allocation (e.g. 20-30% debt / 70% features)",
+        "Prioritizes debt items tied directly to high-risk failure points or feature blockers",
+        "Establishes kill criteria or sequencing rather than attempting everything simultaneously"
+      ]
+    },
+    {
+      "id": "python-dict-merge",
+      "expectTrigger": false,
+      "prompt": "What are the ways to merge two dictionaries in Python 3.9+ without modifying the original dicts? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Shows the union operator `d1 | d2`",
+        "Shows dict unpacking `{**d1, **d2}`",
+        "Explains key precedence (right-hand dict overwrites left-hand)"
+      ]
+    },
+    {
+      "id": "sql-coalesce",
+      "expectTrigger": false,
+      "prompt": "How does the COALESCE function work in standard SQL and what happens if all arguments are NULL? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains returning the first non-NULL expression",
+        "Explains returning NULL if all arguments evaluate to NULL",
+        "Gives a simple SELECT COALESCE(...) example"
+      ]
     }
   ]
 }

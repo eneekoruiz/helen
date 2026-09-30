@@ -33,6 +33,36 @@
         "Proposes a specific alternative layout or hierarchy",
         "Stays within the brand/product context rather than generic trends"
       ]
+    },
+    {
+      "id": "typography-scale-polish",
+      "prompt": "Our landing page uses Inter for everything with 12 different font sizes and random font weights scattered everywhere. How do we establish a disciplined, editorial typographic scale that feels high-end? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Recommends restricting the typographic scale to 4-6 intentional steps",
+        "Suggests pairing a distinctive display or serif typeface with a clean neutral body typeface",
+        "Establishes disciplined line-height and letter-spacing rules for headings vs body",
+        "Prioritizes legibility, contrast, and visual hierarchy over decorative variety"
+      ]
+    },
+    {
+      "id": "git-cherry-pick",
+      "expectTrigger": false,
+      "prompt": "How do I cherry-pick a commit from another branch into my current branch using git CLI? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains `git cherry-pick <commit-hash>`",
+        "Explains how to resolve conflicts and run `git cherry-pick --continue`",
+        "Mentions `git cherry-pick --abort` to cancel"
+      ]
+    },
+    {
+      "id": "binary-search-tree",
+      "expectTrigger": false,
+      "prompt": "What is the worst-case time complexity of searching a Binary Search Tree (BST), and how does an AVL tree address it? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Identifies O(n) worst-case for unbalanced degenerate BST",
+        "Explains AVL tree self-balancing via node rotations maintaining O(log n)",
+        "Mentions balance factor (-1, 0, 1)"
+      ]
     }
   ]
 }

@@ -2,46 +2,174 @@
   "skill": "helen-release",
   "model": "sonnet",
   "date": "2026-09-30",
+  "runsPerCase": 3,
   "cases": [
     {
       "skill": "helen-release",
       "id": "rc",
-      "triggered": false,
-      "forcedTriggered": true,
-      "baseline": 100,
-      "withSkill": 80,
-      "criteria": [
+      "expectTrigger": true,
+      "runsCount": 3,
+      "triggeredCount": 1,
+      "triggerRate": 33,
+      "baseline": 90,
+      "withSkill": 100,
+      "baselineStats": {
+        "mean": 90,
+        "stdDev": 14.1,
+        "marginOfError": 127.1,
+        "lower": -37.1,
+        "upper": 217.1
+      },
+      "withSkillStats": {
+        "mean": 100,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 100,
+        "upper": 100
+      },
+      "deltaStats": {
+        "mean": 10,
+        "stdDev": 14.1,
+        "marginOfError": 127.1,
+        "lower": -117.1,
+        "upper": 137.1,
+        "isNoise": true
+      },
+      "runs": [
         {
-          "text": "Gives a clear verdict that it is not release-ready (NOT RC READY / FAIL or equivalent)",
-          "baseline": true,
-          "withSkill": true
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": true,
+          "baseline": 100,
+          "withSkill": 100,
+          "criteria": [
+            {
+              "text": "Gives a clear verdict that it is not release-ready (NOT RC READY / FAIL or equivalent)",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Explicit 'Verdict: NOT RC READY' and opening 'No'"
+            },
+            {
+              "text": "Treats failing CI tests as a blocker",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Listed as blocker #1, notes local pass insufficient"
+            },
+            {
+              "text": "Flags the outdated README as a blocker",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Listed as blocker #2 explicitly"
+            },
+            {
+              "text": "Flags the release notes claim about the unfinished payment flow as misleading",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Blocker #3, called 'false claim', most serious issue"
+            },
+            {
+              "text": "Gives the smallest next actions",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Concise recommendation: fix CI, update README, correct notes"
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "No — I'd hold off on tagging v2.0.0 today. Three separate blockers:\n\n1. **CI failures** — \"passes locally but fails in CI\" usually means an environment/config difference or a flaky test masking a real issue. Tagging a release on top of unexplained CI failures risks shipping something you haven't actually verified.\n2. **README describes v1 setup** — shipping v2.0.0 with v1 install/setup docs will actively mislead users upgrading or installing fresh.\n3. **Release notes claim \"complete\" but there's a TODO for unfinished payment flow** — this is the most serious one: it's a false claim about functionality, and if payments are involved, shipping incomplete payment code as \"complete\" is a correctness/trust risk, not just a docs gap.\n\nNone of these are things I'd paper over to hit a date — I'd fix the CI discrepancy (or get a clear explanation), update the README, and either finish the payment flow or correct the release notes to reflect actual state before tagging.",
+            "withSkill": "No, this isn't ready for a v2.0.0 tag. Per the release-candidate flow, each of these individually stops the process, and together they're clear blockers:\n\n**Verdict: NOT RC READY**\n\n**Blockers:**\n1. **Test suite checkpoint fails** — 2 CI failures. \"Passes locally\" doesn't satisfy this checkpoint; CI is the authoritative signal (different env/deps/flakiness could be masking a real bug). The flow explicitly says never cosmetically fix or hide a test failure — they need to be root-caused and fixed, not waived.\n2. **Documentation mismatch** — README still describes v1 setup. The flow requires docs/quickstarts to match the real state of the software before release; shipping v2 docs that describe v1 will break new-user onboarding immediately.\n3. **Release notes misrepresent product state** — this is the most serious one. Marking the payment flow \"complete\" while a TODO shows it's unfinished isn't a documentation gap, it's a false claim about a payment-related feature. Shipping that could mean users hit broken payment behavior with no warning, and it's the kind of thing that erodes trust fast. This needs to be fixed in the release notes (mark it accurately, e.g. \"in progress\" / excluded from v2.0.0) or the payment flow needs to actually be finished before release — not tag-and-hope.\n\n**Recommendation:** Fix the CI failures (or explain the local/CI discrepancy), update the README for v2 setup, and correct the release notes to reflect the payment flow's real status (or hold it out of this release). None of these are cosmetic — they're exactly what this checkpoint exists to catch. Once those are addressed, re-run the flow and it can likely go to RC READY same day.\n\nI didn't modify or create any files, per your instruction — this is an assessment only."
+          }
         },
         {
-          "text": "Treats failing CI tests as a blocker",
-          "baseline": true,
-          "withSkill": true
+          "run": 2,
+          "triggered": true,
+          "forcedTriggered": null,
+          "baseline": 80,
+          "withSkill": 100,
+          "criteria": [
+            {
+              "text": "Gives a clear verdict that it is not release-ready (NOT RC READY / FAIL or equivalent)",
+              "baseline": true,
+              "withSkill": true,
+              "note": "States 'NOT RC READY' explicitly"
+            },
+            {
+              "text": "Treats failing CI tests as a blocker",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Listed as blocker #1"
+            },
+            {
+              "text": "Flags the outdated README as a blocker",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Listed as blocker #2"
+            },
+            {
+              "text": "Flags the release notes claim about the unfinished payment flow as misleading",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Called 'falsely claim', most serious blocker"
+            },
+            {
+              "text": "Gives the smallest next actions",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Provides concise recommended path with rc1 fallback"
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "No — I'd hold off on tagging v2.0.0 today. Three blockers:\n\n1. **CI failures** — \"passes locally but fails in CI\" usually means an environment/config difference (flaky test, missing env var, or a real bug masked locally). Tagging a release on top of unexplained CI failures risks shipping something broken; at minimum you need to know *why* they fail before deciding it's safe to ignore.\n2. **README describes v1 setup** — users following it post-release will hit wrong instructions for a major version bump. Not release-blocking on its own, but bad for a v2.0.0 specifically, since setup steps are exactly what changes in major versions.\n3. **Release notes falsely claim the payment flow is complete** — this is the serious one. Shipping documentation that misrepresents an unfinished payment feature as done is a correctness/trust issue, not cosmetic — could lead users to rely on functionality that doesn't work.\n\nRecommendation: fix or explain the CI failures, correct the release notes (either finish the payment flow or accurately describe its status), and update the README before tagging. The README lag is the most deferrable of the three if you're under time pressure, but the other two shouldn't ship as-is.",
+            "withSkill": "**Verdict: NOT RC READY** — do not tag v2.0.0 yet.\n\n**Checks executed:** None run directly (per your instruction, chat-only, no file/command actions) — assessment based on the facts you gave.\n\n**Blockers:**\n1. **CI test failures (2 tests)** — \"passes locally\" doesn't satisfy the release-candidate bar; CI is the source of truth. Local-only green is often an environment/config difference (env vars, seed data, timing) that will bite users on install. Must be fixed or root-caused before tagging.\n2. **README describes v1 setup** — documentation must match the real state of the software before release. Shipping v2.0.0 with v1 install/setup instructions will break new users' onboarding immediately.\n3. **Release notes falsely claim the payment flow is complete** — this is the most serious one. Payments are exactly the kind of surface where \"close enough\" causes real financial/trust damage. Shipping a major version bump (2.0.0 implies a stable, complete release) with release notes that misrepresent an unfinished payment flow is a credibility and potentially legal/compliance risk, not just a doc nit.\n\n**Why this matters for a 2.0.0 tag specifically:** a major version signals \"this is solid and ready.\" Two of these three issues are things users will hit on day one (broken setup instructions, a payment feature that doesn't actually work as documented), and the third (CI failures) means you don't even have confidence the build is stable.\n\n**Recommended path:** fix or explicitly descope the payment flow from the release notes, correct the README, and get CI green (or understand why it diverges from local) — then re-run the release-candidate flow for a real verdict. If there's schedule pressure, a `v2.0.0-rc1` pre-release tag with honest notes is safer than a final v2.0.0 tag."
+          }
         },
         {
-          "text": "Flags the outdated README as a blocker",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Flags the release notes claim about the unfinished payment flow as misleading",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Gives the smallest next actions",
-          "baseline": true,
-          "withSkill": false
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Gives a clear verdict that it is not release-ready (NOT RC READY / FAIL or equivalent)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Treats failing CI tests as a blocker",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Flags the outdated README as a blocker",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Flags the release notes claim about the unfinished payment flow as misleading",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Gives the smallest next actions",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "No — hold off on tagging v2.0.0.\n\nThree separate blockers, and they compound:\n\n1. **CI failures** are the real gate, not local results. If tests fail in CI but pass locally, something environment-dependent is broken (flaky test, missing env var/dependency, platform difference) — that's exactly the kind of thing a release tag should never ship with unexamined.\n2. **README describes v1 setup** — shipping v2 with v1 install/config docs will actively break new users' onboarding.\n3. **Release notes claiming a payment flow is \"complete\" when a TODO says it isn't** is the most serious one — that's not a docs gap, it's a false claim about production functionality. Payment flows failing silently or partially is a money/trust issue, not a cosmetic one.\n\nRecommend: fix the CI failures (or at minimum understand *why* they diverge from local), correct the release notes to not overclaim the payment flow, update the README, then tag. None of these look like multi-day fixes, but tagging over them turns \"not done yet\" into \"shipped and broken.\"",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         }
       ],
-      "errors": 0,
-      "answers": {
-        "baseline": "No, I wouldn't tag v2.0.0 today. Three separate problems block it, and one of them is a real risk.\n\n1. **Two tests fail in CI.** Passing locally doesn't outweigh that. CI is the shared, clean environment, and a local pass with a CI failure usually means something environment-dependent: a missing dependency, a timezone or locale difference, test ordering, a hardcoded path, or a version mismatch. It could be a real bug that only shows up there. Find the cause before you tag. Don't skip or retry the tests to get green.\n\n2. **The payment flow is unfinished, but the release notes call it complete.** This is the most serious one. Users would see a claim that isn't true, and payment code is the last place you want a half-built feature. There are two ways to fix it:\n   - Finish the flow, test it, and remove the TODO.\n   - Correct the release notes, and either gate the feature off or label it as beta or not yet available.\n\n   Don't ship it with notes that say \"complete.\"\n\n3. **The README still describes v1 setup.** A major version usually changes setup, so users following the README will hit failures on day one. It's a smaller problem than the other two, but it should be fixed before a 2.0 release, not after.\n\n**Can you still release today?** Only if the fixes are quick. The README update and the release notes correction are probably an hour or two of work. The CI failures depend on the cause, and the payment flow depends on how much is left. If the flow is close to done, you can still make it. If it isn't, cut the payment feature from the 2.0 scope and tag without it, or tag `v2.0.0-rc.1` today. A release candidate lets people try it without you promising a stable 2.0.\n\nTags are easy to create but awkward to retract once people have pulled them. Shipping a day late costs far less than shipping a broken payment claim.\n\nIf you'd like, I can look at the CI logs and the payment TODO to see how far away you actually are. I'd only read files and logs, not change anything.",
-        "withSkill": "**Verdict: NOT RC READY. Don't tag v2.0.0 today.**\n\nYour three problems each break one of the skill's conditions to advance:\n\n1. **2 tests fail in CI.** The skill requires the test suite to pass \"with no exceptions\", and CI is the environment that counts. A local pass doesn't override it. Find out why CI differs from local. Common causes are environment, dependency versions, timezone, or test ordering. Fix the cause. Don't skip or loosen the tests.\n2. **The README describes v1 setup.** The skill requires documentation and quickstarts to match the real state of the software. A v2.0.0 with v1 install instructions would send new users down a broken path. This matters more for a major version, since v2 probably has breaking changes that need migration notes.\n3. **The release notes call the payment flow \"complete\", but a TODO says it's unfinished.** This is the most serious of the three. The release notes would be making a false claim about payments. Either finish the flow, or change the notes to say it's partial, disabled, or deferred. Don't tag while the notes and the code disagree.\n\n**What I haven't done:** I stopped at loading the skill, and I haven't run the build, lint, typecheck, or security checks. I haven't opened the repo or the CI logs, so the cause of the CI failures is unknown. There may be more blockers beyond these three. The skill also requires checks on security, i18n/SEO, and lint/typecheck before any verdict other than NOT RC READY.\n\n**Path to a tag, in order:**\n1. Fix the 2 CI failures and get CI green.\n2. Resolve the payment flow, either by finishing it or by correcting the release notes to match reality.\n3. Rewrite the README for v2 setup, with migration notes.\n4. Re-run the full release checklist. That covers build, lint, typecheck, tests, security, i18n/SEO, and the repo audit.\n5. Tag v2.0.0.\n\nWhether this can be done today depends on the payment flow and the CI cause. If the payment flow is genuinely finishable, or you're happy to ship it labelled as incomplete, and the CI failures are environmental, it's possible. Otherwise, tag a v2.0.0-rc.1 with honest notes instead.\n\nIf you want, I can investigate the CI failures and the TODO and report back. That would be read-only, and I won't change any files."
-      }
+      "errors": 4
     },
     {
       "skill": "helen-release",

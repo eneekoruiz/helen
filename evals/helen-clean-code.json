@@ -32,6 +32,36 @@
         "Keeps behavior the same for callers",
         "Keeps the answer short and concrete"
       ]
+    },
+    {
+      "id": "deep-nesting-cleanup",
+      "prompt": "Clean up this nested conditional function without breaking any behavior. Answer in chat only; do not modify or create files.\n```ts\nfunction processItem(item: any) {\n  if (item != null) {\n    if (item.active) {\n      if (item.count > 0) {\n        return item.price * item.count;\n      } else {\n        return 0;\n      }\n    } else {\n      return 0;\n    }\n  } else {\n    return 0;\n  }\n}\n```",
+      "criteria": [
+        "Uses guard clauses or early returns to flatten nested conditionals",
+        "Maintains exact return values and edge case behavior",
+        "Adds typing or maintains signature without gratuitous rewrites",
+        "Does not alter surrounding unmentioned code"
+      ]
+    },
+    {
+      "id": "nginx-reverse-proxy",
+      "expectTrigger": false,
+      "prompt": "Provide an Nginx configuration snippet for reverse proxying requests from port 80 to an upstream Node app on port 3000 with WebSocket support. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Includes proxy_pass directive pointing to upstream",
+        "Sets Upgrade and Connection HTTP headers for WebSocket proxying",
+        "Includes basic Host and X-Real-IP proxy headers"
+      ]
+    },
+    {
+      "id": "kubernetes-hpa",
+      "expectTrigger": false,
+      "prompt": "What are the key metrics and configuration fields in a Kubernetes HorizontalPodAutoscaler (HPA) v2 resource? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains targetCPUUtilizationPercentage or target average utilization",
+        "Mentions minReplicas and maxReplicas fields",
+        "References scaleTargetRef pointing to the Deployment"
+      ]
     }
   ]
 }

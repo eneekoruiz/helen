@@ -46,7 +46,16 @@ node dist/cli.js --help      # o: npm link  y luego simplemente: helen --help
 
 (`npx helen-cli ...` solo funciona si el paquete está publicado en npm; desde el clon siempre funciona.)
 
-**Lo más fácil: un solo comando dentro del proyecto donde trabajas.**
+**Lo más fácil: un solo comando dentro o fuera del proyecto.**
+
+```bash
+helen init-project mi-proyecto   # adopta/crea carpeta, setup de agentes, guardrails de seguridad y primer apply con track
+helen init-project --dry-run     # ver qué haría sin tocar nada
+```
+
+`helen init-project` es idempotente: puedes lanzarlo dos veces sobre el mismo proyecto sin romper nada.
+
+**Paso a paso o en un proyecto existente:**
 
 ```bash
 helen setup                     # skills para Claude, Codex y Antigravity + instrucciones en AGENTS.md y CLAUDE.md
@@ -108,6 +117,28 @@ helen apply design --track     # seguir el plan paso a paso (ver abajo)
 | `helen status` | Muestra el avance |
 
 Los pasos de tipo *checkpoint* no se pueden dar por hechos hasta que `helen check` pase (salvo `--force` con nota). Una IA puede llevar todo el proceso solo con `helen next` / `helen done`.
+
+### Salida global `--json` para agentes
+
+Todos los comandos soportan `--json`. La salida en `stdout` es estrictamente un JSON válido (los logs informativos van a `stderr`):
+
+```json
+{
+  "ok": true,
+  "command": "apply",
+  "data": { ... },
+  "warnings": [],
+  "errors": []
+}
+```
+
+Códigos de salida estándar:
+- `0`: Éxito (`ok: true`).
+- `1`: Error de ejecución o validación (`ok: false`).
+- `2`: Completado con advertencias (`warnings` no vacío).
+- `3`: Fallo de comprobación o puerta de calidad (ej. checkpoint bloqueante).
+
+En modo `--json` se desactivan los menús interactivos: si falta información requerida, el comando falla de inmediato con código 1 y un error explícito.
 
 **C) Manual.** Elige un prompt con `helen prompts list` o las "Quick decisions" del README de la fase y ejecútalo con `helen prompts show <id>`.
 
@@ -186,7 +217,7 @@ Reglas por defecto: endpoint oficial, permisos mínimos, **solo lectura** cuando
 
 - `helen doctor`: además del proyecto, revisa tus agentes: skills de HELEN instaladas y desactualizadas, archivos de configuración MCP y **secretos escritos a mano** en ellos (los señala sin imprimirlos).
 - `helen skills update`: reinstala las skills de HELEN ya instaladas con su última versión (`--dry-run` para ver qué cambia).
-- `npm run evals` (desde el repositorio de HELEN, requiere el CLI `claude`): cada caso de `evals/<skill>.json` se ejecuta en un proyecto limpio **sin** la skill y **con** ella; un juez puntúa ambas respuestas contra los criterios. El resultado está en [SKILLS_QUALITY.md](SKILLS_QUALITY.md): tasa de activación automática, % sin skill, % con skill, diferencia y nota (A/B/C).
+- `npm run evals` (desde el repositorio de HELEN, requiere el CLI `claude`): cada caso de `evals/<skill>.json` se evalúa mediante múltiples ejecuciones (`--runs 3` por defecto) en proyectos temporales limpios **sin** la skill y **con** ella. Un juez evalúa cada criterio. El informe en [SKILLS_QUALITY.md](SKILLS_QUALITY.md) calcula medias, desviaciones típicas e intervalos de confianza al 95% (t de Student). Si el intervalo del delta cruza el 0, se clasifica como *ruido estadístico* y no se le asigna nota A/B/C. También evalúa casos negativos (`expectTrigger: false`) para medir la tasa de falsos positivos. Soporta `--dry-run`, `--cases`, `--skill` y `--max-calls`.
 
 ## 10. Protecciones listas para cualquier proyecto
 

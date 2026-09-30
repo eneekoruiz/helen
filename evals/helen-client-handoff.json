@@ -31,6 +31,36 @@
         "Checks mobile viewport",
         "Checks for placeholder or lorem ipsum content"
       ]
+    },
+    {
+      "id": "client-signoff-checklist",
+      "prompt": "We are presenting the finished web app to our agency client on a call this afternoon and need a formal delivery sign-off checklist. What should be signed off? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Covers scope verification against agreed deliverables",
+        "Verifies credentials and asset transfer without leaking secrets",
+        "Includes warranties, support period, or post-launch SLA boundaries",
+        "Requires explicit client acceptance or sign-off record"
+      ]
+    },
+    {
+      "id": "typescript-mapped-types",
+      "expectTrigger": false,
+      "prompt": "How do TypeScript mapped types work with keyof and template literal types? Give an example. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains keyof operator and in keyof syntax",
+        "Shows template literal transformation (e.g. `on${Capitalize<string>}`)",
+        "Provides a valid TypeScript code snippet"
+      ]
+    },
+    {
+      "id": "react-use-memo",
+      "expectTrigger": false,
+      "prompt": "When should I use useMemo in React and when is it premature optimization? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Identifies expensive computations or referential stability for props as legitimate uses",
+        "Explains overhead of useMemo hooks for trivial operations",
+        "Suggests profiling or measuring before adding memoization"
+      ]
     }
   ]
 }

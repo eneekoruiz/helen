@@ -15,25 +15,25 @@ Informe generado el 2026-09-30 sobre HELEN 2.0.0. Todo parte de lo que existe ho
 
 | Rank | Idea (número en este informe) | Impacto | Esfuerzo |
 |---|---|---|---|
-| 1 | `helen init-project`: un comando que hace `setup` + `guardrails` + `apply` (idea 4) | Alto | M |
-| 2 | Publicar `helen-cli` en npm con provenance (idea 1) | Alto | S |
+| 1 | `helen init-project`: un comando que hace `setup` + `guardrails` + `apply` (idea 4) **[hecho]** | Alto | M |
+| 2 | Publicar `helen-cli` en npm con provenance (idea 1) **[hecho]** | Alto | S |
 | 3 | Plantilla de repositorio con todo configurado (idea 3) | Alto | M |
-| 4 | Evals con 10 casos por skill y 3 ejecuciones (idea 57) | Alto | M |
+| 4 | Evals con 10 casos por skill y 3 ejecuciones (idea 57) **[hecho]** | Alto | M |
 | 5 | `helen apply --auto` con parada en cada escritura (idea 14) | Alto | L |
 | 6 | Servidor MCP propio de HELEN (idea 96) | Alto | L |
-| 7 | Release automático con changelog desde commits (idea 81) | Medio | S |
+| 7 | Release automático con changelog desde commits (idea 81) **[hecho]** | Medio | S |
 | 8 | `helen doctor --fix` para lo seguro (idea 13) | Alto | M |
 | 9 | Presupuesto de tokens por prompt (idea 41) | Medio | S |
 | 10 | `helen report`, panel HTML local (idea 93) | Medio | M |
 
 ---|---|---|---|
-| 1 | `helen init-project`: un solo comando que hace `setup` + `guardrails` + `apply` y deja el proyecto listo | Alto | M |
-| 2 | Publicar `helen-cli` en npm con provenance para que `npx helen-cli` funcione de verdad | Alto | S |
+| 1 | `helen init-project`: un solo comando que hace `setup` + `guardrails` + `apply` y deja el proyecto listo **[hecho]** | Alto | M |
+| 2 | Publicar `helen-cli` en npm con provenance para que `npx helen-cli` funcione de verdad **[hecho]** | Alto | S |
 | 3 | Plantilla de repositorio (GitHub template) con todo ya configurado | Alto | M |
-| 4 | Evals con más casos (10 por skill) y 3 ejecuciones por caso para medir varianza | Alto | M |
+| 4 | Evals con más casos (10 por skill) y 3 ejecuciones por caso para medir varianza **[hecho]** | Alto | M |
 | 5 | `helen apply --auto`: ejecuta los pasos de solo lectura y se para en cada paso que escribe o instala | Alto | L |
 | 6 | Servidor MCP propio de HELEN (`helen mcp`) que expone prompts, playbooks y progreso | Alto | L |
-| 7 | Release automático con changelog desde commits (release-please) | Medio | S |
+| 7 | Release automático con changelog desde commits (release-please) **[hecho]** | Medio | S |
 | 8 | Comando `helen doctor --fix` que corrige lo seguro (hooks, skills desactualizadas) | Alto | M |
 | 9 | Presupuesto de tokens por prompt visible en `helen prompts list` | Medio | S |
 | 10 | Panel HTML local (`helen report`) con fase, progreso, calidad y salud del proyecto | Medio | M |
@@ -42,10 +42,10 @@ Informe generado el 2026-09-30 sobre HELEN 2.0.0. Todo parte de lo que existe ho
 
 ## 1. Arranque y distribución (ideas 1-12)
 
-1. **Publicar en npm** con `npm publish --provenance` desde GitHub Actions y una etiqueta de versión. Hoy el README dice "instala desde el repositorio" porque no está publicado. Alto · S.
-2. **`npx helen-cli setup` sin instalar nada**: depende de la idea 1. Alto · S.
+1. **Publicar en npm** con `npm publish --provenance` desde GitHub Actions y una etiqueta de versión. **[hecho]** Workflow `publish.yml` configurado con OIDC. Alto · S.
+2. **`npx helen-cli setup` sin instalar nada**: depende de la idea 1. **[hecho]** Bin alias `helen-cli` configurado en `package.json`. Alto · S.
 3. **GitHub template repository** con `.githooks`, Dependabot, CI, `AGENTS.md` y skills ya instalados: "Use this template" y empiezas. Alto · M.
-4. **`helen init-project <nombre>`** que encadena `create`, `setup`, `add guardrails`, `apply strategy --track`. Alto · M.
+4. **`helen init-project <nombre>`** que encadena `create`, `setup`, `add guardrails`, `apply strategy --track`. **[hecho]** Idempotente con `--dry-run`, `--json`, `--goal`. Alto · M.
 5. **Script de instalación de una línea con checksum**: `curl` a una versión fijada con hash publicado. Siempre fijado, nunca la rama. Medio · S.
 6. **Homebrew tap** para `brew install helen`. Bajo · M.
 7. **Imagen Docker `helen`** para ejecutarlo en CI sin instalar Node. Bajo · S.
@@ -66,8 +66,8 @@ Informe generado el 2026-09-30 sobre HELEN 2.0.0. Todo parte de lo que existe ho
 19. **`helen diff`**: muestra qué cambió desde el último `helen check`. Bajo · S.
 20. **`helen explain <prompt>`**: resumen de 5 líneas de qué hace, cuándo usarlo y cuánto cuesta en tokens. Medio · S.
 21. **Autocompletado de shell** (bash, zsh, fish) para ids de prompts, metas y skills. Medio · S.
-22. **Salida `--json`** en todos los comandos para que otras herramientas y agentes la lean sin parsear texto. Alto · M.
-23. **Códigos de salida documentados** (0 ok, 1 error, 2 aviso, 3 checkpoint fallido). Bajo · S.
+22. **Salida `--json`** en todos los comandos para que otras herramientas y agentes la lean sin parsear texto. **[hecho]** Envolvente estándar `{ ok, command, data, warnings, errors }` con logs a stderr. Alto · M.
+23. **Códigos de salida documentados** (0 ok, 1 error, 2 aviso, 3 checkpoint fallido). **[hecho]** Implementados y cubiertos por tests. Bajo · S.
 24. **`helen config`** (`.helenrc` con idioma, agentes por defecto, metas favoritas, ruta de prompts propios). Medio · M.
 25. **Prompts propios del usuario** (`.helen/prompts/`) que pasan el mismo `lint` y se mezclan con los de HELEN. Alto · M.
 26. **Playbooks propios** (`.helen/playbooks.json`) que extienden los incluidos. Alto · S.
@@ -110,10 +110,10 @@ Informe generado el 2026-09-30 sobre HELEN 2.0.0. Todo parte de lo que existe ho
 
 ## 5. Skills (57-70)
 
-57. **10 casos por skill y 3 ejecuciones** en las evals para separar señal de ruido. Alto · M.
-58. **Evals de "no activar"**: casos donde la skill NO debe cargarse (falsos positivos). Medio · S.
+57. **10 casos por skill y 3 ejecuciones** en las evals para separar señal de ruido. **[hecho]** Runner ampliado a 90 casos totales con `--runs N`, intervalos t-Student y detección de ruido. Alto · M.
+58. **Evals de "no activar"**: casos donde la skill NO debe cargarse (falsos positivos). **[hecho]** Soporte de `expectTrigger: false` y cálculo de tasa de falsos positivos. Medio · S.
 59. **Evals de seguridad de las propias skills**: que no impriman secretos ni ejecuten sin permiso. Alto · M.
-60. **Descripciones optimizadas por bucle**: probar 3-5 redacciones y quedarse con la que más se activa. Alto · M.
+60. **Descripciones optimizadas por bucle**: probar 3-5 redacciones y quedarse con la que más se activa. **[hecho]** Optimizadas descripciones con frases reales de usuario en todas las skills con baja activación. Alto · M.
 61. **Skills más pequeñas y con referencias** (progressive disclosure): mover tablas largas a `references/`. Medio · S.
 62. **Skill `helen-review`** que revisa un diff contra las reglas de HELEN antes de un PR. Alto · M.
 63. **Skill `helen-onboarding`**: guía a una persona nueva por el repositorio. Medio · S.
@@ -140,9 +140,9 @@ Informe generado el 2026-09-30 sobre HELEN 2.0.0. Todo parte de lo que existe ho
 
 ## 7. Calidad, CI y seguridad del repositorio (81-92)
 
-81. **Release automático** con release-please: changelog y etiquetas desde commits. Medio · S.
+81. **Release automático** con release-please: changelog y etiquetas desde commits. **[hecho]** Configurado `.github/workflows/release-please.yml`, `release-please-config.json` y `.release-please-manifest.json`. Medio · S.
 82. **CodeQL** y **secret scanning** activados en el repositorio. Alto · S.
-83. **`SECURITY.md`** con política de divulgación y versiones soportadas. Medio · S.
+83. **`SECURITY.md`** con política de divulgación y versiones soportadas. **[hecho]** Añadido `SECURITY.md` en la raíz del repositorio. Medio · S.
 84. **Renovate o Dependabot con auto-merge solo para parches** con CI verde. Medio · S. (La parte de Dependabot **[hecho]**.)
 85. **Tests de humo por sistema operativo** (Linux, macOS, Windows) en CI. Alto · M.
 86. **Tests de instantáneas** de la salida de `apply` y `next` para detectar cambios accidentales. Medio · S.

@@ -32,6 +32,36 @@
         "Says the multilingual claim should wait until fixed",
         "Recommends checking for hardcoded strings and fallbacks"
       ]
+    },
+    {
+      "id": "social-share-cards",
+      "prompt": "When users paste our blog links into Twitter/X, Slack, and LinkedIn, no preview image or description appears. How do we configure social share metadata properly? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Specifies Open Graph tags: og:title, og:description, og:image, og:url",
+        "Specifies Twitter card tags: twitter:card (summary_large_image), twitter:title, twitter:image",
+        "Recommends absolute URLs for images and canonical link",
+        "Mentions recommended image aspect ratio (1200x630)"
+      ]
+    },
+    {
+      "id": "npm-peer-dependencies",
+      "expectTrigger": false,
+      "prompt": "What is the difference between peerDependencies and dependencies in package.json? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains peerDependencies expects the host/consuming app to provide the package",
+        "Explains dependencies installs packages locally in node_modules",
+        "Mentions peerDependenciesMeta and optional peer dependencies"
+      ]
+    },
+    {
+      "id": "typescript-satisfies-operator",
+      "expectTrigger": false,
+      "prompt": "How does the 'satisfies' operator in TypeScript differ from type annotation (e.g. const x: Type = ...)? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains satisfies validates against a type without widening or losing specific inferred types",
+        "Gives a concrete example showing property inference preservation",
+        "Explains that type annotation widens properties to the declared interface"
+      ]
     }
   ]
 }

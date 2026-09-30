@@ -41,8 +41,10 @@ const hasFlag = (name) => {
 const runsCount = Math.max(1, parseInt(opt('runs', '3'), 10));
 const concurrency = Math.max(1, parseInt(opt('concurrency', '4'), 10));
 const model = opt('model', 'sonnet');
-const maxCalls = opt('max-calls', null) !== null ? parseInt(opt('max-calls', '0'), 10) : null;
-const casesFilter = opt('cases', null) ? opt('cases', '').split(',').map((s) => s.trim()).filter(Boolean) : null;
+const rawMaxCalls = opt('max-calls', null);
+const maxCalls = rawMaxCalls !== null ? parseInt(rawMaxCalls, 10) : null;
+const rawCases = opt('cases', null);
+const casesFilter = rawCases ? rawCases.split(',').map((s) => s.trim()).filter(Boolean) : null;
 const skillFilter = opt('skill', null);
 const dryRun = hasFlag('dry-run');
 const force = hasFlag('force');
@@ -59,6 +61,26 @@ fs.mkdirSync(resultDir, { recursive: true });
 let totalCallsMade = 0;
 let budgetExhausted = false;
 
+function resolveExecutable(cmd) {
+  if (process.platform !== 'win32') return { cmd, shell: false };
+  if (cmd.endsWith('.exe')) return { cmd, shell: false };
+  if (cmd.endsWith('.cmd') || cmd.endsWith('.bat')) return { cmd, shell: true };
+  const dirs = (process.env.PATH || '').split(path.delimiter);
+  for (const ext of ['.exe', '.cmd', '.bat']) {
+    for (const dir of dirs) {
+      try {
+        const full = path.join(dir, cmd + ext);
+        if (fs.existsSync(full)) {
+          return { cmd: full, shell: ext !== '.exe' };
+        }
+      } catch {
+        // Ignore unreadable dirs in PATH
+      }
+    }
+  }
+  return { cmd, shell: false };
+}
+
 function runProcess(cmd, cmdArgs, cwd, timeoutMs = 300_000) {
   if (maxCalls !== null && totalCallsMade >= maxCalls) {
     budgetExhausted = true;
@@ -68,10 +90,11 @@ function runProcess(cmd, cmdArgs, cwd, timeoutMs = 300_000) {
 
   return new Promise((resolve) => {
     const isWin = process.platform === 'win32';
-    const child = spawn(cmd, cmdArgs, {
+    const resolved = resolveExecutable(cmd);
+    const child = spawn(resolved.cmd, cmdArgs, {
       cwd,
       stdio: ['ignore', 'pipe', 'pipe'],
-      shell: isWin,
+      shell: resolved.shell,
     });
     let out = '';
     let err = '';
@@ -123,7 +146,8 @@ async function agent(prompt, skill, attempt = 0) {
       cwd
     );
     const { text, triggered } = parseStreamJsonEvents(res.out);
-    const ok = res.code === 0 && text.length > 0;
+    const isRateLimited = /hit your (?:weekly|daily) limit/i.test(text);
+    const ok = res.code === 0 && text.length > 0 && !isRateLimited;
     if (!ok && attempt < 1 && !budgetExhausted) {
       return agent(prompt, skill, attempt + 1);
     }

@@ -32,6 +32,36 @@
         "Explains aria-hidden only for decorative icons, not meaningful ones",
         "Recommends native semantics first"
       ]
+    },
+    {
+      "id": "keyboard-modal",
+      "prompt": "I have a modal dialog in React that opens with a button. Users complain they cannot close it with the Escape key or tab through its elements without focusing background content. How do I fix this? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Recommends trapping focus within the modal while open",
+        "Recommends handling the Escape key to close the dialog",
+        "Recommends restoring focus to the trigger button upon closing",
+        "Recommends appropriate dialog role and accessible name (aria-labelledby or title)"
+      ]
+    },
+    {
+      "id": "sql-query-tuning",
+      "expectTrigger": false,
+      "prompt": "How can I optimize this PostgreSQL query that joins 5 million order rows with a customers table? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Suggests checking EXPLAIN ANALYZE execution plan",
+        "Recommends index on foreign keys or join columns",
+        "Discusses connection pooling or query restructuring"
+      ]
+    },
+    {
+      "id": "color-psychology",
+      "expectTrigger": false,
+      "prompt": "What emotions do blue and green typically evoke in branding for an eco-friendly travel company? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Associates blue with trust, calm or reliability",
+        "Associates green with nature, sustainability or growth",
+        "Discusses brand perception for travel and eco businesses"
+      ]
     }
   ]
 }

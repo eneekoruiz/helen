@@ -30,6 +30,36 @@
         "Offers honest alternatives (case study, process, guarantee, placeholders clearly marked, collecting real ones)",
         "Explains the trust or legal risk briefly"
       ]
+    },
+    {
+      "id": "pricing-headline-cro",
+      "prompt": "Our SaaS pricing page header says 'Choose A Plan That Suits Your Needs'. How can we rewrite this headline and subheading to improve conversion and clarity? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Focuses the headline on customer outcomes or value rather than self-evident action",
+        "Addresses risk reduction (e.g. money-back guarantee, free trial, cancel anytime)",
+        "Avoids generic corporate jargon",
+        "Suggests clear guidance for which customer segment belongs to each tier"
+      ]
+    },
+    {
+      "id": "git-submodules",
+      "expectTrigger": false,
+      "prompt": "How do I add and update a git submodule in a project repository? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains `git submodule add <url> <path>` command",
+        "Explains `git submodule update --init --recursive`",
+        "Mentions committing .gitmodules file"
+      ]
+    },
+    {
+      "id": "css-grid-auto-fit",
+      "expectTrigger": false,
+      "prompt": "What is the difference between auto-fit and auto-fill in CSS Grid repeat(auto-fit, minmax(200px, 1fr))? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains how auto-fill preserves empty tracks",
+        "Explains how auto-fit collapses empty tracks to allow items to stretch",
+        "Provides clear visual or layout comparison"
+      ]
     }
   ]
 }
