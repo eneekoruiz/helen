@@ -97,7 +97,7 @@ Each phase README has quick decisions, an exit checklist and a generated index.
 
 ## Skills
 
-Bundled: `helen-apply` (entry point), `helen-router`, `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`, `helen-copy-cro`, `helen-motion-3d`, `helen-security`, `helen-seo-compliance`, `helen-qa-scale`, `helen-release`, `helen-client-handoff`, `helen-strategy`, `helen-data-api`, `helen-knowledge`.
+Bundled: `helen-apply` (entry point), `helen-router`, `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`, `helen-copy-cro`, `helen-motion-3d`, `helen-security`, `helen-seo-compliance`, `helen-qa-scale`, `helen-release`, `helen-client-handoff`, `helen-strategy`, `helen-data-api`, `helen-knowledge`, `helen-review`, `helen-onboarding`.
 
 | Target | Folder |
 |---|---|
@@ -106,6 +106,10 @@ Bundled: `helen-apply` (entry point), `helen-router`, `helen-clean-code`, `helen
 | `custom --dir <path>` | any agent that scans a skills folder |
 
 Quality per skill (trigger rate, baseline vs with-skill pass rate) is measured by `npm run evals` and published in [docs/SKILLS_QUALITY.md](docs/SKILLS_QUALITY.md). Eval cases live in [`evals/`](evals).
+
+## Zero Telemetry Guarantee
+
+HELEN does not collect, store, or transmit any telemetry, analytics, user identifiers, project code, or prompt logs to external cloud servers. All parsing, evaluation, reports, and MCP server communications run strictly locally on your machine.
 
 ## Third-party tools
 
@@ -118,3 +122,4 @@ Quality per skill (trigger rate, baseline vs with-skill pass rate) is measured b
 ## License
 
 MIT
+

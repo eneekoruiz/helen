@@ -1,6 +1,7 @@
 ---
 name: helen-motion-3d
 description: Use for any question, CSS snippet, or review involving web animations and transitions (modals, dialogs, custom easing, transforms, opacity, prefers-reduced-motion); scroll behaviors (scroll-jacking, snapping, Lenis, parallax); 3D graphics (Three.js, WebGL, Spline, GLB/GLTF loading budgets, Draco compression, fallbacks); or motion performance on web pages.
+version: 2.1.0
 ---
 
 # Motion, 3D and Cinematic Effects

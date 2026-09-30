@@ -34,4 +34,5 @@ Before moving on to 06-release:
 | [audit-documentation](operations/AUDIT-documentation.md) | AUDIT | Decide whether docs are truthful, current and useful: README, setup, operations, consistency, examples and scope honesty. |
 | [audit-final-audit-flow](operations/AUDIT-final-audit-flow.md) | AUDIT flow | Flow: the final audit sequence with gates: blind spots, technical truth, honest repository, public exposure decision, release gate. |
 | [audit-public-presentation](presentation/AUDIT-public-presentation.md) | AUDIT | Decide whether the project deserves public exposure and whether README, screenshots, GitHub metadata and Open Graph match reality. |
+| [audit-technical-debt-backlog](quality/AUDIT-technical-debt-backlog.md) | AUDIT | Audit codebase for technical debt, legacy patterns, and prioritize a structured mitigation backlog. |
 <!-- HELEN:INDEX:END -->

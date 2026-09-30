@@ -75,3 +75,42 @@ export function validateCatalog(root?: string, today: Date = new Date()): Catalo
   }
   return issues;
 }
+
+export interface CatalogComparison {
+  item1: CatalogItem;
+  item2: CatalogItem;
+  sharedPhases: string[];
+  sameCategory: boolean;
+  sameKind: boolean;
+}
+
+export function compareCatalogItems(id1: string, id2: string, root?: string): CatalogComparison {
+  const item1 = getCatalogItem(id1, root);
+  const item2 = getCatalogItem(id2, root);
+  const sharedPhases = item1.phases.filter(p => item2.phases.includes(p));
+
+  return {
+    item1,
+    item2,
+    sharedPhases,
+    sameCategory: item1.category === item2.category,
+    sameKind: item1.kind === item2.kind,
+  };
+}
+
+export function checkCatalogHealth(root?: string): { total: number; active: number; caution: number; discontinued: number; issues: CatalogIssue[] } {
+  const items = readCatalog(root);
+  const issues = validateCatalog(root);
+  const active = items.filter(i => i.status === 'active').length;
+  const caution = items.filter(i => i.status === 'caution').length;
+  const discontinued = items.filter(i => i.status === 'discontinued').length;
+
+  return {
+    total: items.length,
+    active,
+    caution,
+    discontinued,
+    issues,
+  };
+}
+

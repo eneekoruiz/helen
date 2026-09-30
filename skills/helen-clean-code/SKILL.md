@@ -1,6 +1,7 @@
 ---
 name: helen-clean-code
 description: Use when refactoring, simplifying, or reviewing code for maintainability - removing dead code, duplication, silent errors, and unclear names without changing behavior. Applies to a working codebase before hardening or a release candidate.
+version: 2.1.0
 ---
 
 # Clean Code Pass

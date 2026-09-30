@@ -50,9 +50,51 @@ export function readProgress(cwd: string): Progress | null {
   return JSON.parse(fs.readFileSync(file, 'utf-8')) as Progress;
 }
 
+export function updateStateFile(cwd: string, progress: Progress): void {
+  const doneCount = progress.steps.filter(s => s.status === 'done').length;
+  const skippedCount = progress.steps.filter(s => s.status === 'skipped').length;
+  const current = currentIndex(progress);
+  const currentStep = current !== -1 ? progress.steps[current] : null;
+
+  const lines = [
+    '# HELEN Project State',
+    '',
+    `- **Goal**: ${progress.goal} — ${progress.title}`,
+    `- **Phase**: ${progress.phase}`,
+    `- **Progress**: ${doneCount}/${progress.steps.length} done, ${skippedCount} skipped`,
+    `- **Current Step**: ${currentStep ? `[${currentStep.kind}] ${currentStep.ref}` : 'All steps completed'}`,
+    `- **Started**: ${progress.startedAt}`,
+    `- **Last Updated**: ${new Date().toISOString()}`,
+    '',
+    '## Step Breakdown',
+  ];
+
+  progress.steps.forEach((s, i) => {
+    const mark = s.status === 'done' ? '[x]' : s.status === 'skipped' ? '[-]' : '[ ]';
+    lines.push(`- ${mark} ${i + 1}. **${s.ref}** (${s.kind}): ${s.why}`);
+    if (s.note) lines.push(`  *Note: ${s.note}*`);
+  });
+
+  if (progress.lastCheck) {
+    lines.push('', '## Last Gate Check', `- Status: ${progress.lastCheck.ok ? 'PASSED' : 'FAILED'} at ${progress.lastCheck.at}`);
+    for (const r of progress.lastCheck.results) {
+      lines.push(`  - ${r.script}: ${r.ok ? 'OK' : 'FAILED'}`);
+    }
+  }
+
+  const statePath = path.join(cwd, '.helen', 'STATE.md');
+  try {
+    fs.mkdirSync(path.dirname(statePath), { recursive: true });
+    fs.writeFileSync(statePath, `${lines.join('\n')}\n`, 'utf-8');
+  } catch {
+    // Ignore error if writing STATE.md fails
+  }
+}
+
 function save(cwd: string, progress: Progress): void {
   fs.mkdirSync(path.dirname(progressFile(cwd)), { recursive: true });
   fs.writeFileSync(progressFile(cwd), `${JSON.stringify(progress, null, 2)}\n`, 'utf-8');
+  updateStateFile(cwd, progress);
 }
 
 function requireProgress(cwd: string): Progress {

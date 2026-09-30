@@ -35,4 +35,5 @@ Before moving on to 05-final-audit:
 | [audit-observability-instrumentation](observability/AUDIT-observability-instrumentation.md) | AUDIT | Check that failures and key behavior are visible, actionable and not noisy: logs, errors, metrics, alerts, health checks, PII in logs. |
 | [audit-adversarial-qa-and-edge-cases](qa/AUDIT-adversarial-qa-and-edge-cases.md) | AUDIT | Attack the product with edge cases: malformed, empty and huge data, duplicates, slow network, cancellations, races and partial failures. |
 | [audit-stress-scale-and-cost](qa/AUDIT-stress-scale-and-cost.md) | AUDIT | Find scale, performance and cost problems before success makes them painful: bottlenecks, N+1s, quotas, rate limits, cost drivers. |
+| [audit-prompt-injection-review](security/AUDIT-prompt-injection-review.md) | AUDIT | Audit application for indirect prompt injection vulnerabilities in untrusted external text. |
 <!-- HELEN:INDEX:END -->

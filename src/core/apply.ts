@@ -28,6 +28,7 @@ export interface Playbooks {
 export interface PhaseDetection {
   phase: string;
   confidence: 'low' | 'medium';
+  score?: number;
   evidence: string[];
 }
 
@@ -41,8 +42,22 @@ export interface ApplyPlan {
 
 const PLAYBOOKS_FILE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'docs', 'prompts', 'playbooks.json');
 
-export function readPlaybooks(file: string = PLAYBOOKS_FILE): Playbooks {
-  return JSON.parse(fs.readFileSync(file, 'utf-8')) as Playbooks;
+export function readPlaybooks(file: string = PLAYBOOKS_FILE, cwd?: string): Playbooks {
+  const base = JSON.parse(fs.readFileSync(file, 'utf-8')) as Playbooks;
+  const projectDir = cwd ?? process.cwd();
+  const userPlaybooksPath = path.join(projectDir, '.helen', 'playbooks.json');
+  if (fs.existsSync(userPlaybooksPath)) {
+    try {
+      const user = JSON.parse(fs.readFileSync(userPlaybooksPath, 'utf-8')) as Partial<Playbooks>;
+      return {
+        phaseGoals: { ...base.phaseGoals, ...(user.phaseGoals ?? {}) },
+        goals: { ...base.goals, ...(user.goals ?? {}) },
+      };
+    } catch {
+      // Fallback cleanly to base playbooks
+    }
+  }
+  return base;
 }
 
 function has(cwd: string, ...parts: string[]): boolean {
@@ -66,20 +81,27 @@ export function detectPhase(cwd: string): PhaseDetection {
   const evidence: string[] = [];
   const scripts = readPackageScripts(cwd);
   const hasPackage = has(cwd, 'package.json');
+  const hasGit = has(cwd, '.git');
   const hasSource = has(cwd, 'src') || has(cwd, 'app') || has(cwd, 'pages');
   const hasTests = has(cwd, 'tests') || has(cwd, 'test') || has(cwd, '__tests__') || 'test' in scripts;
   const hasCi = has(cwd, '.github', 'workflows');
   const hasChangelog = has(cwd, 'CHANGELOG.md');
   const hasDeploy = ['vercel.json', 'netlify.toml', 'wrangler.toml', 'Dockerfile'].some(file => has(cwd, file));
   const hasKnowledge = has(cwd, 'AGENTS.md') || has(cwd, 'CLAUDE.md') || has(cwd, 'docs', 'decisions') || has(cwd, 'docs', 'adr');
+  const hasLicense = has(cwd, 'LICENSE') || has(cwd, 'LICENSE.md') || has(cwd, 'LICENSE.txt');
+  const hasSecurity = has(cwd, 'SECURITY.md') || has(cwd, '.github', 'SECURITY.md');
 
-  if (hasPackage) evidence.push('package.json present');
-  if (hasSource) evidence.push('source folder present');
-  if (hasTests) evidence.push('tests present');
-  if (hasCi) evidence.push('CI workflows present');
-  if (hasChangelog) evidence.push('CHANGELOG.md present');
-  if (hasDeploy) evidence.push('deploy config present');
-  if (hasKnowledge) evidence.push('AI context or decision records present');
+  let score = 0;
+  if (hasPackage) { evidence.push('package.json present'); score += 10; }
+  if (hasGit) { evidence.push('git repository initialized'); score += 10; }
+  if (hasSource) { evidence.push('source folder present'); score += 15; }
+  if (hasTests) { evidence.push('tests present'); score += 20; }
+  if (hasCi) { evidence.push('CI workflows present'); score += 15; }
+  if (hasDeploy) { evidence.push('deploy config present'); score += 10; }
+  if (hasKnowledge) { evidence.push('AI context or decision records present'); score += 10; }
+  if (hasChangelog) { evidence.push('CHANGELOG.md present'); score += 5; }
+  if (hasLicense) { evidence.push('license present'); score += 3; }
+  if (hasSecurity) { evidence.push('security policy present'); score += 2; }
 
   let phase: string;
   if (!hasPackage && !hasSource) phase = '01-start-project';
@@ -90,7 +112,7 @@ export function detectPhase(cwd: string): PhaseDetection {
   else phase = '03-finish-features';
 
   if (evidence.length === 0) evidence.push('no project files found');
-  return { phase, confidence: evidence.length >= 4 ? 'medium' : 'low', evidence };
+  return { phase, confidence: evidence.length >= 4 ? 'medium' : 'low', score: Math.min(score, 100), evidence };
 }
 
 export function installedSkillNames(cwd: string, extraDirs: string[] = []): string[] {

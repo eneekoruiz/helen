@@ -80,14 +80,104 @@ export function installAntigravityRules(cwd: string, dryRun = false): string[] {
   return created;
 }
 
-export function setupProject(options: SetupOptions): SetupResult {
+export function removeBlock(existing: string | null): string {
+  if (!existing) return '';
+  const start = existing.indexOf(BLOCK_START);
+  const end = existing.indexOf(BLOCK_END);
+  if (start !== -1 && end > start) {
+    const before = existing.slice(0, start).trimEnd();
+    const after = existing.slice(end + BLOCK_END.length).trimStart();
+    if (!before && !after) return '';
+    if (!before) return `${after}\n`;
+    if (!after) return `${before}\n`;
+    return `${before}\n\n${after}\n`;
+  }
+  return existing;
+}
+
+export function detectInstalledAgents(): SetupAgent[] {
+  const detected = new Set<SetupAgent>();
+  const home = process.env.HOME || process.env.USERPROFILE || '';
+
+  if (fs.existsSync(path.join(home, '.claude')) || fs.existsSync(path.join(home, '.claude.json'))) {
+    detected.add('claude');
+  }
+  if (fs.existsSync(path.join(home, '.gemini')) || fs.existsSync(path.join(home, '.antigravity'))) {
+    detected.add('antigravity');
+  }
+  if (fs.existsSync(path.join(home, '.codex')) || fs.existsSync(path.join(home, '.agents'))) {
+    detected.add('codex');
+  }
+
+  return detected.size > 0 ? Array.from(detected) : ['claude', 'codex', 'antigravity'];
+}
+
+export interface UninstallResult {
+  cleanedInstructions: string[];
+  removedSkills: string[];
+}
+
+export function uninstallProject(options: { cwd: string; dryRun?: boolean }): UninstallResult {
+  const cleanedInstructions: string[] = [];
+  const removedSkills: string[] = [];
+
+  for (const file of ['AGENTS.md', 'CLAUDE.md']) {
+    const full = path.join(options.cwd, file);
+    if (fs.existsSync(full)) {
+      const content = fs.readFileSync(full, 'utf-8');
+      const updated = removeBlock(content);
+      if (!options.dryRun) {
+        if (!updated.trim()) {
+          fs.unlinkSync(full);
+        } else {
+          fs.writeFileSync(full, updated, 'utf-8');
+        }
+      }
+      cleanedInstructions.push(file);
+    }
+  }
+
+  const skillDirs = [
+    path.join(options.cwd, '.claude', 'skills'),
+    path.join(options.cwd, '.agents', 'skills'),
+  ];
+
+  for (const dir of skillDirs) {
+    if (fs.existsSync(dir)) {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        if (entry.isDirectory() && entry.name.startsWith('helen-')) {
+          const skillPath = path.join(dir, entry.name);
+          if (!options.dryRun) {
+            fs.rmSync(skillPath, { recursive: true, force: true });
+          }
+          removedSkills.push(path.relative(options.cwd, skillPath));
+        }
+      }
+    }
+  }
+
+  return { cleanedInstructions, removedSkills };
+}
+
+export function setupProject(options: SetupOptions & { global?: boolean }): SetupResult {
+  const targets = options.agents as SkillTarget[];
   const skills = installSkills({
     cwd: options.cwd,
-    targets: options.agents as SkillTarget[],
+    targets,
     flows: options.flows,
     dryRun: options.dryRun,
     force: options.force,
   });
+
+  if (options.global) {
+    const home = process.env.HOME || process.env.USERPROFILE || '';
+    if (options.agents.includes('claude')) {
+      installSkills({ cwd: home, targets: ['custom'], customDir: '.claude/skills', dryRun: options.dryRun, force: options.force });
+    }
+    if (options.agents.includes('antigravity')) {
+      installSkills({ cwd: home, targets: ['custom'], customDir: '.gemini/config/skills', dryRun: options.dryRun, force: options.force });
+    }
+  }
 
   const instructionFiles = ['AGENTS.md'];
   if (options.agents.includes('claude')) instructionFiles.push('CLAUDE.md');
@@ -95,7 +185,6 @@ export function setupProject(options: SetupOptions): SetupResult {
   for (const file of instructionFiles) {
     const target = path.join(options.cwd, file);
     const existing = fs.existsSync(target) ? fs.readFileSync(target, 'utf-8') : null;
-    // force: the managed block is always safe to refresh; the rest of the file is preserved.
     writeFileSafe(target, upsertBlock(existing, helenBlock()), { dryRun: options.dryRun, force: true });
   }
 

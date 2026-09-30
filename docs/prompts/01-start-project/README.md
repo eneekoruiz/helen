@@ -37,6 +37,7 @@ Before moving on to 02-building:
 | [generate-competitive-advantage](market/GENERATE-competitive-advantage.md) | GENERATE | Build the highest-impact features found in the competitive benchmark, improved rather than copied, in the current stack. |
 | [research-competitive-benchmark](market/RESEARCH-competitive-benchmark.md) | RESEARCH | Compare the project with real competitors and substitutes: UX, conversion, features, trust and gaps worth closing. |
 | [research-market-analysis-flow](market/RESEARCH-market-analysis-flow.md) | RESEARCH flow | Flow: competitive benchmark, then roadmap prioritization, ending in decisions rather than automatic changes. |
+| [init-repo-in-10-minutes](onboarding/INIT-repo-in-10-minutes.md) | INIT | Rapidly understand, map, and document an existing codebase architecture in 10 minutes. |
 | [plan-roadmap-roi-prioritization](strategy/PLAN-roadmap-roi-prioritization.md) | PLAN | Turn ideas and audit findings into a now/next/later roadmap ranked by value, risk, effort and confidence, with kill criteria. |
 | [plan-technology-lifecycle-strategy](strategy/PLAN-technology-lifecycle-strategy.md) | PLAN | Plan the lifecycle of core technologies: support windows, deprecation criteria, major-upgrade strategy and upgrade budget. |
 <!-- HELEN:INDEX:END -->

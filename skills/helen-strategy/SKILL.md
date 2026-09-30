@@ -1,6 +1,7 @@
 ---
 name: helen-strategy
 description: Use when starting a new project, setting visual direction, or gathering design inspiration (curating real references, moodboards, design tokens); prioritizing product roadmaps, features, and quarterly backlog items using value, effort, and kill criteria; conducting competitor benchmarking and market analysis (strictly refusing to fabricate private competitor financials or metrics); or scanning initial tech stack risks.
+version: 2.1.0
 ---
 
 # Strategy and Prioritization

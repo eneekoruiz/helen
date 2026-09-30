@@ -1,6 +1,7 @@
 ---
 name: helen-apply
 description: Main HELEN entry point. Use when the user says "use HELEN", "aplica Helen", asks where the project stands, what to do next, or asks for a whole area of work ("apply all the design improvements", "prepare the release", "make it secure"). Detects the project phase and runs the matching playbook of HELEN prompts, flows, checkpoints, skills and catalog tools.
+version: 2.1.0
 ---
 
 # HELEN Apply

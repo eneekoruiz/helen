@@ -1,6 +1,7 @@
 ---
 name: helen-a11y-perf
 description: Use for web accessibility (a11y) audits and fixes: form accessibility, semantic HTML over redundant ARIA attributes, keyboard navigation, focus states, color contrast, and alt text; AND for frontend web performance optimization: large assets and hero images, oversized JavaScript bundles (lodash, moment), repeated API requests, slow page loads, Core Web Vitals (LCP, CLS), and Lighthouse audits.
+version: 2.1.0
 ---
 
 # Accessibility and Performance Pass

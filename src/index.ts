@@ -8,18 +8,18 @@ import { runModules, printSummary } from './core/moduleRunner.js';
 import { getAllModuleIds, getModule, getAllModules } from './modules/registry.js';
 import { showMainMenu, showModuleSelector, showExplainSelector, printModuleExplanation, printModuleList } from './menu/mainMenu.js';
 import { generateModuleDocs } from './core/docs.js';
-import { printPromptContent, printPromptList, printPromptPath, searchPrompts, shortId, listPromptEntries, resolvePromptEntry, readPrompt, type PromptKind } from './core/prompts.js';
+import { printPromptContent, printPromptList, printPromptPath, searchPrompts, shortId, listPromptEntries, resolvePromptEntry, readPrompt, findPromptOverlaps, type PromptKind } from './core/prompts.js';
 import { updatePhaseIndexes } from './core/promptIndex.js';
 import { ejectModule } from './core/moduleRunner.js';
 import { buildPlan, detectPhase, formatBrief, formatPlan, readPlaybooks, suggestedGoals, installedSkillNames, validatePlaybooks } from './core/apply.js';
-import { getCatalogItem, listCatalog, validateCatalog } from './core/catalog.js';
+import { getCatalogItem, listCatalog, validateCatalog, compareCatalogItems, checkCatalogHealth } from './core/catalog.js';
 import { currentIndex, formatNext, formatStatus, markDone, readProgress, runChecks, skipStep, startProgress } from './core/progress.js';
 import { runAgentDoctor, updateAgentSetup } from './core/agentDoctor.js';
 import { readGuide } from './core/guide.js';
-import { setupProject, type SetupAgent } from './core/setup.js';
+import { setupProject, uninstallProject, detectInstalledAgents, type SetupAgent } from './core/setup.js';
 import { lintPrompts } from './core/promptLint.js';
 import { SKILL_TARGETS, installSkills, listFlowSkills, listSkills, validateSkills, type SkillTarget } from './core/skills.js';
-import { readConfig, updateConfig } from './core/config.js';
+import { readConfig, updateConfig, getConfigValue, setConfigValue } from './core/config.js';
 import { scaffoldProject } from './core/scaffold.js';
 import { generateEntity } from './core/generator.js';
 import type { HelenContext } from './core/context.js';
@@ -390,31 +390,61 @@ export function createProgram(): Command {
       printModuleList();
     });
 
-  // helen explain <module>
+  // helen explain <target>
   program
-    .command('explain <module>')
-    .description('Show detailed documentation for a module')
-    .action((moduleId: string) => {
-      const mod = getModule(moduleId);
-      if (!mod) {
+    .command('explain <target>')
+    .description('Show detailed documentation for a module or prompt (including token budget & cost)')
+    .action(async (target: string) => {
+      const mod = getModule(target);
+      if (mod) {
         if (isJsonMode()) {
-          printJsonAndExit('explain', {}, {
-            ok: false,
-            errors: [`Module "${moduleId}" not found. Available: ${getAllModuleIds().join(', ')}`],
-            exitCode: 1,
+          printJsonAndExit('explain', { module: mod.meta });
+          return;
+        }
+        printModuleExplanation(mod);
+        return;
+      }
+
+      try {
+        const entry = resolvePromptEntry(target);
+        const raw = readPrompt(target);
+        const { estimateTokens, calculateCost } = await import('./core/tokenBudget.js');
+        const tokens = estimateTokens(raw);
+        const cost = calculateCost(tokens);
+        if (isJsonMode()) {
+          printJsonAndExit('explain', {
+            targetType: 'prompt',
+            id: entry.id,
+            title: entry.title,
+            phase: entry.phase,
+            summary: entry.summary,
+            tokens,
+            estimatedCostUsd: cost.claudeSonnet,
+            costs: cost,
           });
           return;
         }
-        logger.error(`Module "${moduleId}" not found.`);
-        logger.info(`Available modules: ${getAllModuleIds().join(', ')}`);
-        process.exitCode = 1;
+        logger.section(`Prompt: ${entry.title}`);
+        logger.info(`ID: ${entry.id} (${entry.kind})`);
+        if (entry.phase) logger.info(`Phase: ${entry.phase}`);
+        logger.info(`Summary: ${entry.summary}`);
+        logger.info(`Tokens: ~${tokens.toLocaleString()} (~$${cost.claudeSonnet.toFixed(4)} with Claude 3.5 Sonnet)`);
         return;
+      } catch {
+        // Not a prompt either
       }
+
       if (isJsonMode()) {
-        printJsonAndExit('explain', { module: mod.meta });
+        printJsonAndExit('explain', {}, {
+          ok: false,
+          errors: [`Target "${target}" not found as a module or prompt. Available modules: ${getAllModuleIds().join(', ')}`],
+          exitCode: 1,
+        });
         return;
       }
-      printModuleExplanation(mod);
+      logger.error(`Target "${target}" not found as a module or prompt.`);
+      logger.info(`Available modules: ${getAllModuleIds().join(', ')}`);
+      process.exitCode = 1;
     });
 
   // helen add <modules...>
@@ -703,10 +733,19 @@ export function createProgram(): Command {
   prompts
     .command('show <prompt>')
     .description('Print a prompt, step, checkpoint, or flow')
-    .action((promptName: string) => {
+    .option('--fill <pairs...>', 'Fill variables in format key=value')
+    .option('--reply-lang <lang>', 'Target language for the AI response (e.g. es, en, fr)')
+    .action((promptName: string, opts: { fill?: string[]; replyLang?: string }) => {
       try {
         const entry = resolvePromptEntry(promptName);
-        const content = readPrompt(promptName);
+        const fillDict: Record<string, string> = {};
+        if (opts.fill) {
+          for (const pair of opts.fill) {
+            const [k, ...rest] = pair.split('=');
+            if (k && rest.length > 0) fillDict[k] = rest.join('=');
+          }
+        }
+        const content = readPrompt(promptName, undefined, { fill: Object.keys(fillDict).length ? fillDict : undefined, replyLang: opts.replyLang });
         if (isJsonMode()) {
           printJsonAndExit('prompts:show', {
             id: shortId(entry),
@@ -718,7 +757,7 @@ export function createProgram(): Command {
           });
           return;
         }
-        printPromptContent(promptName);
+        console.log(content);
       } catch (err) {
         if (isJsonMode()) {
           printJsonAndExit('prompts:show', {}, {
@@ -730,6 +769,31 @@ export function createProgram(): Command {
         }
         logger.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;
+      }
+    });
+
+  prompts
+    .command('overlaps')
+    .description('Identify overlapping prompts by word-set Jaccard similarity')
+    .option('--threshold <val>', 'Similarity threshold between 0.0 and 1.0', '0.45')
+    .action((opts: { threshold: string }) => {
+      const thresh = parseFloat(opts.threshold) || 0.45;
+      const overlaps = findPromptOverlaps(undefined, thresh);
+      if (isJsonMode()) {
+        printJsonAndExit('prompts:overlaps', {
+          threshold: thresh,
+          count: overlaps.length,
+          overlaps,
+        });
+        return;
+      }
+      if (overlaps.length === 0) {
+        logger.success(`No prompt overlaps found above ${thresh * 100}% similarity.`);
+        return;
+      }
+      logger.section(`Prompt Overlaps (>= ${thresh * 100}%)`);
+      for (const o of overlaps) {
+        console.log(`  ${o.promptA} <-> ${o.promptB} (${Math.round(o.similarity * 100)}%)`);
       }
     });
 
@@ -941,18 +1005,28 @@ export function createProgram(): Command {
   program
     .command('setup')
     .description('One command: install HELEN skills for your agents and add HELEN instructions to AGENTS.md / CLAUDE.md')
-    .option('--agents <agents...>', 'claude, codex, antigravity', ['claude', 'codex', 'antigravity'])
+    .option('--agents <agents...>', 'claude, codex, antigravity (auto-detected if omitted)')
+    .option('--global', 'Install skills globally to user agent directories (~/.claude, ~/.gemini)', false)
     .option('--flows', 'Also install every executable flow as a skill', false)
     .option('--dry-run', 'Preview without writing files', false)
     .option('--force', 'Overwrite existing skill files', false)
-    .action((opts: { agents: string[]; flows: boolean; dryRun: boolean; force: boolean }) => {
+    .action((opts: { agents?: string[]; flows: boolean; dryRun: boolean; force: boolean; global: boolean }) => {
       try {
-        const invalid = opts.agents.filter(agent => !['claude', 'codex', 'antigravity'].includes(agent));
+        const targetAgents = opts.agents && opts.agents.length > 0 ? opts.agents : detectInstalledAgents();
+        const invalid = targetAgents.filter(agent => !['claude', 'codex', 'antigravity'].includes(agent));
         if (invalid.length > 0) throw new Error(`Unknown agent(s): ${invalid.join(', ')}. Valid: claude, codex, antigravity`);
-        const result = setupProject({ cwd: process.cwd(), agents: opts.agents as SetupAgent[], flows: opts.flows, dryRun: opts.dryRun, force: opts.force });
+        const result = setupProject({
+          cwd: process.cwd(),
+          agents: targetAgents as SetupAgent[],
+          flows: opts.flows,
+          dryRun: opts.dryRun,
+          force: opts.force,
+          global: opts.global,
+        });
         if (isJsonMode()) {
           printJsonAndExit('setup', {
-            agents: opts.agents,
+            agents: targetAgents,
+            global: opts.global,
             flows: opts.flows,
             skillsCreated: result.skills.created,
             skillsSkipped: result.skills.skipped,
@@ -1245,7 +1319,26 @@ export function createProgram(): Command {
     .description('List recommended third-party skills and tools (HELEN never installs them for you)')
     .option('--category <category>', 'Filter: design, quality, copy, seo, motion, components, verify, deploy, workflow, docs, data')
     .option('--kind <kind>', 'Filter: skill, plugin, cli, reference, service, mcp')
-    .action((opts: { category?: string; kind?: string }) => {
+    .option('--check', 'Check catalog health, freshness, and flag discontinued tools', false)
+    .action((opts: { category?: string; kind?: string; check?: boolean }) => {
+      if (opts.check) {
+        const health = checkCatalogHealth();
+        if (isJsonMode()) {
+          printJsonAndExit('skills:catalog:check', health);
+          return;
+        }
+        logger.section('Catalog Health & Verification');
+        logger.info(`Total items: ${health.total} (${health.active} active, ${health.caution} caution, ${health.discontinued} discontinued)`);
+        if (health.issues.length === 0) {
+          logger.success('All catalog entries pass validation.');
+        } else {
+          for (const issue of health.issues) {
+            console.log(`  [${issue.level.toUpperCase()}] ${issue.id}: ${issue.message}`);
+          }
+        }
+        return;
+      }
+
       const items = listCatalog(opts.category, undefined, opts.kind);
       if (isJsonMode()) {
         printJsonAndExit('skills:catalog', {
@@ -1256,6 +1349,35 @@ export function createProgram(): Command {
       }
       for (const item of items) {
         console.log(`${item.id.padEnd(22)} ${item.category.padEnd(11)} ${item.kind.padEnd(10)} ${item.status.padEnd(12)} ${item.summary}`);
+      }
+    });
+
+  skills
+    .command('compare <id1> <id2>')
+    .description('Compare features, licenses, and overlapping capabilities between two catalog tools')
+    .action((id1: string, id2: string) => {
+      try {
+        const comp = compareCatalogItems(id1, id2);
+        if (isJsonMode()) {
+          printJsonAndExit('skills:compare', comp);
+          return;
+        }
+        logger.section(`Catalog Comparison: ${comp.item1.name} vs ${comp.item2.name}`);
+        console.log(`Category: ${comp.item1.category} ${comp.sameCategory ? '(Match)' : `vs ${comp.item2.category}`}`);
+        console.log(`Kind:     ${comp.item1.kind} ${comp.sameKind ? '(Match)' : `vs ${comp.item2.kind}`}`);
+        console.log(`License:  ${comp.item1.license} vs ${comp.item2.license}`);
+        console.log(`Shared Phases: ${comp.sharedPhases.join(', ') || 'None'}`);
+      } catch (err) {
+        if (isJsonMode()) {
+          printJsonAndExit('skills:compare', {}, {
+            ok: false,
+            errors: [err instanceof Error ? err.message : String(err)],
+            exitCode: 1,
+          });
+          return;
+        }
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
       }
     });
 
@@ -1376,6 +1498,80 @@ export function createProgram(): Command {
     .action(async () => {
       const { startMcpServer } = await import('./core/mcp.js');
       startMcpServer(process.stdin, process.stdout);
+    });
+
+  // helen config
+  program
+    .command('config [key] [value]')
+    .description('Inspect or update configuration settings in .helenrc')
+    .action(async (key?: string, value?: string) => {
+      const cwd = process.cwd();
+      const conf = readConfig(cwd) || {};
+
+      if (!key) {
+        if (isJsonMode()) {
+          printJsonAndExit('config', { config: conf });
+          return;
+        }
+        console.log(JSON.stringify(conf, null, 2));
+        return;
+      }
+
+      if (value === undefined) {
+        const val = getConfigValue(cwd, key);
+        if (isJsonMode()) {
+          printJsonAndExit('config', { key, value: val });
+          return;
+        }
+        console.log(val !== undefined ? val : `(not set)`);
+        return;
+      }
+
+      setConfigValue(cwd, key, value);
+      if (isJsonMode()) {
+        printJsonAndExit('config', { key, value, updated: true });
+        return;
+      }
+      logger.success(`Updated ${key} = ${value}`);
+    });
+
+  // helen completion
+  program
+    .command('completion [shell]')
+    .description('Generate shell autocompletion script (bash, zsh, fish, powershell)')
+    .action((shell = 'bash') => {
+      const cmds = program.commands.map(c => c.name()).join(' ');
+      const goals = Object.keys(readPlaybooks().goals).join(' ');
+      let script = '';
+      if (shell === 'bash') {
+        script = `_helen_completions() {\n  local cur="\${COMP_WORDS[COMP_CWORD]}"\n  local prev="\${COMP_WORDS[COMP_CWORD-1]}"\n  if [[ "$prev" == "helen" ]]; then\n    COMPREPLY=( $(compgen -W "${cmds}" -- "$cur") )\n  elif [[ "$prev" == "apply" ]]; then\n    COMPREPLY=( $(compgen -W "${goals}" -- "$cur") )\n  fi\n}\ncomplete -F _helen_completions helen`;
+      } else if (shell === 'zsh') {
+        script = `#compdef helen\n_arguments "1: :(${cmds})" "*: :(${goals})"`;
+      } else if (shell === 'fish') {
+        script = `complete -c helen -n "__fish_use_subcommand" -a "${cmds}"\ncomplete -c helen -n "__fish_seen_subcommand_from apply" -a "${goals}"`;
+      } else {
+        script = `Register-ArgumentCompleter -Native -CommandName helen -ScriptBlock {\n  param($wordToComplete, $commandAst, $cursorPosition)\n  '${cmds}' -split ' ' | Where-Object { $_ -like "$wordToComplete*" }\n}`;
+      }
+      if (isJsonMode()) {
+        printJsonAndExit('completion', { shell, script });
+        return;
+      }
+      console.log(script);
+    });
+
+  // helen uninstall
+  program
+    .command('uninstall')
+    .description('Cleanly remove installed HELEN skills, instructions, and configuration')
+    .option('--dry-run', 'Preview changes without modifying filesystem', false)
+    .action(async (opts: { dryRun: boolean }) => {
+      const res = uninstallProject({ cwd: process.cwd(), dryRun: opts.dryRun });
+      if (isJsonMode()) {
+        printJsonAndExit('uninstall', res);
+        return;
+      }
+      logger.success(`Removed instructions from: ${res.cleanedInstructions.join(', ') || 'none'}`);
+      logger.success(`Removed skills: ${res.removedSkills.length}`);
     });
 
   return program;

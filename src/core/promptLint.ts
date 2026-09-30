@@ -93,6 +93,9 @@ export function lintPrompts(root: string = getPromptsRoot()): PromptIssue[] {
     }
     if (!BODY_SECTIONS.some(section => new RegExp(`^${section}\\s*$`, 'm').test(body))) add('missing section "## Requirements" or "## Steps"');
 
+    const words = body.trim().split(/\s+/).length;
+    if (words > 2000) add(`prompt exceeds 2000 words limit (${words} words)`);
+
     const id = idFromRelativePath(rel).split('/').at(-1)!;
     if (ids.has(id)) add(`short id "${id}" also used by ${ids.get(id)}`);
     ids.set(id, rel);
