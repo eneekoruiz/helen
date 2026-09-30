@@ -76,7 +76,7 @@ export function listFlowSkills(): SkillInfo[] {
     .map((entry): SkillInfo => {
       const raw = fs.readFileSync(entry.absolutePath, 'utf-8');
       const body = raw
-        .replace(/^---\n[\s\S]*?\n---\n+/, '')
+        .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n+/, '')
         .replace(/\[([^\]]+)\]\(([^)]+\.md)\)/g, (_match, label: string, target: string) => {
           const stem = decodeURIComponent(target).split('/').at(-1)!.replace(/\.md$/i, '').toLowerCase();
           return `${label} (\`helen prompts show ${stem}\`)`;
@@ -148,7 +148,8 @@ export function installSkills(options: InstallSkillsOptions, root: string = SKIL
 export function validateSkills(root: string = SKILLS_ROOT): string[] {
   const issues: string[] = [];
   for (const skill of listSkills(root)) {
-    const content = fs.readFileSync(path.join(skill.dir!, 'SKILL.md'), 'utf-8');
+    const raw = fs.readFileSync(path.join(skill.dir!, 'SKILL.md'), 'utf-8');
+    const content = raw.replace(/\r\n/g, '\n');
     const match = /^---\nname: (.+)\ndescription: (.+)\n---\n/.exec(content);
     if (!match) {
       issues.push(`${skill.name}: SKILL.md must start with name and description frontmatter`);
