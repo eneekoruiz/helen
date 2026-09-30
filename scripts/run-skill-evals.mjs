@@ -118,6 +118,10 @@ ${criteria.map((c, i) => `${i + 1}. ${c}`).join('\n')}`;
   }
 }
 
+// Stored answers may echo secret-shaped strings from the eval prompts; never keep them verbatim.
+const redact = (text) =>
+  text.replace(/(sk-(?:live|proj)-|AKIA|gh[pousr]_|xox[baprs]-)[A-Za-z0-9_-]{6,}/g, '$1[redacted]');
+
 async function pool(tasks, size) {
   const results = [];
   let next = 0;
@@ -161,7 +165,7 @@ if (!reportOnly) {
           withSkill: pct(skillGrades),
           criteria: c.criteria.map((text, i) => ({ text, baseline: baseGrades?.[i] ?? null, withSkill: skillGrades?.[i] ?? null })),
           errors: [baseline, withSkill, forced].filter((r) => r && !r.ok).length + [baseGrades, skillGrades].filter((g) => !g).length,
-          answers: { baseline: baseline.text, withSkill: skillRun.text },
+          answers: { baseline: redact(baseline.text), withSkill: redact(skillRun.text) },
         };
         console.log(`${spec.skill}/${c.id}: trigger=${row.triggered} base=${row.baseline}% skill=${row.withSkill}%`);
         return row;
@@ -221,6 +225,7 @@ for (const s of summaries) {
   const failed = s.cases.flatMap((c) => c.criteria.filter((k) => k.withSkill === false).map((k) => `- ${s.skill}/${c.id}: ${k.text}`));
   if (failed.length) lines.push(...failed);
 }
+lines.push('', '## Known limits', '', '- 3 cases per skill and one judge run: differences under ~10 points are noise, not signal. Negative deltas on a high baseline (e.g. helen-release, helen-a11y-perf) mean the model already answers well without the skill.', '- Trigger 0/3 means the agent did not load the skill on its own for short chat-only prompts; the skill is then applied when requested by name or through `helen-apply`.');
 if (summaries[0]) lines.push('', `Model: ${summaries[0].model} · last run: ${summaries.map((s) => s.date).sort().at(-1)}`);
 fs.writeFileSync(path.join(root, 'docs', 'SKILLS_QUALITY.md'), lines.join('\n') + '\n');
 console.log('Wrote docs/SKILLS_QUALITY.md');

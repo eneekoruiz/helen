@@ -1,0 +1,122 @@
+{
+  "skill": "helen-seo-compliance",
+  "model": "sonnet",
+  "date": "2026-09-30",
+  "cases": [
+    {
+      "skill": "helen-seo-compliance",
+      "id": "head",
+      "triggered": true,
+      "forcedTriggered": null,
+      "baseline": 100,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Flags noindex as a launch blocker",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Flags the generic 'Home' title and missing meta description",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Flags multiple h1 elements",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Mentions Open Graph / social preview tags",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Mentions canonical, sitemap or robots.txt",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "**No, it's not ready. The `noindex` tag alone blocks launch.**\n\n**Blocker**\n- `<meta name=\"robots\" content=\"noindex\">` tells search engines not to index the page, so it won't appear in results. Remove it, or change it to `index, follow`. This is often a leftover from staging.\n\n**Other problems**\n- **Title:** \"Home\" is generic and gives no keywords or brand. Use something specific, roughly 50–60 characters, such as \"Brand – Primary Service in Location\".\n- **Meta description:** none. Add one of about 150–160 characters. It won't affect rankings directly, but it shapes the snippet and click-through rate.\n- **Headings:** there are two `<h1>` tags. HTML5 technically allows this, but the usual SEO practice is a single descriptive H1. \"Welcome\" says nothing about the page. Make the main H1 descriptive and turn \"Our services\" into an `<h2>`.\n- **Image:** the `<img>` has no `alt` text, which hurts accessibility and image search. It also has no `width` and `height`, which can cause layout shift (CLS). Add `loading=\"lazy\"` if the image is below the fold.\n- **Content:** the page has almost no body text, so there's little for search engines to rank. Add real, useful copy.\n\n**Missing technical basics**\n- `<!DOCTYPE html>`, `<html lang=\"en\">`, `<meta charset>` and `<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">`. The viewport tag matters for mobile-first indexing.\n- A `<link rel=\"canonical\">` tag.\n- Open Graph and Twitter card tags for social sharing.\n- Outside this file, you'd also want `robots.txt`, a sitemap, HTTPS, and internal links to and from the page.\n\nFix the `noindex` first. Then the title, description, H1 and alt text are the highest-value quick wins.",
+        "withSkill": "**No, this page isn't ready for launch.** The first issue is a blocker. The rest should be fixed too.\n\n**Blocker**\n- **`<meta name=\"robots\" content=\"noindex\">`** tells search engines not to index the page. If this is the production page, it won't appear in search results. This is usually a staging leftover. Remove it, or set `index, follow`. Also check that the production server doesn't send an `X-Robots-Tag: noindex` header.\n\n**Important**\n- **Title:** \"Home\" is generic and says nothing about the business. Use a unique, descriptive title of about 50–60 characters that includes the brand and what you offer.\n- **Meta description:** there isn't one. Add a real summary of about 150–160 characters. It must match what the product actually does, with no keyword stuffing or unsupported claims.\n- **Two `<h1>` elements:** a page should have one `h1`. Keep \"Welcome\", or better, a heading that states what you do. Make \"Our services\" an `h2`. \"Welcome\" is also weak as a main heading.\n- **Image `alt`:** `<img src=\"a.jpg\">` has no `alt` attribute. Add descriptive alt text, or `alt=\"\"` if the image is purely decorative. The filename `a.jpg` is also non-descriptive, and the tag has no `width` or `height`, which can cause layout shift.\n- **Missing document basics:** there's no `<!doctype html>`, `<html lang=\"…\">`, `<meta charset>` or `<meta name=\"viewport\">`. The viewport tag is essential for mobile-first indexing.\n\n**Missing for launch**\n- A canonical URL (`<link rel=\"canonical\">`).\n- Open Graph and Twitter card tags (`og:title`, `og:description`, `og:image`, `og:url`) for link previews.\n- `robots.txt` and an XML sitemap, which I can't verify from this snippet.\n- `hreflang` and language metadata if you serve more than one language.\n- Structured data (for example Organization) and a favicon are nice to have.\n- The page has almost no content. Thin content will rank poorly.\n\n**Outside SEO, but worth checking before launch:** if you use analytics or cookies, you need a consent banner and a privacy policy (GDPR). I haven't checked any of that here.\n\nI only reviewed the snippet, so I couldn't check server headers, `robots.txt`, the sitemap or the live site. Once the `noindex` is gone and the points above are fixed, it's worth re-checking."
+      }
+    },
+    {
+      "skill": "helen-seo-compliance",
+      "id": "cookies",
+      "triggered": true,
+      "forcedTriggered": null,
+      "baseline": 100,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Says analytics and marketing pixels must wait for consent",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Says the consent banner must allow rejecting as easily as accepting",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Flags '100% GDPR compliant' as an unsupported claim",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Recommends a privacy/cookie policy listing the third parties",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Recommends human legal review rather than definitive legal advice",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "Yes, there are two main problems, and the footer claim makes the first one worse.\n\n**1. Tracking loads before consent (the main issue)**\n- Under the ePrivacy Directive (Art. 5(3)) and the GDPR, non-essential cookies and trackers need prior, opt-in consent. Google Analytics and the Meta pixel both count. Loading them on every page immediately means you're setting cookies and sending personal data (IP address, identifiers, page views) to Google and Meta before the user has chosen anything.\n- Regulators have acted on this. Examples are the CNIL fines against Google and Facebook over cookie consent, the Austrian, French and Italian DPA rulings on GA, and the German courts on Meta pixel use.\n- **Fix:** add a consent management platform (CMP) with a real opt-in banner.\n  - Block GA and the Meta pixel until the user accepts. Don't just load them and show a banner on top.\n  - Give \"Reject all\" equal prominence to \"Accept all\". No pre-ticked boxes, and no \"continue browsing = consent\".\n  - Let users withdraw consent as easily as they gave it, for example with a persistent \"cookie settings\" link.\n  - Keep records of consent.\n  - If you use Google Consent Mode v2, it must be wired to the CMP. For Meta, use Limited Data Use or don't fire the pixel at all until consent is given.\n\n**2. \"100% GDPR compliant\" claim**\n- It's almost certainly untrue while point 1 stands.\n- It's also an unqualified absolute claim. It can count as misleading under consumer protection and unfair commercial practices law, and it can be used against you and your client in a complaint.\n- **Fix:** remove it. Compliance is an ongoing process and can't honestly be claimed as \"100%\". If you want to say something, use something factual and specific, like \"We respect your privacy. See our privacy policy.\"\n\n**Also check**\n- **Privacy and cookie policy:** it should name Google and Meta as recipients and list the purposes, the legal basis (consent), retention periods, and users' rights. It should also cover international transfers to the US. The EU-US Data Privacy Framework currently covers Google and Meta, but check that both are certified.\n- **Data processing agreements:** you need them with Google and Meta, or the joint-controller terms for the Meta pixel, which the CJEU has treated as joint controllership.\n- **GA configuration:** enable IP anonymisation where relevant, set short retention, and turn off Google signals and ad personalisation unless consented.\n- **Other trackers:** scan the site for others (embedded YouTube, fonts, chat widgets, and so on). They often set cookies too.\n- **Meta pixel:** consider whether you need it at all. Server-side or consent-gated setups are safer.\n- **Contract:** confirm with your client who is responsible for compliance. As the implementer, you may share liability.\n- **Legal review:** get the client's DPO or a privacy lawyer to sign off, especially on the transfers and joint-controller points. This is general information, not legal advice.\n\nIf you share the repo or site code, I can look at how the scripts are loaded. You asked for chat only, so I haven't touched any files.",
+        "withSkill": "Yes, there are two problems, and the first is serious.\n\n**1. Trackers fire before consent. This is likely unlawful.**\n- Google Analytics and the Meta pixel set cookies or identifiers and send personal data (IP address, device IDs, browsing behavior) to third parties. Under ePrivacy Art. 5(3) and GDPR Art. 6/7, that requires prior, opt-in consent. Loading them on every page immediately doesn't meet that.\n- The Meta pixel is the higher-risk one. It shares data with Meta for its own purposes, and EU regulators have repeatedly acted against this pattern.\n- Fix:\n  - Add a consent management platform (CMP) or a custom banner. It needs equally prominent \"Accept\" and \"Reject\" buttons, no pre-ticked boxes, and per-purpose choices (analytics, marketing).\n  - Block the GA and Meta scripts until the user opts in. Google Consent Mode v2 is a partial help, but it doesn't replace blocking the Meta pixel.\n  - Let users withdraw consent as easily as they gave it, for example with a persistent \"Cookie settings\" link.\n  - Store a record of each consent.\n  - If you use GA, check the IP handling and data-transfer setup (Data Processing Agreement, SCCs or the EU-US Data Privacy Framework, and data retention settings). Or consider a cookieless, privacy-friendly analytics tool that may not need consent, depending on the regulator's view.\n\n**2. The \"100% GDPR compliant\" footer claim**\n- It is unsupportable. No site can honestly claim \"100%\" compliance, and with the current tracking setup the claim is false.\n- Misleading compliance claims can create separate exposure under consumer-protection and unfair-commercial-practice law, and they draw regulator and complainant attention.\n- Fix: remove it, or replace it with something factual and verifiable, such as \"We respect your privacy\" with a link to the privacy policy. Don't claim certification or compliance you can't evidence.\n\n**Also check**\n- **Privacy policy:** it should list the processors (Google, Meta), the purposes, the legal basis, retention periods, international transfers, and data-subject rights, and name a contact or DPO if one is required.\n- **Contracts and records:** you need a DPA with Google, and the Meta terms need review, since Meta acts as a joint controller for pixel data. Make sure the record of processing activities (RoPA) is up to date.\n- **Other third-party embeds:** fonts, maps, video and chat widgets often leak IPs and set cookies too.\n- **Cookie audit:** scan the site to confirm what actually fires before and after consent.\n- **Consent for other channels:** if you later use the data for remarketing or email, that needs its own basis.\n\n**Who decides what**\n- The wording of the banner, the privacy policy and any replacement claim is legal text. Please have the client's DPO or a privacy lawyer approve it rather than taking it from me.\n- The client, as controller, owns the decision. Tell them about the risk now, since they carry the primary liability and you may share it as their agency or developer.\n\nI haven't looked at the repo, because you asked for chat only. If you'd like, I can audit the actual code for where the scripts load and what else fires."
+      }
+    },
+    {
+      "skill": "helen-seo-compliance",
+      "id": "i18n",
+      "triggered": false,
+      "forcedTriggered": true,
+      "baseline": 100,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Says raw translation keys visible to users are a blocker",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Flags locale-incorrect date format",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Says the multilingual claim should wait until fixed",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Recommends checking for hardcoded strings and fallbacks",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "Not yet, at least not without qualification. What you describe are two different kinds of failure, and both would be visible to Spanish users.\n\n**1. `checkout.submit_button` showing as a raw key**\n- The Spanish catalog is missing that key, and there is no fallback to English. That is the least forgivable place for it, because it is the button that completes a purchase.\n- It probably isn't the only missing key. Diff the `es` catalog against `en` to find the rest, and add a CI check that fails on missing keys.\n\n**2. Dates like 09/30/2026**\n- That is US month/day/year formatting, so the locale isn't reaching the date formatting.\n- It is worse than it looks. For days 1–12, a date such as 05/06/2026 is ambiguous, and a Spanish user will read it as 5 June when it may mean May 6. That can cause real errors with delivery dates or deadlines.\n- The fix is to format dates with the active locale, for example `Intl.DateTimeFormat(locale)` or your i18n library's formatter. Do the same for numbers and currency (`1.234,56 €`), which are probably wrong too.\n\n**What I'd do**\n- Don't announce it yet. Fix the missing keys and the locale-aware formatting first. That is likely a small amount of work.\n- Then walk through the full flow in Spanish, from browsing through checkout, confirmation emails and error messages. Check for any other untranslated strings, hardcoded text, or English in emails, validation messages and the payment provider's UI.\n- If you need to announce sooner, describe it honestly, for example \"Spanish support (beta)\". The catch is that a broken checkout will cost you trust and sales with exactly the audience you're courting.\n\nI haven't looked at the code, so I can't tell how widespread the problem is. If you want, I can audit the repo for missing translation keys and hardcoded date formatting. I would leave the files unchanged.",
+        "withSkill": "**Not yet.** With those two defects, \"available in English and Spanish\" isn't accurate for the checkout. I'd hold the announcement until they're fixed and verified.\n\n**Why it fails the i18n check**\n- **Untranslated key in checkout:** `checkout.submit_button` is a raw i18n key, not a string. So the key is missing from the Spanish catalog and the fallback isn't working. It's on the most sensitive step, the one where users pay. The skill's standard is that every visible string goes through the i18n layer and fallbacks work. This fails both parts. A missing key should at least fall back to English text, never show the key itself.\n- **US date format for Spanish users:** `09/30/2026` is MM/DD/YYYY. Spanish users read DD/MM/YYYY, so `09/30` is invalid to them. Worse, dates like `05/06/2026` would be silently misread. Dates should be formatted with the user's locale (for example `Intl.DateTimeFormat('es-ES')`), which gives `30/9/2026`. The locale may not be reaching the formatter at all.\n\n**Trust and legal exposure**\n- The problem is a claim the product can't back up. It also lands where a misread date or an unclear button could affect a purchase, such as delivery or cancellation dates.\n- If the privacy policy, terms, cookie banner or consent text also lack Spanish versions, that's a further gap. Consent language is where GDPR requires users to understand what they're agreeing to. I haven't checked these, and I haven't looked at any code yet, so the list below is what I'd verify.\n\n**What I'd do before announcing**\n1. Add the missing Spanish keys and audit all catalogs for other gaps (a key diff between `en` and `es`). Make missing keys fall back to English and log them in CI.\n2. Route all dates, numbers and currency through locale-aware formatting.\n3. Manually walk the full Spanish flow: landing, cart, checkout, confirmation emails, error messages, and legal and cookie pages.\n4. Check `hreflang`, `<html lang>`, the canonical URLs and the sitemap entries for both languages.\n5. Have a Spanish speaker review the checkout and legal wording. The legal text needs review by the responsible person, and I shouldn't draft it.\n\n**Interim option:** If you need to announce sooner, say \"Spanish support coming soon\" or \"in beta\". Alternatively, ship once the checkout and legal pages are fully translated.\n\nI made no changes and created no files. If you'd like, I can audit the repo for missing keys and date formatting, using the `audit-i18n` prompt."
+      }
+    }
+  ]
+}

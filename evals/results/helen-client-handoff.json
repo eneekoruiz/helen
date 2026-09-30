@@ -1,0 +1,117 @@
+{
+  "skill": "helen-client-handoff",
+  "model": "sonnet",
+  "date": "2026-09-30",
+  "cases": [
+    {
+      "skill": "helen-client-handoff",
+      "id": "package",
+      "triggered": true,
+      "forcedTriggered": null,
+      "baseline": 100,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Includes reproducible setup and deploy instructions",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Says where credentials live without putting secrets in documents",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Includes ownership of domain, hosting, repository and accounts",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Includes a browser smoke test / links and forms verification",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Includes known limitations or support expectations and a sign-off",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "Here's a practical handoff package for a Next.js site.\n\n## 1. Code and repository\n- **Repo transfer**: ownership of the repo (GitHub/GitLab org transfer or a clean export) with full git history. If history contains anything you don't want to share, say so and hand over a clean copy instead.\n- **Tagged release**: tag the delivered commit (e.g. `v1.0.0`) so \"what was delivered\" is unambiguous.\n- **Clean main branch**: no stray branches, dead code, or committed secrets. Run a secrets scan (e.g. `gitleaks`) before handing over.\n- **Lockfile committed**, with the Node version pinned (`.nvmrc` or `engines` in `package.json`).\n\n## 2. Documentation (README plus a few short docs)\n- **Setup**: prerequisites, install, run dev, build, and start commands.\n- **Environment variables**: a committed `.env.example` with every variable, what it does, and where to get the value. Never include real secrets in the repo.\n- **Architecture overview**: routing approach (App vs Pages Router), data fetching and rendering strategy (SSG/ISR/SSR), and key folders.\n- **Third-party integrations**: CMS, analytics, forms, email, payments, auth, and what each one is used for.\n- **Content editing guide**: how the client updates content, whether via the CMS or the code.\n- **Deployment guide**: how deploys work, branch-to-environment mapping, how to roll back, and how to set env vars.\n- **Known issues and future recommendations**: open bugs, limitations, and suggested next steps.\n\n## 3. Accounts, access, and credentials\n- **Hosting** (Vercel, Netlify, AWS, etc.): transfer the project or add the client as owner.\n- **Domain and DNS registrar**: the client should own it. Document the DNS records.\n- **Third-party services**: CMS, analytics, email, forms, error monitoring, and any API keys. Have the client create the accounts, or transfer them.\n- **Secrets**: deliver them through a password manager share or a similar secure channel, not email or chat.\n- **Rotate credentials** you used during development, and remove your own access when the handoff is complete (or agree on a support window).\n\n## 4. Deployment and infrastructure\n- **Production and staging URLs**, and confirmation that the production build is live and working.\n- **CI/CD config** (GitHub Actions, etc.) and where build logs live.\n- **SSL/HTTPS** status and renewal responsibility.\n- **Redirects, headers, and `robots.txt`/sitemap** configured.\n- **Backups**, if there's a database or CMS.\n\n## 5. Quality checklist (verify before handing over)\n- `npm run build` passes cleanly and lint/type checks pass.\n- Tested on major browsers and mobile.\n- Lighthouse checks for performance, accessibility, and SEO.\n- Metadata, Open Graph images, favicon, and 404/500 pages in place.\n- Analytics and cookie/consent setup working, if applicable.\n- Forms tested end to end (emails actually arrive).\n- Dependency audit (`npm audit`) reviewed, and dependency versions noted.\n\n## 6. Legal and commercial\n- **License and IP terms**: who owns the code, and the licenses of third-party assets (fonts, images, templates).\n- **Asset files**: design source files (Figma), logos, and original images.\n- **Support and warranty terms**: bug-fix window, what's out of scope, and rates for further work.\n- **Ongoing costs**: hosting, domain, and SaaS subscriptions, and who pays.\n\n## 7. Handover session\n- A 30–60 minute walkthrough (recorded is even better), covering deploying, editing content, and where to look when something breaks.\n- A single \"handoff summary\" document listing all links, accounts, and owners in one place.\n- A signed acceptance or sign-off email confirming delivery.\n\nSince you're delivering tomorrow, prioritize these first: **secrets and access transfer, the `.env.example` and README, a verified production build, and the acceptance sign-off.** The rest can be trimmed to fit the project's size.\n\nIf you'd like, I can review this repo for handoff readiness, such as missing `.env.example`, committed secrets, or build issues. I haven't looked at it yet.",
+        "withSkill": "Here's what the handoff package should contain, following the client-handoff checklist. I haven't inspected your repo, so this is generic to a Next.js delivery, and nothing was modified or created.\n\n## 1. Code and reproducible setup\n- Repo access, or a transferred repo, with a clean history and a tagged release (e.g. `v1.0.0`).\n- README covering:\n  - Required Node and package manager versions (pin them with `.nvmrc` or `engines`, and commit the lockfile).\n  - Install, dev, build and start commands.\n  - Folder structure and key architecture decisions: App Router or Pages, data fetching, and where the CMS or API is called.\n- `.env.example` listing every variable with a description and no real values.\n- Proof that it works on a clean machine: fresh clone, install, build and run.\n\n## 2. Secrets and access hygiene\n- Scan the repo and git history for leaked keys, tokens and `.env` files. Rotate anything that was ever committed.\n- Check for a leftover dev or preview URL, test accounts, debug flags, and personal API keys used during development.\n- Give the client credentials through a password manager or vault. The docs should name where they live and never contain the secrets themselves.\n\n## 3. Ownership and accounts\nTable of each item, who owns it, and how it transfers:\n- Domain registrar and DNS.\n- Hosting (Vercel, Netlify or other), including the project, team and billing.\n- Git repository.\n- Database, CMS, storage and CDN.\n- SaaS accounts: analytics, email, forms, auth, monitoring, and search.\n- Third-party API keys, and whose billing they sit on.\n\n## 4. Deployment and operations\n- How deploys work (git push, CI/CD), the environments, and the env vars per environment.\n- How to roll back.\n- Domain, SSL and redirect setup.\n- Cron jobs, webhooks and scheduled revalidation, if any.\n- Monitoring and error tracking, and who gets alerts.\n- Backup and restore steps for data.\n\n## 5. Quality verification (run before sending)\n- `next build` passes with no errors, plus lint, type-check and tests, with results recorded.\n- `npm audit` output and known dependency risks.\n- Browser smoke test on every main route:\n  - Deep links and reload.\n  - Back/forward navigation.\n  - Mobile and desktop.\n- Forms, links and CTAs work. This includes checking that submissions actually reach the client's inbox or CRM.\n- Media has alt text and sensible weight, and images go through `next/image`.\n- SEO basics: metadata, OG images, sitemap, robots.txt, favicon, 404 page.\n- Accessibility and Lighthouse scores.\n- Analytics and cookie or consent setup.\n\n## 6. Content management guide\n- How the client edits content (CMS login, or which files to change).\n- How to add a page or update images.\n- How long changes take to appear (cache and revalidation behavior).\n\n## 7. Release and demo materials\n- Release notes and changelog.\n- A short demo or walkthrough (Loom or a written guide).\n- Design assets, fonts and licenses. Check that font, image and icon licenses transfer to the client.\n- License or IP statement for the code and any third-party components.\n\n## 8. Support and roadmap\n- Known issues and limitations, and technical debt.\n- Dependency upgrade path, including the Next.js and Node versions and when they go end-of-life.\n- Support terms: warranty period, contact, response times, and what's out of scope.\n- Suggested next steps.\n\n## 9. Sign-off summary (one page)\n- Package structure with links.\n- Verification status.\n- Documented risks.\n- Access and IP transfer steps.\n- Your sign-off recommendation: ready, ready with caveats, or not ready.\n\n**For tomorrow:** the highest-risk items are usually leaked secrets, unclear account ownership, and untested form and deep-link behavior on production. Check those first.\n\nIf you'd like, I can run the verification pass on this repo, covering build, secrets scan, and route checks, and draft the summary. I'd need permission to write files for the drafts."
+      }
+    },
+    {
+      "skill": "helen-client-handoff",
+      "id": "env-in-zip",
+      "triggered": false,
+      "forcedTriggered": true,
+      "baseline": 100,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Says not to send .env/secrets by email and to rotate if already sent",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Recommends a repository transfer or clean archive without node_modules",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Recommends sharing credentials through a password manager or the client's own accounts",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "No, don't send it that way. Two problems:\n\n**1. `.env` holds secrets.**\n- It usually contains API keys, database credentials and tokens.\n- Email is unencrypted, gets copied to servers and backups, and is hard to retract once sent.\n- If those keys are yours rather than the client's, you'd be handing over access to your accounts.\n- If they're the client's, they still shouldn't travel by email.\n- If any key has already gone out this way, rotate it.\n\n**2. `node_modules` is unnecessary and risky.**\n- It's often hundreds of MB, so the message will likely bounce because of attachment limits (usually 20–25 MB).\n- Many mail providers block or flag zips containing lots of executables and scripts.\n- The client can recreate it with `npm install` (or `yarn`/`pnpm`) from `package.json` and the lockfile.\n\n**Better approach:**\n- Exclude both from the archive. `git archive -o project.zip HEAD` does this automatically, because it includes only tracked files. That works if `.env` and `node_modules` are in `.gitignore`.\n- Commit a `.env.example` with variable names and dummy values, so the client knows what to fill in.\n- Send the real secrets separately, through a password manager share, an encrypted message, or a one-time secret link. Better still, have the client generate their own keys.\n- For larger or ongoing handoffs, give them access to a private Git repo instead of emailing zips.\n\nBefore you send, check that `.gitignore` covers `.env` and that no secrets are hardcoded elsewhere in the repo. I can do that check if you want.",
+        "withSkill": "No, don't zip and email it as is. That plan breaks checklist item 2 (no credentials, tokens, or development access exposed).\n\n- **`.env`:** It holds your live secrets, such as API keys, database URLs and tokens. Email is unencrypted, gets forwarded and stays in inboxes and backups. Treat anything you send this way as compromised. If it has already gone out, rotate those secrets.\n- **`node_modules`:** It's the wrong thing to ship. It's often hundreds of MB, so attachment limits may block it. It's platform-specific, since native builds compiled on your machine may not run on theirs. It also fails item 1, because a clean machine should reproduce the setup from `package.json` and the lockfile with `npm ci`.\n- **Other things a raw zip picks up:** `.git` history, which may contain old committed secrets, plus local caches, build output and editor config.\n\n**What to do instead**\n1. Ship a clean package, not a zip of the working folder. Use `git archive` or a fresh clone with `.env`, `node_modules` and build artifacts excluded. Or transfer the repository itself to the client's GitHub or GitLab.\n2. Add a `.env.example` with variable names and placeholder values, and document each variable in the README. Add setup and deploy steps that work from a clean machine.\n3. Have the client create their own credentials. Where that isn't possible, hand the real secrets over separately through a password manager share (1Password or Bitwarden) or another end-to-end encrypted channel. Never put them in the same email as the code.\n4. Rotate any keys you used during development, so the client ends up with keys only they hold. Check the git history for leaked secrets before transferring the repository.\n5. Document ownership of the domain, hosting, database and SaaS accounts, and name where each credential lives (the vault, never the secret itself).\n6. Complete the rest of the checklist:\n   - a browser smoke test on the main routes, including reload and back/forward, on mobile and desktop\n   - a link, form and media check\n   - release notes and a changelog\n   - a demo package\n   - a roadmap for keeping the project running\n\nI haven't run any verification (build, tests, security scan, smoke test) yet, since you asked for chat only with no file changes. So I can't give a sign-off recommendation. **Current status: not ready to sign off** until the package is cleaned as above. If you want, I can run the checks read-only, including a scan for secrets in the repo and its git history, and report back."
+      }
+    },
+    {
+      "skill": "helen-client-handoff",
+      "id": "demo",
+      "triggered": false,
+      "forcedTriggered": true,
+      "baseline": 40,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Checks main routes and reload/back navigation",
+          "baseline": false,
+          "withSkill": true
+        },
+        {
+          "text": "Checks console errors and broken assets",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Checks forms and primary CTAs",
+          "baseline": false,
+          "withSkill": true
+        },
+        {
+          "text": "Checks mobile viewport",
+          "baseline": false,
+          "withSkill": true
+        },
+        {
+          "text": "Checks for placeholder or lorem ipsum content",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "Here's a quick pre-demo browser checklist, roughly in priority order.\n\n**1. Run the exact demo path once, end to end**\n- Use the same URL, account and data you'll use live. Click through every step in order and don't skip any.\n- Confirm you're on the right environment (prod or staging, not localhost or a stale preview). Check the URL bar.\n\n**2. Fresh browser state**\n- Use a clean profile or a new window with extensions off. Ad blockers, password managers and translation prompts can break pages or pop up mid-demo.\n- Log in fresh so an expired session doesn't kick you out halfway through. Check that any token or session lifetime covers the demo length.\n- Hard refresh (Ctrl/Cmd+Shift+R) to make sure you're not seeing cached old assets.\n\n**3. DevTools console and network**\n- Open the console and look for red errors on each key page.\n- In the Network tab, look for failed requests (4xx or 5xx), slow calls, CORS errors and mixed-content warnings. Anything over 2–3 seconds needs a plan.\n\n**4. Data and content**\n- Check that the demo data is present and looks realistic. There should be no \"test test\", lorem ipsum or empty states. Check for leftover data that could embarrass you, such as real customer names, debug labels or TODO text.\n- If the demo writes data, confirm you can reset it and that a duplicate or conflicting record won't block you.\n\n**5. Visual check**\n- Test at the resolution and zoom you'll present at. Try 100–125% zoom so text is readable on a shared screen.\n- Look for broken images, missing fonts, layout overflow and dark/light mode issues.\n- Check the favicon and tab title, and close unrelated tabs, bookmarks and notifications.\n\n**6. Integrations and external dependencies**\n- Test anything that calls third parties: auth/SSO, payments in test mode, email, maps, AI/API calls. Check their status pages and API keys or quotas, since rate limits and expired keys are common demo killers.\n- If email or SMS is part of the flow, confirm delivery works.\n\n**7. Connectivity and backup plan**\n- Test the network you'll use, and have a hotspot ready.\n- Have a fallback ready: a screen recording of the happy path, screenshots, or a second logged-in browser or device.\n- Turn on Do Not Disturb, and check screen sharing permissions and that you're sharing the right window.\n\n**8. Freeze changes**\n- Don't deploy anything new in the last hour unless it's a critical fix. If you do, re-run step 1.\n\nIf you tell me what the app does and which flows you're demoing, I can tailor this to specific pages or risks. I can also look through the repo for likely failure points, like env config, hard-coded localhost URLs or console errors.",
+        "withSkill": "Here's the browser pass I'd run in the hour before the demo. It follows item 4 (links, forms, CTAs, media) and item 5 (smoke test) of the handoff checklist. I haven't opened the project or run anything, so the routes and features below are placeholders for yours.\n\n**1. Test the URL the client will see (about 10 min)**\n- Use the deployed or demo URL, not localhost, in a fresh incognito window with no cache or logged-in state.\n- Confirm HTTPS shows no certificate warning.\n- Confirm the console has no red errors and the Network tab has no 404s, 500s or blocked mixed-content requests.\n- Check that no dev-only artifacts are visible, such as debug banners, localhost or staging URLs, placeholder or lorem text, or test data.\n\n**2. Smoke test every main route (about 15 min)**\n- Open each main route directly from the address bar. Then reload it on the route itself. A deep-link reload that returns a 404 is the classic SPA hosting failure.\n- Click through the navigation, then use browser back and forward. Check that the state, scroll position and URL all stay consistent.\n- Try an unknown URL and confirm it shows a sensible 404 page.\n\n**3. Links, forms and CTAs (about 10 min)**\n- Click every primary CTA, nav link, footer link and external link. Check that external links open the right destination.\n- Submit each form once with valid input and once with invalid or empty input. Confirm the validation messages, the success state, and that the submission actually arrives (email, database or webhook).\n- If the demo includes login, run the exact demo account path. Make sure no real credentials or tokens appear in the page, the URL or the Network tab.\n\n**4. Media (about 5 min)**\n- Confirm all images, video and fonts load, with no broken images and no layout jump.\n- Watch the Network tab for oversized assets, and check that the page loads quickly on a throttled connection.\n- Spot-check alt text on key images.\n\n**5. Mobile and desktop (about 10 min)**\n- Use DevTools device mode at about 375px wide, plus a tablet width and your presenting screen's resolution.\n- Check for horizontal scroll, clipped menus, tap targets that are too small, and a keyboard covering form fields.\n- Run one real phone check if you can.\n\n**6. Demo logistics (about 5 min)**\n- Prepare the exact click path you will present, and rehearse it once end to end.\n- Keep a backup ready: screenshots, a screen recording, or a second browser profile already logged in.\n- Turn off notifications, close unrelated tabs, and clear any autofill that shows personal data.\n- Check that the demo data is reset and looks realistic.\n\n**If you find a problem:** at this point, fix only blockers. Note anything else as a known risk for the handoff summary rather than changing things late.\n\nI can also run this as a headless smoke test with `playwright-cli`, or run the build, tests and security checks first. Tell me which routes and URL to use and I'll do it."
+      }
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "skill": "helen-strategy",
+  "model": "sonnet",
+  "date": "2026-09-30",
+  "cases": [
+    {
+      "skill": "helen-strategy",
+      "id": "roadmap",
+      "triggered": true,
+      "forcedTriggered": null,
+      "baseline": 100,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Uses explicit criteria (value, effort, risk, confidence) rather than taste",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Separates quick wins from bigger bets",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Recommends cutting or deferring items (kill criteria)",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Asks about or states assumptions about the business goal",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "**Short version:** pick one goal for the quarter, score the ideas against it, and cut hard. Two developers for a quarter is roughly 24 dev-weeks. After bugs, support and slack, plan on about 16-18.\n\n## 1. Pick the goal first\nThe order changes completely depending on which of these you're after:\n- **Revenue:** you aren't charging yet, or conversion is weak.\n- **Activation and retention:** users sign up but don't stick.\n- **Enterprise:** deals are stalling on missing features.\n\nIf you can't name one, that's the real problem. Twelve ideas are competing because there's no criterion to rank them by.\n\n## 2. Score each idea\nUse RICE or a simple ICE score: (reach × impact × confidence) ÷ effort. Use real evidence for the inputs: customer requests, lost-deal notes, support tickets, funnel drop-offs. Rough effort guesses in dev-weeks:\n\n| Idea | Effort | Notes |\n|---|---|---|\n| CSV export | ~1 | Cheap, often a top support request |\n| Dark mode | 1-2 | Nice, low strategic value. Good filler |\n| Blog | ~0-1 dev | Mostly content and marketing, not engineering |\n| Onboarding tour | ~2 | Directly improves activation |\n| Stripe billing | 3-4 | Unlocks revenue if you don't have it |\n| SSO | 3-4 | Only worth it if named enterprise deals need it |\n| Referral program | 3-4 | Needs a base of happy users first |\n| Analytics dashboard | 4-6 | Depends on whether it's customer-facing |\n| Public API | 4-6 | Creates a long-term support commitment |\n| AI chatbot | 4-8 | Highly uncertain scope and value |\n| Redesign | 8+ | Big and risky, with unclear ROI |\n| Mobile app | 12+ | Would consume the entire quarter |\n\n## 3. Default plan (assuming no strong evidence either way)\n1. **Stripe billing**, if you aren't monetizing yet. Nothing else matters as much.\n2. **Onboarding tour**, for activation.\n3. **CSV export**, a quick win that also gets you real user feedback.\n4. **SSO**, only if you can name 2-3 deals or customers blocked on it. Otherwise swap in the analytics dashboard.\n5. **Dark mode**, as low-risk filler and a morale boost.\n\nThat's about 10-13 dev-weeks, which leaves buffer. Leave ~20% of capacity unallocated, because estimates usually run over.\n\n**Not this quarter:** mobile app, redesign, AI chatbot, public API. Each is either too big or too speculative. Do a small discovery spike on one of them instead, such as a customer interview round or a prototype. **Referral program** waits until activation and billing work. **Blog** goes to whoever owns marketing.\n\n## 4. Process tips\n- Sequence by dependency: billing before referral, and the API before any integrations.\n- Ship in small slices, with a review at week 6 to re-rank against what you've learned.\n- Write down what you're not doing and why, so it doesn't creep back in.\n\nIf you tell me your product, current stage (pre-revenue or not) and main pain point, I can turn this into a specific ranking.",
+        "withSkill": "# Prioritizing 12 ideas with 2 devs and 1 quarter\n\nYou have roughly 24 dev-weeks, and after bugs, support and meetings, about 16-18 are realistic. That fits 4-5 medium items, not 12. Cutting is the main job.\n\n## Step 1: Classify by what each idea does\n\n| Type | Ideas |\n|---|---|\n| Revenue / unlocks revenue | Stripe billing, SSO (enterprise gate), public API (partly) |\n| Activation / retention | Onboarding tour, CSV export, analytics dashboard |\n| Growth | Referral program, blog |\n| Polish / low strategic value | Dark mode, redesign |\n| Big bets (consume the quarter) | Mobile app, AI chatbot |\n\n## Step 2: Score with ICE or RICE\n\nScore each idea on:\n- **Impact:** 1-5, tied to one metric you pick for the quarter (revenue, activation or retention).\n- **Confidence:** how much evidence you have, such as customer requests, churn reasons or lost deals.\n- **Effort:** in dev-weeks.\n\nRank by (Impact × Confidence) / Effort. I don't have your data, so the numbers below are my assumptions and should be replaced with yours.\n\n## Step 3: Provisional ranking\n\n**Do first (dependencies and quick wins)**\n1. **Stripe billing** (about 3-4 weeks). If you don't already charge, nothing else has ROI. It is also a prerequisite for the referral program and for gating an API or SSO as paid tiers. If you already bill, skip this.\n2. **CSV export** (about 1 week). It's cheap, and it is a common customer request and a retention lever. Very high ROI.\n3. **Onboarding tour** (about 1-2 weeks). It improves activation, which multiplies the value of every growth channel.\n\n**Do next (strategic, choose by your customers)**\n\n4. **Analytics dashboard** (about 3-4 weeks), if users ask for insight into their own data. It supports retention and is a good upsell.\n5. **SSO** (about 3 weeks), only if you have named enterprise deals blocked on it. If you don't, defer it.\n\n**Defer or park**\n- **Public API:** it has maintenance and versioning costs. Wait until you have demand, and reconsider once billing exists.\n- **Referral program:** it depends on billing and activation, so it goes next quarter.\n- **Blog:** it needs content, not dev time. A non-dev can run it in parallel.\n- **Dark mode:** it's a nice-to-have, usually 1-2 weeks. Use it as filler only.\n- **AI chatbot:** it's high-variance and hard to scope. Don't start it without a clear user problem.\n- **Mobile app:** it would consume both devs for the whole quarter. Consider a responsive web app first.\n- **Redesign:** it has high risk and unclear payoff. Do targeted UX fixes instead.\n\n## Step 4: Set guardrails\n\n- **Sequence:** billing → CSV export → onboarding tour → one of the analytics dashboard or SSO. Leave about 20% of capacity for bugs and slippage.\n- **Kill criteria:** if an item runs past 1.5× its estimate, or shows no movement on its target metric within 4-6 weeks of shipping, stop investing.\n- **Validate first:** for SSO, the API and the AI chatbot, ask 5 customers or lost prospects before building. Two or more explicit asks is a green light.\n\n## What would change this ranking\n\n- If you're pre-revenue, billing goes first. If you already bill, move onboarding and CSV export up.\n- If churn is the problem, prioritize the analytics dashboard, CSV export and onboarding.\n- If enterprise deals are stalling, SSO becomes the top item.\n- If you have no users yet, focus on activation and the blog, not features.\n\nIf you share your current stage (pre-revenue or revenue), your main metric problem, and whether any deals are blocked on a specific feature, I can tighten this into a firm ranking with estimates."
+      }
+    },
+    {
+      "skill": "helen-strategy",
+      "id": "competitors",
+      "triggered": true,
+      "forcedTriggered": null,
+      "baseline": 100,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Does not invent revenue or user numbers",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Says what would be needed to get real data or marks uncertainty",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Offers a useful alternative analysis based on observable information",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "I couldn't look up these figures. The web search tool was blocked because permission wasn't granted, so I have no data on acme-notes.io, notely.app or paperstack.dev. I also have no local files or connected sources for them, and I won't guess at numbers.\n\nEven with search access, private companies rarely publish revenue or user counts. I'd expect to find only rough third-party estimates, such as traffic estimates, press mentions, funding announcements or Product Hunt and IndieHackers posts, and I'd label those as estimates.\n\nYou could:\n1. Grant web search permission and I'll retry all three.\n2. Let me fetch the sites directly with WebFetch. That would only cover what they publish themselves, such as a pricing page or a \"trusted by X users\" claim.\n3. Paste any data you already have, and I'll compare the three.\n\nWhich would you like?",
+        "withSkill": "I can't give you revenue or user counts for acme-notes.io, notely.app or paperstack.dev. I tried to look them up, but web search was denied permission in this session, so I have no live data. I won't estimate the figures from memory, because they would be invented.\n\nThese companies probably don't publish exact revenue or user counts anyway. If you grant web search access, I can retry and report only what public sources say, with links. Useful sources include:\n- **Transparency pages:** some indie products publish live revenue, for example on Indie Hackers or Open Startup pages.\n- **Traffic estimates:** SimilarWeb or Semrush give visit estimates, which are only a rough proxy for users.\n- **Funding and headcount:** Crunchbase, LinkedIn and press releases show these, if the companies are funded.\n- **Company claims:** each site's own homepage, pricing page or blog often states user milestones such as \"10k teams\".\n\nIf you already have numbers from your own research, send them over and I can build the comparison from those."
+      }
+    },
+    {
+      "skill": "helen-strategy",
+      "id": "inspiration",
+      "triggered": false,
+      "forcedTriggered": true,
+      "baseline": 50,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Recommends collecting real references with URLs and what to take from each",
+          "baseline": false,
+          "withSkill": true
+        },
+        {
+          "text": "Recommends capturing the direction in a design system file (e.g. DESIGN.md or tokens)",
+          "baseline": false,
+          "withSkill": true
+        },
+        {
+          "text": "Warns against copying another brand's identity",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Mentions principles or constraints for the direction",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "# Gathering inspiration and setting direction for a type designer's portfolio\n\nA type designer's site has an unusual job. The typefaces are the product, so the site has to show them well without competing with them. Here's how I'd approach the pre-code phase.\n\n## 1. Start with the designer, not other sites\n- **Interview them (or yourself, if it's your own portfolio).** Ask what they want to be known for: text faces, display, custom or commissioned work, or lettering. Ask who the audience is: foundries, art directors, or buyers. Ask what the site must do: sell licenses, get commissions, or show a body of work.\n- **Pick 3 to 5 adjectives** for the personality, such as \"precise, warm, unfussy\". Use them to test every later choice. Also list 3 to 5 things to avoid.\n- **Inventory the content.** List typefaces, weights and styles, specimens, process material (sketches, spacing studies, glyph sets), case studies, and press. The amount and kind of content shapes the layout more than a mood board will.\n\n## 2. Collect inspiration in layers\nLook beyond other portfolios, because they all converge on the same look.\n- **Type foundry sites:** Klim, Commercial Type, Colophon, Dinamo, Grilli Type, Pangram Pangram, Displaay, Fontsmith, Typotheque. Study how they handle type testers, specimen navigation, and licensing flows.\n- **Specimen sources:** printed specimen books, Fonts In Use, Typewolf, and the Type Directors Club archive. These show typography in context.\n- **Non-web references:** book design, posters, signage, museum catalogues, and letterpress. Type designers often draw from these.\n- **Adjacent portfolios:** graphic designers, editorial studios, and Awwwards or Siteinspire, filtered for restraint.\n- **The designer's own material:** sketches, drawing tools, proofs, and glyph-editor screenshots. This is the most distinctive inspiration you have, and it makes the site theirs.\n\nCapture everything in one place (Are.na, Figma/FigJam, or Milanote). For each reference, write a note on *what specifically* you're taking from it, such as \"the tester's controls\" or \"the grid rhythm\". Don't just save \"looks nice\".\n\n## 3. Analyze, don't just collect\nGroup the references and look for patterns:\n- Layout: grid, density, whitespace, scale contrast.\n- Color: most type sites are near-monochrome so the letterforms carry the page.\n- Navigation and information architecture.\n- Interaction: type testers, variable-font sliders, hover states, motion.\n- What makes each site feel credible to typographers?\n\nThen write down 3 to 5 principles, for example: \"Letterforms are always the largest element\", \"Neutral UI, expressive specimens\", \"Motion only reveals type behavior.\"\n\n## 4. Set the visual direction\n- **Typography for the interface:** This is a real decision. Using the designer's own typefaces is the strongest choice, but the UI text needs to stay readable and neutral. Choose one or two families, define a scale, and set line-length rules.\n- **Color:** Start with a neutral base and one accent at most. Test both light and dark, since specimens can look very different on each.\n- **Layout system:** Choose a grid, spacing scale, and breakpoints. Decide how specimens scale from phone to large monitors.\n- **Rendering concerns to settle early:** font loading and licensing for web use (WOFF2, subsetting, `font-display`), variable-font axes, OpenType features (`font-feature-settings`), and cross-browser rendering differences. Type designers will notice poor rendering.\n- **Tone and imagery:** Decide the photography and graphic style for specimens, mockups, and process images.\n\n## 5. Validate before coding\n1. **Moodboard to 2 or 3 style tiles:** Each tile is one frame with type, color, and a sample component. Show them to the designer and pick one.\n2. **Wireframe the key pages:** Home, typeface page (with a tester), about, contact or licensing.\n3. **Design 2 or 3 high-fidelity screens in Figma**, including one specimen page and one mobile view.\n4. **Prototype the risky interaction in the browser.** For a type site this is usually the type tester or the variable-font control. A small prototype tells you more about performance and feel than a mockup will.\n5. **Write a one-page brief** with the adjectives, principles, palette, type choices, and grid. Refer back to it while building.\n\n## Pitfalls to avoid\n- Copying a popular foundry's look. Type people will recognize it.\n- Letting UI chrome compete with the specimens.\n- Designing only with placeholder text. Use real glyphs, real names, and real specimen copy.\n- Treating mobile as an afterthought. Many visitors will see the work on a phone first.\n- Choosing motion or effects before deciding what they communicate.\n\nIf you tell me who the designer is, what kind of type they make, and what the site needs to do, I can help narrow the references, draft the principles and brief, or suggest a starting palette and type scale.",
+        "withSkill": "The skill says to use real references and not invent facts. I haven't loaded any of these sites live in this session, so treat the URLs as starting points and open each one before you rely on it.\n\n## 1. Benchmark first (about half a day)\n\nThe competitors here are other type designers' portfolios and foundry sites. Pick 5-10 and score each one on:\n- **Specimen quality:** how well it shows the letterforms.\n- **Type tester:** whether you can type your own text and adjust size, weight and axes.\n- **In-use imagery:** whether the type is shown in real work, not only on a blank page.\n- **Licensing and trial flow:** whether it's clear how to get or buy a font.\n- **Performance:** whether variable fonts load without a flash of unstyled text or layout shift.\n- **Case studies and process:** sketches, drawing steps, spacing and kerning notes.\n- **Contact and commission path:** whether a client can see how to hire the designer.\n\nMost portfolios probably look like a grid of specimens. The gaps that matter are likely to be process, in-use context and a good tester, not more features. Check that against what you actually see.\n\n## 2. Real references, with one takeaway each\n\n| Reference | URL | Take from it |\n|---|---|---|\n| Fonts In Use | fontsinuse.com | Showing type in real contexts |\n| Typewolf | typewolf.com | Current type trends and pairings |\n| Klim Type Foundry | klim.co.nz | Editorial depth in specimens and case studies |\n| Dinamo | abcdinamo.com | Experimental type testers and interaction |\n| Pangram Pangram | pangrampangram.com | A clear trial and licensing flow |\n| Grilli Type | grillitype.com | Restrained layouts with strong in-use imagery |\n| Colophon Foundry | colophon-foundry.org | Confident, minimal foundry identity |\n| Godly | godly.website | Layout and motion ideas outside type |\n| Awwwards | awwwards.com | Interaction ideas, with a critical eye |\n| Are.na | are.na | A place to collect and curate your own board |\n\nYou can also run `helen skills catalog --category design` to see what design skills are available.\n\nTake one lesson from each site. Don't copy any brand's identity or layout wholesale.\n\n## 3. How to gather without drowning\n\n1. **Collect widely on an Are.na or Pinterest board.** Aim for 40-60 items and don't filter yet.\n2. **Ask the designer for three things.** What they want to be known for, which two or three typefaces best represent them, and which sites they dislike.\n3. **Cut to 5-10 references and name the single thing you're taking from each.** Anything you can't name a takeaway for gets dropped.\n4. **Pick a stance on the interface.** For a type designer the site should mostly step back and let the letterforms lead. A neutral interface using the designer's own typeface is the safest default. Choose one bold move only, such as the tester, the hero specimen or the motion.\n\n## 4. Set the visual direction before coding\n\nSettle these decisions first:\n- **Type:** the designer's own faces for display, plus one neutral text face for body and UI.\n- **Colour:** two or three colours at most, with contrast that keeps the letterforms crisp. Choose a light and dark theme up front.\n- **Layout:** the grid, the spacing scale and the specimen card format.\n- **Motion:** what moves (for example variable-axis animation on hover) and what stays still.\n- **Components:** type tester, specimen page, glyph grid, case-study block, licence CTA.\n- **Content model:** the typefaces, the projects, and the process material that exists or still needs creating.\n\nThen capture it all in a `DESIGN.md` with sections for principles, references, type, colour, spacing, components, motion and accessibility. I haven't created it, as you asked for chat only. You can do it in about an hour once the choices above are made.\n\n## 5. Prioritise\n\n- **Quick wins:** a hero specimen, a working type tester, and a clear contact and commission path.\n- **Strategic bets:** process case studies, a full licensing or shop flow, and custom motion.\n- **Risks:** font-loading performance, licensing for web use, and content the designer hasn't produced yet. Content is often the biggest schedule risk.\n- **Kill criteria:** cut any feature that doesn't help a client understand the designer's type or hire them, and cut anything that slows the first specimen load noticeably.\n\nNext steps: confirm the 5-10 references after opening them, agree the stance with the designer, then write `DESIGN.md`."
+      }
+    }
+  ]
+}

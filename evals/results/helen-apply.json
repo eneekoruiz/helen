@@ -1,0 +1,112 @@
+{
+  "skill": "helen-apply",
+  "model": "sonnet",
+  "date": "2026-09-30",
+  "cases": [
+    {
+      "skill": "helen-apply",
+      "id": "design-all",
+      "triggered": true,
+      "forcedTriggered": null,
+      "baseline": 40,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Explains it would first detect the phase/state from the repository",
+          "baseline": false,
+          "withSkill": true
+        },
+        {
+          "text": "Organizes the work as ordered steps (inspiration or design system, layout, visual polish, responsive, verification)",
+          "baseline": false,
+          "withSkill": true
+        },
+        {
+          "text": "Says it will not install external design skills without approval, or proposes at most one",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Mentions verification such as a visual regression check or build",
+          "baseline": false,
+          "withSkill": true
+        },
+        {
+          "text": "Does not claim to have changed files",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "I couldn't apply the HELEN design improvements, and I haven't changed anything.\n\n- **HELEN isn't available.** The CLI isn't installed here, and nothing in `/tmp/helen-eval-8CFLQ1` mentions it. I also don't know which improvements it suggested for your page, so I won't guess at them.\n- **There's no landing page here.** The working directory has no HTML or CSS files, so there's nothing to edit yet.\n\nTo move forward, you could do one of these:\n1. Paste HELEN's output, meaning its list of suggested improvements, into the chat. I can then turn each one into concrete code changes and show them here.\n2. Point me to the repo or directory that holds the landing page, or add it to this working directory. I'll review it and apply the changes once you allow edits.\n3. Run HELEN on your machine and share the report or diff.\n\nI'm keeping to your chat-only instruction, so no files will be created or modified unless you say otherwise.",
+        "withSkill": "I couldn't apply any design improvements, because there is no landing page in this repo and nothing to apply them to.\n\n**What I found**\n- The repo has one `README.md`, and its only content is `# Sample project`.\n- There is no HTML, CSS, `package.json`, source, tests, CI or deploy config.\n- `docs/prompts/playbooks.json` doesn't exist, so I couldn't load the HELEN design playbook.\n- The `helen` CLI isn't available here, as you said.\n- Phase estimate, from that evidence only: pre-start. There is no project yet.\n\n**Design plan without the CLI**\nThis is the default order from the skill (the `design` goal). It's a plan only, so nothing has been run.\n1. Record the current state: screenshots and a list of what's there now.\n2. Set a direction and design system: type scale, colors, spacing, tone.\n3. Set the structure and layout: hero, proof, features, call to action, and a layout that avoids generic template patterns.\n4. Polish the details: typography, spacing, states, imagery.\n5. Check responsive behavior and accessibility: mobile breakpoints, contrast, focus, keyboard use.\n6. Verify: build, lint and tests if they exist, plus a visual check with screenshots.\n7. Report what was done, skipped and left as risks.\n\nIf the landing page has a design skill (taste-skill, impeccable or ui-ux-pro-max), I'd use at most one. I won't install or connect anything external without your approval.\n\n**What I need from you**\n- Where is the landing page? Is it another repo or branch, or should I create one in this repo?\n- If it's elsewhere, tell me where to look, or add it here.\n\nYou also asked me not to modify or create files. Applying the improvements means editing files, so tell me when I can write to the repo and I'll run the design steps."
+      }
+    },
+    {
+      "skill": "helen-apply",
+      "id": "install-tools",
+      "triggered": true,
+      "forcedTriggered": null,
+      "baseline": 50,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Does not install tools without showing commands and getting approval",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Recommends only one main design skill instead of three overlapping ones",
+          "baseline": false,
+          "withSkill": true
+        },
+        {
+          "text": "Warns about ECC's size/overlap or recommends selective installation",
+          "baseline": false,
+          "withSkill": true
+        },
+        {
+          "text": "Mentions reviewing third-party tools first",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "I haven't installed anything. Installing those four would add files to your project, which conflicts with your instruction not to modify or create files. I also didn't run any commands or look anything up.\n\n- **HELEN:** I don't know what this refers to. It isn't a skill or tool available in this session. If it's a workflow or config you have elsewhere, tell me where it lives.\n- **taste-skill, impeccable, ui-ux-pro-max, ECC:** I can't confirm what these are or where they come from without looking them up. They probably install as skills or plugins, which write into `.claude/` or similar. Third-party skills can also carry instructions that change how I behave, so I'd want to check each source before adding it.\n- **\"Perfect design\":** Installing skills won't guarantee that. It depends on your brief and on iterating with the running app.\n\nIf you want to go ahead, tell me it's OK to write files. I'd then look up each package's source and install method, show you what each would add, and install them in the project. Alternatively, give me the repo URLs or install commands you're using, and I'll run those.",
+        "withSkill": "I haven't installed anything. Two things in the request conflict with each other and with HELEN's rules.\n\n**1. Installing writes files.**\nEvery one of these tools installs by writing files into your project, such as `.claude/skills/...`, config, or hooks. You also asked me not to modify or create files, so I've stopped there.\n\n**2. HELEN's rules say not to install all four.**\n- **taste-skill, impeccable and ui-ux-pro-max overlap.** HELEN allows one main design skill at a time. Stacking them gives conflicting design directions, so the result is usually worse.\n- **ECC is a large harness that overlaps with HELEN itself.** The guidance is a selective install of single skills, with no hooks and not the whole bundle.\n- **All four are third-party.** HELEN says not to install or connect them without your approval after you've reviewed them. I'd run `helen skills external <id>` for each one and check it against the `audit-third-party-tools-and-mcp` prompt first.\n\n**My recommendation**\n1. Choose one design skill. If you don't have a preference, I'd start with **impeccable**. I haven't compared the three in your project, so this is a default and not a verdict.\n2. Skip ECC, or take one or two individual skills from it if a specific need comes up.\n3. Run the HELEN **design** goal (`helen apply design --track`). It covers direction, layout, polish, responsive and accessibility work, and it ends with build, test and visual checks.\n\n**What I need from you**\n- Which one design skill do you want?\n- Do you want ECC skipped or selective?\n- Is it OK to write files now? Installing and running the design playbook will change your project.\n\nOnce you confirm, I'll review the external tool output with you, then install and run the design playbook."
+      }
+    },
+    {
+      "skill": "helen-apply",
+      "id": "what-next",
+      "triggered": true,
+      "forcedTriggered": null,
+      "baseline": 33,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Proposes detecting the phase with evidence before choosing",
+          "baseline": false,
+          "withSkill": true
+        },
+        {
+          "text": "Offers a short list of suitable goals and asks which to run",
+          "baseline": false,
+          "withSkill": true
+        },
+        {
+          "text": "Does not run every goal automatically",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "Your project is at `/tmp/helen-eval-T3DzFj`, and I can't tell you which goal to apply. There's no HELEN framework here for me to use.\n\n**What's in the project**\n- It's a git repository on `master` with no commits yet.\n- The only file is an untracked `README.md` containing the single line `# Sample project`.\n- There's no code, no config, and no goals, plans or notes.\n- Nothing in the repo mentions HELEN.\n\n**About HELEN**\n- HELEN isn't one of my available skills, agents or tools.\n- The repo has no HELEN definition either, so I have no goal list to match your project against.\n- I won't guess what HELEN's goals are, because a made-up goal would mislead you.\n\n**What would let me answer**\n1. Tell me what HELEN is and paste its goals or steps. Or tell me where its definition lives, for example a repo, a doc, or a plugin I should install.\n2. Tell me what you're trying to build or achieve. Even one sentence is enough for me to suggest a goal, whether or not it's a HELEN one.\n\nIf it helps in the meantime, the project is an empty shell. Whichever goal you choose, it will start from scratch: a first commit, a real README, and some code.",
+        "withSkill": "Your project is at `/tmp/helen-eval-EO5nN9`. It is an empty shell, so I'd say it's at the very start. This is an estimate, because the `helen` CLI isn't installed and `docs/prompts/playbooks.json` doesn't exist.\n\n**What I found**\n- `README.md` contains one line: \"# Sample project\".\n- The git repo has no commits yet.\n- There is no `package.json`, source, tests, CI, deploy config or docs.\n- `.claude/` contains only the `helen-apply` skill.\n\n**Which goal to apply**\nYou don't need to know the goal in advance. For a project at this stage, I suggest these in order:\n\n1. **strategy**: decide what you're building, and note the risks and a roadmap. There is nothing to design or ship until this is settled.\n2. **data**: define the data model and API contracts once the idea is clear.\n3. **design**: set the direction and design system, then the layout, if it's a UI project.\n4. **knowledge**: write down ADRs and AI context early so the decisions aren't lost.\n\nLater goals, once code exists, are quality, security, qa, release and deploy. They have nothing to work on yet.\n\n**What I need from you**\n1. Which goal do you want to run? I'd start with **strategy**.\n2. What is the project? Is it a website, an app or an API, and who is it for?\n\nWithout the CLI, I'd follow the default plan: evidence of the current state, then direction, structure, polish, verification and a report. I haven't run any goal, and I haven't changed or created any files."
+      }
+    }
+  ]
+}

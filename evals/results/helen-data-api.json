@@ -1,0 +1,102 @@
+{
+  "skill": "helen-data-api",
+  "model": "sonnet",
+  "date": "2026-09-30",
+  "cases": [
+    {
+      "skill": "helen-data-api",
+      "id": "contract",
+      "triggered": true,
+      "forcedTriggered": null,
+      "baseline": 75,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Flags the duplicated concept userId vs user_id with different types",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Flags the non-ISO, ambiguous date format",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Flags the ok/error combination as a weak error model",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Mentions versioning or backward compatibility when changing it",
+          "baseline": false,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "**Review of the response design**\n\n**Problems**\n\n1. **Duplicate, conflicting ID fields.** `userId` (number) and `user_id` (string) carry the same value under two naming conventions and two types. Clients won't know which one to trust. Pick one name and one type.\n2. **Mixed naming conventions.** `userId` is camelCase and `user_id` is snake_case, in the same object. Choose one convention for the whole API. `created` follows neither, and it's ambiguous about whether it's a timestamp or a boolean flag.\n3. **Ambiguous, non-standard date.** `\"30/09/2026\"` could be DD/MM or MM/DD (30 makes it decodable here, but `01/02/2026` wouldn't be). It also has no time and no timezone. Use ISO 8601 / RFC 3339 in UTC, e.g. `\"2026-09-30T00:00:00Z\"`, and name the field `createdAt` or `created_at`.\n4. **ID type.** If IDs are opaque, a string is safer, since it avoids JS number-precision problems and lets you change the ID format later. If they're integers, keep them as numbers. Either way, use one type consistently.\n5. **`ok` plus `error: \"\"` is redundant and weakly typed.**\n   - `ok` and `error` can disagree, for example `ok: true` with a non-empty error.\n   - An empty string as \"no error\" forces clients to check for falsy values.\n   - Better: on success, omit `error` or set it to `null`. On failure, return a structured object like `{\"code\": \"USER_NOT_FOUND\", \"message\": \"...\"}` and omit `data`.\n6. **Redundant with HTTP.** If the status code already conveys success or failure, `ok` adds little. If you keep the envelope, document that it must always match the HTTP status.\n\n**Suggested shape**\n\n```json\n{\n  \"data\": { \"id\": \"5\", \"createdAt\": \"2026-09-30T00:00:00Z\" },\n  \"error\": null\n}\n```\n\nOr drop the envelope entirely: return the resource directly on 2xx, and an error body such as RFC 9457 `application/problem+json` on 4xx/5xx.\n\n**Priority:** fix the duplicate ID fields and the date format first. Those are the most likely to cause client bugs.",
+        "withSkill": "# Review of the API response design\n\nThe response has five problems, and the first two are the most serious.\n\n## 1. Duplicate ID field with conflicting name and type (high)\n`\"userId\": 5` is a number in camelCase. `\"user_id\": \"5\"` is a string in snake_case. They hold the same value in two forms.\n- Consumers can't tell which field is authoritative.\n- Once both are published, removing either one is a breaking change.\n- Clients will pick different fields and handle the type differently. Comparing `5 === \"5\"` fails in strict-equality languages.\n- If this is a migration shim, it needs a documented deprecation window. Otherwise pick one field.\n\n**Fix:** Keep one field. Use `userId` if the rest of the API is camelCase, or `user_id` if it's snake_case. Choose one naming convention for the whole API. The type should be consistent everywhere, and it should be a string if IDs could ever exceed 2^53 or change format.\n\n## 2. Ambiguous, non-standard date format (high)\n`\"30/09/2026\"` is DD/MM/YYYY. A US-centric parser will read it as MM/DD, and it fails outright for the 30th. On the 5th of a month it is silently wrong. The format also has no time and no timezone.\n\n**Fix:** Use ISO 8601 / RFC 3339 in UTC, for example `\"2026-09-30T00:00:00Z\"`. Use `YYYY-MM-DD` only if the field is really a date. Name the field for what it means, such as `createdAt`.\n\n## 3. `ok` and `error` are redundant, and `error` is an unstructured string (medium)\n- `ok: true` together with `error: \"\"` carries the same information twice. Success and failure states could disagree, for example `ok: true` with a non-empty `error`.\n- An empty string as \"no error\" forces consumers to check for falsiness. `null` or omitting the field is clearer.\n- A bare string can't be handled programmatically.\n\n**Fix:** Use HTTP status codes for success or failure. On failure, return a structured error such as `{\"error\": {\"code\": \"USER_NOT_FOUND\", \"message\": \"...\", \"details\": [...]}}`. Include a request or correlation ID so failures are diagnosable. If you keep an envelope, make it a discriminated union. Success has `data` and no `error`, and failure has `error` and no `data`.\n\n## 4. Envelope and versioning (low to medium)\n- There is no version marker. Add URL or header versioning, or document the compatibility policy.\n- The envelope is fine if it is used consistently. Make sure list endpoints also fit it, with pagination metadata.\n- No schema, such as OpenAPI or JSON Schema, is mentioned. Publish one and back it with contract tests so drift like the duplicate field is caught.\n\n## 5. Minor points\n- Document nullability and which fields are required.\n- If the payload is an internal shape leaking out, decide which fields are public. `created` is also the wrong name for a timestamp. `createdAt` is better.\n\n## Suggested shape\n```json\n{\n  \"data\": {\n    \"userId\": \"5\",\n    \"createdAt\": \"2026-09-30T00:00:00Z\"\n  }\n}\n```\nErrors would use a 4xx or 5xx status and a body like `{\"error\": {\"code\": \"...\", \"message\": \"...\", \"requestId\": \"...\"}}`.\n\n## Caveat on changes\nIf this contract is already live, don't change it in place. Confirm with the contract owner and the known consumers. Then introduce the corrected shape under a new version, or add the new fields alongside the old ones. Deprecate the old ones with a communicated window before removing them."
+      }
+    },
+    {
+      "skill": "helen-data-api",
+      "id": "invalid-state",
+      "triggered": false,
+      "forcedTriggered": true,
+      "baseline": 100,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Identifies that the model allows invalid states",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Proposes a model or constraints that make invalid states unrepresentable (e.g. single status enum incl. refunded, DB constraints)",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Mentions a migration plan for existing bad data",
+          "baseline": true,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "The root problem is that `status`, `paidAt` and `refunded` are three fields describing one lifecycle, so they can drift apart. There are two layers of fix: make the bad state impossible, then make the transitions correct.\n\n**1. Enforce the invariant in the database (the backstop)**\n\nAdd CHECK constraints so no code path can write the bad combination:\n\n```sql\nALTER TABLE orders ADD CONSTRAINT orders_paid_consistency\n  CHECK (\n    (status = 'paid'   AND paid_at IS NOT NULL) OR\n    (status = 'unpaid' AND paid_at IS NULL)\n  );\n\nALTER TABLE orders ADD CONSTRAINT orders_refund_requires_payment\n  CHECK (refunded = false OR paid_at IS NOT NULL);\n```\n\nDecide first whether a refunded order should stay `status='paid'`, which I'd recommend. If you want refunded orders to show as unpaid, you'd have to keep `paid_at` for history, and the constraint above would then be wrong. That's the design flaw described in section 3.\n\nClean up the existing bad rows before adding the constraint, or use `NOT VALID` and validate afterwards.\n\n**2. Route all changes through one place (the application layer)**\n\nThe bad rows most likely come from a refund or \"mark unpaid\" path that flips `status` back to `unpaid` without clearing `paidAt`, or from separate updates that aren't atomic.\n\n- Put the transitions in domain methods such as `markPaid()`, `refund()` and `markUnpaid()`. Each one sets all related fields together, and callers never set the fields directly.\n- Do the update in a single statement or transaction, not several writes.\n- Make `refund()` reject orders that aren't paid.\n- Check for webhook or retry races, such as a late payment event arriving after a refund or a duplicate event. Use idempotency keys and a status precondition in the update (`WHERE id = ? AND status = 'paid'`).\n\n**3. Fix the model so it can't contradict itself (longer term)**\n\n- `refunded` is redundant with the payment lifecycle. Replace `status` and `refunded` with a single state such as `unpaid | paid | refunded` (or add `partially_refunded`). Then `refunded=true` and `unpaid` can't coexist.\n- Derive `paidAt` from state, or keep payment history in a separate `payments` or `order_events` table, so \"when was it paid\" is never overwritten or left stale.\n\n**4. Find the source of the existing rows**\n\nQuery the bad rows and look at their `updatedAt` and any audit logs. That should show which code path or event sequence created them. Fix that path in addition to adding the constraints, since a constraint will only turn a silent bug into a loud error there.\n\nIf you want, I can look through the codebase for the code paths that write these fields. I haven't looked at the code yet, so the advice above is general.",
+        "withSkill": "The root cause is that `status`, `paidAt` and `refunded` are three independent fields that describe one lifecycle, so nothing stops them from contradicting each other. To fix it, make the invalid states impossible to represent, enforce the rules at every write path, and clean up the existing bad rows with your approval.\n\n## 1. Decide what the fields mean\n\nThe combination `unpaid` + `paidAt` set + `refunded=true` is ambiguous. It could be a refunded order whose status was reset to `unpaid`. It could also be a payment that failed or was reversed and never cleared `paidAt`. Have the contract owner pick one meaning before you enforce anything. I'd suggest:\n\n- `paidAt` is the time the payment was captured. It is set exactly when the order was paid, and it is kept as history.\n- `refunded` is only valid for an order that was paid.\n- A refunded order stays `paid` with `refunded=true`. Alternatively, add an explicit `refunded` or `partially_refunded` status.\n\n## 2. Remove the redundancy\n\nThe better fix is to reduce how many fields can disagree:\n\n- **Single state field.** Replace `status` and `refunded` with one enum, for example `unpaid | paid | refunded`. The invalid combination then can't be expressed.\n- **Derived fields.** If you keep `status`, derive it from `paidAt` and the refund data instead of storing it. You could also replace `refunded` with a `refundedAt` timestamp, or with refund records, which also handle partial refunds.\n\n## 3. Enforce the rules in the database\n\nA database constraint is the only guarantee that covers every writer, including scripts, admin tools, imports and webhooks. For example:\n\n```sql\nCHECK ((status = 'paid') = (paidAt IS NOT NULL))\nCHECK (refunded = false OR status = 'paid')\n```\n\nIf you want to keep `paidAt` after a status change, use only the second check plus `paidAt IS NOT NULL OR status = 'unpaid'`.\n\n## 4. Validate at the API and model layer\n\n- Reject invalid combinations with a clear `422` and a field-level error. Don't silently coerce them.\n- Route all state changes through one transition function or service (`markPaid`, `refund`). It sets all three fields together in one transaction, and callers never write the fields directly.\n- Allow only valid transitions: `unpaid→paid` and `paid→refunded`. Refunding an unpaid order should be an error.\n- Mark `paidAt` and `refunded` as read-only in the public API schema, so clients can't set them.\n\n## 5. Make the transitions safe to retry\n\nPayment and refund webhooks arrive out of order and get retried, which is a common way to end up in this state.\n\n- Use idempotency keys or event IDs to deduplicate events.\n- Use compare-and-set updates, such as `UPDATE ... WHERE status = 'paid'`, or optimistic locking, so a late \"payment failed\" event can't overwrite a refund.\n- Do the status, `paidAt` and refund updates in one transaction.\n\n## 6. Clean up existing data (needs your approval)\n\n1. Find the affected rows: `status='unpaid' AND paidAt IS NOT NULL` and `refunded=true`.\n2. Work out how each one got there. Check the payment provider's records and your logs to see whether the order was actually paid and then refunded.\n3. Correct the rows according to the rule chosen in step 1.\n4. Add the constraint only after the data is clean. In Postgres you can use `NOT VALID` and then `VALIDATE CONSTRAINT`.\n\nThis is a data migration and possibly a contract change. Check first whether any consumer (reporting, finance exports, webhooks, the SDK) relies on the current combination. Roll out with a deprecation window, and ask before running any destructive backfill.\n\n## 7. Tests and monitoring\n\n- Add tests for the state machine, including every invalid combination, retried events and out-of-order events.\n- Add a scheduled query that alerts on any row that violates the invariant, so a new write path that bypasses the rules gets caught quickly.\n\nIf you point me at the Order model and the code that writes to it, I can find which write path causes this today."
+      }
+    },
+    {
+      "skill": "helen-data-api",
+      "id": "breaking",
+      "triggered": false,
+      "forcedTriggered": true,
+      "baseline": 67,
+      "withSkill": 100,
+      "criteria": [
+        {
+          "text": "Flags it as a breaking change for existing clients",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Proposes a compatible migration (add new field, deprecate, version)",
+          "baseline": true,
+          "withSkill": true
+        },
+        {
+          "text": "Recommends confirming with the owner before changing the public contract",
+          "baseline": false,
+          "withSkill": true
+        }
+      ],
+      "errors": 0,
+      "answers": {
+        "baseline": "Don't do a straight rename today. Store apps that are already installed will keep sending and expecting `name`, and users update slowly, so some old versions will stay in use for months or longer. If you rename the field outright, those clients will break. Depending on how they parse responses, they'll crash, show blank names, or send requests the server rejects.\n\nThe safe way is an additive, backward-compatible change:\n\n1. **Responses:** return both `name` and `fullName` with the same value. New code reads `fullName`, and old apps keep reading `name`.\n2. **Requests:** accept either field. Prefer `fullName` if both are present, otherwise fall back to `name`. Don't reject requests that only send `name`.\n3. **Docs and schema:** mark `name` as deprecated in the OpenAPI spec or docs, and say which field is canonical. Also note in the docs when you plan to remove `name`.\n4. **Ship the mobile update:** release app versions that use `fullName`.\n5. **Measure:** log or count requests that still use `name`, and track the app-version distribution.\n6. **Remove `name` later:** only once usage is near zero, or after you force-upgrade old versions with a minimum-version gate. Pick a date and announce it in advance.\n\n**What you can do today:**\n- Add `fullName` alongside `name` on the server, with the dual-read/dual-write behavior above.\n- Deploy that. It's safe for every existing client.\n- Update the docs to mark `name` as deprecated.\n\n**What to avoid today:**\n- Removing `name`, or changing its meaning.\n- Making `fullName` required in requests.\n\nIf your API is versioned (`/v2`), you could make the clean rename there and leave `v1` unchanged. That means running two versions, so it's only worth it if you have other breaking changes to bundle with this one.\n\nIf you'd like, I can look through the repo to find where `name` is defined, serialized and validated, and outline the exact changes. I won't modify any files.",
+        "withSkill": "Don't do a straight rename today. Renaming `name` to `fullName` breaks every store-installed mobile app that reads `name`. Those apps can't be force-updated, so old versions would show blanks or crash until users update, and some never will.\n\n**The safe approach is additive, with a deprecation window:**\n\n1. **Add `fullName` and keep `name`.** Return both fields with identical values. This is non-breaking and can ship today.\n2. **Accept both on writes.** Treat `fullName` as canonical. If a request sends both and they differ, return a 400 with a clear error rather than picking one silently. Document the precedence.\n3. **Ship the mobile apps to read `fullName`, falling back to `name`.** Release these, then track adoption by app version.\n4. **Mark `name` as deprecated.** Update the docs and the OpenAPI/schema, and add a `Deprecation` or `Sunset` header or a changelog entry. Tell all known consumers, including any partners or web clients, not just mobile.\n5. **Set a removal date.** Base it on the share of traffic still on old app versions. Log which clients still read `name`, if you can tell. Consider a minimum-supported-version gate before removal. Removal is the actual breaking change, so it needs the owner's sign-off.\n6. **Or use versioning.** Put `fullName` in `/v2`, or behind a version header, and leave v1 untouched. This is heavier, but it makes sense if you plan other breaking changes.\n\n**Also check before shipping:**\n- Tests, fixtures, mocks, and docs that reference `name`.\n- Other consumers: webhooks, exports, SDKs, analytics, and caches. Cached responses need to carry both fields too.\n- The data model. If you're only renaming the API field, don't rename the DB column in the same change. Keep the two decoupled so each can be rolled back independently.\n- Rollback. Because the change is additive, reverting is trivial.\n\n**Confirm before proceeding:** who owns the contract, who the known consumers are, and what the minimum supported app version is.\n\nI haven't looked at the codebase, and I've changed nothing. If you want, I can find where `name` is serialized and list the affected consumers and tests."
+      }
+    }
+  ]
+}

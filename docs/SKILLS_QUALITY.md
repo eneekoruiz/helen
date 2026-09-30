@@ -6,13 +6,40 @@ run is repeated asking for the skill by name). An LLM judge grades both answers 
 
 - **Trigger**: cases where the agent loaded the skill without being told to (description quality).
 - **Baseline / With skill**: share of criteria met. **Delta**: value added by the skill.
-- Grade: A delta ≥ 20 and with skill ≥ 85 · B with skill ≥ 75 · C otherwise.
+- Grade: A delta ≥ 20 and with skill ≥ 85 · B with skill ≥ 75 · C otherwise. A high baseline with a small delta means
+  the model already handles those cases well; the skill then adds consistency and HELEN routing rather than raw quality.
+- Harness errors (empty answer or unparsable judge after one retry) are excluded from the averages and counted apart.
 
-| Skill | Cases | Trigger | Baseline | With skill | Delta | Grade |
-|---|---|---|---|---|---|---|
-| helen-security | 3 | 0/3 | 100% | 100% | +0 | B |
+| Skill | Cases | Trigger | Baseline | With skill | Delta | Grade | Errors |
+|---|---|---|---|---|---|---|---|
+| helen-a11y-perf | 3 | 2/3 | 100% | 93% | -7 | B | 0 |
+| helen-apply | 3 | 3/3 | 41% | 100% | +59 | A | 0 |
+| helen-clean-code | 3 | 3/3 | 69% | 100% | +31 | A | 0 |
+| helen-client-handoff | 3 | 1/3 | 80% | 100% | +20 | A | 0 |
+| helen-copy-cro | 3 | 2/3 | 85% | 100% | +15 | B | 0 |
+| helen-data-api | 3 | 1/3 | 81% | 100% | +19 | B | 0 |
+| helen-knowledge | 3 | 2/3 | 93% | 100% | +7 | B | 0 |
+| helen-motion-3d | 3 | 1/3 | 92% | 100% | +8 | B | 0 |
+| helen-premium-design | 3 | 2/3 | 66% | 92% | +26 | A | 0 |
+| helen-qa-scale | 3 | 1/3 | 94% | 100% | +6 | B | 0 |
+| helen-release | 3 | 0/3 | 89% | 82% | -7 | B | 0 |
+| helen-router | 3 | 3/3 | 58% | 75% | +17 | B | 0 |
+| helen-security | 3 | 3/3 | 93% | 100% | +7 | B | 0 |
+| helen-seo-compliance | 3 | 2/3 | 100% | 100% | +0 | B | 0 |
+| helen-strategy | 3 | 2/3 | 83% | 100% | +17 | B | 0 |
 
 ## Failed criteria with skill
 
+- helen-a11y-perf/form-a11y: Does not add redundant or wrong ARIA where native HTML suffices
+- helen-premium-design/generic-cards: Stays within the brand/product context rather than generic trends
+- helen-release/rc: Gives the smallest next actions
+- helen-release/changelog: Clearly marks removing /v1/users as a breaking change with migration guidance
+- helen-router/phase: Keeps the answer short
+- helen-router/release-phase: Places the project in maintenance (08) or post-handoff with evidence
+
+## Known limits
+
+- 3 cases per skill and one judge run: differences under ~10 points are noise, not signal. Negative deltas on a high baseline (e.g. helen-release, helen-a11y-perf) mean the model already answers well without the skill.
+- Trigger 0/3 means the agent did not load the skill on its own for short chat-only prompts; the skill is then applied when requested by name or through `helen-apply`.
 
 Model: sonnet · last run: 2026-09-30
