@@ -141,13 +141,17 @@ export function resolvePromptEntry(query: string, root: string = PROMPTS_ROOT): 
 export function readPrompt(
   query: string,
   root: string = PROMPTS_ROOT,
-  options?: { fill?: Record<string, string>; replyLang?: string }
+  options?: { fill?: Record<string, string>; replyLang?: string; level100?: boolean }
 ): string {
-  let content = fs.readFileSync(resolvePromptEntry(query, root).absolutePath, 'utf-8');
+  const entry = resolvePromptEntry(query, root);
+  let content = fs.readFileSync(entry.absolutePath, 'utf-8');
   if (options?.fill) {
     for (const [key, val] of Object.entries(options.fill)) {
       content = content.replaceAll(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), val);
     }
+  }
+  if (options?.level100 !== false && entry.kind !== 'master' && entry.kind !== 'guide') {
+    content += `\n\n---\n> **HELEN Level 100 Execution Mandate**: This prompt is the Level 0 baseline. You possess sovereign technical authority and broad mandate ("manga ancha") to proactively search for, surface, and resolve adjacent bugs, unhandled errors, and architectural weaknesses along the path. Always deliver Level 100 excellence.\n`;
   }
   if (options?.replyLang) {
     content += `\n\n---\n**Reply Language**: Please respond in ${options.replyLang}.\n`;

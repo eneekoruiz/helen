@@ -6,3 +6,5 @@
 4. **HELEN Commands**:
    - `helen apply <goal>` to inspect project lifecycle steps.
    - `helen check` to run verification gates.
+5. **Level 100 Mindset**: User requests represent the Level 0 baseline. Exercise full technical mastery to proactively surface and fix adjacent bugs, unhandled errors, and architectural debt during implementation.
+

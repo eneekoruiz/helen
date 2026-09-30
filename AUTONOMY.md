@@ -21,3 +21,9 @@ Whenever an agent executes a plan via `helen apply <goal> --auto` or `helen next
 1. Run local checks.
 2. Stop immediately if any checkpoint fails.
 3. Report what was accomplished, what was skipped, and the remaining risk profile.
+
+## 4. The Level 100 Contract: Autonomous Broad Scope ("Manga Ancha")
+- **Floor vs. Standard**: User instructions represent the Level 0 minimum floor. Autonomous agents must aim for Level 100 production-grade craft and systemic resilience.
+- **Proactive Defect Hunting**: The agent possesses sovereign technical authority over code changes. When implementing, the agent has full mandate to proactively detect, surface, and fix adjacent bugs, unhandled errors, missing validations, or design slop in the affected modules.
+- **Continuous Value Delivery**: Always report the base task completion PLUS any adjacent improvements, uncovered defects, or proactive fixes applied.
+

@@ -46,6 +46,7 @@ One entry point for everything in HELEN. The user does not need to know which pr
 
 ## Rules
 
+- **Level 100 Mandate**: Treat user requests as the Level 0 baseline. Exercise full technical mastery and broad scope ("manga ancha") to uncover and fix adjacent bugs, missing validations, and design defects during implementation.
 - Prompts guide one task; skills give standing know-how; catalog tools are third-party and optional.
 - Confirm before destructive or high-risk changes. Never invent content, metrics, testimonials, or claims.
 - Prefer minimal changes and verify with build, lint, and tests when they exist.

@@ -29,6 +29,7 @@ export function helenBlock(): string {
     '',
     'This project uses HELEN (prompts, skills and a tools catalog).',
     '',
+    '- **Level 100 Mandate & Full Technical Authority**: The user prompt is the Level 0 floor; your mission is Level 100 excellence. You have absolute technical authority and broad mandate to proactively hunt, surface, and fix adjacent bugs, missing validations, edge cases, and design slop while implementing.',
     '- When asked to "use HELEN", or where the project stands, or what to do next: use the `helen-apply` skill, or run `helen apply`.',
     '- To work an area ("apply all the design improvements", "prepare the release"): `helen apply <goal>` prints the steps; `helen apply <goal> --track` follows them one by one with `helen next`, `helen done`, `helen check`.',
     '- Prompts: `helen prompts list`, `helen prompts show <id>`. Skills live in `.claude/skills` and `.agents/skills`. Guide: `helen guide`.',
@@ -61,7 +62,7 @@ export function installAntigravityRules(cwd: string, dryRun = false): string[] {
     },
     {
       file: 'quality.md',
-      content: `# HELEN Quality & Clean Code Rules\n- Maintain modular architecture and strict TypeScript types without any-casts.\n- Keep test suites green before completing checkpoints.\n- Never bypass git hooks (--no-verify is prohibited).\n`,
+      content: `# HELEN Quality & Clean Code Rules\n- Level 0 is the floor, Level 100 is the standard: the agent has absolute technical freedom and broad mandate to proactively fix adjacent bugs, improve resilience, and elevate craft across the codebase.\n- Maintain modular architecture and strict TypeScript types without any-casts.\n- Keep test suites green before completing checkpoints.\n- Never bypass git hooks (--no-verify is prohibited).\n`,
     },
     {
       file: 'design.md',
