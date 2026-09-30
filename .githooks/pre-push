@@ -1,0 +1,12 @@
+#!/bin/sh
+# HELEN pre-push: run the project's own quality scripts that exist.
+# Skip once with: git push --no-verify
+if [ -f pnpm-lock.yaml ]; then pm=pnpm; elif [ -f yarn.lock ]; then pm=yarn; elif [ -f bun.lockb ] || [ -f bun.lock ]; then pm=bun; else pm=npm; fi
+[ -f package.json ] || exit 0
+
+for script in typecheck lint test build; do
+  if node -e "process.exit(require('./package.json').scripts?.['$script'] ? 0 : 1)" 2>/dev/null; then
+    echo "▸ $pm run $script"
+    CI=1 $pm run "$script" || { echo "✖ $script failed: push blocked by .githooks/pre-push"; exit 1; }
+  fi
+done

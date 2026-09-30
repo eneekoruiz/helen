@@ -1,0 +1,22 @@
+#!/bin/sh
+# HELEN pre-commit: fast checks on staged files only, no dependencies.
+# Skip once with: git commit --no-verify
+fail=0
+files=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$files" ] && exit 0
+
+for f in $files; do
+  case "$f" in
+    *.env|.env|.env.*|*/.env|*/.env.*)
+      case "$f" in *.example|*.sample|*.template) ;; *) echo "✖ $f: environment files must not be committed"; fail=1 ;; esac ;;
+  esac
+  [ -f "$f" ] || continue
+  size=$(wc -c < "$f")
+  if [ "$size" -gt 5242880 ]; then echo "✖ $f: larger than 5 MB (use Git LFS or external storage)"; fail=1; fi
+  if git diff --cached -U0 -- "$f" | grep -qE '^\+(<<<<<<<|>>>>>>>) '; then echo "✖ $f: merge conflict markers"; fail=1; fi
+  if git diff --cached -U0 -- "$f" | grep -qE '^\+.*(-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{36}|sk-(live|proj)-[A-Za-z0-9_-]{16,}|xox[baprs]-[A-Za-z0-9-]{10,})'; then
+    echo "✖ $f: looks like it contains a secret (value not shown)"; fail=1
+  fi
+done
+
+[ "$fail" -eq 0 ] || { echo "Commit blocked by .githooks/pre-commit"; exit 1; }

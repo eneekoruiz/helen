@@ -188,7 +188,18 @@ Reglas por defecto: endpoint oficial, permisos mínimos, **solo lectura** cuando
 - `helen skills update`: reinstala las skills de HELEN ya instaladas con su última versión (`--dry-run` para ver qué cambia).
 - `npm run evals` (desde el repositorio de HELEN, requiere el CLI `claude`): cada caso de `evals/<skill>.json` se ejecuta en un proyecto limpio **sin** la skill y **con** ella; un juez puntúa ambas respuestas contra los criterios. El resultado está en [SKILLS_QUALITY.md](SKILLS_QUALITY.md): tasa de activación automática, % sin skill, % con skill, diferencia y nota (A/B/C).
 
-## 10. Mantener y ampliar HELEN
+## 10. Protecciones listas para cualquier proyecto
+
+`helen add guardrails` deja preparado, sin instalar dependencias:
+
+- `.githooks/pre-commit`: bloquea archivos `.env`, secretos probables (sin mostrarlos), marcas de conflicto y archivos de más de 5 MB. Solo mira lo que vas a commitear, así que es instantáneo.
+- `.githooks/pre-push`: ejecuta los scripts `typecheck`, `lint`, `test` y `build` que tenga el proyecto; si alguno falla, no se sube.
+- `.github/dependabot.yml`: actualizaciones semanales de npm y GitHub Actions, con menores y parches agrupados en un solo PR y las versiones mayores en PRs separados para revisarlas.
+- Un script `prepare` que activa los hooks al hacer `npm install` (o actívalos a mano con `git config core.hooksPath .githooks`).
+
+Si ya usas husky o lefthook, quédate con uno solo. Los hooks se pueden saltar con `--no-verify`: el CI sigue siendo la puerta real.
+
+## 11. Mantener y ampliar HELEN
 
 - **Nuevo prompt**: crea el archivo en su fase siguiendo `docs/prompts/CONTRACT.md` (en inglés) y ejecuta `helen prompts index`; el índice de la fase se genera solo.
 - **Nueva skill**: carpeta `skills/<nombre>/SKILL.md` con `name` (igual que la carpeta) y `description`.
@@ -197,7 +208,7 @@ Reglas por defecto: endpoint oficial, permisos mínimos, **solo lectura** cuando
 - **Nueva skill**: añade también `evals/<nombre>.json` con 3 casos y criterios verificables.
 - Después ejecuta `helen lint` y `npm test`: validan frontmatter, secciones obligatorias, idioma, enlaces, índices, playbooks, skills y catálogo (avisa si una herramienta lleva más de 180 días sin verificar).
 
-## 11. Qué NO hace HELEN
+## 12. Qué NO hace HELEN
 
 - No instala herramientas de terceros por ti.
 - No garantiza que la fase detectada sea correcta: la propone con evidencia.

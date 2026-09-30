@@ -46,6 +46,7 @@ The full explanation (in Spanish) is in [docs/GUIA.md](docs/GUIA.md); `helen gui
 | Skills | `helen skills list [--flows]` · `helen skills install [names...] [--target claude codex antigravity custom] [--dir <path>]` · `helen skills update` · `helen skills installed` |
 | Catalog | `helen skills catalog [--category <c>] [--kind skill\|cli\|mcp\|plugin\|reference\|service]` · `helen skills external <id>` |
 | Library quality | `helen lint` (prompts, indexes, playbooks, skills, catalog) · `npm run evals` (skill quality, see below) |
+| Guardrails | `helen add guardrails`: dependency-free pre-commit (blocks `.env`, secrets, conflict markers, huge files) and pre-push (typecheck, lint, test, build) hooks + grouped weekly Dependabot |
 | Scaffolding | `helen init` · `helen create <name>` · `helen add <modules...>` · `helen modules` · `helen explain <module>` · `helen update` · `helen eject <module>` · `helen rollback` |
 
 Prompt ids accept the full id, the short id (without the action prefix), a path, or a legacy alias.

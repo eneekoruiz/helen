@@ -13,10 +13,12 @@ HELEN becomes an AI agent workflow kit. Breaking: legacy prompt files, routers, 
 - `helen doctor` agent checks (installed/outdated skills, MCP config files, inline secrets) and `helen skills update`.
 - `helen prompts search`, short ids and aliases.
 - Skill evals (`evals/`, `npm run evals`) with the quality report in `docs/SKILLS_QUALITY.md`.
+- `guardrails` module: dependency-free pre-commit/pre-push hooks and a grouped Dependabot config (also used by this repo).
 - Spanish user guide `docs/GUIA.md` (`helen guide`).
 
 ### Changed
 - Prompt library rewritten in English and consolidated from 131 to 94 prompts with a shared `RULES.md` and `CONTRACT.md`.
+- CI runs the full `helen lint` and `npm audit --audit-level=high`; Dependabot is weekly with grouped minor/patch updates and separate majors.
 - `helen check` falls back to npm when no lockfile is found.
 
 ### Security
