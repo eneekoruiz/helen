@@ -24,6 +24,7 @@ import { generateEntity } from './core/generator.js';
 import type { HelenContext } from './core/context.js';
 import { getInstallCommand } from './core/packageManager.js';
 import { runRollback } from './core/rollback.js';
+import { validateAllEvals } from './core/evals.js';
 
 
 
@@ -91,13 +92,14 @@ function runLint(): number {
     ...lintPrompts().map(issue => `${issue.file}: ${issue.message}`),
     ...validatePlaybooks().map(issue => `playbooks.json: ${issue}`),
     ...validateSkills().map(issue => `skills: ${issue}`),
+    ...validateAllEvals().map(issue => `evals: ${issue}`),
   ];
   const catalog = validateCatalog();
   errors.push(...catalog.filter(issue => issue.level === 'error').map(issue => `catalog ${issue.id}: ${issue.message}`));
   for (const issue of catalog.filter(item => item.level === 'warn')) logger.warn(`catalog ${issue.id}: ${issue.message}`);
   for (const error of errors) logger.error(error);
   if (errors.length > 0) return 1;
-  logger.success('HELEN library is valid (prompts, indexes, playbooks, skills, catalog).');
+  logger.success('HELEN library is valid (prompts, indexes, playbooks, skills, catalog, evals).');
   return 0;
 }
 
