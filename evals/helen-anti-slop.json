@@ -1,0 +1,65 @@
+{
+  "skill": "helen-anti-slop",
+  "cases": [
+    {
+      "id": "audit-ai-tells-request",
+      "prompt": "Audit our landing page to detect obvious AI slop and generic template tropes. Tell us where it looks like an AI built it and how to give it authentic human personality. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Detects generic AI clichés like purple neon gradients, uniform Bento grids, and empty buzzwords",
+        "Provides an objective AI Slop Index or percentage",
+        "Formulates an intentional art direction rather than generic template advice",
+        "Gives concrete refactoring recommendations for layout, typography, and copy"
+      ]
+    },
+    {
+      "id": "refactor-bento-grid-slop",
+      "prompt": "Review this component and tell me why it screams 'AI-generated'. How should we refactor it with real character? Answer in chat only; do not modify or create files.\n```tsx\n<div className=\"grid grid-cols-3 gap-6 bg-slate-950 p-12\">\n  {features.map(f => (\n    <div className=\"rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md\">\n      <div className=\"mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500/20 text-purple-400\"><f.icon /></div>\n      <h3 className=\"text-lg font-semibold text-white\">{f.title}</h3>\n      <p className=\"mt-2 text-slate-400\">{f.desc}</p>\n    </div>\n  ))}\n</div>\n```",
+      "criteria": [
+        "Flags the uniform 3-column symmetry, backdrop-blur with white/10 borders, and colored square icon badges as ubiquitous AI tropes",
+        "Critiques the interchangeable aesthetic lacking product-specific context",
+        "Proposes breaking the grid with asymmetrical hierarchy (e.g. featured wide card vs dense metric callout)",
+        "Recommends replacing blurry glow with crisp physical borders or distinct typographic contrast"
+      ]
+    },
+    {
+      "id": "refactor-ai-copy-slop",
+      "prompt": "Our hero section currently reads: 'Unleash the full potential of your business with our next-generation AI-powered platform. Seamlessly elevate your workflow and delve into deeper insights with game-changing synergy.' Audit this copy and refactor it with authentic human voice. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explicitly identifies AI buzzwords: Unleash, next-generation, seamlessly, elevate, delve, game-changing, synergy",
+        "Critiques the lack of concrete, specific meaning about what the product actually does",
+        "Rewrites the headline and subcopy with direct, honest, and grounded human language",
+        "Maintains customer focus and clarity over inflated marketing hype"
+      ]
+    },
+    {
+      "id": "typography-and-palette-personality",
+      "prompt": "Our website looks like a generic Vercel clone with default Inter font and dark background. How do we infuse genuine personality and human craft into the typography and palette? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Advises against relying on ubiquitous neutral sans-serif (Inter) without typographic contrast",
+        "Suggests pairing an opinionated display typeface (e.g. characterful serif or industrial grotesque) with a clean body font",
+        "Proposes a coherent aesthetic palette (e.g. warm analog editorial, Swiss grid, or tactile craft)",
+        "Emphasizes rhythmic hierarchy and physical framing over generic blur effects"
+      ]
+    },
+    {
+      "id": "sql-join-query",
+      "expectTrigger": false,
+      "prompt": "Write a SQL query to find all customers who placed an order in the last 30 days using an INNER JOIN between customers and orders tables. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Provides valid SQL with INNER JOIN",
+        "Filters by date range on orders table",
+        "Does not trigger visual aesthetic or design review skills"
+      ]
+    },
+    {
+      "id": "python-list-comprehension",
+      "expectTrigger": false,
+      "prompt": "How do I filter even numbers and square them using a Python list comprehension? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Provides [x**2 for x in nums if x % 2 == 0]",
+        "Explains the filtering condition and expression syntax",
+        "Does not trigger design or anti-slop skills"
+      ]
+    }
+  ]
+}

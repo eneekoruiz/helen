@@ -37,11 +37,16 @@ export function updatePhaseIndexes(write: boolean, root: string = getPromptsRoot
   const phases = fs.readdirSync(root, { withFileTypes: true }).filter(entry => entry.isDirectory() && PHASE_PATTERN.test(entry.name));
   for (const phase of phases) {
     const readme = path.join(root, phase.name, 'README.md');
-    const current = fs.existsSync(readme) ? fs.readFileSync(readme, 'utf-8') : `# ${phase.name}\n`;
-    const next = withIndex(current, renderPhaseIndex(phase.name, root));
-    if (next !== current) {
-      changed.push(path.relative(root, readme));
-      if (write) fs.writeFileSync(readme, next, 'utf-8');
+    const currentRaw = fs.existsSync(readme) ? fs.readFileSync(readme, 'utf-8') : `# ${phase.name}\n`;
+    const isCrlf = currentRaw.includes('\r\n');
+    const current = currentRaw.replace(/\r\n/g, '\n');
+    const nextNormalized = withIndex(current, renderPhaseIndex(phase.name, root));
+    if (nextNormalized !== current) {
+      changed.push(path.relative(root, readme).replace(/\\/g, '/'));
+      if (write) {
+        const next = isCrlf ? nextNormalized.replace(/\n/g, '\r\n') : nextNormalized;
+        fs.writeFileSync(readme, next, 'utf-8');
+      }
     }
   }
   return changed;

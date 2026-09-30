@@ -14,38 +14,69 @@ HELEN is a workflow kit for building projects with AI agents (Claude Code, Codex
 
 ## Install
 
-HELEN is not published on npm yet. Install it from the repository:
+```bash
+npm install -g helen-cli
+# or run directly with npx
+npx helen-cli --help
+```
+
+Or from source:
 
 ```bash
 git clone https://github.com/eneekoruiz/helen.git
-cd helen && npm ci && npm run build && npm link   # exposes the `helen` command
+cd helen && npm ci && npm run build && npm link   # exposes the `helen` and `helen-cli` commands
 ```
 
 ## Start here
 
+To initialize a new or existing project with full agent setup and safety guardrails in a single command:
+
 ```bash
+helen init-project my-app       # adopts folder, runs setup, installs safety guardrails, tracks goal
+# or step by step:
 cd your-project
-helen setup                 # install skills for Claude, Codex and Antigravity + AGENTS.md/CLAUDE.md instructions
-helen apply                 # detect the project phase and suggest goals
-helen apply design --track  # plan a goal and track it step by step
-helen next                  # current step, with its prompt
-helen done                  # mark it done (checkpoints require `helen check` to pass)
-helen doctor                # project + agent setup health (skills, MCP config, inline secrets)
+helen setup                     # install skills for Claude, Codex and Antigravity + AGENTS.md instructions
+helen apply                     # detect the project phase and suggest goals
+helen apply design --track      # plan a goal and track it step by step
+helen next                      # current step, with its prompt
+helen done                      # mark it done (checkpoints require `helen check` to pass)
+helen doctor                    # project + agent setup health (skills, MCP config, inline secrets)
 ```
 
-Or just tell your agent: *"Use HELEN: analyze where the project is and what to apply"* — the `helen-apply` skill does the rest.
-The full explanation (in Spanish) is in [docs/GUIA.md](docs/GUIA.md); `helen guide` prints it.
+### JSON Mode & Automation for AI Agents
+
+All HELEN commands support a global `--json` flag producing a structured, machine-readable envelope on `stdout`:
+
+```bash
+helen status --json
+helen apply strategy --json
+helen doctor --json
+```
+
+```json
+{
+  "ok": true,
+  "command": "status",
+  "data": { ... },
+  "warnings": [],
+  "errors": []
+}
+```
+
+Standard exit codes: `0` (Success), `1` (Error), `2` (Warnings present), `3` (Checkpoint gate failed).
 
 ## Commands
 
 | Area | Commands |
 |---|---|
-| Plan and track | `helen apply [goal] [--brief] [--track] [--install]` · `helen next` · `helen done` · `helen skip <reason>` · `helen status` · `helen check` |
-| Setup and health | `helen setup [--agents claude codex antigravity] [--dry-run]` · `helen doctor` · `helen guide` |
-| Prompts | `helen prompts list [--kind flow]` · `helen prompts search <text>` · `helen prompts show <id>` · `helen prompts path <id>` · `helen prompts flow <id>` · `helen prompts index` · `helen prompts lint` |
-| Skills | `helen skills list [--flows]` · `helen skills install [names...] [--target claude codex antigravity custom] [--dir <path>]` · `helen skills update` · `helen skills installed` |
-| Catalog | `helen skills catalog [--category <c>] [--kind skill\|cli\|mcp\|plugin\|reference\|service]` · `helen skills external <id>` |
-| Library quality | `helen lint` (prompts, indexes, playbooks, skills, catalog) · `npm run evals` (skill quality, see below) |
+| Project initialization | `helen init-project [name] [--agents ...] [--goal <goal>] [--yes] [--dry-run] [--json]` |
+| Plan and track | `helen apply [goal] [--brief] [--track] [--auto] [--install] [--json]` · `helen next [--json]` · `helen done [--json]` · `helen skip <reason> [--json]` · `helen status [--json]` · `helen check [--json]` |
+| Setup and health | `helen setup [--agents claude codex antigravity] [--dry-run] [--json]` · `helen doctor [--fix] [--json]` · `helen report [--open] [--json]` · `helen guide` |
+| AI Integration & MCP | `helen mcp` (Native Model Context Protocol server over stdio for Antigravity, Claude, and Cursor) · `helen token-budget [target] [--json]` |
+| Prompts | `helen prompts list [--kind flow] [--json]` · `helen prompts search <text> [--json]` · `helen prompts show <id> [--json]` · `helen prompts path <id> [--json]` · `helen prompts flow <id> [--json]` · `helen prompts index [--json]` · `helen prompts lint [--json]` |
+| Skills | `helen skills list [--flows] [--json]` · `helen skills install [names...] [--target claude codex antigravity custom] [--dir <path>] [--json]` · `helen skills update [--json]` · `helen skills installed [--json]` |
+| Catalog | `helen skills catalog [--category <c>] [--kind skill\|cli\|mcp\|plugin\|reference\|service] [--json]` · `helen skills external <id> [--json]` |
+| Library quality | `helen lint [--json]` (prompts, indexes, playbooks, skills, catalog, evals) · `npm run evals` (multi-run skill quality with 95% CI) |
 | Guardrails | `helen add guardrails`: dependency-free pre-commit (blocks `.env`, secrets, conflict markers, huge files) and pre-push (typecheck, lint, test, build) hooks + grouped weekly Dependabot |
 | Scaffolding | `helen init` · `helen create <name>` · `helen add <modules...>` · `helen modules` · `helen explain <module>` · `helen update` · `helen eject <module>` · `helen rollback` |
 
@@ -66,7 +97,7 @@ Each phase README has quick decisions, an exit checklist and a generated index.
 
 ## Skills
 
-Bundled: `helen-apply` (entry point), `helen-router`, `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`, `helen-copy-cro`, `helen-motion-3d`, `helen-security`, `helen-seo-compliance`, `helen-qa-scale`, `helen-release`, `helen-client-handoff`, `helen-strategy`, `helen-data-api`, `helen-knowledge`.
+Bundled: `helen-apply` (entry point), `helen-router`, `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`, `helen-copy-cro`, `helen-motion-3d`, `helen-security`, `helen-seo-compliance`, `helen-qa-scale`, `helen-release`, `helen-client-handoff`, `helen-strategy`, `helen-data-api`, `helen-knowledge`, `helen-review`, `helen-onboarding`.
 
 | Target | Folder |
 |---|---|
@@ -75,6 +106,10 @@ Bundled: `helen-apply` (entry point), `helen-router`, `helen-clean-code`, `helen
 | `custom --dir <path>` | any agent that scans a skills folder |
 
 Quality per skill (trigger rate, baseline vs with-skill pass rate) is measured by `npm run evals` and published in [docs/SKILLS_QUALITY.md](docs/SKILLS_QUALITY.md). Eval cases live in [`evals/`](evals).
+
+## Zero Telemetry Guarantee
+
+HELEN does not collect, store, or transmit any telemetry, analytics, user identifiers, project code, or prompt logs to external cloud servers. All parsing, evaluation, reports, and MCP server communications run strictly locally on your machine.
 
 ## Third-party tools
 
@@ -87,3 +122,4 @@ Quality per skill (trigger rate, baseline vs with-skill pass rate) is measured b
 ## License
 
 MIT
+

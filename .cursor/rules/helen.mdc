@@ -1,0 +1,14 @@
+---
+description: HELEN Autonomous Engineering Guidelines
+globs: **/*
+alwaysApply: true
+---
+
+# HELEN Agent Guidelines
+
+- **Quality Gates**: Keep all builds, linter checks, and test suites passing. Never use `--no-verify`.
+- **Security First**: Never hardcode API keys, secrets, tokens, or credentials. Use `.env.local` and environment variables.
+- **Design Craft**: Build bespoke, responsive, and accessible interfaces. Avoid generic clichés and center-heavy card patterns.
+- **Level 100 Mandate**: User instructions represent the Level 0 minimum floor. You have sovereign technical authority and broad mandate to hunt, surface, and fix adjacent bugs, missing validations, and design slop while implementing. Strive for Level 100 perfection.
+- **Autonomous Progress**: When tracking work, use `helen next` to check instructions and `helen done` upon completing verification.
+

@@ -1,6 +1,7 @@
 ---
 name: helen-premium-design
-description: Use when designing, polishing, or auditing a web UI to feel premium, human-made, and conversion-led - visual hierarchy, typography, motion, micro-interactions, responsive craft, and removing generic AI or template traces. Applies to landing pages, product UIs, portfolios, and client sites.
+description: Use when designing, reviewing, or polishing web UIs and landing pages to look bespoke, premium, and human-crafted; diagnosing and replacing generic template clichés (purple/pink gradients, symmetric 3-card feature grids, centered lorem ipsum, robotic aesthetics); refining visual hierarchy, typography, and palettes; or evaluating visual effects (particles, parallax, custom cursors) against conversion and usability.
+version: 2.1.0
 ---
 
 # Premium Design

@@ -30,6 +30,36 @@
         "Offers a short list of suitable goals and asks which to run",
         "Does not run every goal automatically"
       ]
+    },
+    {
+      "id": "apply-audit-goal",
+      "prompt": "Use HELEN to run a security and quality audit across my project. How does HELEN execute this? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Mentions scanning repository phase and selecting relevant audit gates",
+        "Outlines steps in sequence rather than making chaotic changes",
+        "Explains verifying checkpoints before advancing",
+        "Respects user control and explains commands"
+      ]
+    },
+    {
+      "id": "python-regex",
+      "expectTrigger": false,
+      "prompt": "Write a Python regular expression to match valid hex color codes like #fff or #123456. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Provides a correct regex pattern matching 3 and 6 digit hex colors",
+        "Explains case insensitivity or optional alpha channels if applicable",
+        "Includes quick example test strings"
+      ]
+    },
+    {
+      "id": "docker-multistage",
+      "expectTrigger": false,
+      "prompt": "Show me a Dockerfile example using multi-stage builds to minimize image size for a Go service. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Uses a builder stage with full SDK/Go compiler",
+        "Copies only the compiled binary to a minimal final image (scratch or alpine)",
+        "Sets appropriate entrypoint"
+      ]
     }
   ]
 }

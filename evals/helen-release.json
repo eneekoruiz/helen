@@ -29,6 +29,36 @@
         "Clearly marks removing /v1/users as a breaking change with migration guidance",
         "Does not invent features beyond the three listed"
       ]
+    },
+    {
+      "id": "version-bump-checklist",
+      "prompt": "We are ready to tag and publish v3.0.0 of our npm package. What sanity checks and documentation updates should we verify before running npm publish? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Verifies clean working directory and latest commits pushed",
+        "Verifies build, tests, and linter pass in clean environment",
+        "Verifies CHANGELOG.md is updated with migration guide for breaking changes",
+        "Verifies package.json files array or .npmignore to prevent publishing dev files or secrets"
+      ]
+    },
+    {
+      "id": "css-selectors-specificity",
+      "expectTrigger": false,
+      "prompt": "How does CSS selector specificity calculate scores between ID, class, and element selectors? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains the (Inline, ID, Class/Attribute/Pseudo-class, Element) scoring model",
+        "Compares relative weights (ID outweighs multiple classes)",
+        "Explains how !important overrides normal specificity"
+      ]
+    },
+    {
+      "id": "python-list-comprehension",
+      "expectTrigger": false,
+      "prompt": "How do I filter and square only even numbers from a list using Python list comprehension? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Provides valid Python code: `[x**2 for x in nums if x % 2 == 0]`",
+        "Explains the condition placement at the end of the comprehension",
+        "Gives a quick example input and output"
+      ]
     }
   ]
 }

@@ -33,6 +33,36 @@
         "Recommends an error tracking service or error boundaries (lightweight first)",
         "Mentions alerting with ownership or actionable signals"
       ]
+    },
+    {
+      "id": "retry-storm-protection",
+      "prompt": "When our downstream payment gateway has a 5-second outage, our API clients hammer us with immediate retries, crashing our database connection pool. How do we prevent this retry storm? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Recommends exponential backoff with jitter on client retries",
+        "Recommends implementing a circuit breaker pattern",
+        "Recommends rate limiting or request throttling at the API gateway",
+        "Addresses database connection pool bounds and queuing limits"
+      ]
+    },
+    {
+      "id": "css-flexbox-align",
+      "expectTrigger": false,
+      "prompt": "What is the difference between align-items and align-content in CSS Flexbox? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains align-items aligns items along the cross axis within a line",
+        "Explains align-content aligns flex lines along the cross axis when there is extra space (multi-line)",
+        "Mentions flex-wrap requirement for align-content"
+      ]
+    },
+    {
+      "id": "git-stash-branch",
+      "expectTrigger": false,
+      "prompt": "How do I take my stashed changes and apply them directly into a new git branch? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains `git stash branch <branchname> [<stash>]`",
+        "Explains that it creates the branch and applies the stash cleanly",
+        "Mentions that it drops the stash on success"
+      ]
     }
   ]
 }

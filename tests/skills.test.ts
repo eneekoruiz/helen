@@ -26,11 +26,11 @@ describe('Skills installer', () => {
   it('every bundled skill has name and description frontmatter matching its folder', () => {
     for (const skill of listSkills()) {
       const content = fs.readFileSync(path.join(skill.dir!, 'SKILL.md'), 'utf-8');
-      expect(content).toMatch(new RegExp(`^---\\nname: ${skill.name}\\ndescription: .+\\n---`));
+      expect(content).toMatch(new RegExp(`^---\\r?\\nname: ${skill.name}\\r?\\ndescription: .+(\\r?\\nversion: .+)?\\r?\\n---`));
       expect(content.length).toBeGreaterThan(200);
       const description = /^description: (.+)$/m.exec(content)![1]!;
       expect(description.length).toBeLessThanOrEqual(1024);
-      expect(content.split('\n').length).toBeLessThan(500);
+      expect(content.replace(/\r\n/g, '\n').split('\n').length).toBeLessThan(500);
     }
   });
 

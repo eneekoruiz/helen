@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import * as p from '@clack/prompts';
+import path from 'node:path';
 import { logger } from './core/logger.js';
 import { detectProject } from './core/projectDetector.js';
 import { runDoctor, printDoctorResults } from './core/doctor.js';
@@ -7,27 +8,28 @@ import { runModules, printSummary } from './core/moduleRunner.js';
 import { getAllModuleIds, getModule, getAllModules } from './modules/registry.js';
 import { showMainMenu, showModuleSelector, showExplainSelector, printModuleExplanation, printModuleList } from './menu/mainMenu.js';
 import { generateModuleDocs } from './core/docs.js';
-import { printPromptContent, printPromptList, printPromptPath, searchPrompts, shortId, type PromptKind } from './core/prompts.js';
+import { printPromptContent, printPromptList, printPromptPath, searchPrompts, shortId, listPromptEntries, resolvePromptEntry, readPrompt, findPromptOverlaps, type PromptKind } from './core/prompts.js';
 import { updatePhaseIndexes } from './core/promptIndex.js';
 import { ejectModule } from './core/moduleRunner.js';
 import { buildPlan, detectPhase, formatBrief, formatPlan, readPlaybooks, suggestedGoals, installedSkillNames, validatePlaybooks } from './core/apply.js';
-import { getCatalogItem, listCatalog, validateCatalog } from './core/catalog.js';
-import { formatNext, formatStatus, markDone, readProgress, runChecks, skipStep, startProgress } from './core/progress.js';
+import { getCatalogItem, listCatalog, validateCatalog, compareCatalogItems, checkCatalogHealth } from './core/catalog.js';
+import { currentIndex, formatNext, formatStatus, markDone, readProgress, runChecks, skipStep, startProgress } from './core/progress.js';
 import { runAgentDoctor, updateAgentSetup } from './core/agentDoctor.js';
 import { readGuide } from './core/guide.js';
-import { setupProject, type SetupAgent } from './core/setup.js';
+import { setupProject, uninstallProject, detectInstalledAgents, type SetupAgent } from './core/setup.js';
 import { lintPrompts } from './core/promptLint.js';
 import { SKILL_TARGETS, installSkills, listFlowSkills, listSkills, validateSkills, type SkillTarget } from './core/skills.js';
-import { readConfig, updateConfig } from './core/config.js';
+import { readConfig, updateConfig, getConfigValue, setConfigValue } from './core/config.js';
 import { scaffoldProject } from './core/scaffold.js';
 import { generateEntity } from './core/generator.js';
 import type { HelenContext } from './core/context.js';
 import { getInstallCommand } from './core/packageManager.js';
 import { runRollback } from './core/rollback.js';
+import { validateAllEvals } from './core/evals.js';
+import { isJsonMode, setJsonMode, printJsonAndExit, clearJsonBuffers } from './core/jsonOutput.js';
+import { runInitProject } from './core/initProject.js';
 
-
-
-const VERSION = '2.0.0';
+const VERSION = '2.1.0';
 
 function buildContext(cwd: string, opts: { dryRun?: boolean; force?: boolean; securityLevel?: string }): HelenContext {
   const project = detectProject(cwd);
@@ -87,18 +89,37 @@ function persistResults(results: any[], ctx: HelenContext): void {
 }
 
 function runLint(): number {
-  const errors = [
-    ...lintPrompts().map(issue => `${issue.file}: ${issue.message}`),
-    ...validatePlaybooks().map(issue => `playbooks.json: ${issue}`),
-    ...validateSkills().map(issue => `skills: ${issue}`),
-  ];
+  const promptIssues = lintPrompts().map(issue => `${issue.file}: ${issue.message}`);
+  const playbookIssues = validatePlaybooks().map(issue => `playbooks.json: ${issue}`);
+  const skillIssues = validateSkills().map(issue => `skills: ${issue}`);
+  const evalIssues = validateAllEvals().map(issue => `evals: ${issue}`);
   const catalog = validateCatalog();
-  errors.push(...catalog.filter(issue => issue.level === 'error').map(issue => `catalog ${issue.id}: ${issue.message}`));
-  for (const issue of catalog.filter(item => item.level === 'warn')) logger.warn(`catalog ${issue.id}: ${issue.message}`);
-  for (const error of errors) logger.error(error);
-  if (errors.length > 0) return 1;
-  logger.success('HELEN library is valid (prompts, indexes, playbooks, skills, catalog).');
-  return 0;
+  const catalogErrors = catalog.filter(issue => issue.level === 'error').map(issue => `catalog ${issue.id}: ${issue.message}`);
+  const catalogWarns = catalog.filter(issue => issue.level === 'warn').map(issue => `catalog ${issue.id}: ${issue.message}`);
+
+  const allErrors = [...promptIssues, ...playbookIssues, ...skillIssues, ...evalIssues, ...catalogErrors];
+  const allWarnings = [...catalogWarns];
+
+  if (isJsonMode()) {
+    const exitCode = allErrors.length > 0 ? 1 : allWarnings.length > 0 ? 2 : 0;
+    printJsonAndExit('lint', {
+      valid: allErrors.length === 0,
+      errors: allErrors,
+      warnings: allWarnings,
+    }, {
+      ok: allErrors.length === 0,
+      warnings: allWarnings,
+      errors: allErrors,
+      exitCode,
+    });
+    return exitCode;
+  }
+
+  for (const issue of catalogWarns) logger.warn(`catalog: ${issue}`);
+  for (const error of allErrors) logger.error(error);
+  if (allErrors.length > 0) return 1;
+  logger.success('HELEN library is valid (prompts, indexes, playbooks, skills, catalog, evals).');
+  return allWarnings.length > 0 ? 2 : 0;
 }
 
 export function createProgram(): Command {
@@ -106,12 +127,27 @@ export function createProgram(): Command {
 
   program
     .name('helen')
-    .description('HELEN — Modern project setup CLI for React + Vite + TypeScript')
-    .version(VERSION);
+    .description('HELEN — AI Agent Operating System & Project Scaffolding CLI')
+    .version(VERSION)
+    .option('--json', 'Output machine-readable JSON envelope', false)
+    .hook('preAction', (thisCommand) => {
+      clearJsonBuffers();
+      if (process.argv.includes('--json') || thisCommand.opts().json) {
+        setJsonMode(true);
+      }
+    });
 
   // Default: interactive menu
   program
     .action(async () => {
+      if (isJsonMode()) {
+        printJsonAndExit('root', {}, {
+          ok: false,
+          errors: ['Interactive menu cannot be run in --json mode. Specify a command (e.g., helen status --json, helen apply --json).'],
+          exitCode: 1,
+        });
+        return;
+      }
       logger.banner();
       const cwd = process.cwd();
       const project = detectProject(cwd);
@@ -218,6 +254,54 @@ export function createProgram(): Command {
       }
     });
 
+  // helen init-project [name]
+  program
+    .command('init-project [name]')
+    .description('One command to ready a project: adopts or creates folder, runs setup, adds guardrails, and starts tracking apply <goal>')
+    .option('--agents <agents...>', 'Agents to configure: claude, codex, antigravity', ['claude', 'codex', 'antigravity'])
+    .option('--goal <goal>', 'Initial goal to plan and track (default: strategy for new project, or phase recommendation)')
+    .option('--yes', 'Skip confirmation prompts', false)
+    .option('--dry-run', 'Preview actions without modifying disk', false)
+    .action(async (name?: string, opts?: { agents: string[]; goal?: string; yes?: boolean; dryRun?: boolean }) => {
+      try {
+        const result = await runInitProject({
+          name,
+          cwd: process.cwd(),
+          agents: opts?.agents,
+          goal: opts?.goal,
+          yes: opts?.yes,
+          dryRun: opts?.dryRun,
+        });
+
+        if (isJsonMode()) {
+          printJsonAndExit('init-project', result);
+          return;
+        }
+
+        logger.section(`Initialized Project: ${path.basename(result.projectDir)}`);
+        for (const action of result.actionsTaken) {
+          logger.step(action);
+        }
+        logger.blank();
+        logger.success(`Ready! Plan "${result.chosenGoal}" active (${result.planResult.stepsCount} steps).`);
+        console.log('\nNext steps:');
+        for (const step of result.nextSteps) {
+          console.log(`  ${step}`);
+        }
+      } catch (err) {
+        if (isJsonMode()) {
+          printJsonAndExit('init-project', {}, {
+            ok: false,
+            errors: [err instanceof Error ? err.message : String(err)],
+            exitCode: 1,
+          });
+          return;
+        }
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
   // helen init
   program
     .command('init')
@@ -227,15 +311,19 @@ export function createProgram(): Command {
     .option('--security-level <level>', 'Cybersecurity level (simple or strict)', 'simple')
     .option('--install', 'Automatically install dependencies after changes', false)
     .action(async (opts: { dryRun: boolean; force: boolean; securityLevel: string; install: boolean }) => {
-      logger.banner();
       const cwd = process.cwd();
       const ctx = buildContext(cwd, opts);
-      if (opts.dryRun) {
+      if (opts.dryRun && !isJsonMode()) {
         logger.warn('DRY-RUN mode: previewing changes without writing files');
       }
-      logger.info(`Installing all modules...`);
       const results = await runModules(getAllModuleIds(), ctx);
       persistResults(results, ctx);
+      if (isJsonMode()) {
+        printJsonAndExit('init', { results });
+        return;
+      }
+      logger.banner();
+      logger.info(`Installing all modules...`);
       printSummary(results, ctx);
       if (opts.install) {
         await handleAutoInstall(results, ctx, false);
@@ -254,7 +342,6 @@ export function createProgram(): Command {
     .description('Scaffold a new project from scratch')
     .option('--next', 'Use Next.js instead of Vite', false)
     .action(async (name: string, opts: { next: boolean }) => {
-      logger.banner();
       const cwd = process.cwd();
       const success = await scaffoldProject({
         name,
@@ -262,6 +349,11 @@ export function createProgram(): Command {
         cwd,
       });
 
+      if (isJsonMode()) {
+        printJsonAndExit('create', { name, success, type: opts.next ? 'next-ts' : 'vite-react-ts' }, { ok: success });
+        return;
+      }
+      logger.banner();
       if (success) {
         p.outro(`Next steps: cd ${name} && helen init`);
       }
@@ -281,30 +373,78 @@ export function createProgram(): Command {
         cwd,
         dryRun: opts.dryRun,
       });
+      if (isJsonMode()) {
+        printJsonAndExit('generate', { type, name, dryRun: opts.dryRun });
+      }
     });
-
 
   // helen modules
   program
     .command('modules')
     .description('List all available modules')
     .action(() => {
+      if (isJsonMode()) {
+        printJsonAndExit('modules', { modules: getAllModules().map(m => m.meta) });
+        return;
+      }
       printModuleList();
     });
 
-  // helen explain <module>
+  // helen explain <target>
   program
-    .command('explain <module>')
-    .description('Show detailed documentation for a module')
-    .action((moduleId: string) => {
-      const mod = getModule(moduleId);
-      if (!mod) {
-        logger.error(`Module "${moduleId}" not found.`);
-        logger.info(`Available modules: ${getAllModuleIds().join(', ')}`);
-        process.exitCode = 1;
+    .command('explain <target>')
+    .description('Show detailed documentation for a module or prompt (including token budget & cost)')
+    .action(async (target: string) => {
+      const mod = getModule(target);
+      if (mod) {
+        if (isJsonMode()) {
+          printJsonAndExit('explain', { module: mod.meta });
+          return;
+        }
+        printModuleExplanation(mod);
         return;
       }
-      printModuleExplanation(mod);
+
+      try {
+        const entry = resolvePromptEntry(target);
+        const raw = readPrompt(target);
+        const { estimateTokens, calculateCost } = await import('./core/tokenBudget.js');
+        const tokens = estimateTokens(raw);
+        const cost = calculateCost(tokens);
+        if (isJsonMode()) {
+          printJsonAndExit('explain', {
+            targetType: 'prompt',
+            id: entry.id,
+            title: entry.title,
+            phase: entry.phase,
+            summary: entry.summary,
+            tokens,
+            estimatedCostUsd: cost.claudeSonnet,
+            costs: cost,
+          });
+          return;
+        }
+        logger.section(`Prompt: ${entry.title}`);
+        logger.info(`ID: ${entry.id} (${entry.kind})`);
+        if (entry.phase) logger.info(`Phase: ${entry.phase}`);
+        logger.info(`Summary: ${entry.summary}`);
+        logger.info(`Tokens: ~${tokens.toLocaleString()} (~$${cost.claudeSonnet.toFixed(4)} with Claude 3.5 Sonnet)`);
+        return;
+      } catch {
+        // Not a prompt either
+      }
+
+      if (isJsonMode()) {
+        printJsonAndExit('explain', {}, {
+          ok: false,
+          errors: [`Target "${target}" not found as a module or prompt. Available modules: ${getAllModuleIds().join(', ')}`],
+          exitCode: 1,
+        });
+        return;
+      }
+      logger.error(`Target "${target}" not found as a module or prompt.`);
+      logger.info(`Available modules: ${getAllModuleIds().join(', ')}`);
+      process.exitCode = 1;
     });
 
   // helen add <modules...>
@@ -316,17 +456,21 @@ export function createProgram(): Command {
     .option('--security-level <level>', 'Cybersecurity level (simple or strict)', 'simple')
     .option('--install', 'Automatically install dependencies after changes', false)
     .action(async (moduleIds: string[], opts: { dryRun: boolean; force: boolean; securityLevel: string; install: boolean }) => {
-      logger.banner();
       const cwd = process.cwd();
       const ctx = buildContext(cwd, opts);
+      const results = await runModules(moduleIds, ctx);
+      persistResults(results, ctx);
+
+      if (isJsonMode()) {
+        printJsonAndExit('add', { results });
+        return;
+      }
+
+      logger.banner();
       if (opts.dryRun) {
         logger.warn('DRY-RUN mode: previewing changes without writing files');
       }
       logger.info(`Installing ${moduleIds.length} module(s)...`);
-      const results = await runModules(moduleIds, ctx);
-      
-      persistResults(results, ctx);
-      
       printSummary(results, ctx);
       if (opts.install) {
         await handleAutoInstall(results, ctx, false);
@@ -346,16 +490,30 @@ export function createProgram(): Command {
     .option('--dry-run', 'Preview changes without writing files', false)
     .option('--install', 'Automatically install dependencies after changes', false)
     .action(async (opts: { dryRun: boolean; install: boolean }) => {
-      logger.banner();
       const cwd = process.cwd();
       const config = readConfig(cwd);
       if (!config || config.installedModules.length === 0) {
+        if (isJsonMode()) {
+          printJsonAndExit('update', {}, {
+            ok: false,
+            warnings: ['No modules detected in .helenrc. Use "helen init" or "helen add" first.'],
+            exitCode: 2,
+          });
+          return;
+        }
         logger.warn('No modules detected in .helenrc. Use "helen init" or "helen add" first.');
         return;
       }
       const ctx = buildContext(cwd, { ...opts, force: true });
-      logger.info(`Updating ${config.installedModules.length} modules...`);
       const results = await runModules(config.installedModules, ctx);
+
+      if (isJsonMode()) {
+        printJsonAndExit('update', { results });
+        return;
+      }
+
+      logger.banner();
+      logger.info(`Updating ${config.installedModules.length} modules...`);
       printSummary(results, ctx);
       if (opts.install) {
         await handleAutoInstall(results, ctx, false);
@@ -368,17 +526,18 @@ export function createProgram(): Command {
       }
     });
 
-
   // helen eject <module>
   program
     .command('eject <module>')
     .description('Remove a module and its files')
     .option('--dry-run', 'Preview removal without deleting files', false)
     .action(async (moduleId: string, opts: { dryRun: boolean }) => {
-      logger.banner();
       const cwd = process.cwd();
       const ctx = buildContext(cwd, opts);
       await ejectModule(moduleId, ctx);
+      if (isJsonMode()) {
+        printJsonAndExit('eject', { moduleId, dryRun: opts.dryRun });
+      }
     });
 
   // helen generate-docs
@@ -388,8 +547,10 @@ export function createProgram(): Command {
     .action(async () => {
       const cwd = process.cwd();
       await generateModuleDocs(cwd);
+      if (isJsonMode()) {
+        printJsonAndExit('generate-docs', { success: true });
+      }
     });
-
 
   // helen rollback
   program
@@ -398,12 +559,16 @@ export function createProgram(): Command {
     .description('Rollback all HELEN-created changes and restore original files from backups')
     .option('--dry-run', 'Preview the rollback actions without applying them', false)
     .action(async (opts: { dryRun: boolean }) => {
-      logger.banner();
       const cwd = process.cwd();
+      const rollbackResult = await runRollback(cwd, opts);
+      if (isJsonMode()) {
+        printJsonAndExit('rollback', rollbackResult);
+        return;
+      }
+      logger.banner();
       if (opts.dryRun) {
         logger.warn('DRY-RUN mode: previewing rollback actions without modifying files.');
       }
-      const rollbackResult = await runRollback(cwd, opts);
       if (rollbackResult.restored.length === 0 && rollbackResult.removed.length === 0) {
         logger.info('No backups or created files found to rollback.');
       } else {
@@ -415,10 +580,34 @@ export function createProgram(): Command {
   program
     .command('doctor')
     .description('Check project health')
-    .action(() => {
+    .option('--fix', 'Automatically repair safe issues (hooks, dependabot, skills, .helenrc)', false)
+    .action(async (opts: { fix?: boolean }) => {
       const cwd = process.cwd();
       const project = detectProject(cwd);
-      printDoctorResults([...runDoctor(cwd), ...runAgentDoctor(cwd)], project);
+      let fixReport = null;
+      if (opts.fix) {
+        const { repairDoctorIssues } = await import('./core/doctorFix.js');
+        fixReport = repairDoctorIssues(cwd);
+      }
+      const issues = [...runDoctor(cwd), ...runAgentDoctor(cwd)];
+      if (isJsonMode()) {
+        const errorCount = issues.filter(i => i.status === 'error').length;
+        const warnCount = issues.filter(i => i.status === 'warn').length;
+        const exitCode = errorCount > 0 ? 1 : warnCount > 0 ? 2 : 0;
+        printJsonAndExit('doctor', { project, issues, fixReport }, {
+          ok: errorCount === 0,
+          exitCode,
+        });
+        return;
+      }
+      if (fixReport && fixReport.fixed.length > 0) {
+        logger.section('Auto-Fix Remediation Applied');
+        for (const item of fixReport.fixed) {
+          logger.success(`Fixed: ${item}`);
+        }
+        logger.blank();
+      }
+      printDoctorResults(issues, project);
     });
 
   // helen dry-run
@@ -426,11 +615,15 @@ export function createProgram(): Command {
     .command('dry-run')
     .description('Preview all modules without writing anything')
     .action(async () => {
-      logger.banner();
       const cwd = process.cwd();
       const ctx = buildContext(cwd, { dryRun: true });
-      logger.info('DRY-RUN: previewing all modules...');
       const results = await runModules(getAllModuleIds(), ctx);
+      if (isJsonMode()) {
+        printJsonAndExit('dry-run', { results });
+        return;
+      }
+      logger.banner();
+      logger.info('DRY-RUN: previewing all modules...');
       printSummary(results, ctx);
     });
 
@@ -440,6 +633,10 @@ export function createProgram(): Command {
     .description('Show documentation for all modules')
     .action(() => {
       const modules = getAllModules();
+      if (isJsonMode()) {
+        printJsonAndExit('docs', { modules: modules.map(m => m.meta) });
+        return;
+      }
       for (const mod of modules) {
         printModuleExplanation(mod);
         console.log('─'.repeat(70));
@@ -451,6 +648,10 @@ export function createProgram(): Command {
     .command('prompts')
     .description('Browse reusable project prompts, atomic steps, checkpoints, and executable flows')
     .action(() => {
+      if (isJsonMode()) {
+        printJsonAndExit('prompts', { prompts: listPromptEntries().map(e => ({ id: shortId(e), fullId: e.id, summary: e.summary, kind: e.kind })) });
+        return;
+      }
       printPromptList();
     });
 
@@ -459,6 +660,23 @@ export function createProgram(): Command {
     .description('List available prompts and flows')
     .option('--kind <kind>', 'Filter by kind: master, guide, flow, checkpoint, prompt')
     .action((opts: { kind?: PromptKind }) => {
+      const entries = listPromptEntries().filter(entry => !opts.kind || entry.kind === opts.kind);
+      if (isJsonMode()) {
+        printJsonAndExit('prompts:list', {
+          kind: opts.kind ?? 'all',
+          count: entries.length,
+          prompts: entries.map(e => ({
+            id: shortId(e),
+            fullId: e.id,
+            kind: e.kind,
+            phase: e.phase,
+            action: e.action,
+            summary: e.summary,
+            path: e.relativePath,
+          })),
+        });
+        return;
+      }
       printPromptList(opts.kind);
     });
 
@@ -466,7 +684,24 @@ export function createProgram(): Command {
     .command('search <words...>')
     .description('Find prompts by words in their id, title, summary or aliases')
     .action((words: string[]) => {
-      const results = searchPrompts(words.join(' '));
+      const query = words.join(' ');
+      const results = searchPrompts(query);
+      if (isJsonMode()) {
+        printJsonAndExit('prompts:search', {
+          query,
+          count: results.length,
+          results: results.map(e => ({
+            id: shortId(e),
+            fullId: e.id,
+            kind: e.kind,
+            phase: e.phase,
+            action: e.action,
+            summary: e.summary,
+            path: e.relativePath,
+          })),
+        });
+        return;
+      }
       if (results.length === 0) {
         logger.warn('No prompt matches. Try other words or: helen prompts list');
         return;
@@ -481,6 +716,10 @@ export function createProgram(): Command {
     .description('Regenerate the prompt index in every phase README from prompt frontmatter')
     .action(() => {
       const changed = updatePhaseIndexes(true);
+      if (isJsonMode()) {
+        printJsonAndExit('prompts:index', { changed });
+        return;
+      }
       logger.success(changed.length ? `Updated: ${changed.join(', ')}` : 'All phase indexes are up to date.');
     });
 
@@ -494,22 +733,95 @@ export function createProgram(): Command {
   prompts
     .command('show <prompt>')
     .description('Print a prompt, step, checkpoint, or flow')
-    .action((prompt: string) => {
+    .option('--fill <pairs...>', 'Fill variables in format key=value')
+    .option('--reply-lang <lang>', 'Target language for the AI response (e.g. es, en, fr)')
+    .action((promptName: string, opts: { fill?: string[]; replyLang?: string }) => {
       try {
-        printPromptContent(prompt);
+        const entry = resolvePromptEntry(promptName);
+        const fillDict: Record<string, string> = {};
+        if (opts.fill) {
+          for (const pair of opts.fill) {
+            const [k, ...rest] = pair.split('=');
+            if (k && rest.length > 0) fillDict[k] = rest.join('=');
+          }
+        }
+        const content = readPrompt(promptName, undefined, { fill: Object.keys(fillDict).length ? fillDict : undefined, replyLang: opts.replyLang });
+        if (isJsonMode()) {
+          printJsonAndExit('prompts:show', {
+            id: shortId(entry),
+            fullId: entry.id,
+            kind: entry.kind,
+            summary: entry.summary,
+            path: entry.relativePath,
+            content,
+          });
+          return;
+        }
+        console.log(content);
       } catch (err) {
+        if (isJsonMode()) {
+          printJsonAndExit('prompts:show', {}, {
+            ok: false,
+            errors: [err instanceof Error ? err.message : String(err)],
+            exitCode: 1,
+          });
+          return;
+        }
         logger.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;
       }
     });
 
   prompts
+    .command('overlaps')
+    .description('Identify overlapping prompts by word-set Jaccard similarity')
+    .option('--threshold <val>', 'Similarity threshold between 0.0 and 1.0', '0.45')
+    .action((opts: { threshold: string }) => {
+      const thresh = parseFloat(opts.threshold) || 0.45;
+      const overlaps = findPromptOverlaps(undefined, thresh);
+      if (isJsonMode()) {
+        printJsonAndExit('prompts:overlaps', {
+          threshold: thresh,
+          count: overlaps.length,
+          overlaps,
+        });
+        return;
+      }
+      if (overlaps.length === 0) {
+        logger.success(`No prompt overlaps found above ${thresh * 100}% similarity.`);
+        return;
+      }
+      logger.section(`Prompt Overlaps (>= ${thresh * 100}%)`);
+      for (const o of overlaps) {
+        console.log(`  ${o.promptA} <-> ${o.promptB} (${Math.round(o.similarity * 100)}%)`);
+      }
+    });
+
+  prompts
     .command('path <prompt>')
     .description('Print the absolute path to a prompt, step, checkpoint, or flow')
-    .action((prompt: string) => {
+    .action((promptName: string) => {
       try {
-        printPromptPath(prompt);
+        const entry = resolvePromptEntry(promptName);
+        if (isJsonMode()) {
+          printJsonAndExit('prompts:path', {
+            id: shortId(entry),
+            fullId: entry.id,
+            absolutePath: entry.absolutePath,
+            relativePath: entry.relativePath,
+          });
+          return;
+        }
+        printPromptPath(promptName);
       } catch (err) {
+        if (isJsonMode()) {
+          printJsonAndExit('prompts:path', {}, {
+            ok: false,
+            errors: [err instanceof Error ? err.message : String(err)],
+            exitCode: 1,
+          });
+          return;
+        }
         logger.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;
       }
@@ -520,8 +832,28 @@ export function createProgram(): Command {
     .description('Print an executable flow such as full-polish, release-candidate, or client-delivery')
     .action((flow: string) => {
       try {
+        const entry = resolvePromptEntry(flow);
+        const content = readPrompt(flow);
+        if (isJsonMode()) {
+          printJsonAndExit('prompts:flow', {
+            id: shortId(entry),
+            fullId: entry.id,
+            kind: entry.kind,
+            path: entry.relativePath,
+            content,
+          });
+          return;
+        }
         printPromptContent(flow);
       } catch (err) {
+        if (isJsonMode()) {
+          printJsonAndExit('prompts:flow', {}, {
+            ok: false,
+            errors: [err instanceof Error ? err.message : String(err)],
+            exitCode: 1,
+          });
+          return;
+        }
         logger.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;
       }
@@ -535,9 +867,41 @@ export function createProgram(): Command {
     .action((opts: { short: boolean }) => {
       try {
         const progress = readProgress(process.cwd());
-        if (!progress) throw new Error('Nothing is being tracked. Start with: helen apply <goal> --track');
+        if (!progress) {
+          if (isJsonMode()) {
+            printJsonAndExit('next', { progress: null }, {
+              ok: false,
+              errors: ['Nothing is being tracked. Start with: helen apply <goal> --track'],
+              exitCode: 1,
+            });
+            return;
+          }
+          throw new Error('Nothing is being tracked. Start with: helen apply <goal> --track');
+        }
+        const idx = currentIndex(progress);
+        const currentStep = idx !== -1 ? progress.steps[idx] : null;
+        if (isJsonMode()) {
+          printJsonAndExit('next', {
+            goal: progress.goal,
+            title: progress.title,
+            phase: progress.phase,
+            currentIndex: idx,
+            totalSteps: progress.steps.length,
+            step: currentStep,
+            progress,
+          });
+          return;
+        }
         console.log(formatNext(progress, !opts.short));
       } catch (err) {
+        if (isJsonMode()) {
+          printJsonAndExit('next', {}, {
+            ok: false,
+            errors: [err instanceof Error ? err.message : String(err)],
+            exitCode: 1,
+          });
+          return;
+        }
         logger.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;
       }
@@ -549,10 +913,28 @@ export function createProgram(): Command {
     .option('--force', 'Allow a checkpoint without a passing check (say why in the note)', false)
     .action((note: string[], opts: { force: boolean }) => {
       try {
-        console.log(formatStatus(markDone(process.cwd(), note.join(' ') || undefined, opts.force)));
+        const progress = markDone(process.cwd(), note.join(' ') || undefined, opts.force);
+        if (isJsonMode()) {
+          printJsonAndExit('done', {
+            progress,
+            completedStepIndex: currentIndex(progress) === -1 ? progress.steps.length - 1 : currentIndex(progress) - 1,
+          });
+          return;
+        }
+        console.log(formatStatus(progress));
       } catch (err) {
-        logger.error(err instanceof Error ? err.message : String(err));
-        process.exitCode = 1;
+        const msg = err instanceof Error ? err.message : String(err);
+        const isCheckpoint = msg.toLowerCase().includes('checkpoint');
+        if (isJsonMode()) {
+          printJsonAndExit('done', {}, {
+            ok: false,
+            errors: [msg],
+            exitCode: isCheckpoint ? 3 : 1,
+          });
+          return;
+        }
+        logger.error(msg);
+        process.exitCode = isCheckpoint ? 3 : 1;
       }
     });
 
@@ -561,8 +943,21 @@ export function createProgram(): Command {
     .description('Skip the current step, recording why')
     .action((reason: string[]) => {
       try {
-        console.log(formatStatus(skipStep(process.cwd(), reason.join(' '))));
+        const progress = skipStep(process.cwd(), reason.join(' '));
+        if (isJsonMode()) {
+          printJsonAndExit('skip', { progress });
+          return;
+        }
+        console.log(formatStatus(progress));
       } catch (err) {
+        if (isJsonMode()) {
+          printJsonAndExit('skip', {}, {
+            ok: false,
+            errors: [err instanceof Error ? err.message : String(err)],
+            exitCode: 1,
+          });
+          return;
+        }
         logger.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;
       }
@@ -573,6 +968,13 @@ export function createProgram(): Command {
     .description('Show progress of the tracked plan')
     .action(() => {
       const progress = readProgress(process.cwd());
+      if (isJsonMode()) {
+        printJsonAndExit('status', {
+          tracking: progress !== null,
+          progress,
+        });
+        return;
+      }
       console.log(progress ? formatStatus(progress) : 'Nothing is being tracked. Start with: helen apply <goal> --track');
     });
 
@@ -581,29 +983,68 @@ export function createProgram(): Command {
     .description("Run the project's own typecheck, lint, test and build scripts as a gate")
     .action(() => {
       const run = runChecks(process.cwd());
+      if (isJsonMode()) {
+        printJsonAndExit('check', {
+          ok: run.ok,
+          at: run.at,
+          results: run.results,
+        }, {
+          ok: run.ok,
+          exitCode: run.ok ? 0 : 3, // checkpoint failure code 3
+        });
+        return;
+      }
       if (run.results.length === 0) {
         logger.warn('No typecheck, lint, test or build scripts found in package.json.');
       }
       run.ok ? logger.success('Checks passed.') : logger.error('Checks failed.');
-      process.exitCode = run.ok ? 0 : 1;
+      process.exitCode = run.ok ? 0 : 3;
     });
 
   // helen setup
   program
     .command('setup')
     .description('One command: install HELEN skills for your agents and add HELEN instructions to AGENTS.md / CLAUDE.md')
-    .option('--agents <agents...>', 'claude, codex, antigravity', ['claude', 'codex', 'antigravity'])
+    .option('--agents <agents...>', 'claude, codex, antigravity (auto-detected if omitted)')
+    .option('--global', 'Install skills globally to user agent directories (~/.claude, ~/.gemini)', false)
     .option('--flows', 'Also install every executable flow as a skill', false)
     .option('--dry-run', 'Preview without writing files', false)
     .option('--force', 'Overwrite existing skill files', false)
-    .action((opts: { agents: string[]; flows: boolean; dryRun: boolean; force: boolean }) => {
+    .action((opts: { agents?: string[]; flows: boolean; dryRun: boolean; force: boolean; global: boolean }) => {
       try {
-        const invalid = opts.agents.filter(agent => !['claude', 'codex', 'antigravity'].includes(agent));
+        const targetAgents = opts.agents && opts.agents.length > 0 ? opts.agents : detectInstalledAgents();
+        const invalid = targetAgents.filter(agent => !['claude', 'codex', 'antigravity'].includes(agent));
         if (invalid.length > 0) throw new Error(`Unknown agent(s): ${invalid.join(', ')}. Valid: claude, codex, antigravity`);
-        const result = setupProject({ cwd: process.cwd(), agents: opts.agents as SetupAgent[], flows: opts.flows, dryRun: opts.dryRun, force: opts.force });
+        const result = setupProject({
+          cwd: process.cwd(),
+          agents: targetAgents as SetupAgent[],
+          flows: opts.flows,
+          dryRun: opts.dryRun,
+          force: opts.force,
+          global: opts.global,
+        });
+        if (isJsonMode()) {
+          printJsonAndExit('setup', {
+            agents: targetAgents,
+            global: opts.global,
+            flows: opts.flows,
+            skillsCreated: result.skills.created,
+            skillsSkipped: result.skills.skipped,
+            instructions: result.instructionFiles,
+          });
+          return;
+        }
         logger.success(`Skills: ${result.skills.created.length} created, ${result.skills.skipped.length} already there. Instructions: ${result.instructionFiles.join(', ')}.`);
         console.log('\nNext: tell your AI "Use HELEN: analyze where the project is and what to apply", or run: helen apply');
       } catch (err) {
+        if (isJsonMode()) {
+          printJsonAndExit('setup', {}, {
+            ok: false,
+            errors: [err instanceof Error ? err.message : String(err)],
+            exitCode: 1,
+          });
+          return;
+        }
         logger.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;
       }
@@ -612,7 +1053,7 @@ export function createProgram(): Command {
   // helen lint
   program
     .command('lint')
-    .description('Validate the whole HELEN library: prompts, indexes, playbooks, skills and catalog')
+    .description('Validate the whole HELEN library: prompts, indexes, playbooks, skills, catalog and evals')
     .action(() => {
       process.exitCode = runLint();
     });
@@ -622,7 +1063,12 @@ export function createProgram(): Command {
     .command('guide')
     .description('Print the user guide: what prompts, skills, catalog and playbooks are and how to use them')
     .action(() => {
-      console.log(readGuide());
+      const guideText = readGuide();
+      if (isJsonMode()) {
+        printJsonAndExit('guide', { guide: guideText });
+        return;
+      }
+      console.log(guideText);
     });
 
   // helen apply
@@ -631,35 +1077,129 @@ export function createProgram(): Command {
     .description('Analyze the project, detect its phase, and plan which HELEN prompts, skills and tools to use for a goal (e.g. "design", "release", "mejora el diseño")')
     .option('--brief', 'Print a paste-ready brief for an AI agent instead of the plan', false)
     .option('--track', 'Follow the plan step by step: then use helen next / done / skip / status / check', false)
+    .option('--auto', 'Run in semi-autonomous mode: verify checkpoints automatically and execute steps', false)
     .option('--force', 'With --track: restart even if another plan is in progress', false)
     .option('--install', 'Install the bundled skills the goal needs into --target', false)
     .option('--target <targets...>', 'Where to install skills: claude, codex, custom', ['claude'])
     .option('--dir <path>', 'Project-relative directory for the "custom" target')
-    .action((goalWords: string[], opts: { brief: boolean; track: boolean; force: boolean; install: boolean; target: string[]; dir?: string }) => {
+    .action(async (goalWords: string[], opts: { brief: boolean; track: boolean; auto: boolean; force: boolean; install: boolean; target: string[]; dir?: string }) => {
       try {
         const playbooks = readPlaybooks();
         const cwd = process.cwd();
         if (goalWords.length === 0) {
           const detection = detectPhase(cwd);
+          const suggested = suggestedGoals(detection.phase, playbooks);
+          if (isJsonMode()) {
+            printJsonAndExit('apply', {
+              detection,
+              suggestedGoals: suggested,
+              goals: Object.entries(playbooks.goals).map(([id, g]) => ({ id, title: g.title, description: g.description, keywords: g.keywords })),
+            });
+            return;
+          }
           console.log(`Detected phase: ${detection.phase} (confidence ${detection.confidence}; estimate, please confirm)`);
           console.log(`Evidence: ${detection.evidence.join('; ')}`);
-          console.log(`Suggested goals for this phase: ${suggestedGoals(detection.phase, playbooks).join(', ')}`);
+          console.log(`Suggested goals for this phase: ${suggested.join(', ')}`);
           console.log('\nAll goals:');
           for (const [id, goal] of Object.entries(playbooks.goals)) console.log(`  ${id.padEnd(13)} ${goal.title}`);
           console.log('\nRun: helen apply <goal>   (add --brief for an AI-ready brief, --install to install the needed skills)');
           return;
         }
+
         const plan = buildPlan(cwd, goalWords.join(' '), playbooks);
+
+        if (opts.auto) {
+          const { startProgress: startProg, currentIndex: currIdx, markDone: doneStep, runChecks: checksRunner } = await import('./core/progress.js');
+          let prog = startProg(cwd, plan, true);
+          logger.section(`Autonomous Execution: ${plan.goal.title}`);
+          const autoLogs: string[] = [];
+
+          let idx = currIdx(prog);
+          while (idx !== -1) {
+            const currentStep = prog.steps[idx]!;
+
+            if (currentStep.kind === 'checkpoint') {
+              logger.info(`Checking gate: ${currentStep.ref}...`);
+              const checkRun = checksRunner(cwd);
+              if (!checkRun.ok) {
+                const failed = checkRun.results.filter(r => !r.ok).map(r => r.script).join(', ');
+                const errMsg = `Autonomous stop: checkpoint verification failed on scripts [${failed}].`;
+                if (isJsonMode()) {
+                  printJsonAndExit('apply', { plan, progress: prog, failedCheckpoint: currentStep }, {
+                    ok: false,
+                    errors: [errMsg],
+                    exitCode: 3,
+                  });
+                  return;
+                }
+                logger.error(errMsg);
+                process.exitCode = 3;
+                return;
+              }
+              prog = doneStep(cwd, 'Auto-verified quality gate');
+              autoLogs.push(`Verified checkpoint: ${currentStep.ref}`);
+              logger.success(`Passed checkpoint: ${currentStep.ref}`);
+            } else {
+              prog = doneStep(cwd, `Auto-staged step (${currentStep.kind}: ${currentStep.ref})`);
+              autoLogs.push(`Staged: ${currentStep.kind} ${currentStep.ref}`);
+              logger.success(`Staged: ${currentStep.kind} ${currentStep.ref}`);
+            }
+            idx = currIdx(prog);
+          }
+
+          if (isJsonMode()) {
+            printJsonAndExit('apply', {
+              plan,
+              progress: prog,
+              autoLogs,
+              completed: true,
+            });
+            return;
+          }
+          logger.success(`Autonomous execution of goal "${plan.goalId}" completed successfully!`);
+          return;
+        }
+
+        let progress = null;
+        if (opts.track) {
+          progress = startProgress(cwd, plan, opts.force);
+        }
+
+        let installedSkillsResult = null;
+        if (opts.install && plan.missingSkills.length > 0) {
+          installedSkillsResult = installSkills({
+            cwd,
+            targets: opts.target as SkillTarget[],
+            customDir: opts.dir,
+            skills: plan.missingSkills,
+          });
+        }
+
+        if (isJsonMode()) {
+          printJsonAndExit('apply', {
+            plan,
+            tracking: progress,
+            installedSkills: installedSkillsResult,
+          });
+          return;
+        }
+
         console.log(opts.brief ? formatBrief(plan) : formatPlan(plan));
         if (opts.track) {
-          startProgress(cwd, plan, opts.force);
           console.log('\nTracking started (.helen/progress.json; add .helen/ to .gitignore if you do not want it in git). Next: helen next');
         }
-        if (opts.install && plan.missingSkills.length > 0) {
-          const result = installSkills({ cwd, targets: opts.target as SkillTarget[], customDir: opts.dir, skills: plan.missingSkills });
-          logger.success(`Skills: ${result.created.length} created, ${result.skipped.length} skipped.`);
+        if (installedSkillsResult) {
+          logger.success(`Skills: ${installedSkillsResult.created.length} created, ${installedSkillsResult.skipped.length} skipped.`);
         }
       } catch (err) {
+        if (isJsonMode()) {
+          printJsonAndExit('apply', {}, {
+            ok: false,
+            errors: [err instanceof Error ? err.message : String(err)],
+            exitCode: 1,
+          });
+          return;
+        }
         logger.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;
       }
@@ -675,7 +1215,18 @@ export function createProgram(): Command {
     .description('List bundled skills (add --flows to include prompt flows)')
     .option('--flows', 'Include executable prompt flows as skills', false)
     .action((opts: { flows: boolean }) => {
-      for (const skill of [...listSkills(), ...(opts.flows ? listFlowSkills() : [])]) {
+      const skillsList = [...listSkills(), ...(opts.flows ? listFlowSkills() : [])];
+      if (isJsonMode()) {
+        printJsonAndExit('skills:list', {
+          count: skillsList.length,
+          skills: skillsList.map(s => ({
+            name: s.name,
+            isFlow: s.name.startsWith('helen-flow-'),
+          })),
+        });
+        return;
+      }
+      for (const skill of skillsList) {
         console.log(skill.name);
       }
     });
@@ -704,8 +1255,24 @@ export function createProgram(): Command {
           dryRun: opts.dryRun,
           force: opts.force,
         });
+        if (isJsonMode()) {
+          printJsonAndExit('skills:install', {
+            created: result.created,
+            overwritten: result.overwritten,
+            skipped: result.skipped,
+          });
+          return;
+        }
         logger.success(`Skills: ${result.created.length} created, ${result.overwritten.length} overwritten, ${result.skipped.length} skipped.`);
       } catch (err) {
+        if (isJsonMode()) {
+          printJsonAndExit('skills:install', {}, {
+            ok: false,
+            errors: [err instanceof Error ? err.message : String(err)],
+            exitCode: 1,
+          });
+          return;
+        }
         logger.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;
       }
@@ -717,6 +1284,14 @@ export function createProgram(): Command {
     .option('--dry-run', 'Preview without writing files', false)
     .action((opts: { dryRun: boolean }) => {
       const result = updateAgentSetup(process.cwd(), opts.dryRun);
+      if (isJsonMode()) {
+        printJsonAndExit('skills:update', {
+          dryRun: opts.dryRun,
+          updatedSkills: result.skills,
+          updatedInstructions: result.instructionFiles,
+        });
+        return;
+      }
       if (result.skills.length === 0 && result.instructionFiles.length === 0) {
         logger.success('Everything is already up to date.');
         return;
@@ -729,6 +1304,13 @@ export function createProgram(): Command {
     .description('Show which skills are installed in this project')
     .action(() => {
       const names = installedSkillNames(process.cwd());
+      if (isJsonMode()) {
+        printJsonAndExit('skills:installed', {
+          count: names.length,
+          installed: names,
+        });
+        return;
+      }
       console.log(names.length > 0 ? names.join('\n') : 'No skills installed in .claude/skills or .agents/skills.');
     });
 
@@ -737,9 +1319,65 @@ export function createProgram(): Command {
     .description('List recommended third-party skills and tools (HELEN never installs them for you)')
     .option('--category <category>', 'Filter: design, quality, copy, seo, motion, components, verify, deploy, workflow, docs, data')
     .option('--kind <kind>', 'Filter: skill, plugin, cli, reference, service, mcp')
-    .action((opts: { category?: string; kind?: string }) => {
-      for (const item of listCatalog(opts.category, undefined, opts.kind)) {
+    .option('--check', 'Check catalog health, freshness, and flag discontinued tools', false)
+    .action((opts: { category?: string; kind?: string; check?: boolean }) => {
+      if (opts.check) {
+        const health = checkCatalogHealth();
+        if (isJsonMode()) {
+          printJsonAndExit('skills:catalog:check', health);
+          return;
+        }
+        logger.section('Catalog Health & Verification');
+        logger.info(`Total items: ${health.total} (${health.active} active, ${health.caution} caution, ${health.discontinued} discontinued)`);
+        if (health.issues.length === 0) {
+          logger.success('All catalog entries pass validation.');
+        } else {
+          for (const issue of health.issues) {
+            console.log(`  [${issue.level.toUpperCase()}] ${issue.id}: ${issue.message}`);
+          }
+        }
+        return;
+      }
+
+      const items = listCatalog(opts.category, undefined, opts.kind);
+      if (isJsonMode()) {
+        printJsonAndExit('skills:catalog', {
+          count: items.length,
+          items,
+        });
+        return;
+      }
+      for (const item of items) {
         console.log(`${item.id.padEnd(22)} ${item.category.padEnd(11)} ${item.kind.padEnd(10)} ${item.status.padEnd(12)} ${item.summary}`);
+      }
+    });
+
+  skills
+    .command('compare <id1> <id2>')
+    .description('Compare features, licenses, and overlapping capabilities between two catalog tools')
+    .action((id1: string, id2: string) => {
+      try {
+        const comp = compareCatalogItems(id1, id2);
+        if (isJsonMode()) {
+          printJsonAndExit('skills:compare', comp);
+          return;
+        }
+        logger.section(`Catalog Comparison: ${comp.item1.name} vs ${comp.item2.name}`);
+        console.log(`Category: ${comp.item1.category} ${comp.sameCategory ? '(Match)' : `vs ${comp.item2.category}`}`);
+        console.log(`Kind:     ${comp.item1.kind} ${comp.sameKind ? '(Match)' : `vs ${comp.item2.kind}`}`);
+        console.log(`License:  ${comp.item1.license} vs ${comp.item2.license}`);
+        console.log(`Shared Phases: ${comp.sharedPhases.join(', ') || 'None'}`);
+      } catch (err) {
+        if (isJsonMode()) {
+          printJsonAndExit('skills:compare', {}, {
+            ok: false,
+            errors: [err instanceof Error ? err.message : String(err)],
+            exitCode: 1,
+          });
+          return;
+        }
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
       }
     });
 
@@ -749,6 +1387,10 @@ export function createProgram(): Command {
     .action((id: string) => {
       try {
         const item = getCatalogItem(id);
+        if (isJsonMode()) {
+          printJsonAndExit('skills:external', { item });
+          return;
+        }
         console.log(`${item.name} [${item.kind}, ${item.status}]`);
         if (item.status === 'discontinued') console.log('WARNING: discontinued. Do not install.');
         console.log(item.summary);
@@ -759,6 +1401,14 @@ export function createProgram(): Command {
         for (const command of item.install) console.log(`  ${command}`);
         if (item.notes) console.log(`\nNote: ${item.notes}`);
       } catch (err) {
+        if (isJsonMode()) {
+          printJsonAndExit('skills:external', {}, {
+            ok: false,
+            errors: [err instanceof Error ? err.message : String(err)],
+            exitCode: 1,
+          });
+          return;
+        }
         logger.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;
       }
@@ -801,6 +1451,127 @@ export function createProgram(): Command {
     .action(async () => {
       const { runEnekoRuizArt } = await import('./core/cinematicArt.js');
       await runEnekoRuizArt();
+    });
+
+  // helen report
+  program
+    .command('report')
+    .description('Generate an interactive HTML dashboard and project health report')
+    .option('--open', 'Open the generated report in your default browser', false)
+    .action(async (opts: { open?: boolean }) => {
+      const cwd = process.cwd();
+      const { writeReport, openInBrowser } = await import('./core/report.js');
+      const { data, filePath } = writeReport(cwd);
+      if (isJsonMode()) {
+        printJsonAndExit('report', data);
+        return;
+      }
+      logger.section('HELEN Project Report');
+      logger.success(`Dashboard generated: ${filePath}`);
+      logger.info(`Phase: ${data.phase.current} (${data.phase.progressPercentage}% done)`);
+      logger.info(`Health: ${data.health.passed}/${data.health.total} checks passing`);
+      if (opts.open) {
+        openInBrowser(filePath);
+      } else {
+        logger.info(`To view in browser, run with --open or open: ${filePath}`);
+      }
+    });
+
+  // helen token-budget
+  program
+    .command('token-budget [target]')
+    .description('Estimate token usage and costs across AI models for prompts and playbooks')
+    .action(async (target?: string) => {
+      const { computeTokenBudget, printTokenBudget } = await import('./core/tokenBudget.js');
+      const summary = computeTokenBudget(target);
+      if (isJsonMode()) {
+        printJsonAndExit('token-budget', summary);
+        return;
+      }
+      printTokenBudget(summary);
+    });
+
+  // helen mcp
+  program
+    .command('mcp')
+    .description('Start the HELEN Model Context Protocol (MCP) server over stdio')
+    .action(async () => {
+      const { startMcpServer } = await import('./core/mcp.js');
+      startMcpServer(process.stdin, process.stdout);
+    });
+
+  // helen config
+  program
+    .command('config [key] [value]')
+    .description('Inspect or update configuration settings in .helenrc')
+    .action(async (key?: string, value?: string) => {
+      const cwd = process.cwd();
+      const conf = readConfig(cwd) || {};
+
+      if (!key) {
+        if (isJsonMode()) {
+          printJsonAndExit('config', { config: conf });
+          return;
+        }
+        console.log(JSON.stringify(conf, null, 2));
+        return;
+      }
+
+      if (value === undefined) {
+        const val = getConfigValue(cwd, key);
+        if (isJsonMode()) {
+          printJsonAndExit('config', { key, value: val });
+          return;
+        }
+        console.log(val !== undefined ? val : `(not set)`);
+        return;
+      }
+
+      setConfigValue(cwd, key, value);
+      if (isJsonMode()) {
+        printJsonAndExit('config', { key, value, updated: true });
+        return;
+      }
+      logger.success(`Updated ${key} = ${value}`);
+    });
+
+  // helen completion
+  program
+    .command('completion [shell]')
+    .description('Generate shell autocompletion script (bash, zsh, fish, powershell)')
+    .action((shell = 'bash') => {
+      const cmds = program.commands.map(c => c.name()).join(' ');
+      const goals = Object.keys(readPlaybooks().goals).join(' ');
+      let script = '';
+      if (shell === 'bash') {
+        script = `_helen_completions() {\n  local cur="\${COMP_WORDS[COMP_CWORD]}"\n  local prev="\${COMP_WORDS[COMP_CWORD-1]}"\n  if [[ "$prev" == "helen" ]]; then\n    COMPREPLY=( $(compgen -W "${cmds}" -- "$cur") )\n  elif [[ "$prev" == "apply" ]]; then\n    COMPREPLY=( $(compgen -W "${goals}" -- "$cur") )\n  fi\n}\ncomplete -F _helen_completions helen`;
+      } else if (shell === 'zsh') {
+        script = `#compdef helen\n_arguments "1: :(${cmds})" "*: :(${goals})"`;
+      } else if (shell === 'fish') {
+        script = `complete -c helen -n "__fish_use_subcommand" -a "${cmds}"\ncomplete -c helen -n "__fish_seen_subcommand_from apply" -a "${goals}"`;
+      } else {
+        script = `Register-ArgumentCompleter -Native -CommandName helen -ScriptBlock {\n  param($wordToComplete, $commandAst, $cursorPosition)\n  '${cmds}' -split ' ' | Where-Object { $_ -like "$wordToComplete*" }\n}`;
+      }
+      if (isJsonMode()) {
+        printJsonAndExit('completion', { shell, script });
+        return;
+      }
+      console.log(script);
+    });
+
+  // helen uninstall
+  program
+    .command('uninstall')
+    .description('Cleanly remove installed HELEN skills, instructions, and configuration')
+    .option('--dry-run', 'Preview changes without modifying filesystem', false)
+    .action(async (opts: { dryRun: boolean }) => {
+      const res = uninstallProject({ cwd: process.cwd(), dryRun: opts.dryRun });
+      if (isJsonMode()) {
+        printJsonAndExit('uninstall', res);
+        return;
+      }
+      logger.success(`Removed instructions from: ${res.cleanedInstructions.join(', ') || 'none'}`);
+      logger.success(`Removed skills: ${res.removedSkills.length}`);
     });
 
   return program;

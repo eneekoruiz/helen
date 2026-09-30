@@ -29,6 +29,36 @@
         "Suggests native alternatives (CSS scroll snap, scroll-driven animations) or a restrained approach",
         "Mentions touch devices / keyboard users / reduced motion"
       ]
+    },
+    {
+      "id": "page-transition-motion",
+      "prompt": "We want to implement smooth page transitions in our React Next.js application using Framer Motion. How should we handle layout shift, exit animations, and accessibility? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Uses AnimatePresence with mode='wait' or proper keying to avoid layout shifts",
+        "Uses transform and opacity rather than animating dimensions",
+        "Implements useReducedMotion to disable or simplify transitions for users requesting reduced motion",
+        "Keeps transition duration snappy (under 400ms)"
+      ]
+    },
+    {
+      "id": "sql-index-types",
+      "expectTrigger": false,
+      "prompt": "Explain the difference between B-tree, Hash, and GIN indexes in PostgreSQL. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains B-tree for comparison and range queries",
+        "Explains Hash for equality lookups",
+        "Explains GIN for composite types, arrays, or full text search"
+      ]
+    },
+    {
+      "id": "jwt-refresh-flow",
+      "expectTrigger": false,
+      "prompt": "How should a client store and rotate JWT access and refresh tokens securely in a web application? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Recommends httpOnly secure cookies for refresh tokens",
+        "Recommends short-lived access tokens stored in memory",
+        "Explains token rotation on refresh to detect reuse"
+      ]
     }
   ]
 }

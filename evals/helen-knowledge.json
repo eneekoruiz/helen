@@ -32,6 +32,36 @@
         "Is concise rather than a long essay",
         "Contains no secrets"
       ]
+    },
+    {
+      "id": "incident-runbook",
+      "prompt": "When our payment webhook handler fails in production, on-call engineers don't know how to diagnose the queue or safely replay events. What should our operational runbook contain? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Specifies symptoms, alerts, and verification steps to confirm incident",
+        "Details step-by-step mitigation or failover procedure",
+        "Describes safe queue inspection and idempotent replay mechanism",
+        "Includes escalation contacts and post-incident review requirement"
+      ]
+    },
+    {
+      "id": "bubble-sort-python",
+      "expectTrigger": false,
+      "prompt": "Explain how bubble sort works and show an in-place Python implementation. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains adjacent element comparison and swapping",
+        "Shows correct Python code with nested loops",
+        "Mentions O(n^2) time complexity"
+      ]
+    },
+    {
+      "id": "svg-stroke-dashoffset",
+      "expectTrigger": false,
+      "prompt": "How does stroke-dasharray and stroke-dashoffset work in SVG path animations? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains stroke-dasharray creates dashes and gaps",
+        "Explains stroke-dashoffset shifts the starting point of the dash pattern",
+        "Shows CSS transition or keyframes example for line drawing effect"
+      ]
     }
   ]
 }

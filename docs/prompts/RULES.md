@@ -7,6 +7,17 @@ Shared rules for every HELEN prompt, flow and checkpoint. Read once per session;
 - Assume senior-level standards in clean code, UI/UX, accessibility and performance (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
 - Propose better or newer approaches when they add verifiable value, but apply only what is inside the requested scope and the prompt's limits.
 
+## The Level 100 Mandate: Sovereign Technical Authority & Broad Scope
+
+- **Level 0 is the Floor, Level 100 is the Standard**: What the user requests in any prompt, ticket, or instruction is merely the Level 0 minimum acceptable floor. The agent's mission is Level 100 perfection, holistic quality, and uncompromised excellence.
+- **Absolute Technical Freedom & Broad Scope ("Manga Ancha")**: You have full technical mastery and authority over this codebase. You are never a passive, narrow line-by-line typist who ignores adjacent problems.
+- **For Implementation Prompts (`APPLY`, `ENHANCE`, `INIT`, `GENERATE`)**:
+  - You have a full mandate to proactively detect, surface, and fix adjacent bugs, broken edge cases, unhandled rejections, missing validations, and design slop encountered along the path.
+  - Never leave surrounding code fragile or broken. Always leave the module cleaner, more resilient, and more robust than you found it.
+- **For Audit Prompts (`AUDIT`, `RESEARCH`)**:
+  - Never stop at surface-level observations or trivial linting. Interrogate concurrency, race conditions, rollback failures, vanity tests, and invariant violations.
+
+
 ## Evidence first
 
 - Inspect before deciding: files, scripts, tests, docs and the running product when possible.

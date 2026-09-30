@@ -30,6 +30,36 @@
         "Recommends fixing or assessing reachability and severity",
         "Suggests documenting accepted residual risk if a fix is not possible"
       ]
+    },
+    {
+      "id": "cors-wildcard-credentials",
+      "prompt": "We configured our Express server with `res.header('Access-Control-Allow-Origin', '*')` and `res.header('Access-Control-Allow-Credentials', 'true')` because frontend cookies were being blocked. Why is this failing and what are the security implications? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains browser CORS specification forbids wildcard origin '*' with credentials 'true'",
+        "Warns about CSRF and unauthorized cross-origin credentialed access if origin is blindly echoed",
+        "Recommends an explicit allowlist of trusted origins",
+        "Recommends validating Origin header against the allowlist"
+      ]
+    },
+    {
+      "id": "react-portal-usage",
+      "expectTrigger": false,
+      "prompt": "How and when should I use ReactDOM.createPortal in a React application? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains rendering children into a DOM node outside the parent hierarchy",
+        "Gives common use cases (modals, tooltips, dialogs)",
+        "Explains event bubbling behavior through React tree despite DOM disconnection"
+      ]
+    },
+    {
+      "id": "css-custom-properties",
+      "expectTrigger": false,
+      "prompt": "How do CSS custom properties (variables) cascade and inherit down the DOM tree? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains inheritance from parent elements or :root",
+        "Explains overriding values in specific subtrees or media queries",
+        "Shows var(--name, fallback) syntax"
+      ]
     }
   ]
 }

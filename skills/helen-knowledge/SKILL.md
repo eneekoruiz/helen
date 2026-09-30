@@ -1,6 +1,7 @@
 ---
 name: helen-knowledge
-description: Use to preserve project knowledge and reduce bus factor - decision logs (ADRs), AI context files, runbooks, ownership of accounts and deployment, onboarding for future developers. Also use when a project will change hands or its owner may leave.
+description: Use when drafting or reviewing Architectural Decision Records (ADRs) and trade-off logs; writing AGENTS.md, AI context files, runbooks, or onboarding documentation; or mitigating bus factor and project handover risks (transferring personal credentials, deployment keys, domain ownership, and undocumented deployment scripts before a team member leaves).
+version: 2.1.0
 ---
 
 # Knowledge Preservation

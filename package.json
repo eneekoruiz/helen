@@ -1,12 +1,24 @@
 {
   "name": "helen-cli",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "HELEN — AI agent workflow kit: phase prompts, agent skills, playbooks and a vetted tool catalog, plus React + Vite + TypeScript scaffolding.",
   "type": "module",
   "bin": {
-    "helen": "./dist/cli.js"
+    "helen": "dist/cli.js",
+    "helen-cli": "dist/cli.js"
   },
   "main": "./dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eneekoruiz/helen.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eneekoruiz/helen/issues"
+  },
+  "homepage": "https://github.com/eneekoruiz/helen#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "files": [
     "dist",
     "templates",
@@ -31,12 +43,13 @@
     "react",
     "vite",
     "typescript",
-    "setup",
-    "boilerplate",
-    "docker",
-    "ci",
-    "seo",
-    "security",
+    "agents",
+    "ai",
+    "skills",
+    "prompts",
+    "playbooks",
+    "guardrails",
+    "scaffolding",
     "dx"
   ],
   "author": "eneekoruiz",
@@ -62,5 +75,10 @@
     "tsx": "^4.23.15",
     "typescript": "^5.6.3",
     "vitest": "^4.1.11"
-  }
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "types": "./dist/index.d.ts"
 }

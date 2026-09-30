@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeFileSafe } from './fs.js';
 import { listPromptEntries } from './prompts.js';
+import { parseFrontmatter } from './frontmatter.js';
 
 /**
  * Skills are folders containing a SKILL.md. Known targets map an agent to the
@@ -76,7 +77,7 @@ export function listFlowSkills(): SkillInfo[] {
     .map((entry): SkillInfo => {
       const raw = fs.readFileSync(entry.absolutePath, 'utf-8');
       const body = raw
-        .replace(/^---\n[\s\S]*?\n---\n+/, '')
+        .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n+/, '')
         .replace(/\[([^\]]+)\]\(([^)]+\.md)\)/g, (_match, label: string, target: string) => {
           const stem = decodeURIComponent(target).split('/').at(-1)!.replace(/\.md$/i, '').toLowerCase();
           return `${label} (\`helen prompts show ${stem}\`)`;
@@ -148,16 +149,18 @@ export function installSkills(options: InstallSkillsOptions, root: string = SKIL
 export function validateSkills(root: string = SKILLS_ROOT): string[] {
   const issues: string[] = [];
   for (const skill of listSkills(root)) {
-    const content = fs.readFileSync(path.join(skill.dir!, 'SKILL.md'), 'utf-8');
-    const match = /^---\nname: (.+)\ndescription: (.+)\n---\n/.exec(content);
-    if (!match) {
+    const raw = fs.readFileSync(path.join(skill.dir!, 'SKILL.md'), 'utf-8');
+    const { data, hasFrontmatter } = parseFrontmatter(raw);
+    if (!hasFrontmatter || !data.name || !data.description) {
       issues.push(`${skill.name}: SKILL.md must start with name and description frontmatter`);
       continue;
     }
-    if (match[1] !== skill.name) issues.push(`${skill.name}: name "${match[1]}" does not match the folder`);
-    if (match[2]!.length > 1024) issues.push(`${skill.name}: description longer than 1024 characters`);
-    if (match[2]!.length < 80) issues.push(`${skill.name}: description too short to trigger reliably (under 80 characters)`);
-    if (content.split('\n').length > 500) issues.push(`${skill.name}: SKILL.md longer than 500 lines; move detail to references/`);
+    const name = String(data.name);
+    const desc = String(data.description);
+    if (name !== skill.name) issues.push(`${skill.name}: name "${name}" does not match the folder`);
+    if (desc.length > 1024) issues.push(`${skill.name}: description longer than 1024 characters`);
+    if (desc.length < 80) issues.push(`${skill.name}: description too short to trigger reliably (under 80 characters)`);
+    if (raw.replace(/\r\n/g, '\n').split('\n').length > 500) issues.push(`${skill.name}: SKILL.md longer than 500 lines; move detail to references/`);
   }
   return issues;
 }

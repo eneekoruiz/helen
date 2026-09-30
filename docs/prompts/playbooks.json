@@ -5,12 +5,16 @@
     "01-start-project": [
       "strategy",
       "design",
+      "landing",
+      "portfolio",
       "connect-tools"
     ],
     "02-building": [
       "quality",
       "security",
       "data",
+      "saas",
+      "ecommerce",
       "autonomy",
       "connect-tools"
     ],
@@ -18,9 +22,14 @@
       "design",
       "copy",
       "motion",
-      "quality"
+      "quality",
+      "landing",
+      "saas",
+      "portfolio",
+      "ecommerce"
     ],
     "04-before-production": [
+      "launch",
       "qa",
       "security",
       "seo-legal"
@@ -28,9 +37,11 @@
     "05-final-audit": [
       "quality",
       "seo-legal",
-      "knowledge"
+      "knowledge",
+      "docs-site"
     ],
     "06-release": [
+      "launch",
       "release",
       "deploy"
     ],
@@ -40,6 +51,7 @@
     ],
     "08-maintenance": [
       "knowledge",
+      "docs-site",
       "safe-install",
       "connect-tools"
     ],
@@ -773,6 +785,286 @@
           "kind": "external",
           "ref": "agentshield",
           "why": "Scan agent configs, hooks and MCP settings"
+        }
+      ]
+    },
+    "launch": {
+      "title": "Comprehensive launch readiness",
+      "description": "Composite goal chaining QA, security hardening, SEO & legal compliance, and release candidate validation.",
+      "keywords": [
+        "launch",
+        "lanzamiento total",
+        "pre-launch",
+        "prelaunch",
+        "production ready",
+        "producción"
+      ],
+      "steps": [
+        {
+          "kind": "checkpoint",
+          "ref": "audit-quality-gates-checkpoint",
+          "why": "Ensure all test and lint gates pass before launch checks"
+        },
+        {
+          "kind": "skill",
+          "ref": "helen-qa-scale",
+          "why": "Adversarial QA and scale resilience"
+        },
+        {
+          "kind": "prompt",
+          "ref": "audit-adversarial-qa-and-edge-cases",
+          "why": "Detect edge cases and failure modes"
+        },
+        {
+          "kind": "skill",
+          "ref": "helen-security",
+          "why": "Security hardening and secrets audit"
+        },
+        {
+          "kind": "flow",
+          "ref": "apply-security-hardening-flow",
+          "why": "Apply security hardening before release"
+        },
+        {
+          "kind": "skill",
+          "ref": "helen-seo-compliance",
+          "why": "SEO, OpenGraph, privacy and compliance"
+        },
+        {
+          "kind": "prompt",
+          "ref": "audit-final-seo",
+          "why": "Final SEO and metadata review"
+        },
+        {
+          "kind": "prompt",
+          "ref": "enhance-privacy-and-legal-readiness",
+          "why": "Privacy policy and cookie compliance"
+        },
+        {
+          "kind": "skill",
+          "ref": "helen-release",
+          "why": "Release validation and changelog preparation"
+        },
+        {
+          "kind": "checkpoint",
+          "ref": "audit-release-readiness-checkpoint",
+          "why": "Final launch readiness gate"
+        }
+      ]
+    },
+    "landing": {
+      "title": "Landing page polish and conversion",
+      "description": "Design craft, clear value proposition, conversion rate optimization (CRO), and performance for high-converting marketing landing pages.",
+      "keywords": [
+        "landing",
+        "marketing",
+        "homepage",
+        "captación",
+        "conversión",
+        "conversion"
+      ],
+      "steps": [
+        {
+          "kind": "skill",
+          "ref": "helen-strategy",
+          "why": "Define value proposition and positioning"
+        },
+        {
+          "kind": "skill",
+          "ref": "helen-premium-design",
+          "why": "Premium aesthetics and visual hierarchy"
+        },
+        {
+          "kind": "skill",
+          "ref": "helen-copy-cro",
+          "why": "Direct, honest copy and conversion architecture"
+        },
+        {
+          "kind": "prompt",
+          "ref": "enhance-copy-and-conversion",
+          "why": "High-converting copy and clear call to action"
+        },
+        {
+          "kind": "prompt",
+          "ref": "apply-basic-performance-pass",
+          "why": "Fast mobile loading and core web vitals"
+        },
+        {
+          "kind": "checkpoint",
+          "ref": "audit-quality-gates-checkpoint",
+          "why": "Verify clean build and asset weights"
+        }
+      ]
+    },
+    "saas": {
+      "title": "SaaS application hardening and UX",
+      "description": "App dashboard usability, secure data contracts, edge-case QA, and onboarding workflows for software-as-a-service applications.",
+      "keywords": [
+        "saas",
+        "dashboard",
+        "app",
+        "software",
+        "panel",
+        "b2b"
+      ],
+      "steps": [
+        {
+          "kind": "skill",
+          "ref": "helen-data-api",
+          "why": "Validate data model and API state machines"
+        },
+        {
+          "kind": "prompt",
+          "ref": "audit-data-and-api-contracts",
+          "why": "Contracts, edge cases, and schema validation"
+        },
+        {
+          "kind": "skill",
+          "ref": "helen-qa-scale",
+          "why": "Stress test auth, concurrency, and volume"
+        },
+        {
+          "kind": "prompt",
+          "ref": "audit-adversarial-qa-and-edge-cases",
+          "why": "Audit error boundaries, permissions, and timeouts"
+        },
+        {
+          "kind": "skill",
+          "ref": "helen-clean-code",
+          "why": "Maintainable frontend and backend structure"
+        },
+        {
+          "kind": "flow",
+          "ref": "apply-clean-code-pass-flow",
+          "why": "Clean code refactor pass without regressions"
+        },
+        {
+          "kind": "checkpoint",
+          "ref": "audit-quality-gates-checkpoint",
+          "why": "Validate typecheck, tests, and build"
+        }
+      ]
+    },
+    "portfolio": {
+      "title": "Portfolio and personal showcase",
+      "description": "Bespoke design, memorable narrative, high-performance interactions, and showcase of craft.",
+      "keywords": [
+        "portfolio",
+        "portafolio",
+        "cv",
+        "personal",
+        "showcase"
+      ],
+      "steps": [
+        {
+          "kind": "prompt",
+          "ref": "init-creative-direction-and-design-md",
+          "why": "Art direction and bespoke typographic system"
+        },
+        {
+          "kind": "skill",
+          "ref": "helen-premium-design",
+          "why": "Eliminate generic clichés and establish personal style"
+        },
+        {
+          "kind": "skill",
+          "ref": "helen-motion-3d",
+          "why": "Subtle, performant micro-interactions and transitions"
+        },
+        {
+          "kind": "prompt",
+          "ref": "audit-motion-and-3d-performance",
+          "why": "Keep frame rates smooth and assets lightweight"
+        },
+        {
+          "kind": "checkpoint",
+          "ref": "audit-quality-gates-checkpoint",
+          "why": "Validate zero console errors and clean build"
+        }
+      ]
+    },
+    "ecommerce": {
+      "title": "E-commerce checkout and product flow",
+      "description": "Frictionless product pages, robust cart/checkout state machines, security, and conversion.",
+      "keywords": [
+        "ecommerce",
+        "e-commerce",
+        "tienda",
+        "shop",
+        "checkout",
+        "carrito",
+        "pagos",
+        "store"
+      ],
+      "steps": [
+        {
+          "kind": "skill",
+          "ref": "helen-copy-cro",
+          "why": "High-clarity product descriptions and low friction CTAs"
+        },
+        {
+          "kind": "prompt",
+          "ref": "enhance-copy-and-conversion",
+          "why": "Clear pricing, guarantees, and frictionless action"
+        },
+        {
+          "kind": "skill",
+          "ref": "helen-data-api",
+          "why": "Idempotent payment transactions and order states"
+        },
+        {
+          "kind": "prompt",
+          "ref": "audit-data-and-api-contracts",
+          "why": "Verify API contracts and checkout payloads"
+        },
+        {
+          "kind": "skill",
+          "ref": "helen-security",
+          "why": "Protect sensitive customer data and payment callbacks"
+        },
+        {
+          "kind": "checkpoint",
+          "ref": "audit-security-risk-checkpoint",
+          "why": "Verify zero secret leakage and safe environment config"
+        },
+        {
+          "kind": "checkpoint",
+          "ref": "audit-quality-gates-checkpoint",
+          "why": "Ensure tests and builds pass cleanly"
+        }
+      ]
+    },
+    "docs-site": {
+      "title": "Documentation site and developer experience",
+      "description": "Clear technical writing, intuitive navigation, fast search, accessibility, and clean code examples.",
+      "keywords": [
+        "docs",
+        "documentation",
+        "documentación",
+        "manual",
+        "wiki",
+        "guía"
+      ],
+      "steps": [
+        {
+          "kind": "skill",
+          "ref": "helen-knowledge",
+          "why": "Information architecture and documentation structure"
+        },
+        {
+          "kind": "prompt",
+          "ref": "audit-final-seo",
+          "why": "Ensure sitemaps, headings, and search indexing are optimal"
+        },
+        {
+          "kind": "prompt",
+          "ref": "apply-basic-accessibility-pass",
+          "why": "High contrast, keyboard navigation, and screen reader friendliness"
+        },
+        {
+          "kind": "checkpoint",
+          "ref": "audit-quality-gates-checkpoint",
+          "why": "Verify broken link checks and build pass"
         }
       ]
     }

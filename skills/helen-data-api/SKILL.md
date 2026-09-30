@@ -1,6 +1,7 @@
 ---
 name: helen-data-api
-description: Use when reviewing or designing data models, API contracts, integrations, config schemas, and content models - validation, errors, versioning, idempotency, and breaking-change risk.
+description: Use when designing or reviewing data models, API contracts, JSON responses, error formats, or schema definitions; eliminating impossible or contradictory states in models (e.g. status vs boolean flags, invalid dates); evaluating breaking changes (field renames, deprecations, public API versioning, client compatibility); and ensuring idempotency and data migration safety.
+version: 2.1.0
 ---
 
 # Data and API Contracts

@@ -27,6 +27,36 @@
         "Places the project in maintenance (08) or post-handoff with evidence",
         "Recommends maintenance-type next steps (dependencies, backups, monitoring)"
       ]
+    },
+    {
+      "id": "brand-new-repo-phase",
+      "prompt": "I just ran `git init` and created an empty README.md. What HELEN phase is this project in and what should my first steps be? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Identifies phase 01 (Foundation / Kickoff / Strategy)",
+        "Recommends setup, stack decisions, or initial project configuration",
+        "Recommends establishing design direction or quality gates before coding features",
+        "Explains next action concisely"
+      ]
+    },
+    {
+      "id": "python-virtualenv",
+      "expectTrigger": false,
+      "prompt": "How do I create and activate a Python virtual environment using venv on macOS/Linux? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains `python3 -m venv .venv`",
+        "Explains `source .venv/bin/activate`",
+        "Mentions `deactivate` to exit"
+      ]
+    },
+    {
+      "id": "json-web-token-structure",
+      "expectTrigger": false,
+      "prompt": "What are the three parts of a JSON Web Token (JWT) separated by dots? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Identifies Header (algorithm and token type)",
+        "Identifies Payload (claims and data)",
+        "Identifies Signature (cryptographic hash verifying integrity)"
+      ]
     }
   ]
 }

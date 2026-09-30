@@ -107,6 +107,14 @@ export function listPromptEntries(root: string = PROMPTS_ROOT): PromptEntry[] {
     }
   }
 
+  const userPromptsDir = path.join(process.cwd(), '.helen', 'prompts');
+  if (fs.existsSync(userPromptsDir)) {
+    for (const file of walkMarkdown(userPromptsDir)) {
+      const relative = toPosix(path.relative(userPromptsDir, file));
+      entries.push(toEntry(userPromptsDir, file, `user/${idFromRelativePath(relative)}`, kindFromFile(path.basename(file))));
+    }
+  }
+
   entries.sort((a, b) => a.id.localeCompare(b.id));
   cache.set(root, entries);
   return entries;
@@ -130,8 +138,71 @@ export function resolvePromptEntry(query: string, root: string = PROMPTS_ROOT): 
   return found;
 }
 
-export function readPrompt(query: string, root: string = PROMPTS_ROOT): string {
-  return fs.readFileSync(resolvePromptEntry(query, root).absolutePath, 'utf-8');
+export function readPrompt(
+  query: string,
+  root: string = PROMPTS_ROOT,
+  options?: { fill?: Record<string, string>; replyLang?: string; level100?: boolean }
+): string {
+  const entry = resolvePromptEntry(query, root);
+  let content = fs.readFileSync(entry.absolutePath, 'utf-8');
+  if (options?.fill) {
+    for (const [key, val] of Object.entries(options.fill)) {
+      content = content.replaceAll(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), val);
+    }
+  }
+  if (options?.level100 !== false && entry.kind !== 'master' && entry.kind !== 'guide') {
+    content += `\n\n---\n> **HELEN Level 100 Execution Mandate**: This prompt is the Level 0 baseline. You possess sovereign technical authority and broad mandate ("manga ancha") to proactively search for, surface, and resolve adjacent bugs, unhandled errors, and architectural weaknesses along the path. Always deliver Level 100 excellence.\n`;
+  }
+  if (options?.replyLang) {
+    content += `\n\n---\n**Reply Language**: Please respond in ${options.replyLang}.\n`;
+  }
+  return content;
+}
+
+export interface PromptOverlap {
+  promptA: string;
+  promptB: string;
+  similarity: number;
+}
+
+/**
+ * Identify overlapping prompts based on word-set Jaccard similarity (DRY enforcement).
+ */
+export function findPromptOverlaps(root: string = PROMPTS_ROOT, threshold = 0.45): PromptOverlap[] {
+  const entries = listPromptEntries(root).filter(e => e.kind === 'prompt' || e.kind === 'flow');
+  const wordSets = new Map<string, Set<string>>();
+
+  const STOP_WORDS = new Set([
+    'the', 'and', 'for', 'with', 'that', 'this', 'from', 'when', 'without', 'into', 'each', 'before', 'after', 'will', 'your', 'about', 'must', 'should', 'have', 'more', 'some', 'than'
+  ]);
+
+  for (const entry of entries) {
+    const raw = fs.readFileSync(entry.absolutePath, 'utf-8');
+    const words = raw.toLowerCase().match(/\b[a-z]{3,}\b/g) || [];
+    const set = new Set(words.filter(w => !STOP_WORDS.has(w)));
+    wordSets.set(entry.id, set);
+  }
+
+  const overlaps: PromptOverlap[] = [];
+  for (let i = 0; i < entries.length; i++) {
+    for (let j = i + 1; j < entries.length; j++) {
+      const idA = entries[i]!.id;
+      const idB = entries[j]!.id;
+      const setA = wordSets.get(idA)!;
+      const setB = wordSets.get(idB)!;
+      let intersection = 0;
+      for (const w of setA) {
+        if (setB.has(w)) intersection++;
+      }
+      const union = setA.size + setB.size - intersection;
+      const similarity = union > 0 ? intersection / union : 0;
+      if (similarity >= threshold) {
+        overlaps.push({ promptA: idA, promptB: idB, similarity: Math.round(similarity * 100) / 100 });
+      }
+    }
+  }
+
+  return overlaps.sort((a, b) => b.similarity - a.similarity);
 }
 
 /** Rank prompts by how many query words appear in their id, title, summary and aliases. */

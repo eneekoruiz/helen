@@ -23,7 +23,9 @@ describe('guardrails module', () => {
   it('creates executable hooks, dependabot config and the prepare script', async () => {
     const result = await run();
     expect(result.created).toEqual(['.githooks/pre-commit', '.githooks/pre-push', '.github/dependabot.yml']);
-    expect(fs.statSync(path.join(tmp, '.githooks/pre-commit')).mode & 0o111).not.toBe(0);
+    if (process.platform !== 'win32') {
+      expect(fs.statSync(path.join(tmp, '.githooks/pre-commit')).mode & 0o111).not.toBe(0);
+    }
     const pkg = JSON.parse(fs.readFileSync(path.join(tmp, 'package.json'), 'utf-8'));
     expect(pkg.scripts.prepare).toContain('core.hooksPath .githooks');
   });

@@ -1,6 +1,7 @@
 ---
 name: helen-release
-description: Use when deciding whether a project can become a release candidate and preparing the release - build/lint/test gates, security and SEO/i18n checks, repository presentation, changelog and release notes. Produces a RC READY / RC WITH CAVEATS / NOT RC READY verdict. Also use when asked whether something is ready to ship, publish, tag or deploy.
+description: Use for any release question, decision or task: checking if code is ready to release, ship, tag or deploy (e.g. 'Can we tag vX today?', 'Release is today', flaky tests before shipping, CI failures before release), writing changelogs and release notes from commit lists, reviewing release blockers, or deciding release candidate (RC) readiness with an RC READY / NOT RC READY verdict.
+version: 2.1.0
 ---
 
 # Release Candidate

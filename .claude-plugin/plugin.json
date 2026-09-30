@@ -1,0 +1,23 @@
+{
+  "name": "helen",
+  "version": "2.1.0",
+  "description": "Autonomous engineering lifecycle, playbooks, skills, and tools catalog for Claude Code and AI agents",
+  "commands": [
+    {
+      "name": "apply",
+      "description": "Detect phase and plan HELEN prompts and skills"
+    },
+    {
+      "name": "next",
+      "description": "Show the current tracked step"
+    },
+    {
+      "name": "done",
+      "description": "Mark current tracked step as complete"
+    },
+    {
+      "name": "check",
+      "description": "Run project quality gates"
+    }
+  ]
+}

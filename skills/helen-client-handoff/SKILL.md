@@ -1,6 +1,7 @@
 ---
 name: helen-client-handoff
-description: Use when preparing to deliver a project to a client or future maintainer - reproducible setup, no leaked private access, handoff package, support readiness, browser smoke test, media and links check. Produces a sign-off recommendation.
+description: Use when preparing to hand off or deliver a project to a client or new maintainer, assembling delivery packages, conducting pre-demo browser smoke tests (checking console errors, broken assets, forms, mobile viewports), planning repository or file transfers (warning against sending .env or node_modules in zip archives), verifying credentials management, and writing handoff documentation and sign-offs.
+version: 2.1.0
 ---
 
 # Client Handoff

@@ -1,6 +1,7 @@
 ---
 name: helen-seo-compliance
-description: Use before publishing a public website - technical SEO and indexability, i18n fallbacks, privacy/cookie/legal compliance (GDPR), and claims that create legal or trust exposure. Verifies metadata against the real product. Also use for questions about meta tags, sitemaps, cookie banners, privacy policies or translations.
+description: Use when auditing or implementing technical SEO and launch readiness (title tags, meta descriptions, noindex blockers, heading hierarchy, Open Graph, sitemaps, robots.txt); evaluating privacy and GDPR compliance (cookie consent banners, analytics and Meta pixel tracking disclosures, privacy policies); or verifying internationalization (i18n), raw translation keys in UI, and locale formatting.
+version: 2.1.0
 ---
 
 # SEO, i18n and Compliance

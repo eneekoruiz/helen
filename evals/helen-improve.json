@@ -1,0 +1,65 @@
+{
+  "skill": "helen-improve",
+  "cases": [
+    {
+      "id": "scan-more-improvements",
+      "prompt": "What else can we improve in this repository? Give me an exhaustive scan across backend, frontend, design, and performance with a prioritized backlog. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Sweeps across multiple dimensions: functionality, aesthetics, backend architecture, performance, and DX",
+        "Rejects superficial filler (like formatting or commenting) and focuses on high-leverage architectural and product improvements",
+        "Structures proposals into an actionable matrix (Quick Wins vs Strategic Upgrades)",
+        "Recommends specific next steps and cites files or modules"
+      ]
+    },
+    {
+      "id": "full-stack-audit-request",
+      "prompt": "I want more improvements for this project. Look at our current code and suggest meaningful upgrades for functionality, aesthetics, and test depth. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Addresses functionality, visual craft/aesthetics, and verification depth",
+        "Mentions delegating or applying relevant criteria for aesthetics and testing",
+        "Provides concrete, actionable proposals rather than vague generalities",
+        "Prioritizes proposals by impact and effort"
+      ]
+    },
+    {
+      "id": "backend-and-dx-enhancements",
+      "prompt": "Can you find more improvements for our backend architecture and developer experience? Look for bottlenecks, safety issues, and tooling polish. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Identifies backend optimization opportunities (batching, idempotency, runtime validation)",
+        "Examines developer experience (one-command workflows, error diagnostics, pre-commit gates)",
+        "Provides clear technical rationale for each proposed upgrade",
+        "Groups items into quick wins and deeper architectural changes"
+      ]
+    },
+    {
+      "id": "aesthetic-and-feature-upgrades",
+      "prompt": "What more improvements can we make to elevate this app from a basic prototype to an outstanding product? Look at UX, personality, and missing features. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Proposes distinctive visual craft and anti-slop refinements",
+        "Identifies missing user workflow capabilities (empty states, shortcuts, persistence)",
+        "Delivers a structured improvement roadmap",
+        "Keeps recommendations grounded in the actual codebase context"
+      ]
+    },
+    {
+      "id": "docker-ps-command",
+      "expectTrigger": false,
+      "prompt": "How do I list only the container IDs of all running Docker containers? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Provides docker ps -q or docker ps --format '{{.ID}}'",
+        "Explains the quiet or formatting flag",
+        "Does not trigger holistic repository improvement scanning skills"
+      ]
+    },
+    {
+      "id": "markdown-table-syntax",
+      "expectTrigger": false,
+      "prompt": "How do I align text to the right in a column within a GitHub-flavored Markdown table? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains the colon on the right side of the delimiter row (---:)",
+        "Provides a short valid Markdown table example",
+        "Does not trigger repository enhancement or audit skills"
+      ]
+    }
+  ]
+}

@@ -18,8 +18,9 @@ You are working on this project with HELEN, a library of prompts, skills and pla
 
 1. Evidence before advice; mark estimates as estimates.
 2. Never advance past a failed checkpoint.
-3. Never install or connect third-party tools without approval; use at most one main design skill.
-4. Keep answers short; findings go by severity, changes go as a short report.
-5. Answer in the user's language.
+3. **The Level 100 Mandate**: Treat the user's instructions as the Level 0 baseline. You have sovereign technical authority and broad mandate ("manga ancha") to proactively search for, surface, and resolve adjacent bugs, edge cases, and architectural weaknesses along the path. Always deliver Level 100 excellence.
+4. Never install or connect third-party tools without approval; use at most one main design skill.
+5. Keep answers short; findings go by severity, changes go as a short report.
+6. Answer in the user's language.
 
 Without the CLI, the same information lives in `docs/prompts/<phase>/README.md` and `docs/prompts/playbooks.json`.
