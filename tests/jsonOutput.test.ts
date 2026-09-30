@@ -10,7 +10,16 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cli = path.join(root, 'dist', 'cli.js');
 
 function runCli(args: string[], cwd: string = root): { status: number; stdout: string; stderr: string; json: any } {
-  const res = spawnSync(process.execPath, [cli, ...args], {
+  let execArgs: string[];
+  if (fs.existsSync(cli)) {
+    execArgs = [cli, ...args];
+  } else {
+    const tsxBin = path.join(root, 'node_modules', 'tsx', 'dist', 'cli.mjs');
+    const srcCli = path.join(root, 'src', 'cli.ts');
+    execArgs = [tsxBin, srcCli, ...args];
+  }
+
+  const res = spawnSync(process.execPath, execArgs, {
     cwd,
     encoding: 'utf-8',
   });
