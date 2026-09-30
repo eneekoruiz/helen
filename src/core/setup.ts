@@ -49,6 +49,37 @@ export function upsertBlock(existing: string | null, block: string): string {
   return `${existing.replace(/\s*$/, '')}\n\n${block}\n`;
 }
 
+/** Install hierarchical rules in .agents/rules for Antigravity and Codex. */
+export function installAntigravityRules(cwd: string, dryRun = false): string[] {
+  const rulesDir = path.join(cwd, '.agents', 'rules');
+  const created: string[] = [];
+
+  const rules = [
+    {
+      file: 'security.md',
+      content: `# HELEN Security Rules\n- Never commit or print real secrets, tokens, private keys or passwords.\n- Always use environment variables (.env.local) and sanitized inputs.\n- Enforce strict CSP headers and validate external inputs.\n`,
+    },
+    {
+      file: 'quality.md',
+      content: `# HELEN Quality & Clean Code Rules\n- Maintain modular architecture and strict TypeScript types without any-casts.\n- Keep test suites green before completing checkpoints.\n- Never bypass git hooks (--no-verify is prohibited).\n`,
+    },
+    {
+      file: 'design.md',
+      content: `# HELEN Design System Rules\n- Maintain accessible contrast (WCAG AA/AAA) across all color themes.\n- Ensure responsive layouts across mobile, tablet, and desktop breakpoints.\n- Respect prefers-reduced-motion for all UI transitions and animations.\n`,
+    },
+  ];
+
+  for (const { file, content } of rules) {
+    const target = path.join(rulesDir, file);
+    if (!fs.existsSync(target)) {
+      writeFileSafe(target, content, { dryRun });
+      created.push(`.agents/rules/${file}`);
+    }
+  }
+
+  return created;
+}
+
 export function setupProject(options: SetupOptions): SetupResult {
   const skills = installSkills({
     cwd: options.cwd,
@@ -66,6 +97,10 @@ export function setupProject(options: SetupOptions): SetupResult {
     const existing = fs.existsSync(target) ? fs.readFileSync(target, 'utf-8') : null;
     // force: the managed block is always safe to refresh; the rest of the file is preserved.
     writeFileSafe(target, upsertBlock(existing, helenBlock()), { dryRun: options.dryRun, force: true });
+  }
+
+  if (options.agents.includes('antigravity') || options.agents.includes('codex')) {
+    installAntigravityRules(options.cwd, options.dryRun);
   }
 
   return { skills, instructionFiles };

@@ -160,20 +160,21 @@ describe('CLI Global --json Commands & Shapes', () => {
     expect(res.json.errors[0]).toMatch(/checkpoint/i);
   });
 
-  it('outputs valid JSON for prompts and skills inspection commands', () => {
-    // prompts list
+  it('outputs valid JSON for prompts list --json', () => {
     const promptsList = runCli(['prompts', 'list', '--json'], root);
     expect(promptsList.status).toBe(0);
     expect(promptsList.json.command).toBe('prompts:list');
     expect(promptsList.json.data.prompts.length).toBeGreaterThan(50);
+  });
 
-    // skills list
+  it('outputs valid JSON for skills list --json', () => {
     const skillsList = runCli(['skills', 'list', '--json'], root);
     expect(skillsList.status).toBe(0);
     expect(skillsList.json.command).toBe('skills:list');
     expect(skillsList.json.data.skills.some((s: any) => s.name === 'helen-release')).toBe(true);
+  });
 
-    // skills catalog
+  it('outputs valid JSON for skills catalog --json', () => {
     const catalogRes = runCli(['skills', 'catalog', '--json'], root);
     expect(catalogRes.status).toBe(0);
     expect(catalogRes.json.command).toBe('skills:catalog');
