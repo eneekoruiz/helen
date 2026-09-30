@@ -19,24 +19,24 @@ Informe generado el 2026-09-30 sobre HELEN 2.0.0. Todo parte de lo que existe ho
 | 2 | Publicar `helen-cli` en npm con provenance (idea 1) **[hecho]** | Alto | S |
 | 3 | Plantilla de repositorio con todo configurado (idea 3) | Alto | M |
 | 4 | Evals con 10 casos por skill y 3 ejecuciones (idea 57) **[hecho]** | Alto | M |
-| 5 | `helen apply --auto` con parada en cada escritura (idea 14) | Alto | L |
-| 6 | Servidor MCP propio de HELEN (idea 96) | Alto | L |
+| 5 | `helen apply --auto` con parada en cada escritura (idea 14) **[hecho]** | Alto | L |
+| 6 | Servidor MCP propio de HELEN (idea 96) **[hecho]** | Alto | L |
 | 7 | Release automático con changelog desde commits (idea 81) **[hecho]** | Medio | S |
-| 8 | `helen doctor --fix` para lo seguro (idea 13) | Alto | M |
-| 9 | Presupuesto de tokens por prompt (idea 41) | Medio | S |
-| 10 | `helen report`, panel HTML local (idea 93) | Medio | M |
+| 8 | `helen doctor --fix` para lo seguro (idea 13) **[hecho]** | Alto | M |
+| 9 | Presupuesto de tokens por prompt (idea 41) **[hecho]** | Medio | S |
+| 10 | `helen report`, panel HTML local (idea 93) **[hecho]** | Medio | M |
 
 ---|---|---|---|
 | 1 | `helen init-project`: un solo comando que hace `setup` + `guardrails` + `apply` y deja el proyecto listo **[hecho]** | Alto | M |
 | 2 | Publicar `helen-cli` en npm con provenance para que `npx helen-cli` funcione de verdad **[hecho]** | Alto | S |
 | 3 | Plantilla de repositorio (GitHub template) con todo ya configurado | Alto | M |
 | 4 | Evals con más casos (10 por skill) y 3 ejecuciones por caso para medir varianza **[hecho]** | Alto | M |
-| 5 | `helen apply --auto`: ejecuta los pasos de solo lectura y se para en cada paso que escribe o instala | Alto | L |
-| 6 | Servidor MCP propio de HELEN (`helen mcp`) que expone prompts, playbooks y progreso | Alto | L |
+| 5 | `helen apply --auto`: ejecuta los pasos de solo lectura y se para en cada paso que escribe o instala **[hecho]** | Alto | L |
+| 6 | Servidor MCP propio de HELEN (`helen mcp`) que expone prompts, playbooks y progreso **[hecho]** | Alto | L |
 | 7 | Release automático con changelog desde commits (release-please) **[hecho]** | Medio | S |
-| 8 | Comando `helen doctor --fix` que corrige lo seguro (hooks, skills desactualizadas) | Alto | M |
-| 9 | Presupuesto de tokens por prompt visible en `helen prompts list` | Medio | S |
-| 10 | Panel HTML local (`helen report`) con fase, progreso, calidad y salud del proyecto | Medio | M |
+| 8 | Comando `helen doctor --fix` que corrige lo seguro (hooks, skills desactualizadas) **[hecho]** | Alto | M |
+| 9 | Presupuesto de tokens por prompt visible en `helen token-budget` **[hecho]** | Medio | S |
+| 10 | Panel HTML local (`helen report`) con fase, progreso, calidad y salud del proyecto **[hecho]** | Medio | M |
 
 ---
 
@@ -57,8 +57,8 @@ Informe generado el 2026-09-30 sobre HELEN 2.0.0. Todo parte de lo que existe ho
 
 ## 2. Núcleo del CLI (13-28)
 
-13. **`helen doctor --fix`** con confirmación: activa hooks, actualiza skills, crea el bloque en `AGENTS.md`. Alto · M.
-14. **`helen apply --auto`**: ejecuta pasos de lectura (auditorías) y se detiene ante escritura, instalación o gasto. Alto · L.
+13. **`helen doctor --fix`** con confirmación: activa hooks, actualiza skills, crea el bloque en `AGENTS.md`. **[hecho]** Implementado con reparación segura de hooks, dependabot, skills y .helenrc. Alto · M.
+14. **`helen apply --auto`**: ejecuta pasos de lectura (auditorías) y se detiene ante escritura, instalación o gasto. **[hecho]** Modo semi-autónomo con validación automática de checkpoints. Alto · L.
 15. **`helen apply --resume`** que retoma el plan aunque haya cambiado de rama. Medio · S.
 16. **Planes en paralelo**: varias metas trackeadas a la vez (`.helen/plans/<meta>.json`). Medio · M.
 17. **`helen undo`** que revierte el último paso hecho usando un commit por paso. Medio · L.
@@ -91,7 +91,7 @@ Informe generado el 2026-09-30 sobre HELEN 2.0.0. Todo parte de lo que existe ho
 
 ## 4. Biblioteca de prompts (41-56)
 
-41. **Presupuesto de tokens por prompt** en el frontmatter (`tokens_estimate`), calculado por `helen prompts index`. Medio · S.
+41. **Presupuesto de tokens por prompt** en el frontmatter o vía `helen token-budget`. **[hecho]** Comando `helen token-budget` con cálculo de tokens y estimación de coste multidivisa y multimodel (Gemini, Claude, GPT-4o). Medio · S.
 42. **Límite de tamaño en `lint`** (por ejemplo 2 000 palabras) para mantener los prompts ágiles. Medio · S.
 43. **Ejemplos de salida esperada** (`## Example output`) en los 15 prompts más usados. Medio · M.
 44. **Variables en prompts** (`{{project_name}}`, `{{stack}}`) rellenadas por `helen prompts show --fill`. Medio · M.
@@ -155,10 +155,10 @@ Informe generado el 2026-09-30 sobre HELEN 2.0.0. Todo parte de lo que existe ho
 
 ## 8. Experiencia para humanos y para IAs (93-100+)
 
-93. **`helen report`**: informe HTML local con fase, progreso, salud, calidad de skills y siguientes pasos. Medio · M.
+93. **`helen report`**: informe HTML local con fase, progreso, salud, calidad de skills y siguientes pasos. **[hecho]** Generador de dashboard interactivo `.helen/report.html` y resumen JSON. Medio · M.
 94. **Menú interactivo mejorado** (`helen` sin argumentos) con "qué quieres hacer hoy" y atajos. Medio · S.
 95. **Modo "explícame"** (`--explain`): cada comando cuenta qué hizo y por qué, para aprender. Medio · S.
-96. **Servidor MCP de HELEN** (`helen mcp`): expone `apply`, `next`, `done`, `prompts show` como herramientas para cualquier agente. Alto · L.
+96. **Servidor MCP de HELEN** (`helen mcp`): expone `apply`, `next`, `done`, `prompts show` como herramientas para cualquier agente. **[hecho]** Servidor stdio JSON-RPC 2.0 nativo con herramientas de ciclo de vida completo. Alto · L.
 97. **Comandos de barra para Claude Code** (`/helen-apply`, `/helen-next`, `/helen-check`) empaquetados. Alto · S.
 98. **Reglas para Cursor y Copilot** generadas a partir de las mismas fuentes (`.cursor/rules`, `.github/copilot-instructions.md`). Medio · S.
 99. **Documentación como sitio** (Docusaurus, Starlight o VitePress) generado desde `docs/`, con búsqueda. Medio · M.

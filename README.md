@@ -70,8 +70,9 @@ Standard exit codes: `0` (Success), `1` (Error), `2` (Warnings present), `3` (Ch
 | Area | Commands |
 |---|---|
 | Project initialization | `helen init-project [name] [--agents ...] [--goal <goal>] [--yes] [--dry-run] [--json]` |
-| Plan and track | `helen apply [goal] [--brief] [--track] [--install] [--json]` · `helen next [--json]` · `helen done [--json]` · `helen skip <reason> [--json]` · `helen status [--json]` · `helen check [--json]` |
-| Setup and health | `helen setup [--agents claude codex antigravity] [--dry-run] [--json]` · `helen doctor [--json]` · `helen guide` |
+| Plan and track | `helen apply [goal] [--brief] [--track] [--auto] [--install] [--json]` · `helen next [--json]` · `helen done [--json]` · `helen skip <reason> [--json]` · `helen status [--json]` · `helen check [--json]` |
+| Setup and health | `helen setup [--agents claude codex antigravity] [--dry-run] [--json]` · `helen doctor [--fix] [--json]` · `helen report [--open] [--json]` · `helen guide` |
+| AI Integration & MCP | `helen mcp` (Native Model Context Protocol server over stdio for Antigravity, Claude, and Cursor) · `helen token-budget [target] [--json]` |
 | Prompts | `helen prompts list [--kind flow] [--json]` · `helen prompts search <text> [--json]` · `helen prompts show <id> [--json]` · `helen prompts path <id> [--json]` · `helen prompts flow <id> [--json]` · `helen prompts index [--json]` · `helen prompts lint [--json]` |
 | Skills | `helen skills list [--flows] [--json]` · `helen skills install [names...] [--target claude codex antigravity custom] [--dir <path>] [--json]` · `helen skills update [--json]` · `helen skills installed [--json]` |
 | Catalog | `helen skills catalog [--category <c>] [--kind skill\|cli\|mcp\|plugin\|reference\|service] [--json]` · `helen skills external <id> [--json]` |

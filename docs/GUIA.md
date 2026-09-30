@@ -22,15 +22,17 @@ HELEN es un repositorio con **tres capas** más un **cerebro** que las conecta:
 | Buscar por tema | `helen prompts search <texto>` |
 | Leer uno | `helen prompts show <id>` (acepta id completo, id corto o alias antiguo) |
 | Reglas comunes de todos los prompts | `helen prompts show rules` |
+| Presupuesto de tokens y costes | `helen token-budget [meta]` (analiza coste en Gemini, Claude y GPT-4o) |
 | Las skills propias de HELEN | `helen skills list` (con `--flows` incluye cada flow como skill) |
 | Herramientas de terceros recomendadas | `helen skills catalog` (filtra con `--category design`) |
 | Detalle y comandos de una herramienta | `helen skills external <id>` (solo muestra, no instala) |
 | Qué skills tiene ya instaladas este proyecto | `helen skills installed` |
 | Cómo va el plan en curso | `helen status` |
-| En qué fase estás y qué te conviene | `helen apply` |
-| Todas las metas disponibles | `helen apply` (sin argumentos) |
+| Panel visual interactivo en HTML | `helen report` (abre con `--open` o vuelca con `--json`) |
+| En qué fase estás y qué te conviene | `helen apply` (agrega `--auto` para avance semi-autónomo) |
+| Servidor MCP nativo para agentes | `helen mcp` (stdio JSON-RPC para Antigravity, Claude, Cursor) |
 | Validar toda la biblioteca | `helen lint` |
-| Salud del proyecto y de tus agentes | `helen doctor` |
+| Salud y auto-reparación del proyecto | `helen doctor` (agrega `--fix` para reparar hooks, dependabot y skills) |
 | Actualizar las skills instaladas | `helen skills update` |
 | Calidad medida de cada skill | [SKILLS_QUALITY.md](SKILLS_QUALITY.md) |
 

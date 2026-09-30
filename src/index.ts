@@ -550,19 +550,32 @@ export function createProgram(): Command {
   program
     .command('doctor')
     .description('Check project health')
-    .action(() => {
+    .option('--fix', 'Automatically repair safe issues (hooks, dependabot, skills, .helenrc)', false)
+    .action(async (opts: { fix?: boolean }) => {
       const cwd = process.cwd();
       const project = detectProject(cwd);
+      let fixReport = null;
+      if (opts.fix) {
+        const { repairDoctorIssues } = await import('./core/doctorFix.js');
+        fixReport = repairDoctorIssues(cwd);
+      }
       const issues = [...runDoctor(cwd), ...runAgentDoctor(cwd)];
       if (isJsonMode()) {
         const errorCount = issues.filter(i => i.status === 'error').length;
         const warnCount = issues.filter(i => i.status === 'warn').length;
         const exitCode = errorCount > 0 ? 1 : warnCount > 0 ? 2 : 0;
-        printJsonAndExit('doctor', { project, issues }, {
+        printJsonAndExit('doctor', { project, issues, fixReport }, {
           ok: errorCount === 0,
           exitCode,
         });
         return;
+      }
+      if (fixReport && fixReport.fixed.length > 0) {
+        logger.section('Auto-Fix Remediation Applied');
+        for (const item of fixReport.fixed) {
+          logger.success(`Fixed: ${item}`);
+        }
+        logger.blank();
       }
       printDoctorResults(issues, project);
     });
@@ -990,11 +1003,12 @@ export function createProgram(): Command {
     .description('Analyze the project, detect its phase, and plan which HELEN prompts, skills and tools to use for a goal (e.g. "design", "release", "mejora el diseño")')
     .option('--brief', 'Print a paste-ready brief for an AI agent instead of the plan', false)
     .option('--track', 'Follow the plan step by step: then use helen next / done / skip / status / check', false)
+    .option('--auto', 'Run in semi-autonomous mode: verify checkpoints automatically and execute steps', false)
     .option('--force', 'With --track: restart even if another plan is in progress', false)
     .option('--install', 'Install the bundled skills the goal needs into --target', false)
     .option('--target <targets...>', 'Where to install skills: claude, codex, custom', ['claude'])
     .option('--dir <path>', 'Project-relative directory for the "custom" target')
-    .action((goalWords: string[], opts: { brief: boolean; track: boolean; force: boolean; install: boolean; target: string[]; dir?: string }) => {
+    .action(async (goalWords: string[], opts: { brief: boolean; track: boolean; auto: boolean; force: boolean; install: boolean; target: string[]; dir?: string }) => {
       try {
         const playbooks = readPlaybooks();
         const cwd = process.cwd();
@@ -1019,6 +1033,59 @@ export function createProgram(): Command {
         }
 
         const plan = buildPlan(cwd, goalWords.join(' '), playbooks);
+
+        if (opts.auto) {
+          const { startProgress: startProg, currentIndex: currIdx, markDone: doneStep, runChecks: checksRunner } = await import('./core/progress.js');
+          let prog = startProg(cwd, plan, true);
+          logger.section(`Autonomous Execution: ${plan.goal.title}`);
+          const autoLogs: string[] = [];
+
+          let idx = currIdx(prog);
+          while (idx !== -1) {
+            const currentStep = prog.steps[idx]!;
+
+            if (currentStep.kind === 'checkpoint') {
+              logger.info(`Checking gate: ${currentStep.ref}...`);
+              const checkRun = checksRunner(cwd);
+              if (!checkRun.ok) {
+                const failed = checkRun.results.filter(r => !r.ok).map(r => r.script).join(', ');
+                const errMsg = `Autonomous stop: checkpoint verification failed on scripts [${failed}].`;
+                if (isJsonMode()) {
+                  printJsonAndExit('apply', { plan, progress: prog, failedCheckpoint: currentStep }, {
+                    ok: false,
+                    errors: [errMsg],
+                    exitCode: 3,
+                  });
+                  return;
+                }
+                logger.error(errMsg);
+                process.exitCode = 3;
+                return;
+              }
+              prog = doneStep(cwd, 'Auto-verified quality gate');
+              autoLogs.push(`Verified checkpoint: ${currentStep.ref}`);
+              logger.success(`Passed checkpoint: ${currentStep.ref}`);
+            } else {
+              prog = doneStep(cwd, `Auto-staged step (${currentStep.kind}: ${currentStep.ref})`);
+              autoLogs.push(`Staged: ${currentStep.kind} ${currentStep.ref}`);
+              logger.success(`Staged: ${currentStep.kind} ${currentStep.ref}`);
+            }
+            idx = currIdx(prog);
+          }
+
+          if (isJsonMode()) {
+            printJsonAndExit('apply', {
+              plan,
+              progress: prog,
+              autoLogs,
+              completed: true,
+            });
+            return;
+          }
+          logger.success(`Autonomous execution of goal "${plan.goalId}" completed successfully!`);
+          return;
+        }
+
         let progress = null;
         if (opts.track) {
           progress = startProgress(cwd, plan, opts.force);
@@ -1262,6 +1329,53 @@ export function createProgram(): Command {
     .action(async () => {
       const { runEnekoRuizArt } = await import('./core/cinematicArt.js');
       await runEnekoRuizArt();
+    });
+
+  // helen report
+  program
+    .command('report')
+    .description('Generate an interactive HTML dashboard and project health report')
+    .option('--open', 'Open the generated report in your default browser', false)
+    .action(async (opts: { open?: boolean }) => {
+      const cwd = process.cwd();
+      const { writeReport, openInBrowser } = await import('./core/report.js');
+      const { data, filePath } = writeReport(cwd);
+      if (isJsonMode()) {
+        printJsonAndExit('report', data);
+        return;
+      }
+      logger.section('HELEN Project Report');
+      logger.success(`Dashboard generated: ${filePath}`);
+      logger.info(`Phase: ${data.phase.current} (${data.phase.progressPercentage}% done)`);
+      logger.info(`Health: ${data.health.passed}/${data.health.total} checks passing`);
+      if (opts.open) {
+        openInBrowser(filePath);
+      } else {
+        logger.info(`To view in browser, run with --open or open: ${filePath}`);
+      }
+    });
+
+  // helen token-budget
+  program
+    .command('token-budget [target]')
+    .description('Estimate token usage and costs across AI models for prompts and playbooks')
+    .action(async (target?: string) => {
+      const { computeTokenBudget, printTokenBudget } = await import('./core/tokenBudget.js');
+      const summary = computeTokenBudget(target);
+      if (isJsonMode()) {
+        printJsonAndExit('token-budget', summary);
+        return;
+      }
+      printTokenBudget(summary);
+    });
+
+  // helen mcp
+  program
+    .command('mcp')
+    .description('Start the HELEN Model Context Protocol (MCP) server over stdio')
+    .action(async () => {
+      const { startMcpServer } = await import('./core/mcp.js');
+      startMcpServer(process.stdin, process.stdout);
     });
 
   return program;

@@ -5,6 +5,11 @@
 Wave 1 implementation: automated project bootstrap, machine-readable JSON output for AI agents, statistically honest evaluation framework, npm publication pipeline, and cross-platform Windows compatibility.
 
 ### Added
+- `helen mcp`: native Model Context Protocol (MCP) server running via standard stdio JSON-RPC 2.0. Exposes tools (`helen_status`, `helen_next`, `helen_done`, `helen_apply`, `helen_doctor`, `helen_prompt_get`, `helen_skills_list`, `helen_init_project`) directly to Antigravity, Claude, and Cursor without terminal parsing.
+- `helen doctor --fix`: automated, safe remediation of missing or broken git hooks, `.github/dependabot.yml`, outdated skills, and missing `.helenrc`.
+- `helen apply --auto`: semi-autonomous step orchestration that advances through playbook steps, automatically executing and verifying checkpoint quality gates.
+- `helen report`: standalone, interactive HTML dashboard (`.helen/report.html`) and JSON reporting of project phase, completion percentage, checkpoint health, and skills inventory. Supports `--open` and `--json`.
+- `helen token-budget`: token estimation and multi-model cost projection (Gemini 1.5 Flash/Pro, Claude 3.5 Sonnet, GPT-4o) across prompt library and playbooks. Supports `--json`.
 - `helen init-project`: single-command idempotent project initialization chaining `setup`, `guardrails`, and goal tracking (`apply <goal> --track`). Supports `--dry-run`, `--json`, `--goal`, and `--agents`.
 - Global `--json` output across all commands (`apply`, `next`, `done`, `skip`, `status`, `check`, `doctor`, `lint`, `setup`, `init-project`, `prompts *`, `skills *`). Standard envelope: `{ ok, command, data, warnings, errors }` on `stdout`, with human/progress logs routed strictly to `stderr`.
 - Standard exit codes: `0` (Success), `1` (Error), `2` (Warnings present), `3` (Checkpoint gate failed). Interactive menus cleanly disabled in JSON mode.
