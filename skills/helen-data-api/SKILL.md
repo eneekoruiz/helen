@@ -19,6 +19,6 @@ Check domain integrity, constraints, ownership of each field, migration path, an
 
 ## Limits
 
-Do not change public contracts without justification and a migration path. Ask before destructive migrations.
+Do not change public contracts without justification and a migration path (versioning, deprecation window, communication to consumers). Confirm with the contract owner and known consumers before any breaking change, and ask before destructive migrations.
 
 Prompts: `audit-data-and-api-contracts`, `audit-content-model-and-editorial-workflow`.

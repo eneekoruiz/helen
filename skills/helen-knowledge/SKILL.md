@@ -1,6 +1,6 @@
 ---
 name: helen-knowledge
-description: Use to preserve project knowledge and reduce bus factor - decision logs (ADRs), AI context files, runbooks, ownership of accounts and deployment, onboarding for future developers.
+description: Use to preserve project knowledge and reduce bus factor - decision logs (ADRs), AI context files, runbooks, ownership of accounts and deployment, onboarding for future developers. Also use when a project will change hands or its owner may leave.
 ---
 
 # Knowledge Preservation

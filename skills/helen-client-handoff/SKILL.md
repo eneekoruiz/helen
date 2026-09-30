@@ -11,7 +11,7 @@ description: Use when preparing to deliver a project to a client or future maint
 2. No credentials, tokens, or development access exposed in the repo or docs.
 3. Ownership is clear: domains, hosting, repositories, databases, SaaS accounts, and where credentials live (name the vault, never the secret).
 4. Links, forms, and CTAs work; media has alt text and sensible weight.
-5. A browser smoke test passes (a headless browser tool such as `playwright-cli` helps).
+5. A browser smoke test passes on every main route, including reload (deep links) and back/forward navigation, on mobile and desktop (a headless browser tool such as `playwright-cli` helps).
 6. Release notes, changelog, and a demo package exist.
 7. The receiver has a clear roadmap to keep operating.
 

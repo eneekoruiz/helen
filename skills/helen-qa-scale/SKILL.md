@@ -1,6 +1,6 @@
 ---
 name: helen-qa-scale
-description: Use before production to stress a project - adversarial QA and edge cases, scaling limits and cost drivers, and observability (logs, errors, metrics, alerts). Finds what breaks under bad input, load, retries, and partial failure.
+description: Use before production to stress a project - adversarial QA and edge cases, scaling limits and cost drivers, and observability (logs, errors, metrics, alerts). Finds what breaks under bad input, load, retries, and partial failure. Also use when asked what could break, how a feature behaves at scale, or how to monitor it.
 ---
 
 # QA, Scale and Observability

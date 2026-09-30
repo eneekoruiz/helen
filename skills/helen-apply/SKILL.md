@@ -13,13 +13,14 @@ One entry point for everything in HELEN. The user does not need to know which pr
 2. **Choose the goal.**
    - The user named an area: map it to a goal below (or run `helen apply "<their words>"`).
    - The user only said "use HELEN" or "what should I do": propose the goals suggested for the detected phase and ask which to run. Do not run all of them unasked.
-3. **Load the playbook.** `helen apply <goal> --track` starts a tracked run: then `helen next` shows the current step with the prompt text or commands, `helen done "<what you did>"` advances, `helen skip "<reason>"` skips, `helen status` shows progress, `helen check` runs the project's typecheck, lint, test and build (a checkpoint step cannot be marked done until it passes). Without tracking, `helen apply <goal>` prints the steps and `--brief` prints a brief. Without the CLI, read `docs/prompts/playbooks.json`.
+3. **Load the playbook.** `helen apply <goal> --track` starts a tracked run: then `helen next` shows the current step with the prompt text or commands, `helen done "<what you did>"` advances, `helen skip "<reason>"` skips, `helen status` shows progress, `helen check` runs the project's typecheck, lint, test and build (a checkpoint step cannot be marked done until it passes). Without tracking, `helen apply <goal>` prints the steps and `--brief` prints a brief. Without the CLI, read `docs/prompts/playbooks.json`. If neither is available, present the plan in the default order: evidence of the current state → direction or design system → structure and layout → detailed polish → responsive and accessibility → verification (build, tests, visual check) → report.
 4. **Execute the steps in order.** By step kind:
    - `prompt` or `flow`: read it (`helen prompts show <ref>`) and follow it.
    - `checkpoint`: run it; if it fails, stop and report. Never advance past a failed checkpoint.
    - `skill`: use the bundled skill. If missing, install it: `helen skills install <name> --target claude codex` (or `--target custom --dir <path>`).
-   - `external` (skills, plugins, CLIs and MCP servers): never install or connect on your own. Show `helen skills external <id>` output, remind the user to review it (`audit-third-party-tools-and-mcp`), and continue only with approval. Use at most ONE main design skill.
-5. **Report**: steps done, skipped (and why), changes, risks, manual actions.
+   - `external` (skills, plugins, CLIs and MCP servers): never install or connect on your own. Show `helen skills external <id>` output, remind the user to review it (`audit-third-party-tools-and-mcp`), and continue only with approval. Use at most ONE main design skill (taste-skill, impeccable or ui-ux-pro-max overlap). Large harnesses such as ECC overlap with HELEN itself: recommend a minimal or selective install (single skills, no hooks), never the whole bundle on top.
+5. **Verify** before reporting: build and tests, plus a visual check (screenshots or visual regression) for design and motion work.
+6. **Report**: steps done, skipped (and why), changes, risks, manual actions.
 
 ## Goals
 

@@ -1,6 +1,6 @@
 ---
 name: helen-a11y-perf
-description: Use when checking or improving web UI accessibility and performance before release or client delivery - keyboard navigation, focus, contrast, semantic HTML, labels, alt text, bundle and asset size, render cost, and loading experience.
+description: Use when checking or improving web UI accessibility and performance before release or client delivery - keyboard navigation, focus, contrast, semantic HTML, labels, alt text, bundle and asset size, render cost, and loading experience. Also use for any question, code snippet or review about accessibility, ARIA, forms, Core Web Vitals, Lighthouse or slow pages.
 ---
 
 # Accessibility and Performance Pass

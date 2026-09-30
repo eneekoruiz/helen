@@ -1,6 +1,6 @@
 ---
 name: helen-motion-3d
-description: Use when adding or auditing motion, scroll-driven sequences, view transitions, 3D (Spline or React Three Fiber), shaders, or video scrubbing on a website - with a performance budget and graceful degradation.
+description: Use when adding or auditing motion, scroll-driven sequences, view transitions, 3D (Spline or React Three Fiber), shaders, or video scrubbing on a website - with a performance budget and graceful degradation. Also use for any question or snippet about animations, GSAP, Framer Motion, Lenis, Three.js, parallax or scroll effects.
 ---
 
 # Motion, 3D and Cinematic Effects

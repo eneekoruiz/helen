@@ -1,6 +1,6 @@
 ---
 name: helen-security
-description: Use when auditing or hardening a project's security before public exposure, client delivery, or release - secrets, input validation and injection, dependency vulnerabilities, permissions, and destructive operations. Mitigates safely and never prints secrets.
+description: Use when auditing or hardening a project's security before public exposure, client delivery, or release - secrets, input validation and injection, dependency vulnerabilities, permissions, and destructive operations. Mitigates safely and never prints secrets. Also use for any code review, snippet, dependency audit, secret leak, CI shortcut or question about installing third-party scripts, skills, plugins or MCP servers.
 ---
 
 # Security Hardening

@@ -9,7 +9,7 @@ HELEN does not produce standard web pages. It produces digital assets oriented t
 
 ## Principles
 
-1. **Specific, not interchangeable.** A premium site looks inevitably made for that client. Anything swappable with another brand is suspect.
+1. **Specific, not interchangeable.** Every choice must come from the brand, audience and product context, not from generic trends. A premium site looks inevitably made for that client. Anything swappable with another brand is suspect.
 2. **Zero AI/template traces.** Watch for empty claims, inflated phrases, excessive symmetry, generic gradients, repeated cards, obvious icons, implausible testimonials, and microcopy without context.
 3. **Hierarchy first.** Check spacing, alignment, typography scale, contrast, density, and interaction feedback before adding effects.
 4. **Motion with a concept.** Subtle, purposeful micro-interactions. Respect `prefers-reduced-motion`. Never add effects that reduce legibility, conversion, performance, or accessibility.
@@ -20,7 +20,7 @@ HELEN does not produce standard web pages. It produces digital assets oriented t
 
 1. Read the project and business goal. State assumptions.
 2. Audit: list issues by severity (Critical / Important / Optional) with concrete before/after substitutions.
-3. Apply the smallest set of changes with the highest perceived impact.
+3. Apply the smallest set of changes with the highest perceived impact. When asked for many effects or trends at once, propose a restrained, prioritized subset tied to the brand and product (what each effect is for) instead of adding everything.
 4. Verify: build, and check the result at real viewport sizes when a browser is available.
 
 ## Safety limits

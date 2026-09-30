@@ -54,7 +54,7 @@ function makeProject(skill) {
   return dir;
 }
 
-async function agent(prompt, skill) {
+async function agent(prompt, skill, attempt = 0) {
   const cwd = makeProject(skill);
   await run('git', ['init', '-q'], cwd);
   const res = await run(
@@ -86,10 +86,13 @@ async function agent(prompt, skill) {
     }
   }
   fs.rmSync(cwd, { recursive: true, force: true });
-  return { text, triggered, ok: res.code === 0 && text.length > 0 };
+  const ok = res.code === 0 && text.length > 0;
+  if (!ok && attempt < 1) return agent(prompt, skill, attempt + 1);
+  return { text, triggered, ok };
 }
 
-async function grade(prompt, answer, criteria) {
+async function grade(prompt, answer, criteria, attempt = 0) {
+  if (!answer) return null;
   const judge = `You are a strict evaluator. Grade the ANSWER against each CRITERION.
 Return only JSON: {"results":[{"criterion":"...","pass":true|false,"note":"<=15 words"}]}
 
@@ -107,9 +110,11 @@ ${criteria.map((c, i) => `${i + 1}. ${c}`).join('\n')}`;
   try {
     const raw = JSON.parse(res.out).result;
     const json = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
+    if (json.results.length !== criteria.length) throw new Error('criteria mismatch');
     return json.results.map((r) => Boolean(r.pass));
   } catch {
-    return criteria.map(() => false);
+    // A judge failure is a harness error, not a failed criterion: retry once, then report it
+    return attempt < 1 ? grade(prompt, answer, criteria, attempt + 1) : null;
   }
 }
 
@@ -146,7 +151,7 @@ if (!reportOnly) {
           grade(c.prompt, baseline.text, c.criteria),
           grade(c.prompt, skillRun.text, c.criteria),
         ]);
-        const pct = (g) => Math.round((100 * g.filter(Boolean).length) / g.length);
+        const pct = (g) => (g ? Math.round((100 * g.filter(Boolean).length) / g.length) : null);
         const row = {
           skill: spec.skill,
           id: c.id,
@@ -154,8 +159,9 @@ if (!reportOnly) {
           forcedTriggered: forced ? forced.triggered : null,
           baseline: pct(baseGrades),
           withSkill: pct(skillGrades),
-          criteria: c.criteria.map((text, i) => ({ text, baseline: baseGrades[i], withSkill: skillGrades[i] })),
-          errors: [baseline, withSkill, forced].filter((r) => r && !r.ok).length,
+          criteria: c.criteria.map((text, i) => ({ text, baseline: baseGrades?.[i] ?? null, withSkill: skillGrades?.[i] ?? null })),
+          errors: [baseline, withSkill, forced].filter((r) => r && !r.ok).length + [baseGrades, skillGrades].filter((g) => !g).length,
+          answers: { baseline: baseline.text, withSkill: skillRun.text },
         };
         console.log(`${spec.skill}/${c.id}: trigger=${row.triggered} base=${row.baseline}% skill=${row.withSkill}%`);
         return row;
@@ -167,6 +173,10 @@ if (!reportOnly) {
   for (const r of rows) (bySkill[r.skill] ??= []).push(r);
   const date = new Date().toISOString().slice(0, 10);
   for (const [skill, cases] of Object.entries(bySkill)) {
+    // Keep stored cases that were not re-run (e.g. when running a single case subset)
+    const file = path.join(resultDir, `${skill}.json`);
+    const previous = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf-8')).cases : [];
+    for (const old of previous) if (!cases.some((c) => c.id === old.id)) cases.push(old);
     fs.writeFileSync(path.join(resultDir, `${skill}.json`), JSON.stringify({ skill, model, date, cases }, null, 2) + '\n');
   }
 }
@@ -178,7 +188,10 @@ const summaries = fs
   .map((f) => JSON.parse(fs.readFileSync(path.join(resultDir, f), 'utf-8')))
   .sort((a, b) => a.skill.localeCompare(b.skill));
 
-const avg = (xs) => Math.round(xs.reduce((a, b) => a + b, 0) / Math.max(xs.length, 1));
+const avg = (values) => {
+  const xs = values.filter((x) => typeof x === 'number');
+  return Math.round(xs.reduce((a, b) => a + b, 0) / Math.max(xs.length, 1));
+};
 const lines = [
   '# Skill quality',
   '',
@@ -188,10 +201,12 @@ const lines = [
   '',
   '- **Trigger**: cases where the agent loaded the skill without being told to (description quality).',
   '- **Baseline / With skill**: share of criteria met. **Delta**: value added by the skill.',
-  '- Grade: A delta ≥ 20 and with skill ≥ 85 · B with skill ≥ 75 · C otherwise.',
+  '- Grade: A delta ≥ 20 and with skill ≥ 85 · B with skill ≥ 75 · C otherwise. A high baseline with a small delta means',
+  '  the model already handles those cases well; the skill then adds consistency and HELEN routing rather than raw quality.',
+  '- Harness errors (empty answer or unparsable judge after one retry) are excluded from the averages and counted apart.',
   '',
-  '| Skill | Cases | Trigger | Baseline | With skill | Delta | Grade |',
-  '|---|---|---|---|---|---|---|',
+  '| Skill | Cases | Trigger | Baseline | With skill | Delta | Grade | Errors |',
+  '|---|---|---|---|---|---|---|---|',
 ];
 for (const s of summaries) {
   const trig = s.cases.filter((c) => c.triggered).length;
@@ -199,11 +214,11 @@ for (const s of summaries) {
   const withSkill = avg(s.cases.map((c) => c.withSkill));
   const delta = withSkill - base;
   const gradeLetter = delta >= 20 && withSkill >= 85 ? 'A' : withSkill >= 75 ? 'B' : 'C';
-  lines.push(`| ${s.skill} | ${s.cases.length} | ${trig}/${s.cases.length} | ${base}% | ${withSkill}% | ${delta >= 0 ? '+' : ''}${delta} | ${gradeLetter} |`);
+  lines.push(`| ${s.skill} | ${s.cases.length} | ${trig}/${s.cases.length} | ${base}% | ${withSkill}% | ${delta >= 0 ? '+' : ''}${delta} | ${gradeLetter} | ${s.cases.reduce((n, c) => n + (c.errors ?? 0), 0)} |`);
 }
 lines.push('', '## Failed criteria with skill', '');
 for (const s of summaries) {
-  const failed = s.cases.flatMap((c) => c.criteria.filter((k) => !k.withSkill).map((k) => `- ${s.skill}/${c.id}: ${k.text}`));
+  const failed = s.cases.flatMap((c) => c.criteria.filter((k) => k.withSkill === false).map((k) => `- ${s.skill}/${c.id}: ${k.text}`));
   if (failed.length) lines.push(...failed);
 }
 if (summaries[0]) lines.push('', `Model: ${summaries[0].model} · last run: ${summaries.map((s) => s.date).sort().at(-1)}`);

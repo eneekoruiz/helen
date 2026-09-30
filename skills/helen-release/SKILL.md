@@ -1,6 +1,6 @@
 ---
 name: helen-release
-description: Use when deciding whether a project can become a release candidate and preparing the release - build/lint/test gates, security and SEO/i18n checks, repository presentation, changelog and release notes. Produces a RC READY / RC WITH CAVEATS / NOT RC READY verdict.
+description: Use when deciding whether a project can become a release candidate and preparing the release - build/lint/test gates, security and SEO/i18n checks, repository presentation, changelog and release notes. Produces a RC READY / RC WITH CAVEATS / NOT RC READY verdict. Also use when asked whether something is ready to ship, publish, tag or deploy.
 ---
 
 # Release Candidate

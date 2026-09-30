@@ -21,7 +21,7 @@ Reduce complexity, duplication, and technical risk **without changing behavior**
 
 1. **Zero dead code (high priority).** Remove unused variables, imports, functions, classes, components, and files. Confirm they are unused (search references, check exports and dynamic usage) before deleting.
 2. Review responsibilities, naming, duplication, coupling, silent error handling, and abstractions.
-3. Prefer small, safe changes. Keep existing behavior.
+3. Prefer small, safe changes. Keep existing behavior for every caller: exported names, signatures and return shapes stay the same unless the user agrees to change them.
 
 ## Beyond the checklist
 
