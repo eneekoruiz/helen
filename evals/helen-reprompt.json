@@ -1,0 +1,35 @@
+{
+  "skill": "helen-reprompt",
+  "cases": [
+    {
+      "id": "reprompt-messy",
+      "prompt": "helen reprompt the user said 'make a button and it does fetch to /api but sometimes it fails so fix it' so rewrite this to be a good prompt for claude and then execute it. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Identifies the user's messy prompt",
+        "Rewrites the prompt into a structured English prompt",
+        "The new prompt includes Context & Goal, Constraints, and Expected Output",
+        "States that it will immediately execute the rewritten prompt"
+      ]
+    },
+    {
+      "id": "reprompt-vague",
+      "prompt": "usa reprompt para 'haz que la app sea mas rapida no se como pero rapida'. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Recognizes the 'reprompt' trigger",
+        "Translates the vague intent into a concrete performance audit and optimization prompt in English",
+        "The rewritten prompt is highly structured",
+        "Mentions self-execution"
+      ]
+    },
+    {
+      "id": "anti-trigger-unrelated",
+      "prompt": "How do I create a button in React?",
+      "criteria": [
+        "Does not mention HELEN Reprompt Engine",
+        "Does not rewrite the prompt",
+        "Directly answers the question"
+      ],
+      "shouldTrigger": false
+    }
+  ]
+}
