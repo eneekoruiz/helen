@@ -1,122 +1,902 @@
 {
   "skill": "helen-a11y-perf",
   "model": "sonnet",
-  "date": "2026-09-30",
+  "date": "2026-10-01",
+  "runsPerCase": 3,
   "cases": [
     {
       "skill": "helen-a11y-perf",
       "id": "form-a11y",
-      "triggered": true,
-      "forcedTriggered": null,
-      "baseline": 100,
-      "withSkill": 80,
-      "criteria": [
+      "expectTrigger": true,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
         {
-          "text": "Replaces the clickable div with a real button element",
-          "baseline": true,
-          "withSkill": true
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Replaces the clickable div with a real button element",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Adds a visible label linked to the input (placeholder is not a label)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Adds appropriate alt text (or empty alt if decorative) to the image",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Flags the low-contrast error text and links the error to the field (e.g. aria-describedby)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Does not add redundant or wrong ARIA where native HTML suffices",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Adds a visible label linked to the input (placeholder is not a label)",
-          "baseline": true,
-          "withSkill": true
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Replaces the clickable div with a real button element",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Adds a visible label linked to the input (placeholder is not a label)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Adds appropriate alt text (or empty alt if decorative) to the image",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Flags the low-contrast error text and links the error to the field (e.g. aria-describedby)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Does not add redundant or wrong ARIA where native HTML suffices",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Adds appropriate alt text (or empty alt if decorative) to the image",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Flags the low-contrast error text and links the error to the field (e.g. aria-describedby)",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Does not add redundant or wrong ARIA where native HTML suffices",
-          "baseline": true,
-          "withSkill": false
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Replaces the clickable div with a real button element",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Adds a visible label linked to the input (placeholder is not a label)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Adds appropriate alt text (or empty alt if decorative) to the image",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Flags the low-contrast error text and links the error to the field (e.g. aria-describedby)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Does not add redundant or wrong ARIA where native HTML suffices",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         }
       ],
-      "errors": 0,
-      "answers": {
-        "baseline": "Here's an accessible version, with the reasons for each change below.\n\n```html\n<form action=\"/subscribe\" method=\"post\" novalidate>\n  <img src=\"hero.jpg\" alt=\"Person reading a newsletter on a phone\">\n  <!-- Use alt=\"\" instead if the image is purely decorative -->\n\n  <label for=\"email\">Email</label>\n  <input\n    id=\"email\"\n    name=\"email\"\n    type=\"email\"\n    autocomplete=\"email\"\n    required\n    aria-invalid=\"true\"\n    aria-describedby=\"email-error\">\n\n  <span id=\"email-error\" role=\"alert\" style=\"color:#b00020\">\n    Error: Please enter a valid email address.\n  </span>\n\n  <button type=\"submit\">Send</button>\n</form>\n```\n\n**What changed and why**\n\n1. **`<div onclick>` → `<button type=\"submit\">`**: A div isn't focusable, isn't announced as a button, and doesn't respond to Enter or Space. A native `<button>` provides all of that. Inside a `<form>`, it also submits without inline JavaScript. If you must keep a div, it needs `role=\"button\"`, `tabindex=\"0\"` and a key handler, and that is worse than using a button.\n\n2. **Input with only a placeholder → real `<label>`**: Placeholders disappear as you type, usually have poor contrast, and aren't a reliable accessible name. A visible `<label for=\"email\">` fixes that and enlarges the click target. I also added `type=\"email\"` (mobile keyboard and validation), `autocomplete=\"email\"` (WCAG 1.3.5), and `name`.\n\n3. **`<img>` without `alt`**: Screen readers will read out the filename. Add a meaningful `alt`, or `alt=\"\"` if the image is decorative.\n\n4. **Error text `#aaa` on white**: The contrast is about 2.3:1, and WCAG AA needs 4.5:1. `#b00020` is about 7:1. The error is now tied to the field with `aria-describedby` and `aria-invalid=\"true\"`. `role=\"alert\"` makes it announce when it appears. Don't rely on color alone, so keep the \"Error:\" text and add an icon if you like.\n\n**Notes**\n- Only render the error element, and set `aria-invalid=\"true\"`, after validation fails. In the snippet they're always present to show the wiring.\n- Make sure the button and input have a visible focus style. Don't use `outline: none` without a replacement.\n- Move any `submit()` logic to a `submit` event listener on the form, not an inline handler.",
-        "withSkill": "Improvements applied.\n\n```html\n<form action=\"/subscribe\" method=\"post\" novalidate>\n  <label for=\"email\">Email</label>\n  <input id=\"email\" name=\"email\" type=\"email\" autocomplete=\"email\" required\n         aria-invalid=\"true\" aria-describedby=\"email-error\">\n  <p id=\"email-error\" class=\"error\" role=\"alert\">\n    Error: enter a valid email address, for example name@example.com.\n  </p>\n  <button type=\"submit\" class=\"btn\">Send</button>\n</form>\n\n<img src=\"hero.jpg\" alt=\"Describe what the image shows\" width=\"1200\" height=\"600\" loading=\"lazy\">\n<!-- If it is purely decorative: alt=\"\" -->\n```\n\n```css\n.error { color: #b00020; } /* about 6.5:1 on white; #aaa is only about 2.3:1 */\n.btn:focus-visible, input:focus-visible { outline: 2px solid #005fcc; outline-offset: 2px; }\n```\n\nChanges applied:\n- **Button:** the `<div onclick>` becomes a real `<button type=\"submit\">`. It is now keyboard-focusable and works with Enter and Space, and screen readers announce it as a button. Handle submission with a `submit` event on the form instead of an inline `onclick`.\n- **Input:** a visible `<label for>` replaces the placeholder, which disappears while typing and isn't a reliable label. I also added `type=\"email\"`, `autocomplete=\"email\"`, and `name`/`id`.\n- **Error message:** the grey `#aaa` text failed contrast, so it is now a darker red with clearer wording. It is linked to the input with `aria-describedby` and announced through `role=\"alert\"`. The text says what is wrong, so it doesn't rely on color alone.\n- **Image:** it now has `alt` text. Use `alt=\"\"` if it is decorative. I added `width` and `height` to prevent layout shift, and `loading=\"lazy\"` for a below-the-fold image. Drop `loading=\"lazy\"` if it is the hero at the top of the page, because it would slow the largest paint.\n- **Focus:** the CSS adds a visible focus outline.\n\nManual actions needed:\n- Show the error only after validation fails. Set `aria-invalid=\"true\"` and render the message then, rather than leaving it on the page permanently.\n- Write real alt text for the image.\n- If you show errors on submit, move focus to the first invalid field."
-      }
+      "errors": 15
     },
     {
       "skill": "helen-a11y-perf",
       "id": "perf",
-      "triggered": false,
-      "forcedTriggered": true,
-      "baseline": 100,
-      "withSkill": 100,
-      "criteria": [
+      "expectTrigger": true,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
         {
-          "text": "Prioritizes by user-visible impact (hero image / LCP first or clearly ranked)",
-          "baseline": true,
-          "withSkill": true
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Prioritizes by user-visible impact (hero image / LCP first or clearly ranked)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends modern image formats, sizing and dimensions for the hero",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends removing or replacing heavy dependencies (lodash/moment) or importing only what is used",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends deduplicating the repeated /api/config request",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions measuring before and after",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Recommends modern image formats, sizing and dimensions for the hero",
-          "baseline": true,
-          "withSkill": true
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Prioritizes by user-visible impact (hero image / LCP first or clearly ranked)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends modern image formats, sizing and dimensions for the hero",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends removing or replacing heavy dependencies (lodash/moment) or importing only what is used",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends deduplicating the repeated /api/config request",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions measuring before and after",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Recommends removing or replacing heavy dependencies (lodash/moment) or importing only what is used",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Recommends deduplicating the repeated /api/config request",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Mentions measuring before and after",
-          "baseline": true,
-          "withSkill": true
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Prioritizes by user-visible impact (hero image / LCP first or clearly ranked)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends modern image formats, sizing and dimensions for the hero",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends removing or replacing heavy dependencies (lodash/moment) or importing only what is used",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends deduplicating the repeated /api/config request",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions measuring before and after",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         }
       ],
-      "errors": 0,
-      "answers": {
-        "baseline": "**Fix the hero PNG first.**\n\n1. **Hero PNG (4 MB)**: This is the biggest cost, and the fix is quick.\n   - Convert it to AVIF or WebP. That's typically 90% smaller, so about 200–400 KB.\n   - Serve responsive sizes with `srcset`.\n   - Don't lazy-load it, because it's probably your LCP element. Add `fetchpriority=\"high\"` and a preload instead.\n   - This needs no code refactoring, and it usually improves LCP more than anything else on the list. On a slow mobile connection, 4 MB alone can take several seconds.\n\n2. **Triple `/api/config` fetch**: Fix this second. It's a small change with a real payoff.\n   - Dedupe it with a single shared promise or module-level cache. If you use React Query or SWR, share one key.\n   - It's cheap to do, and it removes two redundant round trips that may sit on the critical render path. If the config blocks rendering, this could rank above the JS work.\n\n3. **JS bundle (1.2 MB)**: This one is worth doing but takes more effort.\n   - Swap `moment` for `date-fns` or `dayjs`. That saves about 70 KB gzipped.\n   - Use per-method lodash imports (`lodash/debounce`) or `lodash-es` with tree-shaking. Better still, replace the few functions you use with native code.\n   - Run a bundle analyzer, and consider code-splitting anything that's not needed above the fold.\n   - The bytes matter less than the parse and execute time, especially on mobile. Even so, the image is a bigger network cost.\n\n**Order:** image, then config dedupe, then bundle. The first two can ship in an hour or so. The bundle work comes after them.\n\nI haven't looked at your code, so measure before and after. Run Lighthouse or WebPageTest and compare LCP, total transfer, and TBT. If `/api/config` gates the first render, move the dedupe up to first.",
-        "withSkill": "**Fix the 4 MB hero PNG first.** It is almost certainly your LCP element, and it is the largest single cost on the page.\n\n**1. Hero image (do first)**\n- The PNG is likely 3.5 MB or more heavier than it needs to be. On a mid-range mobile connection that alone is several seconds of LCP.\n- Convert it to AVIF or WebP, with a JPEG fallback via `<picture>` if you need one. Size it to the real rendered dimensions and add `srcset`/`sizes`. This typically brings it under 150–300 KB.\n- Keep it eager, not lazy-loaded, since it's above the fold. Add `fetchpriority=\"high\"` and explicit `width`/`height` so the layout doesn't shift.\n- Keep or write meaningful `alt` text. Use `alt=\"\"` if it's purely decorative.\n- It's a small change with a large payoff.\n\n**2. JS bundle (second)**\n- 1.2 MB with all of lodash and moment is the next biggest cost. It hurts parse and execute time and INP/TBT, which matters most on slow phones.\n- Replace `moment` with `date-fns` or `dayjs`, or with native `Intl`/`Date`. Moment is about 70 KB or more gzipped, and it isn't tree-shakeable.\n- Import individual lodash functions (`lodash/debounce`) or use `lodash-es`. You may also be able to drop lodash for native methods.\n- Confirm with a bundle analyzer (`source-map-explorer`, `webpack-bundle-analyzer`, or `vite-bundle-visualizer`) before cutting. That way you fix what's actually big, not what you assume is big.\n- Then code-split anything not needed for first paint.\n\n**3. Triple `/api/config` fetch (third)**\n- This is the cheapest to fix but the smallest in bytes. The cost is redundant requests and delayed rendering if the page waits on config.\n- Fetch it once and share the result through a module-level promise, a context/provider, or your data library's cache (React Query or SWR dedupe automatically). Keep it simple and avoid a custom caching layer.\n- Also check why three components each fetch it. That usually points to a missing shared provider.\n\n**Order:** image, then bundle, then config. After each fix, re-measure with Lighthouse or WebPageTest on throttled mobile so you know what actually moved LCP and TBT. I haven't looked at your code or profiled the page, so this ranking rests on the sizes you gave. If the config fetch blocks first render, move it up.\n\nSince this is a landing page, also confirm the hero has good contrast for any text overlaid on it, and that the image swap doesn't remove the alt text."
-      }
+      "errors": 15
     },
     {
       "skill": "helen-a11y-perf",
       "id": "aria-theater",
-      "triggered": true,
-      "forcedTriggered": null,
-      "baseline": 100,
-      "withSkill": 100,
-      "criteria": [
+      "expectTrigger": true,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
         {
-          "text": "Says native <button> already has the role and focusability, so these attributes are redundant",
-          "baseline": true,
-          "withSkill": true
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Says native <button> already has the role and focusability, so these attributes are redundant",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Warns that aria-label='button' would harm screen reader output",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Explains aria-hidden only for decorative icons, not meaningful ones",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends native semantics first",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Warns that aria-label='button' would harm screen reader output",
-          "baseline": true,
-          "withSkill": true
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Says native <button> already has the role and focusability, so these attributes are redundant",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Warns that aria-label='button' would harm screen reader output",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Explains aria-hidden only for decorative icons, not meaningful ones",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends native semantics first",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Explains aria-hidden only for decorative icons, not meaningful ones",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Recommends native semantics first",
-          "baseline": true,
-          "withSkill": true
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Says native <button> already has the role and focusability, so these attributes are redundant",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Warns that aria-label='button' would harm screen reader output",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Explains aria-hidden only for decorative icons, not meaningful ones",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends native semantics first",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         }
       ],
-      "errors": 0,
-      "answers": {
-        "baseline": "No. Adding those to every button would make accessibility worse in most cases.\n\n**On `<button>`:**\n- `role=\"button\"` is redundant. A native `<button>` already has that role, and linters flag it.\n- `tabindex=\"0\"` is redundant. Buttons are already focusable, so it adds nothing.\n- `aria-label=\"button\"` is harmful. It overrides the button's visible text, so a screen reader announces \"button, button\" and loses the real label like \"Save\". It also breaks voice control, which relies on the visible label matching the accessible name.\n\n**What to do instead:**\n- Use a real `<button>` with visible text. That is usually all you need.\n- Give it `type=\"button\"` when it's inside a form and shouldn't submit.\n- Use `aria-label` only for icon-only buttons, with a meaningful, specific name such as `aria-label=\"Close dialog\"`.\n- Don't remove the focus outline unless you replace it with a visible focus style.\n\n**On icons:**\n- `aria-hidden=\"true\"` is right for decorative icons, such as an icon next to visible text. It stops screen readers from announcing noise.\n- It's wrong for an icon that is the only content of a button. In that case, put the label on the button (`aria-label`, or visually hidden text) and mark the icon itself `aria-hidden=\"true\"`. The icon is hidden, but the button still has a name.\n- Icons that convey information on their own, such as a standalone status icon, need a text alternative (`role=\"img\"` with `aria-label`, or `<title>` in an SVG).\n\n**Where `role` and `tabindex` do apply:** only when you build a button from a non-semantic element like `<div onClick>`. Then you'd need `role=\"button\"`, `tabindex=\"0\"`, and Enter/Space key handlers. It's much better to switch to a real `<button>`.\n\n**Examples:**\n```html\n<!-- Text button with a decorative icon -->\n<button type=\"button\">\n  <svg aria-hidden=\"true\" focusable=\"false\">…</svg>\n  Save\n</button>\n\n<!-- Icon-only button -->\n<button type=\"button\" aria-label=\"Close dialog\">\n  <svg aria-hidden=\"true\" focusable=\"false\">…</svg>\n</button>\n```\n\nTo check, run axe or Lighthouse, and test with a keyboard and a screen reader such as VoiceOver or NVDA.",
-        "withSkill": "No. Don't add those attributes to every button. Most of them are redundant, and one of them makes things worse.\n\n**`role=\"button\"`**\n- A native `<button>` already has the button role. Adding it does nothing.\n- It's only needed on non-button elements like `<div>` or `<span>` acting as buttons. The better fix there is to switch to a real `<button>`.\n\n**`tabindex=\"0\"`**\n- A `<button>` is already focusable and in the tab order.\n- It's only needed on custom widgets that aren't natively focusable.\n\n**`aria-label=\"button\"`**\n- This is harmful. `aria-label` replaces the button's visible text as its accessible name.\n- A screen reader would announce \"button, button\" for every control and lose the real label (\"Save\", \"Close\" and so on).\n- Buttons with visible text need no `aria-label`.\n- Add one only when the button has no text, such as an icon-only button. Then it should describe the action, e.g. `aria-label=\"Close dialog\"`.\n- If the label is visible text, it should match the accessible name (WCAG 2.5.3, \"Label in Name\").\n\n**`aria-hidden=\"true\"` on icons**\n- Do this for decorative icons that sit next to text, like an SVG beside \"Save\". It stops the icon being announced as noise.\n- Don't do it blindly on every icon. An icon that is the only content of a button carries the meaning, so the button needs an accessible name from `aria-label`, `aria-labelledby` or visually hidden text. The icon itself can still be `aria-hidden`.\n- Never put `aria-hidden` on a focusable element, or on an ancestor of one. That hides a focusable control from assistive tech.\n\n**What to do instead**\n1. Use native `<button type=\"button\">` for actions and `<a href>` for navigation.\n2. Give icon-only buttons a specific, action-based accessible name.\n3. Mark decorative icons `aria-hidden=\"true\"` and `focusable=\"false\"` (for SVG in old IE/Edge).\n4. Keep the focus indicator visible. Don't remove `outline` without replacing it.\n5. Check contrast and test with keyboard-only navigation and a screen reader.\n\nThe rule of thumb is native semantics first, and ARIA only to fill gaps that HTML can't cover. Redundant or wrong ARIA is often worse than none."
-      }
+      "errors": 15
+    },
+    {
+      "skill": "helen-a11y-perf",
+      "id": "keyboard-modal",
+      "expectTrigger": true,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Recommends trapping focus within the modal while open",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends handling the Escape key to close the dialog",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends restoring focus to the trigger button upon closing",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends appropriate dialog role and accessible name (aria-labelledby or title)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Recommends trapping focus within the modal while open",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends handling the Escape key to close the dialog",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends restoring focus to the trigger button upon closing",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends appropriate dialog role and accessible name (aria-labelledby or title)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Recommends trapping focus within the modal while open",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends handling the Escape key to close the dialog",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends restoring focus to the trigger button upon closing",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends appropriate dialog role and accessible name (aria-labelledby or title)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        }
+      ],
+      "errors": 15
+    },
+    {
+      "skill": "helen-a11y-perf",
+      "id": "sql-query-tuning",
+      "expectTrigger": false,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Suggests checking EXPLAIN ANALYZE execution plan",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends index on foreign keys or join columns",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Discusses connection pooling or query restructuring",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Suggests checking EXPLAIN ANALYZE execution plan",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends index on foreign keys or join columns",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Discusses connection pooling or query restructuring",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Suggests checking EXPLAIN ANALYZE execution plan",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends index on foreign keys or join columns",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Discusses connection pooling or query restructuring",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        }
+      ],
+      "errors": 12
+    },
+    {
+      "skill": "helen-a11y-perf",
+      "id": "color-psychology",
+      "expectTrigger": false,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Associates blue with trust, calm or reliability",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Associates green with nature, sustainability or growth",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Discusses brand perception for travel and eco businesses",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Associates blue with trust, calm or reliability",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Associates green with nature, sustainability or growth",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Discusses brand perception for travel and eco businesses",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Associates blue with trust, calm or reliability",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Associates green with nature, sustainability or growth",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Discusses brand perception for travel and eco businesses",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        }
+      ],
+      "errors": 12
     }
   ]
 }

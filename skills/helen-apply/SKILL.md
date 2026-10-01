@@ -41,6 +41,7 @@ One entry point for everything in HELEN. The user does not need to know which pr
 | data | API contracts and data model |
 | knowledge | ADRs, AI context, runbook, bus factor |
 | autonomy | agent loops, spec-driven work, automated review |
+| implementa | autonomous end-to-end implementation with self-correction |
 | connect-tools | connecting MCP servers safely (browser, docs, GitHub, hosting, database) |
 | safe-install | vetting third-party skills |
 

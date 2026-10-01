@@ -1,12 +1,12 @@
 {
-  "skill": "helen-knowledge",
+  "skill": "helen-improve",
   "model": "sonnet",
   "date": "2026-10-01",
   "runsPerCase": 3,
   "cases": [
     {
-      "skill": "helen-knowledge",
-      "id": "adr",
+      "skill": "helen-improve",
+      "id": "scan-more-improvements",
       "expectTrigger": true,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -44,25 +44,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Uses an ADR structure with Context, Decision, Consequences and Status",
+              "text": "Sweeps across multiple dimensions: functionality, aesthetics, backend architecture, performance, and DX",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes negative consequences or tradeoffs, not only benefits",
+              "text": "Rejects superficial filler (like formatting or commenting) and focuses on high-leverage architectural and product improvements",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions alternatives considered or rejected",
+              "text": "Structures proposals into an actionable matrix (Quick Wins vs Strategic Upgrades)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is limited to this single decision",
+              "text": "Recommends specific next steps and cites files or modules",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -82,25 +82,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Uses an ADR structure with Context, Decision, Consequences and Status",
+              "text": "Sweeps across multiple dimensions: functionality, aesthetics, backend architecture, performance, and DX",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes negative consequences or tradeoffs, not only benefits",
+              "text": "Rejects superficial filler (like formatting or commenting) and focuses on high-leverage architectural and product improvements",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions alternatives considered or rejected",
+              "text": "Structures proposals into an actionable matrix (Quick Wins vs Strategic Upgrades)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is limited to this single decision",
+              "text": "Recommends specific next steps and cites files or modules",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -120,25 +120,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Uses an ADR structure with Context, Decision, Consequences and Status",
+              "text": "Sweeps across multiple dimensions: functionality, aesthetics, backend architecture, performance, and DX",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes negative consequences or tradeoffs, not only benefits",
+              "text": "Rejects superficial filler (like formatting or commenting) and focuses on high-leverage architectural and product improvements",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions alternatives considered or rejected",
+              "text": "Structures proposals into an actionable matrix (Quick Wins vs Strategic Upgrades)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is limited to this single decision",
+              "text": "Recommends specific next steps and cites files or modules",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -154,8 +154,8 @@
       "errors": 15
     },
     {
-      "skill": "helen-knowledge",
-      "id": "bus",
+      "skill": "helen-improve",
+      "id": "full-stack-audit-request",
       "expectTrigger": true,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -193,31 +193,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Moves domain and accounts to organization-owned accounts",
+              "text": "Addresses functionality, visual craft/aesthetics, and verification depth",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Moves the password to a team password manager / secrets store and rotates it",
+              "text": "Mentions delegating or applying relevant criteria for aesthetics and testing",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Documents or automates the deploy (runbook / CI)",
+              "text": "Provides concrete, actionable proposals rather than vague generalities",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Prioritizes by urgency given the two-week deadline",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Does not ask to write the password into documentation",
+              "text": "Prioritizes proposals by impact and effort",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -237,31 +231,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Moves domain and accounts to organization-owned accounts",
+              "text": "Addresses functionality, visual craft/aesthetics, and verification depth",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Moves the password to a team password manager / secrets store and rotates it",
+              "text": "Mentions delegating or applying relevant criteria for aesthetics and testing",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Documents or automates the deploy (runbook / CI)",
+              "text": "Provides concrete, actionable proposals rather than vague generalities",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Prioritizes by urgency given the two-week deadline",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Does not ask to write the password into documentation",
+              "text": "Prioritizes proposals by impact and effort",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -281,31 +269,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Moves domain and accounts to organization-owned accounts",
+              "text": "Addresses functionality, visual craft/aesthetics, and verification depth",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Moves the password to a team password manager / secrets store and rotates it",
+              "text": "Mentions delegating or applying relevant criteria for aesthetics and testing",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Documents or automates the deploy (runbook / CI)",
+              "text": "Provides concrete, actionable proposals rather than vague generalities",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Prioritizes by urgency given the two-week deadline",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Does not ask to write the password into documentation",
+              "text": "Prioritizes proposals by impact and effort",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -321,8 +303,8 @@
       "errors": 15
     },
     {
-      "skill": "helen-knowledge",
-      "id": "agents-md",
+      "skill": "helen-improve",
+      "id": "backend-and-dx-enhancements",
       "expectTrigger": true,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -360,31 +342,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Includes the stack and key commands (install, dev, build, test, lint)",
+              "text": "Identifies backend optimization opportunities (batching, idempotency, runtime validation)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes the main folder structure or where logic lives",
+              "text": "Examines developer experience (one-command workflows, error diagnostics, pre-commit gates)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes limits on what the agent must not do (e.g. major upgrades, skipping tests, committing secrets)",
+              "text": "Provides clear technical rationale for each proposed upgrade",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is concise rather than a long essay",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Contains no secrets",
+              "text": "Groups items into quick wins and deeper architectural changes",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -404,31 +380,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Includes the stack and key commands (install, dev, build, test, lint)",
+              "text": "Identifies backend optimization opportunities (batching, idempotency, runtime validation)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes the main folder structure or where logic lives",
+              "text": "Examines developer experience (one-command workflows, error diagnostics, pre-commit gates)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes limits on what the agent must not do (e.g. major upgrades, skipping tests, committing secrets)",
+              "text": "Provides clear technical rationale for each proposed upgrade",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is concise rather than a long essay",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Contains no secrets",
+              "text": "Groups items into quick wins and deeper architectural changes",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -448,31 +418,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Includes the stack and key commands (install, dev, build, test, lint)",
+              "text": "Identifies backend optimization opportunities (batching, idempotency, runtime validation)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes the main folder structure or where logic lives",
+              "text": "Examines developer experience (one-command workflows, error diagnostics, pre-commit gates)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes limits on what the agent must not do (e.g. major upgrades, skipping tests, committing secrets)",
+              "text": "Provides clear technical rationale for each proposed upgrade",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is concise rather than a long essay",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Contains no secrets",
+              "text": "Groups items into quick wins and deeper architectural changes",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -488,8 +452,8 @@
       "errors": 15
     },
     {
-      "skill": "helen-knowledge",
-      "id": "incident-runbook",
+      "skill": "helen-improve",
+      "id": "aesthetic-and-feature-upgrades",
       "expectTrigger": true,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -527,25 +491,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Specifies symptoms, alerts, and verification steps to confirm incident",
+              "text": "Proposes distinctive visual craft and anti-slop refinements",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Details step-by-step mitigation or failover procedure",
+              "text": "Identifies missing user workflow capabilities (empty states, shortcuts, persistence)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Describes safe queue inspection and idempotent replay mechanism",
+              "text": "Delivers a structured improvement roadmap",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes escalation contacts and post-incident review requirement",
+              "text": "Keeps recommendations grounded in the actual codebase context",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -565,25 +529,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Specifies symptoms, alerts, and verification steps to confirm incident",
+              "text": "Proposes distinctive visual craft and anti-slop refinements",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Details step-by-step mitigation or failover procedure",
+              "text": "Identifies missing user workflow capabilities (empty states, shortcuts, persistence)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Describes safe queue inspection and idempotent replay mechanism",
+              "text": "Delivers a structured improvement roadmap",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes escalation contacts and post-incident review requirement",
+              "text": "Keeps recommendations grounded in the actual codebase context",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -603,25 +567,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Specifies symptoms, alerts, and verification steps to confirm incident",
+              "text": "Proposes distinctive visual craft and anti-slop refinements",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Details step-by-step mitigation or failover procedure",
+              "text": "Identifies missing user workflow capabilities (empty states, shortcuts, persistence)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Describes safe queue inspection and idempotent replay mechanism",
+              "text": "Delivers a structured improvement roadmap",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes escalation contacts and post-incident review requirement",
+              "text": "Keeps recommendations grounded in the actual codebase context",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -637,8 +601,8 @@
       "errors": 15
     },
     {
-      "skill": "helen-knowledge",
-      "id": "bubble-sort-python",
+      "skill": "helen-improve",
+      "id": "docker-ps-command",
       "expectTrigger": false,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -676,19 +640,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains adjacent element comparison and swapping",
+              "text": "Provides docker ps -q or docker ps --format '{{.ID}}'",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows correct Python code with nested loops",
+              "text": "Explains the quiet or formatting flag",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions O(n^2) time complexity",
+              "text": "Does not trigger holistic repository improvement scanning skills",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -708,19 +672,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains adjacent element comparison and swapping",
+              "text": "Provides docker ps -q or docker ps --format '{{.ID}}'",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows correct Python code with nested loops",
+              "text": "Explains the quiet or formatting flag",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions O(n^2) time complexity",
+              "text": "Does not trigger holistic repository improvement scanning skills",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -740,19 +704,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains adjacent element comparison and swapping",
+              "text": "Provides docker ps -q or docker ps --format '{{.ID}}'",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows correct Python code with nested loops",
+              "text": "Explains the quiet or formatting flag",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions O(n^2) time complexity",
+              "text": "Does not trigger holistic repository improvement scanning skills",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -768,8 +732,8 @@
       "errors": 12
     },
     {
-      "skill": "helen-knowledge",
-      "id": "svg-stroke-dashoffset",
+      "skill": "helen-improve",
+      "id": "markdown-table-syntax",
       "expectTrigger": false,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -807,19 +771,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains stroke-dasharray creates dashes and gaps",
+              "text": "Explains the colon on the right side of the delimiter row (---:)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Explains stroke-dashoffset shifts the starting point of the dash pattern",
+              "text": "Provides a short valid Markdown table example",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows CSS transition or keyframes example for line drawing effect",
+              "text": "Does not trigger repository enhancement or audit skills",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -839,19 +803,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains stroke-dasharray creates dashes and gaps",
+              "text": "Explains the colon on the right side of the delimiter row (---:)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Explains stroke-dashoffset shifts the starting point of the dash pattern",
+              "text": "Provides a short valid Markdown table example",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows CSS transition or keyframes example for line drawing effect",
+              "text": "Does not trigger repository enhancement or audit skills",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -871,19 +835,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains stroke-dasharray creates dashes and gaps",
+              "text": "Explains the colon on the right side of the delimiter row (---:)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Explains stroke-dashoffset shifts the starting point of the dash pattern",
+              "text": "Provides a short valid Markdown table example",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows CSS transition or keyframes example for line drawing effect",
+              "text": "Does not trigger repository enhancement or audit skills",
               "baseline": null,
               "withSkill": null,
               "note": ""

@@ -1,12 +1,12 @@
 {
-  "skill": "helen-knowledge",
+  "skill": "helen-impeccable",
   "model": "sonnet",
   "date": "2026-10-01",
   "runsPerCase": 3,
   "cases": [
     {
-      "skill": "helen-knowledge",
-      "id": "adr",
+      "skill": "helen-impeccable",
+      "id": "apple-audit-request",
       "expectTrigger": true,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -44,25 +44,31 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Uses an ADR structure with Context, Decision, Consequences and Status",
+              "text": "Adopts an uncompromising, adversarial auditor posture without conversational flattery",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes negative consequences or tradeoffs, not only benefits",
+              "text": "Checks verification depth and distinguishes between vanity tests and proof of invariants",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions alternatives considered or rejected",
+              "text": "Audits error handling, failure paths, rollback integrity, and edge case resilience",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is limited to this single decision",
+              "text": "Checks type craft, single responsibility, and elimination of dead or misleading code",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Provides a structured verdict with a 0-100 Craftsmanship Score and prioritized remediation backlog",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -82,25 +88,31 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Uses an ADR structure with Context, Decision, Consequences and Status",
+              "text": "Adopts an uncompromising, adversarial auditor posture without conversational flattery",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes negative consequences or tradeoffs, not only benefits",
+              "text": "Checks verification depth and distinguishes between vanity tests and proof of invariants",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions alternatives considered or rejected",
+              "text": "Audits error handling, failure paths, rollback integrity, and edge case resilience",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is limited to this single decision",
+              "text": "Checks type craft, single responsibility, and elimination of dead or misleading code",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Provides a structured verdict with a 0-100 Craftsmanship Score and prioritized remediation backlog",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -120,25 +132,31 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Uses an ADR structure with Context, Decision, Consequences and Status",
+              "text": "Adopts an uncompromising, adversarial auditor posture without conversational flattery",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes negative consequences or tradeoffs, not only benefits",
+              "text": "Checks verification depth and distinguishes between vanity tests and proof of invariants",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions alternatives considered or rejected",
+              "text": "Audits error handling, failure paths, rollback integrity, and edge case resilience",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is limited to this single decision",
+              "text": "Checks type craft, single responsibility, and elimination of dead or misleading code",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Provides a structured verdict with a 0-100 Craftsmanship Score and prioritized remediation backlog",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -154,8 +172,8 @@
       "errors": 15
     },
     {
-      "skill": "helen-knowledge",
-      "id": "bus",
+      "skill": "helen-impeccable",
+      "id": "vanity-test-detection",
       "expectTrigger": true,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -193,31 +211,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Moves domain and accounts to organization-owned accounts",
+              "text": "Identifies expect(res).toBeDefined() as a low-signal vanity assertion",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Moves the password to a team password manager / secrets store and rotates it",
+              "text": "Flags missing verification of invariant outcomes (balance reduction, idempotency, receipt creation)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Documents or automates the deploy (runbook / CI)",
+              "text": "Highlights absence of failure case testing (network timeout, insufficient funds, duplicate submissions)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Prioritizes by urgency given the two-week deadline",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Does not ask to write the password into documentation",
+              "text": "Recommends concrete adversarial assertions that prove correctness",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -237,31 +249,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Moves domain and accounts to organization-owned accounts",
+              "text": "Identifies expect(res).toBeDefined() as a low-signal vanity assertion",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Moves the password to a team password manager / secrets store and rotates it",
+              "text": "Flags missing verification of invariant outcomes (balance reduction, idempotency, receipt creation)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Documents or automates the deploy (runbook / CI)",
+              "text": "Highlights absence of failure case testing (network timeout, insufficient funds, duplicate submissions)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Prioritizes by urgency given the two-week deadline",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Does not ask to write the password into documentation",
+              "text": "Recommends concrete adversarial assertions that prove correctness",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -281,31 +287,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Moves domain and accounts to organization-owned accounts",
+              "text": "Identifies expect(res).toBeDefined() as a low-signal vanity assertion",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Moves the password to a team password manager / secrets store and rotates it",
+              "text": "Flags missing verification of invariant outcomes (balance reduction, idempotency, receipt creation)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Documents or automates the deploy (runbook / CI)",
+              "text": "Highlights absence of failure case testing (network timeout, insufficient funds, duplicate submissions)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Prioritizes by urgency given the two-week deadline",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Does not ask to write the password into documentation",
+              "text": "Recommends concrete adversarial assertions that prove correctness",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -321,8 +321,8 @@
       "errors": 15
     },
     {
-      "skill": "helen-knowledge",
-      "id": "agents-md",
+      "skill": "helen-impeccable",
+      "id": "ai-blind-spot-inspection",
       "expectTrigger": true,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -360,31 +360,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Includes the stack and key commands (install, dev, build, test, lint)",
+              "text": "Identifies loose any[] typing and lack of domain validation",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes the main folder structure or where logic lives",
+              "text": "Flags sequential loop awaiting db.save without batching or concurrency limits (N+1 query bottleneck)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes limits on what the agent must not do (e.g. major upgrades, skipping tests, committing secrets)",
+              "text": "Points out that a failure halfway through leaves partial, uncommitted state without transactional rollback",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is concise rather than a long essay",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Contains no secrets",
+              "text": "Notes that returning { success: true } masks partial success or unhandled promise rejections",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -404,31 +398,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Includes the stack and key commands (install, dev, build, test, lint)",
+              "text": "Identifies loose any[] typing and lack of domain validation",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes the main folder structure or where logic lives",
+              "text": "Flags sequential loop awaiting db.save without batching or concurrency limits (N+1 query bottleneck)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes limits on what the agent must not do (e.g. major upgrades, skipping tests, committing secrets)",
+              "text": "Points out that a failure halfway through leaves partial, uncommitted state without transactional rollback",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is concise rather than a long essay",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Contains no secrets",
+              "text": "Notes that returning { success: true } masks partial success or unhandled promise rejections",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -448,31 +436,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Includes the stack and key commands (install, dev, build, test, lint)",
+              "text": "Identifies loose any[] typing and lack of domain validation",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes the main folder structure or where logic lives",
+              "text": "Flags sequential loop awaiting db.save without batching or concurrency limits (N+1 query bottleneck)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes limits on what the agent must not do (e.g. major upgrades, skipping tests, committing secrets)",
+              "text": "Points out that a failure halfway through leaves partial, uncommitted state without transactional rollback",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is concise rather than a long essay",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Contains no secrets",
+              "text": "Notes that returning { success: true } masks partial success or unhandled promise rejections",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -488,8 +470,8 @@
       "errors": 15
     },
     {
-      "skill": "helen-knowledge",
-      "id": "incident-runbook",
+      "skill": "helen-impeccable",
+      "id": "cross-platform-path-audit",
       "expectTrigger": true,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -527,25 +509,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Specifies symptoms, alerts, and verification steps to confirm incident",
+              "text": "Flags hardcoded forward slashes breaking Windows path conventions",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Details step-by-step mitigation or failover procedure",
+              "text": "Recommends using path.join or path.resolve",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Describes safe queue inspection and idempotent replay mechanism",
+              "text": "Warns about missing directory existence verification or path traversal risks if sub contains relative segments",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes escalation contacts and post-incident review requirement",
+              "text": "Suggests robust error and boundary handling",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -565,25 +547,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Specifies symptoms, alerts, and verification steps to confirm incident",
+              "text": "Flags hardcoded forward slashes breaking Windows path conventions",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Details step-by-step mitigation or failover procedure",
+              "text": "Recommends using path.join or path.resolve",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Describes safe queue inspection and idempotent replay mechanism",
+              "text": "Warns about missing directory existence verification or path traversal risks if sub contains relative segments",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes escalation contacts and post-incident review requirement",
+              "text": "Suggests robust error and boundary handling",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -603,25 +585,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Specifies symptoms, alerts, and verification steps to confirm incident",
+              "text": "Flags hardcoded forward slashes breaking Windows path conventions",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Details step-by-step mitigation or failover procedure",
+              "text": "Recommends using path.join or path.resolve",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Describes safe queue inspection and idempotent replay mechanism",
+              "text": "Warns about missing directory existence verification or path traversal risks if sub contains relative segments",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes escalation contacts and post-incident review requirement",
+              "text": "Suggests robust error and boundary handling",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -637,8 +619,8 @@
       "errors": 15
     },
     {
-      "skill": "helen-knowledge",
-      "id": "bubble-sort-python",
+      "skill": "helen-impeccable",
+      "id": "css-flex-align",
       "expectTrigger": false,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -676,19 +658,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains adjacent element comparison and swapping",
+              "text": "Explains display: flex and align-items: center",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows correct Python code with nested loops",
+              "text": "Provides a minimal and clean CSS code snippet",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions O(n^2) time complexity",
+              "text": "Does not trigger repository-level verification or code audit skills",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -708,19 +690,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains adjacent element comparison and swapping",
+              "text": "Explains display: flex and align-items: center",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows correct Python code with nested loops",
+              "text": "Provides a minimal and clean CSS code snippet",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions O(n^2) time complexity",
+              "text": "Does not trigger repository-level verification or code audit skills",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -740,19 +722,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains adjacent element comparison and swapping",
+              "text": "Explains display: flex and align-items: center",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows correct Python code with nested loops",
+              "text": "Provides a minimal and clean CSS code snippet",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions O(n^2) time complexity",
+              "text": "Does not trigger repository-level verification or code audit skills",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -768,8 +750,8 @@
       "errors": 12
     },
     {
-      "skill": "helen-knowledge",
-      "id": "svg-stroke-dashoffset",
+      "skill": "helen-impeccable",
+      "id": "git-commit-amend",
       "expectTrigger": false,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -807,19 +789,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains stroke-dasharray creates dashes and gaps",
+              "text": "Provides git commit --amend",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Explains stroke-dashoffset shifts the starting point of the dash pattern",
+              "text": "Mentions -m flag or interactive editor behavior",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows CSS transition or keyframes example for line drawing effect",
+              "text": "Does not trigger deep code quality or verification skills",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -839,19 +821,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains stroke-dasharray creates dashes and gaps",
+              "text": "Provides git commit --amend",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Explains stroke-dashoffset shifts the starting point of the dash pattern",
+              "text": "Mentions -m flag or interactive editor behavior",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows CSS transition or keyframes example for line drawing effect",
+              "text": "Does not trigger deep code quality or verification skills",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -871,19 +853,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains stroke-dasharray creates dashes and gaps",
+              "text": "Provides git commit --amend",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Explains stroke-dashoffset shifts the starting point of the dash pattern",
+              "text": "Mentions -m flag or interactive editor behavior",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows CSS transition or keyframes example for line drawing effect",
+              "text": "Does not trigger deep code quality or verification skills",
               "baseline": null,
               "withSkill": null,
               "note": ""

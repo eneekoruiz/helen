@@ -1,127 +1,920 @@
 {
   "skill": "helen-qa-scale",
   "model": "sonnet",
-  "date": "2026-09-30",
+  "date": "2026-10-01",
+  "runsPerCase": 3,
   "cases": [
     {
       "skill": "helen-qa-scale",
       "id": "edge",
-      "triggered": false,
-      "forcedTriggered": true,
-      "baseline": 83,
-      "withSkill": 100,
-      "criteria": [
+      "expectTrigger": true,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
         {
-          "text": "Includes negative, zero or huge amounts / malformed input",
-          "baseline": true,
-          "withSkill": true
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Includes negative, zero or huge amounts / malformed input",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Includes double submission or retries (idempotency)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Includes concurrent transfers / race conditions",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Includes transfer to self or to a nonexistent user",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Includes partial failure between debit and credit (atomicity / rollback)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Suggests regression tests for the risky cases",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Includes double submission or retries (idempotency)",
-          "baseline": true,
-          "withSkill": true
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Includes negative, zero or huge amounts / malformed input",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Includes double submission or retries (idempotency)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Includes concurrent transfers / race conditions",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Includes transfer to self or to a nonexistent user",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Includes partial failure between debit and credit (atomicity / rollback)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Suggests regression tests for the risky cases",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Includes concurrent transfers / race conditions",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Includes transfer to self or to a nonexistent user",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Includes partial failure between debit and credit (atomicity / rollback)",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Suggests regression tests for the risky cases",
-          "baseline": false,
-          "withSkill": true
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Includes negative, zero or huge amounts / malformed input",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Includes double submission or retries (idempotency)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Includes concurrent transfers / race conditions",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Includes transfer to self or to a nonexistent user",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Includes partial failure between debit and credit (atomicity / rollback)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Suggests regression tests for the risky cases",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         }
       ],
-      "errors": 0,
-      "answers": {
-        "baseline": "## Edge cases for `POST /transfer {from, to, amount}`\n\n### Amount validation\n- `0`, negative (`-5`), and negative-that-nets-out tricks (a negative amount reverses the direction and steals credits)\n- Missing, `null`, empty string, or non-numeric (`\"abc\"`, `\"10\"` as string, `NaN`, `Infinity`)\n- Fractional amounts (`0.5`, `0.1 + 0.2` float issues) if credits are integers; excess decimal precision if they aren't\n- Very large values: `Number.MAX_SAFE_INTEGER`, `2^63` (overflow), scientific notation (`1e21`)\n- Leading/trailing whitespace, hex/octal forms, `-0`\n\n### Account validation\n- `from == to` (self-transfer: should be rejected, or at least not mint or lose credits)\n- Nonexistent `from`, nonexistent `to`, or both\n- Missing, null, or wrong-typed IDs (number vs string, array, object)\n- Deleted, suspended, locked, or unverified accounts on either side\n- Case or whitespace variants of IDs; SQL/NoSQL injection strings in IDs\n\n### Balance\n- Amount exactly equal to balance (should succeed, leaving 0)\n- Amount = balance + 1 (should fail with no partial change)\n- Balance of 0\n- Receiver's balance near the max (overflow or cap on `to`)\n\n### Concurrency and race conditions\n- Two simultaneous transfers that together exceed the balance (double-spend)\n- Many parallel transfers between the same pair, in both directions (A→B and B→A), to check for deadlocks and lost updates\n- Circular transfers across three or more accounts\n- Total credits across the system stay constant after a stress run\n\n### Atomicity and failure\n- Failure after debit but before credit (DB error, crash, timeout): expect a full rollback\n- Failure while writing the ledger or audit log\n- Partial-failure behavior when the DB connection drops mid-transaction\n\n### Idempotency and retries\n- Same request sent twice (client retry, double-click): is it applied twice?\n- Idempotency key handling if supported: same key with a different payload, and an expired key\n- Timeout where the client retries but the first request actually succeeded\n\n### Authorization and security\n- Unauthenticated request; expired or invalid token\n- Authenticated as user X but `from` = user Y (IDOR: moving someone else's credits)\n- Role-based limits (admin, or a service account acting on behalf of a user)\n- Rate limiting and per-day or per-transaction limits\n- Mass-assignment: extra fields in the body (`balance`, `fee`, `admin`)\n- CSRF if cookie-authenticated\n\n### Request format\n- Empty body, malformed JSON, wrong `Content-Type`, oversized body\n- Duplicate keys (`{\"amount\":1,\"amount\":1000}`), extra or unknown fields\n- Wrong HTTP method (GET, PUT), query-string params instead of a body\n\n### Response and side effects\n- Correct status codes: 400 vs 422 (validation), 401/403 (auth), 404 (unknown user), 409 (conflict), 402/422 (insufficient funds)\n- The response body shows the new balances, and they match a subsequent GET\n- Errors don't leak internal details or account existence, if that matters\n- A ledger/transaction record is created exactly once with the correct fields, and none is created on failure\n- Notifications, webhooks, and events fire once on success and never on failure\n\n### Fees and limits (if applicable)\n- Fee calculation and rounding; a transfer where amount + fee > balance\n- Minimum and maximum transfer limits (boundary values ±1)\n- Rounding that would create or destroy credits\n\nIf you tell me the stack (SQL vs NoSQL, integer vs decimal credits, auth model), I can turn the highest-value ones into concrete test code.",
-        "withSkill": "# Edge cases for `POST /transfer {from, to, amount}`\n\nI reasoned about this from the endpoint description alone and did not read any code. The \"evidence\" is therefore the failure scenario, and each fix is a proposal.\n\n## Critical (money or integrity at risk)\n\n| Case | What to test | Expected / fix |\n|---|---|---|\n| **Double-spend race** | Two concurrent transfers that together exceed the balance, for example balance 100 and two requests of 80 fired at the same time. | Exactly one succeeds. Use an atomic conditional update (`UPDATE ... SET bal = bal - :amt WHERE id = :from AND bal >= :amt`) or `SELECT ... FOR UPDATE`. Do not read the balance and then write it. |\n| **Retry / duplicate submit** | The same request sent twice (client timeout, double click, network retry). | Require an `Idempotency-Key`. A replay returns the original result and does not move credits again. |\n| **Partial failure** | Crash or error between the debit and the credit. | Both updates run in one DB transaction. Test by injecting a failure after the debit and check that nothing changed. |\n| **Deadlock** | A→B and B→A at the same moment. | Lock rows in a consistent order, for example by lowest ID first. |\n| **Authorization (IDOR)** | Authenticated as user X, send `from` = user Y. Also try no auth and an expired token. | 401 or 403, with no balance change. `from` should come from the session, not the body. |\n| **Negative amount** | `-50`. | Reject. Otherwise the caller steals credits from `to`. |\n| **Zero amount** | `0`. | Reject with 400, or define it as a no-op. Don't write a ledger row. |\n| **Self-transfer** | `from == to`. | Reject. Also test the same user ID in different case or format. |\n| **Insufficient funds** | The amount is greater than the balance, or exactly equal to it (the boundary). | Greater than the balance gives a clean 4xx and no change. Exactly equal succeeds and leaves a balance of 0. Check that the balance never goes negative. |\n\n## Important (correctness and robustness)\n\n**Amount type and precision**\n- Floats such as `0.1 + 0.2`, and `1.999`. Decide whether credits are integers. If not, use a decimal or minor units and test rounding.\n- Very large values: `1e308`, `Number.MAX_SAFE_INTEGER + 1`, values that overflow int32 or int64, and a balance plus amount that overflows on the receiver.\n- `NaN`, `Infinity`, and `\"10\"` as a string. Also `\"1e2\"`, `\"0x10\"`, `\" 10 \"`, and `null`.\n- An array or object as the amount.\n\n**Input shape**\n- Missing fields, extra fields (mass assignment such as `fee` or `balance`), and an empty body.\n- Malformed JSON, wrong Content-Type, and an oversized body.\n- `from` or `to` that is null, an empty string, a wrong type, or a very long string. Also SQL/NoSQL injection strings and unicode look-alikes.\n- Duplicate JSON keys, for example `{\"amount\":1,\"amount\":9999}`.\n\n**Account state**\n- A nonexistent `to`, or a nonexistent `from`. The response must not reveal which accounts exist.\n- A deleted, suspended, frozen, or unverified account on either side.\n- A `to` account with a balance cap or limit. Also a per-user daily limit or minimum amount, if the business rules define them.\n\n**Response and error handling**\n- Status codes are distinct and correct: 400, 401, 403, 404, 409, 422.\n- The response returns the new balance or a transaction ID, and does not leak the other party's balance.\n- A 5xx during the transfer. Check the client can tell whether it was applied, and that a retry is safe.\n\n**Infrastructure failures**\n- DB timeout, connection drop after commit but before the response, and a replica lag read (a stale balance used for the check).\n- A slow or cancelled client: the request is aborted mid-flight. The transfer should be either fully applied or not applied.\n\n## Optional\n\n- Rate limiting and abuse: rapid-fire micro-transfers, and enumeration of user IDs through error differences.\n- Timing side channels between \"user not found\" and \"insufficient funds\".\n- Ledger reconciliation: after a stress run, the sum of all balances equals the sum before (conservation of credits).\n- Audit trail: each transfer writes an immutable record with actor, both IDs, amount, and timestamp.\n- Load test: 1,000 concurrent transfers touching one hot account (lock contention), and latency at p99.\n- Timezone or clock issues, if daily limits apply.\n- Bidirectional consistency: a transfer must never produce a credit without a matching debit.\n\n## Missing regression tests to add first\n\n1. A concurrent double-spend test. Run N parallel transfers and assert the final balance and that the total is conserved.\n2. An idempotent replay test.\n3. An atomicity test with a fault injected between the debit and the credit.\n4. A parameterized invalid-amount test with values from the list above.\n5. An authorization test for spoofed `from`.\n6. A conservation-of-credits invariant check, run after the whole suite.\n\n## Observability to check while testing\n\n- Every transfer logs the request ID, the IDs, the amount, and the outcome. It must not log tokens or PII.\n- Metrics: transfer count, failure rate by reason, and latency.\n- An alert on any negative balance and on a spike in insufficient-funds or 403 responses. Each alert needs an owner.\n\nIf you share the code or the stack (DB, ORM, auth), I can turn this into concrete test cases and check which of these are already covered."
-      }
+      "errors": 15
     },
     {
       "skill": "helen-qa-scale",
       "id": "scale",
-      "triggered": true,
-      "forcedTriggered": null,
-      "baseline": 100,
-      "withSkill": 100,
-      "criteria": [
+      "expectTrigger": true,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
         {
-          "text": "Identifies the N+1 query pattern",
-          "baseline": true,
-          "withSkill": true
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Identifies the N+1 query pattern",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends batching/joins, pagination or caching",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions measuring or load testing before launch",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions cost or database load at scale",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Prefers simple mitigations over a big re-architecture",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Recommends batching/joins, pagination or caching",
-          "baseline": true,
-          "withSkill": true
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Identifies the N+1 query pattern",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends batching/joins, pagination or caching",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions measuring or load testing before launch",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions cost or database load at scale",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Prefers simple mitigations over a big re-architecture",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Mentions measuring or load testing before launch",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Mentions cost or database load at scale",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Prefers simple mitigations over a big re-architecture",
-          "baseline": true,
-          "withSkill": true
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Identifies the N+1 query pattern",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends batching/joins, pagination or caching",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions measuring or load testing before launch",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions cost or database load at scale",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Prefers simple mitigations over a big re-architecture",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         }
       ],
-      "errors": 0,
-      "answers": {
-        "baseline": "Yes, this is the classic N+1 query problem. It's invisible at 20 products and painful at 20,000. Here are the concerns, roughly in priority order.\n\n**1. N+1 queries**\n- Rendering 20,000 products means about 20,001 queries: one for the products and one per product for its reviews.\n- Each query costs a network round trip (roughly 0.5–5 ms) plus a connection checkout and parse. That's about 10–100+ seconds of DB time per page load, before rendering.\n- Concurrent users multiply this. The connection pool will exhaust, and other pages will stall or time out along with this one. This can take down the whole site, not just this page.\n\n**2. Rendering all 20,000 at once**\n- Even with perfectly batched queries, one page with 20,000 products and all their reviews is a huge response. It means high memory use on the server, a multi-MB HTML payload and a slow browser render.\n- **Paginate** (or use infinite scroll or cursor-based pagination). This is likely the biggest single fix. Prefer keyset/cursor pagination over `OFFSET`, which gets slow on deep pages.\n\n**3. Fixes for the queries**\n- **Batch the fetch:** load reviews for the page's product IDs in one query (`WHERE product_id IN (...)`) and group in memory. In an ORM this is eager loading (`includes`/`prefetch_related`/`joinedload`/`selectinload`, depending on your stack).\n- **Avoid a single big JOIN** if products have many reviews. It duplicates product rows and inflates the result set. A separate `IN` query is usually better.\n- **Don't load reviews you don't display.** The listing view probably needs only an aggregate (average rating and count), not review bodies. Full reviews belong on the product detail page, or behind a \"load more\" call.\n\n**4. Indexes and aggregates**\n- Make sure `reviews.product_id` is indexed. Without an index, each of those 20,000 queries is a full table scan, and the cost is quadratic.\n- If you show average rating and count, compute them with `GROUP BY`. For hot paths, consider denormalized columns (`review_count`, `avg_rating`) on products, updated when reviews change, or a materialized view.\n\n**5. Caching**\n- Product listing pages are usually highly cacheable. Use a short-TTL page or fragment cache, or a CDN, so most requests never hit the DB.\n- Watch for a **cache stampede** at launch. If the cache is cold and many users arrive at once, they all miss together. Warm it before launch or use request coalescing.\n\n**6. Testing before launch**\n- Staging with 20 rows can't reveal this. **Seed staging with production-scale data**: 20,000 products and a realistic number of reviews per product, including some skewed products with thousands of reviews.\n- Run a load test at expected launch traffic.\n- Log the query count per request. Many frameworks have tools that flag N+1 patterns (Bullet for Rails, `nplusone` for Django, and so on). A test asserting a maximum query count per page is a cheap regression guard.\n\n**7. Other launch risks**\n- Check the connection pool size against your app instance count and DB `max_connections`.\n- Set statement and request timeouts so a slow page can't hold resources indefinitely.\n- Set up monitoring and alerts on DB CPU, connection count and p95 latency, so you see trouble before users report it.\n\n**Minimum viable plan for a week:**\n1. Paginate the listing.\n2. Batch or aggregate the reviews query and add the index.\n3. Load test with realistic data.\n4. Add short-TTL caching in front.\n\nIf you tell me the framework and ORM, or point me at the code, I can suggest the specific change. I haven't looked at your code yet, so this is based on your description.",
-        "withSkill": "Yes, this needs fixing before launch. I haven't looked at your code, so this is based on your description. If the page really runs one review query per product, it's an N+1 pattern, and at 20,000 products it will likely fail.\n\n## Critical\n\n**1. N+1 queries.**\n- **Query count:** 20 products means 21 queries, which you won't notice. 20,000 products means 20,001 queries per page render.\n- **Latency:** At 1–5 ms per round trip, that's 20–100+ seconds of database time before you render anything. Requests will time out.\n- **Load:** Each page view holds a connection for that whole time. A handful of concurrent visitors can exhaust the connection pool and take down the whole site, not just this page.\n- **Fix:** Fetch all the reviews in one query, e.g. `WHERE product_id IN (...)`, or use your ORM's eager loading (`include`, `prefetch_related`, `joinedload`, and similar). Group them in memory. Better still, don't fetch full reviews for a listing (see #2).\n\n**2. Rendering 20,000 products on one page.**\n- **Cost:** Even with a single query, that's a huge query, a huge response, and a huge DOM. Memory use and time-to-first-byte will be bad.\n- **Fix:** Paginate, with 24–60 items per page. Use keyset (cursor) pagination rather than `OFFSET`, because deep offsets get slow. Only load reviews for the products on the current page.\n\n## Important\n\n**3. Don't load full reviews on a listing.**\n- **What to show:** A listing usually only needs average rating and review count.\n- **Fix:** Use one grouped query (`GROUP BY product_id`), or store `review_count` and `avg_rating` on the product row and update them when a review is added. Load full review text only on the individual product page, paginated.\n\n**4. Missing index.**\n- **Problem:** Without an index on `reviews.product_id`, each lookup scans the reviews table. That could turn a slow page into a dead database.\n- **Fix:** Add the index, or a composite one like `(product_id, created_at)` if you sort by date. Run `EXPLAIN` on the real query.\n\n**5. Staging data doesn't match production.**\n- **Problem:** 20 products with few reviews hides everything above. Review counts per product are also skewed, so a few popular products may have thousands of reviews each.\n- **Fix:** Seed staging with 20k products and realistic review volumes, then load test the page. Do this before launch, not after.\n\n**6. No caching.**\n- **Problem:** Product and review data changes rarely relative to how often it's read.\n- **Fix:** Cache rendered pages or fragments, or use a CDN with a short TTL plus invalidation on new reviews. Prevent cache stampedes on cold start, for example by warming the cache before launch.\n\n## Optional\n\n**7. Observability.**\n- **Metrics and logging:** Track queries per request, p95/p99 latency, DB connection pool usage, and slow query logs. Add a request-level query-count metric so a regression like this shows up immediately.\n- **Alerts:** Set them for latency, pool saturation, and DB CPU, and give each one an owner.\n- **Guardrails:** Some ORMs and test suites can fail when a request exceeds N queries (e.g. `nplusone` for Django, `bullet` for Rails). That catches this class of bug in CI.\n\n**8. Limits and abuse.**\n- **Bad input:** Cap page size and reject huge `limit` or `page` values. Handle empty result sets and products with zero reviews.\n- **Traffic:** Rate-limit crawlers and bots. A scraper walking 20,000 uncached pages could hurt you.\n\n## Suggested order before launch\n\n1. Batch or eager-load the reviews (or switch to aggregates).\n2. Add pagination.\n3. Add the `product_id` index.\n4. Load test with 20k seeded products.\n5. Add caching and query-count and latency monitoring.\n\nIf you point me at the code, I can find the exact spot and suggest the concrete change. I won't modify anything unless you ask."
-      }
+      "errors": 15
     },
     {
       "skill": "helen-qa-scale",
       "id": "logs",
-      "triggered": false,
-      "forcedTriggered": true,
-      "baseline": 100,
-      "withSkill": 100,
-      "criteria": [
+      "expectTrigger": true,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
         {
-          "text": "Flags logging passwords/PII as a critical problem",
-          "baseline": true,
-          "withSkill": true
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Flags logging passwords/PII as a critical problem",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends structured logs with context (request id, user action, version)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends an error tracking service or error boundaries (lightweight first)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions alerting with ownership or actionable signals",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Recommends structured logs with context (request id, user action, version)",
-          "baseline": true,
-          "withSkill": true
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Flags logging passwords/PII as a critical problem",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends structured logs with context (request id, user action, version)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends an error tracking service or error boundaries (lightweight first)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions alerting with ownership or actionable signals",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Recommends an error tracking service or error boundaries (lightweight first)",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Mentions alerting with ownership or actionable signals",
-          "baseline": true,
-          "withSkill": true
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Flags logging passwords/PII as a critical problem",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends structured logs with context (request id, user action, version)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends an error tracking service or error boundaries (lightweight first)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions alerting with ownership or actionable signals",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         }
       ],
-      "errors": 0,
-      "answers": {
-        "baseline": "Logging the full error object and request body is a security problem before it is an observability problem. Fix that first, then build the structure on top.\n\n## 1. Stop leaking secrets (do this first)\n\n- **Never log request bodies by default.** Log an allowlist of fields (route, method, status, content length, user ID), not a denylist of bad ones. Denylists miss new fields like `newPassword`, `token`, `ssn` and `card`.\n- **Add redaction as a backstop.** Use a structured logger with built-in redaction, such as pino's `redact: ['req.headers.authorization', 'req.headers.cookie', '*.password', '*.token', ...]`. Winston and bunyan have equivalent options. This catches accidents, but it should not be your main defense.\n- **Serialize errors explicitly.** Axios and fetch errors often embed `config.data`, `config.headers` and the response. Log `{ name, message, stack, code, status }` through a custom error serializer, not the raw `err`.\n- **Clean up what already leaked.** Check where the logs have gone: stdout, log aggregator, backups and any third-party service. Purge or expire them. Depending on your users and jurisdiction, exposed passwords may need incident handling and password resets. Talk to whoever owns security or compliance.\n- **Add guardrails.** Add an ESLint rule (`no-console`) so raw `console.log` can't creep back in. Add a CI or log-pipeline scanner that flags patterns like `password=` and JWT-shaped strings.\n\n## 2. Structured, leveled logging\n\n- Replace `console.log('error', err)` with one shared logger (pino is a good default). It emits JSON with `level`, `timestamp`, `msg`, `service`, `env` and `version`.\n- Use levels properly (`error`, `warn`, `info`, `debug`). Log errors at `error` and keep noisy detail at `debug`, off in production.\n- Log messages should be constant strings with the variable data in fields. For example, `logger.error({ err, userId, orderId }, 'payment failed')` groups and searches far better than string concatenation.\n\n## 3. Correlation and context\n\n- Generate or accept a **request ID** (`X-Request-Id`) in middleware. Attach it to every log line via a child logger or `AsyncLocalStorage`, and return it to clients so support can quote it.\n- Include stable context: user or tenant ID (never email or PII if you can avoid it), route, and release version.\n- If you have multiple services, propagate W3C `traceparent` so logs join up across them.\n\n## 4. Beyond logs\n\n- **Error tracking.** Use Sentry or similar for grouping, deduplication, alerting and release tracking. Configure its `beforeSend` scrubbing too, since it captures request data by default.\n- **Metrics.** Track error rate, latency percentiles (p50/p95/p99) and saturation per route. Logs tell you what happened. Metrics tell you that something is happening.\n- **Tracing.** OpenTelemetry gives you spans across DB and HTTP calls. It is often the fastest way to find where a slow or failing request went wrong.\n- **Alerting.** Alert on symptoms such as error-rate or latency SLO burn, not on individual log lines.\n\n## 5. Operational hygiene\n\n- Set retention and access controls on logs. They should be treated as sensitive data.\n- Sample high-volume `info` and `debug` logs, but never sample errors.\n- Handle `unhandledRejection` and `uncaughtException` by logging through the same logger.\n\n## Suggested order\n\n1. Add the error serializer and stop logging bodies (a day or less).\n2. Swap in pino with redaction and a request-ID middleware.\n3. Purge leaked logs and confirm the incident-handling question.\n4. Add Sentry, then metrics, then tracing as you need them.\n\nI haven't looked at your codebase. If you want, I can find the `console.log('error', err)` call sites and check what your framework's error objects actually contain. That would show how bad the leakage is and what a migration would involve.",
-        "withSkill": "I haven't inspected the codebase, so the evidence below is your description of the logs, not code I've read. I can grep for the actual call sites if you want.\n\n## Critical\n\n**1. Passwords are being written to logs.**\n- **Evidence:** `console.log('error', err)` logs the whole error object. Errors from HTTP clients and frameworks (axios, `fetch` wrappers, body-parser, ORMs) often carry `config.data`, `request.body` or headers, so the request body ends up in the log.\n- **Impact:** Plaintext credentials are stored in your log store, in every tool that reads it, and in backups. That is a breach and a compliance problem (GDPR, SOC 2). Authorization headers, cookies and tokens are probably leaking the same way.\n- **Fix, in order:**\n  1. Stop the leak now. Replace the call with a helper that logs only `err.message`, `err.name`, `err.stack`, the status code and a request ID. Never log `err` or `req.body` directly.\n  2. Treat existing logs as compromised. Purge or expire the affected log data, and check who and what had access to it. Decide whether users need to be told to reset passwords, based on retention and access.\n  3. Add a redaction layer as a second line of defence. Use a structured logger's redact option, such as pino `redact: ['*.password', '*.token', 'req.headers.authorization', 'req.headers.cookie', '*.body']`. Prefer an allowlist of fields to log over a denylist of fields to hide.\n  4. Add a CI check. Use an ESLint `no-console` rule plus a test that fires a request with a fake password through the error path and asserts the log output doesn't contain it.\n\n## Important\n\n**2. Logs are unstructured and hard to search.**\n- **Evidence:** `console.log('error', err)` has no level, timestamp, request ID or user context. It goes to stdout, so it can't be filtered by severity, and `err` may print as `[object Object]` or a huge dump.\n- **Fix:** Adopt one structured JSON logger (pino or winston) with these fields:\n  - level\n  - timestamp\n  - service\n  - environment\n  - version\n  - `requestId`\n  - `userId` (an opaque ID, not an email)\n  - route\n  - `errorCode`\n  - stack\n\n  Add request-ID middleware that propagates the ID to downstream calls, and use `console.error` or `logger.error` only through that wrapper.\n\n**3. There are no error tracking, metrics or alerts.**\n- **Fix:**\n  - Send unhandled and handled errors to Sentry or similar, with `beforeSend` scrubbing enabled. Set `sendDefaultPii: false` and strip request bodies.\n  - Track the RED metrics per route: request rate, error rate and latency (p50/p95/p99).\n  - Set alerts on 5xx rate, auth-failure spikes, latency and dependency failures. Each alert needs a named owner and a runbook link, or it will be ignored.\n  - Add `/healthz` (liveness) and `/readyz` (checks the database and other dependencies).\n\n**4. Log volume and cost can grow without limit.**\n- **Evidence:** Logging full bodies, on top of being a leak, means unbounded log size. A retry loop or an attack can produce a flood of large lines.\n- **Fix:**\n  - Truncate long fields.\n  - Sample or rate-limit repeated identical errors.\n  - Set retention per level (for example 7–14 days for debug and 30–90 days for errors).\n  - Add a log-volume alert.\n\n## Optional\n\n- **Distributed tracing.** Add OpenTelemetry once there is more than one service or a slow-dependency problem.\n- **Audit trail.** Keep a separate, tamper-resistant log for security events such as logins, password changes and permission changes. Log the fact of the event, never the secret.\n- **Log levels by environment.** Use `debug` locally and `info` or `warn` in production, configurable through an environment variable.\n- **Error taxonomy.** Give errors stable codes (`AUTH_INVALID_CREDENTIALS`, `DB_TIMEOUT`) so you can aggregate and alert on them instead of matching message strings.\n\n## Regression tests to add\n- A login failure with a fake password produces no log line or Sentry event containing that password.\n- The same holds when an error is thrown with a request object attached.\n- Oversized bodies are truncated in logs.\n- The request ID appears in the logs of an error path.\n\n## Suggested order\n1. Stop logging `err` and bodies (a same-day hotfix).\n2. Purge or contain the leaked data.\n3. Introduce the structured logger with redaction and request IDs.\n4. Add error tracking, then metrics and alerts with owners.\n5. Add tracing and the audit log as needed."
-      }
+      "errors": 15
+    },
+    {
+      "skill": "helen-qa-scale",
+      "id": "retry-storm-protection",
+      "expectTrigger": true,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Recommends exponential backoff with jitter on client retries",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends implementing a circuit breaker pattern",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends rate limiting or request throttling at the API gateway",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Addresses database connection pool bounds and queuing limits",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Recommends exponential backoff with jitter on client retries",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends implementing a circuit breaker pattern",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends rate limiting or request throttling at the API gateway",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Addresses database connection pool bounds and queuing limits",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Recommends exponential backoff with jitter on client retries",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends implementing a circuit breaker pattern",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends rate limiting or request throttling at the API gateway",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Addresses database connection pool bounds and queuing limits",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        }
+      ],
+      "errors": 15
+    },
+    {
+      "skill": "helen-qa-scale",
+      "id": "css-flexbox-align",
+      "expectTrigger": false,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Explains align-items aligns items along the cross axis within a line",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Explains align-content aligns flex lines along the cross axis when there is extra space (multi-line)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions flex-wrap requirement for align-content",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Explains align-items aligns items along the cross axis within a line",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Explains align-content aligns flex lines along the cross axis when there is extra space (multi-line)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions flex-wrap requirement for align-content",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Explains align-items aligns items along the cross axis within a line",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Explains align-content aligns flex lines along the cross axis when there is extra space (multi-line)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions flex-wrap requirement for align-content",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        }
+      ],
+      "errors": 12
+    },
+    {
+      "skill": "helen-qa-scale",
+      "id": "git-stash-branch",
+      "expectTrigger": false,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Explains `git stash branch <branchname> [<stash>]`",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Explains that it creates the branch and applies the stash cleanly",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions that it drops the stash on success",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Explains `git stash branch <branchname> [<stash>]`",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Explains that it creates the branch and applies the stash cleanly",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions that it drops the stash on success",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Explains `git stash branch <branchname> [<stash>]`",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Explains that it creates the branch and applies the stash cleanly",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions that it drops the stash on success",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        }
+      ],
+      "errors": 12
     }
   ]
 }

@@ -31,6 +31,12 @@ import { runInitProject } from './core/initProject.js';
 
 const VERSION = '2.1.0';
 
+interface ModuleRunResult {
+  moduleId: string;
+  created: string[];
+  modified: string[];
+}
+
 function buildContext(cwd: string, opts: { dryRun?: boolean; force?: boolean; securityLevel?: string }): HelenContext {
   const project = detectProject(cwd);
   return {
@@ -43,7 +49,7 @@ function buildContext(cwd: string, opts: { dryRun?: boolean; force?: boolean; se
   };
 }
 
-async function handleAutoInstall(results: any[], ctx: HelenContext, isInteractive: boolean): Promise<void> {
+async function handleAutoInstall(results: ModuleRunResult[], ctx: HelenContext, isInteractive: boolean): Promise<void> {
   if (ctx.dryRun) return;
   const packageJsonModified = results.some(r => r.modified.includes('package.json'));
   if (!packageJsonModified) return;
@@ -76,7 +82,7 @@ async function handleAutoInstall(results: any[], ctx: HelenContext, isInteractiv
   }
 }
 
-function persistResults(results: any[], ctx: HelenContext): void {
+function persistResults(results: ModuleRunResult[], ctx: HelenContext): void {
   if (ctx.dryRun || results.length === 0) return;
   const createdFiles = results.flatMap(r => r.created);
   updateConfig(ctx.cwd, {

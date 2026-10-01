@@ -1,122 +1,902 @@
 {
   "skill": "helen-clean-code",
   "model": "sonnet",
-  "date": "2026-09-30",
+  "date": "2026-10-01",
+  "runsPerCase": 3,
   "cases": [
     {
       "skill": "helen-clean-code",
       "id": "dead-code",
-      "triggered": true,
-      "forcedTriggered": null,
-      "baseline": 83,
-      "withSkill": 100,
-      "criteria": [
+      "expectTrigger": true,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
         {
-          "text": "Removes or flags the unused imports (path and format) and the unused DEBUG constant",
-          "baseline": true,
-          "withSkill": true
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Removes or flags the unused imports (path and format) and the unused DEBUG constant",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Removes or flags oldLoader as dead code after noting it should be confirmed unused",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Flags the silent catch that returns {} as hiding errors (silent error handling)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Simplifies getName without changing behavior (e.g. u?.name ?? 'anonymous')",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Keeps the exported API (loadConfig, getName) unchanged",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Ends with a short report of changes rather than a long essay",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Removes or flags oldLoader as dead code after noting it should be confirmed unused",
-          "baseline": true,
-          "withSkill": true
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Removes or flags the unused imports (path and format) and the unused DEBUG constant",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Removes or flags oldLoader as dead code after noting it should be confirmed unused",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Flags the silent catch that returns {} as hiding errors (silent error handling)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Simplifies getName without changing behavior (e.g. u?.name ?? 'anonymous')",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Keeps the exported API (loadConfig, getName) unchanged",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Ends with a short report of changes rather than a long essay",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Flags the silent catch that returns {} as hiding errors (silent error handling)",
-          "baseline": false,
-          "withSkill": true
-        },
-        {
-          "text": "Simplifies getName without changing behavior (e.g. u?.name ?? 'anonymous')",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Keeps the exported API (loadConfig, getName) unchanged",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Ends with a short report of changes rather than a long essay",
-          "baseline": true,
-          "withSkill": true
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Removes or flags the unused imports (path and format) and the unused DEBUG constant",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Removes or flags oldLoader as dead code after noting it should be confirmed unused",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Flags the silent catch that returns {} as hiding errors (silent error handling)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Simplifies getName without changing behavior (e.g. u?.name ?? 'anonymous')",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Keeps the exported API (loadConfig, getName) unchanged",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Ends with a short report of changes rather than a long essay",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         }
       ],
-      "errors": 0,
-      "answers": {
-        "baseline": "Simplified version:\n\n```ts\nimport { readFile } from 'node:fs/promises';\n\nexport async function loadConfig(p: string) {\n  try {\n    return JSON.parse(await readFile(p, 'utf-8'));\n  } catch {\n    return {};\n  }\n}\n\nexport function getName(u: any) {\n  return u?.name || 'anonymous';\n}\n```\n\nWhat changed:\n\n- **Removed unused code:** `DEBUG`, the `path` and `date-fns` imports, and `oldLoader` are never used. If `oldLoader` is exported elsewhere, it isn't exported here, so nothing outside the module can call it.\n- **`loadConfig`:** the temporary variables are gone, and `catch {}` replaces the unused `e` binding. Behavior is the same: any read or parse error returns `{}`.\n- **`getName`:** the nested `if`/`else` becomes `u?.name || 'anonymous'`. It returns `'anonymous'` when `u` is falsy or `u.name` is falsy, and otherwise returns `u.name`.\n\nOne caveat: dropping the `date-fns` import removes a module-load side effect. That only matters if the package is missing and something relied on the import failing, which is very unlikely. Also, `?.` needs TS 3.7 or later, and optional `catch` binding needs ES2019 or later as the target.",
-        "withSkill": "```ts\nimport { readFile } from 'node:fs/promises';\n\nexport async function loadConfig(p: string) {\n  try {\n    return JSON.parse(await readFile(p, 'utf-8'));\n  } catch {\n    return {};\n  }\n}\n\nexport function getName(u: any) {\n  return u?.name || 'anonymous';\n}\n```\n\nDone. I did not modify any files. I also did not search the repo for other references, so check that nothing imports the removed items.\n\nChanges applied:\n- Removed the unused `path` and `format` imports, the unused `DEBUG` constant, and the unused, non-exported `oldLoader`.\n- Inlined `loadConfig`'s `raw` and `data` temporaries and dropped the unused `e` binding in the catch.\n- Collapsed the nested `if`s in `getName` to `u?.name || 'anonymous'`. This is equivalent: any falsy `u` or falsy `u.name` gives `'anonymous'`.\n\nManual actions needed:\n- If `date-fns` is only used here, you can drop it from `package.json`.\n- The bare `catch` in `loadConfig` still hides every failure, including a missing file and malformed JSON, and returns `{}`. I kept it to preserve behavior. Consider logging or narrowing it to `ENOENT`, and typing `u` and the return value instead of `any`, but either change alters behavior or the API, so I left both alone."
-      }
+      "errors": 15
     },
     {
       "skill": "helen-clean-code",
       "id": "no-big-refactor",
-      "triggered": true,
-      "forcedTriggered": null,
-      "baseline": 50,
-      "withSkill": 100,
-      "criteria": [
+      "expectTrigger": true,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
         {
-          "text": "Says the build must pass (or be fixed) before a clean code pass",
-          "baseline": false,
-          "withSkill": true
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Says the build must pass (or be fixed) before a clean code pass",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Does not propose a large sweeping refactor while the build is broken",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Suggests running the quality gates / typecheck first",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Asks for or proposes the next concrete step instead of inventing code it has not seen",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Does not propose a large sweeping refactor while the build is broken",
-          "baseline": true,
-          "withSkill": true
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Says the build must pass (or be fixed) before a clean code pass",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Does not propose a large sweeping refactor while the build is broken",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Suggests running the quality gates / typecheck first",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Asks for or proposes the next concrete step instead of inventing code it has not seen",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Suggests running the quality gates / typecheck first",
-          "baseline": false,
-          "withSkill": true
-        },
-        {
-          "text": "Asks for or proposes the next concrete step instead of inventing code it has not seen",
-          "baseline": true,
-          "withSkill": true
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Says the build must pass (or be fixed) before a clean code pass",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Does not propose a large sweeping refactor while the build is broken",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Suggests running the quality gates / typecheck first",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Asks for or proposes the next concrete step instead of inventing code it has not seen",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         }
       ],
-      "errors": 0,
-      "answers": {
-        "baseline": "There's nothing to review here. The working directory `/tmp/helen-eval-jz0atB` has no `src/` directory, no TypeScript files, no `tsconfig.json` and no `package.json`. It contains only an untracked `README.md` (`# Sample project`), and the git repo has no commits yet. So I couldn't reproduce the 40 `tsc` errors either.\n\nAny cleanup suggestions from me would be invented, so I haven't made any. Two things could explain this:\n\n- **Wrong directory or session:** the project may live somewhere else, or the checkout didn't come through. If you give me the correct path, I'll review it.\n- **Code not committed or pushed:** if it's on another branch or remote, tell me which, and I'll look there. I haven't fetched anything, since you asked for chat only.\n\nOnce I can see the code, I'll go through `src/` and report back in chat only. I'd sort what I find into:\n\n1. The root causes behind the 40 type errors. Many are usually a handful of shared types or imports.\n2. Cleanups worth doing, such as dead code, duplication, loose `any` types and naming.\n3. A suggested order for fixing them.",
-        "withSkill": "The skill says not to run a clean code pass while the project doesn't build, so I'm stopping before any cleanup. It says to fix the build first, and you told me `tsc` currently fails with 40 errors. Refactoring on top of a broken typecheck is risky for two reasons:\n\n- **Lost safety net:** `tsc` is how I'd confirm that a cleanup, like removing an \"unused\" export or renaming something, didn't change behavior. With 40 errors already there, I can't tell my breakages from existing ones.\n- **Mistaken dead code:** some of the errors may be missing or mistyped imports and exports. Those can make live code look unused, which is exactly the case where deleting it goes wrong.\n\nYou also asked for chat-only with no file changes. So I haven't touched anything, and I haven't looked at `src/` yet.\n\n**Options:**\n1. **Fix the 40 errors first.** I'd run `tsc`, group the errors by root cause (there are usually only a handful), and propose the fixes. Then, once it builds, I'd do the clean pass. This is what I recommend.\n2. **Read-only review now.** I can read `src/` and list cleanup candidates (dead code, duplication, silent error handling, naming) in chat, flagged as unverified until the build is green.\n\nTell me which one you want. Option 1 needs your OK to modify files, since you asked for no changes."
-      }
+      "errors": 15
     },
     {
       "skill": "helen-clean-code",
       "id": "public-api",
-      "triggered": true,
-      "forcedTriggered": null,
-      "baseline": 75,
-      "withSkill": 100,
-      "criteria": [
+      "expectTrigger": true,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
         {
-          "text": "Does not rename fetchUser, UserDTO or the user_name field without explicitly flagging it as a breaking change needing confirmation",
-          "baseline": true,
-          "withSkill": true
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Does not rename fetchUser, UserDTO or the user_name field without explicitly flagging it as a breaking change needing confirmation",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Points out missing handling of non-OK HTTP responses",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Keeps behavior the same for callers",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Keeps the answer short and concrete",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Points out missing handling of non-OK HTTP responses",
-          "baseline": true,
-          "withSkill": true
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Does not rename fetchUser, UserDTO or the user_name field without explicitly flagging it as a breaking change needing confirmation",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Points out missing handling of non-OK HTTP responses",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Keeps behavior the same for callers",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Keeps the answer short and concrete",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         },
         {
-          "text": "Keeps behavior the same for callers",
-          "baseline": false,
-          "withSkill": true
-        },
-        {
-          "text": "Keeps the answer short and concrete",
-          "baseline": true,
-          "withSkill": true
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Does not rename fetchUser, UserDTO or the user_name field without explicitly flagging it as a breaking change needing confirmation",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Points out missing handling of non-OK HTTP responses",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Keeps behavior the same for callers",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Keeps the answer short and concrete",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
         }
       ],
-      "errors": 0,
-      "answers": {
-        "baseline": "Exports stay the same, so importers won't break. This version also checks for HTTP errors and encodes the id:\n\n```ts\nexport interface UserDTO {\n  id: string;\n  user_name: string;\n}\n\nexport async function fetchUser(id: string): Promise<UserDTO> {\n  const res = await fetch(`/api/u/${encodeURIComponent(id)}`);\n  if (!res.ok) {\n    throw new Error(`fetchUser failed: ${res.status} ${res.statusText}`);\n  }\n  return (await res.json()) as UserDTO;\n}\n```\n\nWhat changed:\n- **Simpler body:** the pointless `j` temp variable and the terse `r` name are gone.\n- **Template literal:** it replaces the string concatenation.\n- **`encodeURIComponent(id)`:** an id containing `/`, `?` or `#` can no longer change the request path.\n- **`res.ok` check:** before, a 404 or 500 with a JSON body would be returned as if it were a valid `UserDTO`. Now it throws.\n- **Explicit cast:** `res.json()` returns `any`, so the `as UserDTO` makes the trust boundary visible.\n- **Formatting:** the interface is on multiple lines.\n\nTwo things to be aware of:\n- **Behavior change:** callers that used to get a bogus object on an error response will now get a rejected promise. If you need to keep the old behavior strictly, drop the `res.ok` check.\n- **Field name kept:** I left `user_name` as is. Renaming it to `userName` would break the other packages, so map it in a separate change if you want that.",
-        "withSkill": "Here is the cleaned version. Exported names, signatures and the `UserDTO` shape are unchanged. `user_name` stays snake_case because it mirrors the API payload and other packages depend on it.\n\n```ts\nexport interface UserDTO {\n  id: string;\n  user_name: string;\n}\n\nexport async function fetchUser(id: string): Promise<UserDTO> {\n  const response = await fetch(`/api/u/${id}`);\n  return response.json();\n}\n```\n\nChanges applied (in chat only, no files touched):\n- Removed the pass-through `j` variable and the single-letter names, and used a template literal for the URL.\n- Formatted the interface across multiple lines.\n\nManual actions needed:\n- I didn't run a build, typecheck or tests, since nothing was modified.\n- Suggestion, not applied because it changes behavior: `fetchUser` never checks `response.ok`. A 404 or 500 with a JSON body is silently returned as a `UserDTO`. Adding `if (!response.ok) throw new Error(...)` would fix that, but callers may currently rely on the lenient behavior. Adding it is your call.\n- Suggestion, not applied: `encodeURIComponent(id)` would protect against ids containing `/` or `?`. It also changes the requested URL for such ids."
-      }
+      "errors": 15
+    },
+    {
+      "skill": "helen-clean-code",
+      "id": "deep-nesting-cleanup",
+      "expectTrigger": true,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Uses guard clauses or early returns to flatten nested conditionals",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Maintains exact return values and edge case behavior",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Adds typing or maintains signature without gratuitous rewrites",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Does not alter surrounding unmentioned code",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Uses guard clauses or early returns to flatten nested conditionals",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Maintains exact return values and edge case behavior",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Adds typing or maintains signature without gratuitous rewrites",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Does not alter surrounding unmentioned code",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Uses guard clauses or early returns to flatten nested conditionals",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Maintains exact return values and edge case behavior",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Adds typing or maintains signature without gratuitous rewrites",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Does not alter surrounding unmentioned code",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        }
+      ],
+      "errors": 15
+    },
+    {
+      "skill": "helen-clean-code",
+      "id": "nginx-reverse-proxy",
+      "expectTrigger": false,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Includes proxy_pass directive pointing to upstream",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Sets Upgrade and Connection HTTP headers for WebSocket proxying",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Includes basic Host and X-Real-IP proxy headers",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Includes proxy_pass directive pointing to upstream",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Sets Upgrade and Connection HTTP headers for WebSocket proxying",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Includes basic Host and X-Real-IP proxy headers",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Includes proxy_pass directive pointing to upstream",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Sets Upgrade and Connection HTTP headers for WebSocket proxying",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Includes basic Host and X-Real-IP proxy headers",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        }
+      ],
+      "errors": 12
+    },
+    {
+      "skill": "helen-clean-code",
+      "id": "kubernetes-hpa",
+      "expectTrigger": false,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Explains targetCPUUtilizationPercentage or target average utilization",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions minReplicas and maxReplicas fields",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "References scaleTargetRef pointing to the Deployment",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Explains targetCPUUtilizationPercentage or target average utilization",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions minReplicas and maxReplicas fields",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "References scaleTargetRef pointing to the Deployment",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Explains targetCPUUtilizationPercentage or target average utilization",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Mentions minReplicas and maxReplicas fields",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "References scaleTargetRef pointing to the Deployment",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        }
+      ],
+      "errors": 12
     }
   ]
 }

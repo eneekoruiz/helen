@@ -13,35 +13,34 @@ Grades are evaluated against explicit case criteria by an LLM judge with multi-r
 
 | Skill | Cases | Runs | Trigger | False Pos | Baseline (95% CI) | With skill (95% CI) | Delta (95% CI) | Grade | Errors |
 |---|---|---|---|---|---|---|---|---|---|
-| helen-a11y-perf | 3 | 1x | 2/3 | 0% | 100% | 93% | -6.7% [-35.4%, 22%] | Noise* | 0 |
-| helen-apply | 3 | 1x | 3/3 | 0% | 41% | 100% | +59% [37.8%, 80.2%] | A | 0 |
-| helen-clean-code | 3 | 1x | 3/3 | 0% | 69% | 100% | +30.7% [-12.1%, 73.4%] | Noise* | 0 |
-| helen-client-handoff | 3 | 1x | 1/3 | 0% | 80% | 100% | +20% [-66.1%, 106.1%] | Noise* | 0 |
-| helen-copy-cro | 3 | 1x | 2/3 | 0% | 85% | 100% | +15% [-17.9%, 47.9%] | Noise* | 0 |
-| helen-data-api | 3 | 1x | 1/3 | 0% | 81% | 100% | +19.3% [-23.4%, 62.1%] | Noise* | 0 |
-| helen-knowledge | 3 | 1x | 2/3 | 0% | 93% | 100% | +6.7% [-22%, 35.4%] | Noise* | 0 |
-| helen-motion-3d | 3 | 1x | 1/3 | 0% | 92% | 100% | +8.3% [-27.5%, 44.2%] | Noise* | 0 |
-| helen-premium-design | 3 | 1x | 2/3 | 0% | 66% | 92% | +25.7% [-51.2%, 102.5%] | Noise* | 0 |
-| helen-qa-scale | 3 | 1x | 1/3 | 0% | 94% | 100% | +5.7% [-18.7%, 30.1%] | Noise* | 0 |
-| helen-release | 3 | 2x | 1/5 | 0% | 86% | 89% | +3.3% [-11%, 17.7%] | Noise* | 4 |
-| helen-router | 3 | 1x | 3/3 | 0% | 58% | 75% | +16.7% [-55%, 88.4%] | Noise* | 0 |
-| helen-security | 3 | 1x | 3/3 | 0% | 93% | 100% | +6.7% [-22%, 35.4%] | Noise* | 0 |
-| helen-seo-compliance | 3 | 1x | 2/3 | 0% | 100% | 100% | +0% [0%, 0%] | Noise* | 0 |
-| helen-strategy | 3 | 1x | 2/3 | 0% | 83% | 100% | +16.7% [-55%, 88.4%] | Noise* | 0 |
+| helen-a11y-perf | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-anti-slop | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-apply | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-clean-code | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-client-handoff | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-copy-cro | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-data-api | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-impeccable | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-implementa | 5 | 3x | 0/9 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 69 |
+| helen-improve | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-knowledge | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-motion-3d | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-premium-design | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-qa-scale | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-release | 6 | 3x | 1/12 | 0% (0/6) | 15% | 17% | +1.7% [-2.6%, 6%] | Noise* | 73 |
+| helen-router | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-security | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-seo-compliance | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-strategy | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
 
 * \*Noise: The 95% confidence interval spans zero, meaning the delta cannot be reliably distinguished from sample variance under current evaluation conditions. No letter grade is assigned.
 
 ## Failed criteria with skill
 
-- helen-a11y-perf/form-a11y: Does not add redundant or wrong ARIA where native HTML suffices
-- helen-premium-design/generic-cards: Stays within the brand/product context rather than generic trends
-- helen-release/changelog: Clearly marks removing /v1/users as a breaking change with migration guidance
-- helen-router/phase: Keeps the answer short
-- helen-router/release-phase: Places the project in maintenance (08) or post-handoff with evidence
 
 ## Known limits & Recommendations
 
 - Differences where the confidence interval crosses 0 are statistical noise. Expanding evaluation cases (e.g. to 10 cases with 3+ runs) narrows the confidence intervals.
 - Trigger rates below 100% on chat-only prompts indicate that skill descriptions require keyword tuning so agents activate them autonomously.
 
-Model: sonnet · last report update: 2026-09-30
+Model: sonnet · last report update: 2026-10-01

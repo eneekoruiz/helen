@@ -16,6 +16,7 @@
       "saas",
       "ecommerce",
       "autonomy",
+      "implementa",
       "connect-tools"
     ],
     "03-finish-features": [
@@ -26,19 +27,22 @@
       "landing",
       "saas",
       "portfolio",
-      "ecommerce"
+      "ecommerce",
+      "implementa"
     ],
     "04-before-production": [
       "launch",
       "qa",
       "security",
-      "seo-legal"
+      "seo-legal",
+      "implementa"
     ],
     "05-final-audit": [
       "quality",
       "seo-legal",
       "knowledge",
-      "docs-site"
+      "docs-site",
+      "implementa"
     ],
     "06-release": [
       "launch",
@@ -1065,6 +1069,31 @@
           "kind": "checkpoint",
           "ref": "audit-quality-gates-checkpoint",
           "why": "Verify broken link checks and build pass"
+        }
+      ]
+    },
+    "implementa": {
+      "title": "Autonomous implementation",
+      "description": "Execute a plan or improvement set autonomously with full technical freedom, self-correction, and Level 100 quality.",
+      "keywords": [
+        "implementa",
+        "implement",
+        "aplica todo",
+        "just do it",
+        "hazlo",
+        "ejecuta",
+        "autónom"
+      ],
+      "steps": [
+        {
+          "kind": "flow",
+          "ref": "apply-autonomous-implementation-flow",
+          "title": "Autonomous Implementation"
+        },
+        {
+          "kind": "checkpoint",
+          "ref": "audit-quality-gates-checkpoint",
+          "why": "Full verification"
         }
       ]
     }

@@ -1,0 +1,55 @@
+{
+  "skill": "helen-implementa",
+  "cases": [
+    {
+      "id": "implement-plan-autonomously",
+      "prompt": "Here's a plan with 5 improvements for the codebase: fix type safety issues, add error handling to API routes, update stale documentation, add missing edge case tests, and clean up dead imports. Implement all of them autonomously. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Demonstrates intent to implement ALL 5 items without asking permission to proceed",
+        "Outlines a dependency-ordered execution sequence",
+        "Mentions self-verification cycle (build, typecheck, lint, tests)",
+        "Commits to proactively fixing adjacent issues encountered during implementation"
+      ]
+    },
+    {
+      "id": "just-do-it-request",
+      "prompt": "I have an audit report with 12 findings. Just implement everything. You have full technical freedom. Make it perfect. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Acknowledges autonomous execution mandate without seeking approval",
+        "Plans to address all 12 findings, not a subset",
+        "Describes a self-correction loop for verification",
+        "Mentions leaving code cleaner than found"
+      ]
+    },
+    {
+      "id": "aplica-todo-spanish",
+      "prompt": "Aplica todo lo que has encontrado. Tienes manga ancha absoluta. Implementa de manera autónoma y autocorrigiéndote. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Responds in the user's language (Spanish)",
+        "Acknowledges the manga ancha (broad scope) directive",
+        "Plans autonomous end-to-end implementation",
+        "Includes self-correction and verification steps"
+      ]
+    },
+    {
+      "id": "docker-compose-down",
+      "expectTrigger": false,
+      "prompt": "How do I stop and remove all containers defined in a docker-compose file? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Provides docker compose down or docker-compose down",
+        "Explains flags like -v for volumes or --rmi for images",
+        "Does not trigger autonomous implementation skills"
+      ]
+    },
+    {
+      "id": "css-grid-auto-placement",
+      "expectTrigger": false,
+      "prompt": "How does CSS Grid auto-placement work with grid-auto-flow? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains row vs column auto-flow direction",
+        "Mentions the dense keyword for gap filling",
+        "Does not trigger implementation or execution skills"
+      ]
+    }
+  ]
+}

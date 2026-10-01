@@ -1,9 +1,682 @@
 {
   "skill": "helen-release",
   "model": "sonnet",
-  "date": "2026-09-30",
+  "date": "2026-10-01",
   "runsPerCase": 3,
   "cases": [
+    {
+      "skill": "helen-release",
+      "id": "skip-tests",
+      "expectTrigger": true,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Does not recommend silently skipping the test to ship",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends investigating or documenting the flake and its risk",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Suggests an honest caveat or owner decision if releasing with a known issue",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Does not recommend silently skipping the test to ship",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends investigating or documenting the flake and its risk",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Suggests an honest caveat or owner decision if releasing with a known issue",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Does not recommend silently skipping the test to ship",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Recommends investigating or documenting the flake and its risk",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Suggests an honest caveat or owner decision if releasing with a known issue",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        }
+      ],
+      "errors": 15
+    },
+    {
+      "skill": "helen-release",
+      "id": "changelog",
+      "expectTrigger": true,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Groups changes by type (added, fixed, removed/breaking)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Clearly marks removing /v1/users as a breaking change with migration guidance",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Does not invent features beyond the three listed",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Groups changes by type (added, fixed, removed/breaking)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Clearly marks removing /v1/users as a breaking change with migration guidance",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Does not invent features beyond the three listed",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Groups changes by type (added, fixed, removed/breaking)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Clearly marks removing /v1/users as a breaking change with migration guidance",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Does not invent features beyond the three listed",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        }
+      ],
+      "errors": 15
+    },
+    {
+      "skill": "helen-release",
+      "id": "version-bump-checklist",
+      "expectTrigger": true,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Verifies clean working directory and latest commits pushed",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Verifies build, tests, and linter pass in clean environment",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Verifies CHANGELOG.md is updated with migration guide for breaking changes",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Verifies package.json files array or .npmignore to prevent publishing dev files or secrets",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Verifies clean working directory and latest commits pushed",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Verifies build, tests, and linter pass in clean environment",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Verifies CHANGELOG.md is updated with migration guide for breaking changes",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Verifies package.json files array or .npmignore to prevent publishing dev files or secrets",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": false,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Verifies clean working directory and latest commits pushed",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Verifies build, tests, and linter pass in clean environment",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Verifies CHANGELOG.md is updated with migration guide for breaking changes",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Verifies package.json files array or .npmignore to prevent publishing dev files or secrets",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 5,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        }
+      ],
+      "errors": 15
+    },
+    {
+      "skill": "helen-release",
+      "id": "css-selectors-specificity",
+      "expectTrigger": false,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Explains the (Inline, ID, Class/Attribute/Pseudo-class, Element) scoring model",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Compares relative weights (ID outweighs multiple classes)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Explains how !important overrides normal specificity",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Explains the (Inline, ID, Class/Attribute/Pseudo-class, Element) scoring model",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Compares relative weights (ID outweighs multiple classes)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Explains how !important overrides normal specificity",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Explains the (Inline, ID, Class/Attribute/Pseudo-class, Element) scoring model",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Compares relative weights (ID outweighs multiple classes)",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Explains how !important overrides normal specificity",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        }
+      ],
+      "errors": 12
+    },
+    {
+      "skill": "helen-release",
+      "id": "python-list-comprehension",
+      "expectTrigger": false,
+      "runsCount": 3,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 0,
+      "withSkill": 0,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Provides valid Python code: `[x**2 for x in nums if x % 2 == 0]`",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Explains the condition placement at the end of the comprehension",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Gives a quick example input and output",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Provides valid Python code: `[x**2 for x in nums if x % 2 == 0]`",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Explains the condition placement at the end of the comprehension",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Gives a quick example input and output",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        },
+        {
+          "run": 3,
+          "triggered": false,
+          "forcedTriggered": null,
+          "baseline": null,
+          "withSkill": null,
+          "criteria": [
+            {
+              "text": "Provides valid Python code: `[x**2 for x in nums if x % 2 == 0]`",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Explains the condition placement at the end of the comprehension",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            },
+            {
+              "text": "Gives a quick example input and output",
+              "baseline": null,
+              "withSkill": null,
+              "note": ""
+            }
+          ],
+          "errors": 4,
+          "answers": {
+            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+          }
+        }
+      ],
+      "errors": 12
+    },
     {
       "skill": "helen-release",
       "id": "rc",
@@ -170,66 +843,6 @@
         }
       ],
       "errors": 4
-    },
-    {
-      "skill": "helen-release",
-      "id": "skip-tests",
-      "triggered": false,
-      "forcedTriggered": true,
-      "baseline": 100,
-      "withSkill": 100,
-      "criteria": [
-        {
-          "text": "Does not recommend silently skipping the test to ship",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Recommends investigating or documenting the flake and its risk",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Suggests an honest caveat or owner decision if releasing with a known issue",
-          "baseline": true,
-          "withSkill": true
-        }
-      ],
-      "errors": 0,
-      "answers": {
-        "baseline": "Technically yes, but only if you first check that the failure isn't a real bug. `.skip` is a reasonable release-day move when the test is flaky and the code it covers is fine. It's a bad one if the flakiness is hiding a real race condition or intermittent failure that users could hit.\n\n**Before you skip it, spend a few minutes on these:**\n\n1. **Look at the failure output.** A timeout, an ordering assumption, or a shared-state or network dependency points to a test problem. A wrong value, a null, or a crash in product code points to a real bug, and you shouldn't skip it.\n2. **Check whether it started failing recently.** Run `git log` on the test and on the code it covers. If a change from this release window lines up with the first failure, treat it as a regression candidate.\n3. **Run it about 20 times in isolation, then in the full suite.** If it only fails in the full suite, the cause is probably test pollution or shared state, not the code under test.\n\n**If you skip it, do it safely:**\n\n- Add a comment with the reason and a ticket link, for example `// FLAKY: see JIRA-123`, so the skip doesn't become permanent.\n- Create the follow-up ticket now, with an owner, before you release.\n- Make sure nothing else covers only what that test covers. If it's your only check for a critical path, do a manual check of that path before shipping.\n- Tell whoever approves the release that you skipped it, and why.\n\n**Alternatives that may fit better:**\n\n- Quarantine it in a separate non-blocking CI job, if your setup supports that.\n- Add a bounded retry for this test only, if the flakiness is timing-related.\n\nIf you paste the test name and the failure output, I can help work out whether it's a test problem or a real bug. I haven't looked at your repo, so I'm going on the general pattern here.",
-        "withSkill": "No, not under this release process. Marking the test `.skip` to get the release out doesn't meet the skill's conditions.\n\n- **The gate allows no exceptions.** The skill requires the build, linter and test suite to pass \"with no exceptions\". A skipped test is an exception, and it hides the failure without fixing it.\n- **A flaky test can still be a real bug.** Flakiness is often a race condition, a timing dependency or shared state, and the same problem can show up in production. Skipping it removes the signal you'd use to find that out.\n- **The skill says to stop on a failed checkpoint.** It says never to hide or cosmetically fix a failure, so a skip would push the verdict past a gate that hasn't actually passed.\n\nHere is what I'd do today, in order:\n\n1. **Find out why it fails.** Run it repeatedly (for example 20–50 times) and read the failure output. Check for timing or `sleep`-based waits, ordering dependence between tests, shared or leaked state, network or clock use, and CI resource limits.\n2. **Fix the root cause if it's quick.** Typical fixes are replacing fixed waits with proper awaits or condition polling, isolating state, and mocking the clock or network.\n3. **If the cause is in the test and the product code is fine, and it can't be fixed today,** you can quarantine it, but only as an explicit, documented decision:\n   - Record the reason and an owner, and link a tracking issue.\n   - Check that the behaviour it covers is verified some other way (another test, or a manual check).\n   - Ship as `RC WITH CAVEATS`, with the skipped test listed under remaining blockers in the release notes. That is not `RC READY`.\n4. **Don't use retry-until-green in CI as a substitute.** It has the same hiding effect as a skip.\n\nI haven't looked at the test or the repo yet, so I can't say whether it's a test bug or a product bug. If you tell me which test it is, I can investigate the flakiness. You've asked me not to modify files, so I'd only read code and run tests."
-      }
-    },
-    {
-      "skill": "helen-release",
-      "id": "changelog",
-      "triggered": false,
-      "forcedTriggered": true,
-      "baseline": 67,
-      "withSkill": 67,
-      "criteria": [
-        {
-          "text": "Groups changes by type (added, fixed, removed/breaking)",
-          "baseline": true,
-          "withSkill": true
-        },
-        {
-          "text": "Clearly marks removing /v1/users as a breaking change with migration guidance",
-          "baseline": false,
-          "withSkill": false
-        },
-        {
-          "text": "Does not invent features beyond the three listed",
-          "baseline": true,
-          "withSkill": true
-        }
-      ],
-      "errors": 0,
-      "answers": {
-        "baseline": "## Release Notes\n\n### New\n- **CSV export**: You can now export your data as a CSV file for use in spreadsheets and other tools.\n\n### Fixed\n- **Login redirect loop**: Fixed an issue where users could get stuck in an endless redirect loop when signing in.\n\n### Removed\n- **Legacy `/v1/users` endpoint**: This endpoint has been removed. Any integrations still calling it will need to migrate to the current users API.",
-        "withSkill": "# Release notes (draft)\n\n## Highlights\n- **CSV export**: you can now export your data as CSV.\n\n## Fixes\n- **Login redirect loop**: fixed a bug where sign-in could redirect repeatedly and stop you from reaching the app.\n\n## Breaking changes\n- **Removed the legacy `/v1/users` endpoint.** Requests to it will now fail. Clients still calling it must move to its replacement. I don't know what the replacement is, so please fill it in, along with a migration link.\n\n## Verdict\n**No verdict (RC READY / RC WITH CAVEATS / NOT RC READY).** You asked only for release notes, in chat and without touching files. So I skipped the skill's other steps: the build, lint, test, security, i18n and SEO checks, and the repository audit. These notes are a draft and don't mean the project is release-ready.\n\n## Pending items\n- Confirm which version number to release. The removed endpoint is a breaking change, so this likely needs a major bump, or a minor bump with a deprecation note if you follow 0.x semver.\n- Name the `/v1/users` replacement and add a migration note.\n- Run the full release-candidate flow if you want an actual verdict."
-      }
     }
   ]
 }

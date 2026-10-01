@@ -34,6 +34,7 @@ Before moving on to 04-before-production:
 | [enhance-3d-scene-polish](3d/ENHANCE-3d-scene-polish.md) | ENHANCE | Refine an existing 3D scene (framing, lights, materials, timing, performance, fallback) without breaking its API or integration. |
 | [generate-3d-experience-component](3d/GENERATE-3d-experience-component.md) | GENERATE | Build one isolated 3D scene or showcase on the existing foundation, with an asset pipeline, motion templates and a non-3D fallback. |
 | [generate-3d-foundation](3d/GENERATE-3d-foundation.md) | GENERATE | Choose Spline or React Three Fiber and build the reusable 3D foundation: canvas, loading, fallbacks and performance rules. |
+| [apply-autonomous-implementation-flow](flow/APPLY-autonomous-implementation-flow.md) | APPLY flow | Execute a plan autonomously with full technical freedom, self-correction loops, and Level 100 quality until zero improvements remain. |
 | [apply-cinematic-visual-flow](flow/APPLY-cinematic-visual-flow.md) | APPLY flow | Flow: turn a working site into a cinematic, award-level experience (taste, motion, scroll, 3D, shaders, mockups) within a performance budget. |
 | [apply-full-polish-flow](flow/APPLY-full-polish-flow.md) | APPLY flow | Flow: lift a working project to a clearly more refined level in UX, visuals, responsive, accessibility, clean code and performance. |
 | [apply-premium-site-stack-flow](flow/APPLY-premium-site-stack-flow.md) | APPLY flow | Flow: build or lift a premium website end to end: inspiration, design, copy, motion, components, quality, SEO and publishing. |

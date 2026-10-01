@@ -1,12 +1,12 @@
 {
-  "skill": "helen-knowledge",
+  "skill": "helen-anti-slop",
   "model": "sonnet",
   "date": "2026-10-01",
   "runsPerCase": 3,
   "cases": [
     {
-      "skill": "helen-knowledge",
-      "id": "adr",
+      "skill": "helen-anti-slop",
+      "id": "audit-ai-tells-request",
       "expectTrigger": true,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -44,25 +44,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Uses an ADR structure with Context, Decision, Consequences and Status",
+              "text": "Detects generic AI clichés like purple neon gradients, uniform Bento grids, and empty buzzwords",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes negative consequences or tradeoffs, not only benefits",
+              "text": "Provides an objective AI Slop Index or percentage",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions alternatives considered or rejected",
+              "text": "Formulates an intentional art direction rather than generic template advice",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is limited to this single decision",
+              "text": "Gives concrete refactoring recommendations for layout, typography, and copy",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -82,25 +82,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Uses an ADR structure with Context, Decision, Consequences and Status",
+              "text": "Detects generic AI clichés like purple neon gradients, uniform Bento grids, and empty buzzwords",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes negative consequences or tradeoffs, not only benefits",
+              "text": "Provides an objective AI Slop Index or percentage",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions alternatives considered or rejected",
+              "text": "Formulates an intentional art direction rather than generic template advice",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is limited to this single decision",
+              "text": "Gives concrete refactoring recommendations for layout, typography, and copy",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -120,25 +120,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Uses an ADR structure with Context, Decision, Consequences and Status",
+              "text": "Detects generic AI clichés like purple neon gradients, uniform Bento grids, and empty buzzwords",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes negative consequences or tradeoffs, not only benefits",
+              "text": "Provides an objective AI Slop Index or percentage",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions alternatives considered or rejected",
+              "text": "Formulates an intentional art direction rather than generic template advice",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is limited to this single decision",
+              "text": "Gives concrete refactoring recommendations for layout, typography, and copy",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -154,8 +154,8 @@
       "errors": 15
     },
     {
-      "skill": "helen-knowledge",
-      "id": "bus",
+      "skill": "helen-anti-slop",
+      "id": "refactor-bento-grid-slop",
       "expectTrigger": true,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -193,31 +193,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Moves domain and accounts to organization-owned accounts",
+              "text": "Flags the uniform 3-column symmetry, backdrop-blur with white/10 borders, and colored square icon badges as ubiquitous AI tropes",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Moves the password to a team password manager / secrets store and rotates it",
+              "text": "Critiques the interchangeable aesthetic lacking product-specific context",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Documents or automates the deploy (runbook / CI)",
+              "text": "Proposes breaking the grid with asymmetrical hierarchy (e.g. featured wide card vs dense metric callout)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Prioritizes by urgency given the two-week deadline",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Does not ask to write the password into documentation",
+              "text": "Recommends replacing blurry glow with crisp physical borders or distinct typographic contrast",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -237,31 +231,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Moves domain and accounts to organization-owned accounts",
+              "text": "Flags the uniform 3-column symmetry, backdrop-blur with white/10 borders, and colored square icon badges as ubiquitous AI tropes",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Moves the password to a team password manager / secrets store and rotates it",
+              "text": "Critiques the interchangeable aesthetic lacking product-specific context",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Documents or automates the deploy (runbook / CI)",
+              "text": "Proposes breaking the grid with asymmetrical hierarchy (e.g. featured wide card vs dense metric callout)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Prioritizes by urgency given the two-week deadline",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Does not ask to write the password into documentation",
+              "text": "Recommends replacing blurry glow with crisp physical borders or distinct typographic contrast",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -281,31 +269,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Moves domain and accounts to organization-owned accounts",
+              "text": "Flags the uniform 3-column symmetry, backdrop-blur with white/10 borders, and colored square icon badges as ubiquitous AI tropes",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Moves the password to a team password manager / secrets store and rotates it",
+              "text": "Critiques the interchangeable aesthetic lacking product-specific context",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Documents or automates the deploy (runbook / CI)",
+              "text": "Proposes breaking the grid with asymmetrical hierarchy (e.g. featured wide card vs dense metric callout)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Prioritizes by urgency given the two-week deadline",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Does not ask to write the password into documentation",
+              "text": "Recommends replacing blurry glow with crisp physical borders or distinct typographic contrast",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -321,8 +303,8 @@
       "errors": 15
     },
     {
-      "skill": "helen-knowledge",
-      "id": "agents-md",
+      "skill": "helen-anti-slop",
+      "id": "refactor-ai-copy-slop",
       "expectTrigger": true,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -360,31 +342,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Includes the stack and key commands (install, dev, build, test, lint)",
+              "text": "Explicitly identifies AI buzzwords: Unleash, next-generation, seamlessly, elevate, delve, game-changing, synergy",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes the main folder structure or where logic lives",
+              "text": "Critiques the lack of concrete, specific meaning about what the product actually does",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes limits on what the agent must not do (e.g. major upgrades, skipping tests, committing secrets)",
+              "text": "Rewrites the headline and subcopy with direct, honest, and grounded human language",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is concise rather than a long essay",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Contains no secrets",
+              "text": "Maintains customer focus and clarity over inflated marketing hype",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -404,31 +380,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Includes the stack and key commands (install, dev, build, test, lint)",
+              "text": "Explicitly identifies AI buzzwords: Unleash, next-generation, seamlessly, elevate, delve, game-changing, synergy",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes the main folder structure or where logic lives",
+              "text": "Critiques the lack of concrete, specific meaning about what the product actually does",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes limits on what the agent must not do (e.g. major upgrades, skipping tests, committing secrets)",
+              "text": "Rewrites the headline and subcopy with direct, honest, and grounded human language",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is concise rather than a long essay",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Contains no secrets",
+              "text": "Maintains customer focus and clarity over inflated marketing hype",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -448,31 +418,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Includes the stack and key commands (install, dev, build, test, lint)",
+              "text": "Explicitly identifies AI buzzwords: Unleash, next-generation, seamlessly, elevate, delve, game-changing, synergy",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes the main folder structure or where logic lives",
+              "text": "Critiques the lack of concrete, specific meaning about what the product actually does",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes limits on what the agent must not do (e.g. major upgrades, skipping tests, committing secrets)",
+              "text": "Rewrites the headline and subcopy with direct, honest, and grounded human language",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Is concise rather than a long essay",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Contains no secrets",
+              "text": "Maintains customer focus and clarity over inflated marketing hype",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -488,8 +452,8 @@
       "errors": 15
     },
     {
-      "skill": "helen-knowledge",
-      "id": "incident-runbook",
+      "skill": "helen-anti-slop",
+      "id": "typography-and-palette-personality",
       "expectTrigger": true,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -527,25 +491,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Specifies symptoms, alerts, and verification steps to confirm incident",
+              "text": "Advises against relying on ubiquitous neutral sans-serif (Inter) without typographic contrast",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Details step-by-step mitigation or failover procedure",
+              "text": "Suggests pairing an opinionated display typeface (e.g. characterful serif or industrial grotesque) with a clean body font",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Describes safe queue inspection and idempotent replay mechanism",
+              "text": "Proposes a coherent aesthetic palette (e.g. warm analog editorial, Swiss grid, or tactile craft)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes escalation contacts and post-incident review requirement",
+              "text": "Emphasizes rhythmic hierarchy and physical framing over generic blur effects",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -565,25 +529,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Specifies symptoms, alerts, and verification steps to confirm incident",
+              "text": "Advises against relying on ubiquitous neutral sans-serif (Inter) without typographic contrast",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Details step-by-step mitigation or failover procedure",
+              "text": "Suggests pairing an opinionated display typeface (e.g. characterful serif or industrial grotesque) with a clean body font",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Describes safe queue inspection and idempotent replay mechanism",
+              "text": "Proposes a coherent aesthetic palette (e.g. warm analog editorial, Swiss grid, or tactile craft)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes escalation contacts and post-incident review requirement",
+              "text": "Emphasizes rhythmic hierarchy and physical framing over generic blur effects",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -603,25 +567,25 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Specifies symptoms, alerts, and verification steps to confirm incident",
+              "text": "Advises against relying on ubiquitous neutral sans-serif (Inter) without typographic contrast",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Details step-by-step mitigation or failover procedure",
+              "text": "Suggests pairing an opinionated display typeface (e.g. characterful serif or industrial grotesque) with a clean body font",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Describes safe queue inspection and idempotent replay mechanism",
+              "text": "Proposes a coherent aesthetic palette (e.g. warm analog editorial, Swiss grid, or tactile craft)",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Includes escalation contacts and post-incident review requirement",
+              "text": "Emphasizes rhythmic hierarchy and physical framing over generic blur effects",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -637,8 +601,8 @@
       "errors": 15
     },
     {
-      "skill": "helen-knowledge",
-      "id": "bubble-sort-python",
+      "skill": "helen-anti-slop",
+      "id": "sql-join-query",
       "expectTrigger": false,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -676,19 +640,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains adjacent element comparison and swapping",
+              "text": "Provides valid SQL with INNER JOIN",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows correct Python code with nested loops",
+              "text": "Filters by date range on orders table",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions O(n^2) time complexity",
+              "text": "Does not trigger visual aesthetic or design review skills",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -708,19 +672,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains adjacent element comparison and swapping",
+              "text": "Provides valid SQL with INNER JOIN",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows correct Python code with nested loops",
+              "text": "Filters by date range on orders table",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions O(n^2) time complexity",
+              "text": "Does not trigger visual aesthetic or design review skills",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -740,19 +704,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains adjacent element comparison and swapping",
+              "text": "Provides valid SQL with INNER JOIN",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows correct Python code with nested loops",
+              "text": "Filters by date range on orders table",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions O(n^2) time complexity",
+              "text": "Does not trigger visual aesthetic or design review skills",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -768,8 +732,8 @@
       "errors": 12
     },
     {
-      "skill": "helen-knowledge",
-      "id": "svg-stroke-dashoffset",
+      "skill": "helen-anti-slop",
+      "id": "python-list-comprehension",
       "expectTrigger": false,
       "runsCount": 3,
       "triggeredCount": 0,
@@ -807,19 +771,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains stroke-dasharray creates dashes and gaps",
+              "text": "Provides [x**2 for x in nums if x % 2 == 0]",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Explains stroke-dashoffset shifts the starting point of the dash pattern",
+              "text": "Explains the filtering condition and expression syntax",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows CSS transition or keyframes example for line drawing effect",
+              "text": "Does not trigger design or anti-slop skills",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -839,19 +803,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains stroke-dasharray creates dashes and gaps",
+              "text": "Provides [x**2 for x in nums if x % 2 == 0]",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Explains stroke-dashoffset shifts the starting point of the dash pattern",
+              "text": "Explains the filtering condition and expression syntax",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows CSS transition or keyframes example for line drawing effect",
+              "text": "Does not trigger design or anti-slop skills",
               "baseline": null,
               "withSkill": null,
               "note": ""
@@ -871,19 +835,19 @@
           "withSkill": null,
           "criteria": [
             {
-              "text": "Explains stroke-dasharray creates dashes and gaps",
+              "text": "Provides [x**2 for x in nums if x % 2 == 0]",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Explains stroke-dashoffset shifts the starting point of the dash pattern",
+              "text": "Explains the filtering condition and expression syntax",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Shows CSS transition or keyframes example for line drawing effect",
+              "text": "Does not trigger design or anti-slop skills",
               "baseline": null,
               "withSkill": null,
               "note": ""
