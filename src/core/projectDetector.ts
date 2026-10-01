@@ -115,7 +115,7 @@ export function detectProject(cwd: string): ProjectInfo {
     fileExists(path.join(cwd, 'lerna.json')) ||
     fileExists(path.join(cwd, 'turbo.json')) ||
     fileExists(path.join(cwd, 'nx.json')) ||
-    Boolean((pkg as any)?.workspaces);
+    Boolean((pkg as Record<string, unknown> | null)?.workspaces);
 
   return {
     name: (pkg?.name as string) ?? 'unknown-project',

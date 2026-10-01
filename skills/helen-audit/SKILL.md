@@ -1,18 +1,22 @@
 ---
 name: helen-audit
-description: Master skill for auditing code quality, finding improvements, standardizing Apple-grade tests, checking edge cases, performing code reviews, and identifying technical debt.
+description: Master skill for auditing code quality, finding improvements, standardizing Apple-grade tests, checking edge cases, performing code reviews, and identifying technical debt in a zero-interruption autonomous convergence loop.
 ---
 
-# The HELEN Audit (Impeccable Quality & Improvement Scanner)
+# The HELEN Audit (Autonomous Quality & Convergence Engine)
 
-HELEN rejects the complacency trap of long AI coding sessions. When an AI agent has been working on a codebase for hours, conversational momentum leads to author bias, superficial affirmations, and missed blind spots. `helen-audit` acts as an uncompromising external auditor demanding production-grade craft, proven invariant safety, and continuous improvement across all dimensions.
+HELEN rejects the complacency trap of long AI coding sessions. When an AI agent has been working on a codebase for hours, conversational momentum leads to author bias, superficial affirmations, and missed blind spots. `helen-audit` acts as an uncompromising external auditor and autonomous remediation engine.
+
+> **CRITICAL OPERATING RULE: THE AUTONOMOUS CONVERGENCE LOOP**
+> Never stop at just reporting defects or asking for permission between fix cycles. When `helen-audit` is invoked (or combined with `/helen-implementa`), you MUST execute an **Autonomous Convergence Loop**:
+> **Audit → Fix → Verify → Re-audit → Repeat** until the Craftsmanship Score reaches a **100/100 (IMPECCABLE)** and zero defects remain across all 6 dimensions. Only report back when the codebase is a pristine 10/10.
 
 ## The Adversarial Auditor Mindset
 
 1. **Discard Prior AI Assumptions**: Treat the existing code as if written by an exhausted third party who cut corners under a deadline. Do not accept self-serving comments or optimistic docstrings as truth.
 2. **Cold, Skeptical Examination**: Every assertion must be proven mathematically, logically, or empirically through tests. If an error branch or rollback path has no test proving it works, assume it is broken.
 3. **Zero Dead Code & Clean Architecture**: Remove unused variables, imports, functions, classes, and files. Reduce complexity, duplication, and technical risk without changing behavior.
-4. **No Flattery or Filler**: Never output vague compliments like "The code is well-structured." Every finding must point to concrete files, line numbers, and failure vectors.
+4. **No Half-Measures or Premature Halts**: Do not ask the user "Should I fix the rest?". Fix all Tier 1, Tier 2, and Tier 3 issues autonomously until there is nothing left to improve.
 
 ## The 6 Dimensions of Auditing
 
@@ -45,17 +49,30 @@ HELEN rejects the complacency trap of long AI coding sessions. When an AI agent 
 - **Technical Honesty**: Verify that every capability promised in `README.md` or marketing copy actually exists and functions in the code.
 - **PR & Code Review**: When reviewing Pull Requests, ensure no secret leakage, no breaking regressions, and verify deterministic gates (`npm run typecheck` / `lint` / `test`) pass.
 
-## Output Format & Prioritization
+## The Convergence Execution Protocol
 
-Structure all proposed improvements and audit findings into clear, actionable tiers. Do not modify code in an audit run unless explicitly instructed; only provide the report.
+1. **Phase 1: Deep Audit**: Scan all 6 dimensions. Identify all defects (Tier 1, Tier 2, Tier 3).
+2. **Phase 2: Autonomous Remediation**: Immediately implement fixes for every single finding. Do not stop to report or ask for confirmation.
+3. **Phase 3: Deterministic Verification**: Execute `npm run typecheck`, `npm run lint`, and `npm test`. If any check fails, fix the failure immediately.
+4. **Phase 4: Re-Audit**: Re-evaluate the entire codebase against the 6 dimensions.
+   - If findings remain: Go to **Phase 2**.
+   - If 0 findings remain and Craftsmanship Score = 100/100: Proceed to **Phase 5**.
+5. **Phase 5: Final Pristine Report**: Output the final 10/10 report summarizing all autonomous iterations, fixes applied, and verification metrics.
 
-1. **Executive Verdict & Score**:
-   - `IMPECCABLE (95-100)`: Shipped to production without hesitation.
-   - `CONDITIONAL PASS (80-94)`: Safe for staging, remediation required before public exposure.
-   - `DEFECTIVE (<80)`: Critical flaws present; blocked.
-2. **AI Blind Spots Uncovered**: Specific defects the previous AI overlooked.
-3. **Prioritized Remediation Matrix**:
-   - **Tier 1 (Critical/Blockers)**: Unhandled exceptions, data loss risks, security leaks, failing tests.
-   - **Tier 2 (Strategic/Important)**: Architectural bottlenecks, missing adversarial tests, `any` typings.
-   - **Tier 3 (Polish/Optional)**: Dead code elimination, DX improvements, UI ergonomics.
-4. **Immediate Next Step**: The single most impactful improvement to implement first.
+## Final Output Format (When 100/100 Reached)
+
+```text
+# 🏆 HELEN Audit Final Report: 10/10 IMPECCABLE
+
+- **Craftsmanship Score**: 100 / 100 (IMPECCABLE)
+- **Autonomous Convergence Cycles**: [N] rounds completed
+- **Defects / Technical Debt Remaining**: 0
+
+### Summary of Autonomous Fixes Applied
+- [List of all issues detected and fixed during the convergence loop]
+
+### Deterministic Verification Gates
+- ✅ Typecheck: 0 errors
+- ✅ Lint: 0 warnings/errors
+- ✅ Test Suite: 100% passing
+```

@@ -72,7 +72,7 @@ export function updateConfig(cwd: string, updates: Partial<HelenConfig>): void {
     },
   };
 
-  patchJson(configPath, newConfig as any);
+  patchJson(configPath, newConfig as Record<string, unknown>);
 }
 
 /**
