@@ -1,29 +1,36 @@
 ---
 name: helen-copy
-description: Use when writing, rewriting, or auditing website copy, headlines, and calls-to-action (CTAs) to improve conversion rate (CRO); eliminating AI buzzwords, generic filler, and unsupported marketing claims; optimizing contact forms and lead capture (reducing friction, specific button text); and handling requests for customer testimonials or social proof (declining to fabricate fake testimonials and offering honest alternatives).
+description: Master skill for writing, rewriting, and auditing website copy, headlines, and calls-to-action (CTAs) to maximize conversion rate (CRO); eliminating AI buzzwords and robotic tropes in an autonomous convergence loop.
+version: 2.1.0
 ---
 
+# Copy, Claims and Conversion (CRO Master Skill)
 
-## From helen-copy-cro
+High-converting copy is concrete, authentic, and human. Generic AI models generate verbose fluff ("elevate", "streamline", "unleash") that kills trust and conversion. `helen-copy` audits and rewrites copy with sharp positioning and high-velocity clarity.
 
-# Copy, Claims and Conversion
+## Operating Principles
 
-## Review
+### 1. Interactive Scoping Questionnaire
+Before rewriting landing pages or CTAs, clarify brand boundaries:
+- **Brand Voice & ICP**: What is the target customer persona, and what exact vocabulary do they use to describe their problem?
+- **Tone Profile**: Direct & pragmatic, witty & idiosyncratic, or authoritative & enterprise?
+- **Proof & Social Evidence**: Do real metrics/testimonials exist, or should copy rely on transparent technical explanations rather than synthetic claims?
 
-1. **Visible copy:** headings, CTAs, labels, nav, footer, forms, errors, empty states, metadata, testimonials, FAQs, pricing. Find typos, mixed language, vague promises, and robotic phrasing.
-2. **Tone:** coherent across pages, matching the product's real maturity; remove filler that makes it generic.
-3. **Claims:** flag unsupported "best", "secure", "guaranteed", "AI-powered", "trusted by", or performance promises. Offer safer wording.
-4. **Conversion:** CTA text matches intent; primary and secondary CTAs differ; remove ambiguity and dead ends. Forms: fewest fields possible, clear labels and errors, what happens after submit, and real proof or trust near the form (response time, privacy note, genuine testimonial) without inventing any.
-5. **SEO copy:** titles, descriptions, headings; no keyword stuffing.
+### 2. Autonomous Copy Convergence Loop
+Once voice parameters are locked:
+**Scan AI Tells → Rewrite Headers & CTAs → Audit Form Friction → Verify Clarity & Character → Repeat**
+Iterate autonomously until 100% of generic fluff is replaced with punchy, authentic human prose.
 
-## Humanizing
+### 3. Specialized Subagents
+- **CRO & Friction Subagent**: Audits form fields, CTA contrast, microcopy, and cognitive load on conversion paths.
+- **Tone & Claim Verification Subagent**: Detects inflated adjectives, buzzwords, and unsubstantiated claims.
 
-AI traces to remove: staged run-ups, forced triples, inflated significance, sales language, symmetric structure. Rewrite with specific, checkable detail from the real business. An external `humanizer` skill and `cro-optimization` skill are in the catalog.
+### 4. Extreme Token Economy
+Provide before/after copy tables with concrete rationale. Avoid lecturing on marketing theory.
 
-## Limits
+## Copy Review Checklist
 
-- Do not invent facts, testimonials, metrics, logos, awards, or certifications.
-- Do not change legal, privacy, or pricing language in risky ways without flagging it.
-- Preserve translations, i18n structure, and CMS field identity.
-
-Prompts: `audit-content-copy-brand-and-claims`, `audit-links-forms-ctas-and-conversion-paths`, `audit-ai-trace-erasure-and-human-craft`, `enhance-copy-and-conversion`.
+1. **Visible copy:** Headings, CTAs, labels, navigation, footers, forms, error messages, empty states, FAQs, and pricing.
+2. **AI Fluff Eradication:** Kill words like "unleash", "elevate", "delve", "supercharge", "next-gen", "cutting-edge". Eliminate robotic tricolons ("Fast. Reliable. Secure.").
+3. **Conversion Path Optimization:** Form fields stripped to the essential minimum. Action-oriented CTA button text ("Download the SDK" instead of "Submit").
+4. **Truthful Social Proof:** Never invent testimonials, logos, metrics, or certifications. Replace absent social proof with radical product transparency.

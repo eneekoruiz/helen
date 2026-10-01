@@ -1,46 +1,55 @@
 ---
 name: helen-release
-description: Master skill for release engineering, SEO technical compliance, version bumps, changelogs, privacy policies, and preparing clean handoffs to clients.
+description: Master skill for release engineering, SEO technical compliance, version bumps, changelogs, privacy policies, and preparing clean handoffs to clients in an autonomous convergence loop.
+version: 2.1.0
 ---
 
 # Release Engineering & Client Handoff (Release Master Skill)
 
 Decide if the project can be packaged as a release candidate (RC) or delivered to a client, with mathematical guarantees. This skill groups release candidate preparation, SEO/i18n compliance, and clean client handoff packaging.
 
+## Operating Principles
+
+### 1. Interactive Scoping Questionnaire
+Before beginning release packaging, clarify deployment and delivery parameters:
+- **Release Target & Versioning**: What is the target bump (patch, minor, major) and distribution channel (npm, Docker, Vercel, static export)?
+- **Handoff Mode**: Internal engineering release vs. client handover package with credential transfer protocols?
+- **Strictness Level**: Fail-fast on minor SEO/a11y warnings or require only build/typecheck/security pass?
+
+### 2. Autonomous Release Convergence Loop
+Once release parameters are locked:
+**Build & Compile → Test & Security Scan → SEO/i18n Verification → Asset Optimization → Package → Repeat**
+Iterate autonomously through all verification gates. Do not stop until all checks pass and the final release candidate is fully compiled and tagged.
+
+### 3. Specialized Subagents
+- **SEO & Compliance Subagent**: Audits OpenGraph, canonical URLs, robots.txt, sitemaps, and legal claim compliance.
+- **Smoke Test & Verification Subagent**: Runs browser smoke tests across deep routes, back/forward navigation, and responsive viewports.
+- **Changelog & Documentation Subagent**: Generates clean semantic release notes and handoff runbooks.
+
+### 4. Extreme Token Economy
+Provide high-density release summaries: verification tables, semver tags, and checksums. Zero fluff.
+
 ## The Release Candidate Sequence
 
 1. **Build & Compile**: Verify the project builds completely from a cold start.
-2. **Deterministic Gates**: Run the linter, typechecker, and test suite. They must pass with zero exceptions. Never hide or cosmetically fix a type, build, or security error just to pass the gate.
-3. **Security Hardening**: Verify no `.env`, credentials, API tokens, or development access are exposed in the repository or documentation.
+2. **Deterministic Gates**: Run the linter, typechecker, and test suite. They must pass with zero exceptions.
+3. **Security Hardening**: Verify no `.env`, credentials, API tokens, or development access are exposed.
 4. **SEO & i18n Compliance**:
-   - Check `title`, meta description, Open Graph, canonical URLs, `robots.txt`, sitemaps, single `h1`, and heading order.
-   - Confirm there is no accidental `noindex` tag for production builds.
-   - Ensure every visible string goes through the i18n layer, language fallbacks work, and `hreflang` tags are correct.
+   - Check title, meta description, Open Graph, canonical URLs, robots.txt, sitemaps, single h1, and heading order.
+   - Confirm no accidental noindex in production.
+   - Verify visible strings are localized and language fallbacks work.
 5. **Documentation & Handoff Preparation**:
    - Ensure setup and deployment instructions reproduce on a clean machine.
-   - Clarify ownership: domains, hosting, databases, SaaS accounts, and where credentials live (name the vault, never the secret).
-   - Generate release notes, changelogs, and a demo package.
-
-## Privacy, Legal, and Compliance Limits
-
-- Identify personal data flows (analytics, logs, uploads, support data, third-party processors).
-- Review consent/cookie behavior, tracking, retention, and data minimization.
-- **Do not invent legal text, certifications, or privacy policies.** Flag gaps, draft placeholders, and recommend review by legal counsel.
-- Flag marketing claims such as "100% secure", "guaranteed", or "fully compliant" that need empirical evidence.
-
-## Conditions to Advance
-
-- Build, linter, and test suite pass with no exceptions.
-- No open secrets or critical security gaps.
-- Documentation and quickstarts match the real state of the software.
-- A browser smoke test (or manual reasoning) confirms every main route works, including deep links and back/forward navigation.
+   - Clarify ownership: domains, hosting, databases, SaaS accounts, and credential vaults (name the vault, never the secret).
+   - Generate release notes, changelogs, and demo package.
 
 ## Final Summary Output Format
 
-When executing a release or handoff sequence, provide a concise final summary:
+```text
+# 🚀 HELEN Release Verdict: [RC READY | RC WITH CAVEATS | NOT RC READY]
 
-1. **Verdict**: `RC READY`, `RC WITH CAVEATS`, or `NOT RC READY`.
-2. **Quality Verification Status**: Checks executed (build, lint, test, security).
-3. **Handoff Package & Links**: Where the release notes, changelog, and built assets are.
-4. **Access & IP Transfer Instructions**: Documented ownership transfers (domains, SaaS, credential vaults).
-5. **Remaining Blockers / Pending Items**: What must be resolved before the final sign-off.
+- **Version Bump**: [e.g. v2.1.0]
+- **Verification Gates**: Build (Pass), Types (Pass), Tests (Pass), Security (Pass), SEO (Pass)
+- **Handoff Package**: [Path to changelog and built assets]
+- **Ownership & Access**: [Documented transfers]
+```

@@ -1,27 +1,43 @@
 ---
 name: helen-backend
-description: Use when designing or reviewing data models, API contracts, JSON responses, error formats, or schema definitions; eliminating impossible or contradictory states in models (e.g. status vs boolean flags, invalid dates); evaluating breaking changes (field renames, deprecations, public API versioning, client compatibility); and ensuring idempotency and data migration safety.
+description: Master skill for designing and reviewing data models, API contracts, JSON responses, error formats, or schema definitions; eliminating impossible states, evaluating breaking changes, ensuring idempotency, and enforcing data migration safety in an autonomous convergence loop.
+version: 2.1.0
 ---
 
+# Data, Schema and API Contracts (Backend Master Skill)
 
-## From helen-data-api
+Robust backends eliminate contradictory domain states, enforce runtime validation at boundaries, and guarantee idempotent mutations. `helen-backend` audits and refactors backend architecture with mathematical rigor.
 
-# Data and API Contracts
+## Operating Principles
 
-## Contract review
+### 1. Interactive Scoping Questionnaire
+Before mutating API endpoints or data models, clarify trade-offs via a structured questionnaire:
+- **Breaking Changes**: Zero tolerance (strict backwards compatibility with deprecation headers) vs. version bump permitted?
+- **Migration & Persistence**: Are migrations transactional with rollback scripts, or stateless prototyping?
+- **Clean Code vs. Fast Patch**: Refactor underlying service architecture or apply a surgical schema patch?
 
-1. Identify public and internal APIs, CLI contracts, config schemas, file formats, webhooks, SDK surfaces, plugin interfaces, and third-party integrations.
-2. Check request/response shape, validation, errors, versioning, compatibility, retries, idempotency, rate limits, timeouts, and authentication.
-3. Review docs, examples, fixtures, tests, mocks, and assumptions.
-4. Identify breaking-change risk and undocumented behavior.
-5. Integrations must fail safely and be diagnosable.
+### 2. Autonomous Convergence Loop
+Once contract boundaries are defined:
+**Schema Audit → Type & Runtime Validation (Zod/Valibot) → Idempotency Verification → Regression Testing → Repeat**
+Iterate autonomously until all endpoints and database models pass contract tests with zero defects.
 
-## Data model
+### 3. Specialized Subagents
+- **Contract & Schema Subagent**: Inspects serialization, nullability, enum exhaustiveness, and OpenAPI spec parity.
+- **Migration & Concurrency Subagent**: Analyzes race conditions, N+1 query patterns, and double-submit transaction safety.
 
-Check domain integrity, constraints, ownership of each field, migration path, and import/export lock-in. For editable content, review the editorial workflow.
+### 4. Extreme Token Economy
+Communicate purely through TypeScript interfaces, Zod schemas, HTTP status matrices, and reproducible curl/fetch snippets. Zero fluff.
 
-## Limits
+## Contract Review Checklist
 
-Do not change public contracts without justification and a migration path (versioning, deprecation window, communication to consumers). Confirm with the contract owner and known consumers before any breaking change, and ask before destructive migrations.
+1. Identify public and internal APIs, CLI contracts, config schemas, webhooks, and third-party integrations.
+2. Check request/response shape, runtime schema validation, standard error envelopes, versioning, retries, idempotency keys, rate limits, and timeouts.
+3. Review docs, fixtures, tests, mocks, and invariants.
+4. Eliminate impossible domain states (e.g. mutually contradictory booleans replaced with discriminated unions).
+5. Ensure external integrations fail gracefully with diagnostic error context.
 
-Prompts: `audit-data-and-api-contracts`, `audit-content-model-and-editorial-workflow`.
+## Data Model & Migrations
+
+- Check domain integrity, unique constraints, field ownership, and foreign key cascades.
+- Destructive schema drops require safe two-phase migrations (expand, migrate, contract).
+- For editable content, review the editorial workflow and persistence strategy.

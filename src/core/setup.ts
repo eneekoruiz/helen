@@ -29,7 +29,10 @@ export function helenBlock(): string {
     '',
     'This project uses HELEN (prompts, skills and a tools catalog).',
     '',
-    '- **Level 100 Mandate & Full Technical Authority**: The user prompt is the Level 0 floor; your mission is Level 100 excellence. You have absolute technical authority and broad mandate to proactively hunt, surface, and fix adjacent bugs, missing validations, edge cases, and design slop while implementing.',
+    '- **Level 100 Mandate & Autonomous Convergence Loop**: The user prompt is the Level 0 floor; your mission is Level 100 excellence. You have absolute technical authority and broad mandate ("manga ancha") to proactively hunt, surface, and fix adjacent bugs, missing validations, edge cases, and design slop. Once scope is locked, execute an autonomous loop (Audit → Fix → Test → Re-audit) without intermediate interruptions or asking for permission until achieving 100/100 (zero defects).',
+    '- **Interactive Scoping Questionnaires**: Before launching broad audits, refactors, or improvements, present a targeted interactive questionnaire to clarify critical trade-offs (e.g., asking whether Clean Code & architectural refactoring should be included, or strictly isolated to functional/security/aesthetic fixes without altering working structures).',
+    '- **Specialized Subagents**: Decompose multi-faceted tasks into specialized subagents (researchers, auditors, testers, domain specialists) to execute in parallel, isolate context, and deliver superior craft.',
+    '- **Token Economy**: Strictly conserve tokens. Deliver high-density, zero-fluff responses with concise diffs and actionable tables, omitting conversational filler.',
     '- When asked to "use HELEN", or where the project stands, or what to do next: use the `helen-apply` skill, or run `helen apply`.',
     '- To work an area ("apply all the design improvements", "prepare the release"): `helen apply <goal>` prints the steps; `helen apply <goal> --track` follows them one by one with `helen next`, `helen done`, `helen check`.',
     '- Prompts: `helen prompts list`, `helen prompts show <id>`. Skills live in `.claude/skills` and `.agents/skills`. Guide: `helen guide`.',
@@ -62,7 +65,7 @@ export function installAntigravityRules(cwd: string, dryRun = false): string[] {
     },
     {
       file: 'quality.md',
-      content: `# HELEN Quality & Clean Code Rules\n- Level 0 is the floor, Level 100 is the standard: the agent has absolute technical freedom and broad mandate to proactively fix adjacent bugs, improve resilience, and elevate craft across the codebase.\n- Maintain modular architecture and strict TypeScript types without any-casts.\n- Keep test suites green before completing checkpoints.\n- Never bypass git hooks (--no-verify is prohibited).\n`,
+      content: `# HELEN Quality & Autonomous Execution Rules\n- Level 0 is the floor, Level 100 is the standard: the agent operates with absolute technical freedom and broad mandate ("manga ancha") to fix adjacent bugs and elevate craft.\n- Autonomous Convergence Loop: Once scope is agreed upon, iterate autonomously (Audit → Fix → Test → Re-audit) until 100/100 perfection with zero interruptions.\n- Interactive Scoping: Use questionnaires before initiating broad tasks to clarify whether clean code refactors are requested or excluded.\n- Specialized Subagents: Delegate heavy domain tasks and research to dedicated subagents.\n- Token Efficiency: Output dense, high-signal diffs and tables with zero conversational filler.\n- Maintain strict TypeScript types without any-casts; never bypass git hooks (--no-verify is prohibited).\n`,
     },
     {
       file: 'design.md',

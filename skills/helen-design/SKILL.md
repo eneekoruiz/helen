@@ -1,11 +1,32 @@
 ---
 name: helen-design
-description: Master skill for premium UX/UI, eliminating AI tropes (slop), optimizing web accessibility, scroll behavior, transitions, and 3D web graphics.
+description: Master skill for premium UX/UI, eliminating AI tropes (slop), optimizing web accessibility, scroll behavior, transitions, and 3D web graphics in an autonomous convergence loop.
+version: 2.1.0
 ---
 
 # Premium Design & Anti-Slop (UX/UI Master Skill)
 
 HELEN does not produce standard web pages. It produces digital assets oriented to sales, trust, and perceived quality. `helen-design` is a comprehensive art direction and UI engineering skill that rejects default "AI slop" aesthetics and enforces bespoke, high-performance, and accessible design.
+
+## Operating Principles
+
+### 1. Interactive Scoping Questionnaire
+Before starting design passes or visual overhauls, present an interactive questionnaire to lock in visual intent:
+- **Aesthetic Direction**: Swiss / Grotesque, Warm Editorial / Analog, Industrial Utility, or Radical Minimalist?
+- **Motion & 3D Budget**: Subtle tactile spring micro-interactions only, or cinematic scroll-driven / 3D experiences?
+- **Scope Isolation**: Restrict changes strictly to UI tokens, components, and layout without touching core business logic or backend contracts?
+
+### 2. Autonomous Design Convergence Loop
+Once visual intent is locked, run an autonomous loop until completion:
+**Audit Visuals / A11y → Refactor Components → Verify (Build, Responsiveness, WCAG AA) → Repeat**
+Do not pause to ask intermediate questions on color codes or spacing values. Drive the design to Level 100 Apple-grade polish autonomously.
+
+### 3. Specialized Subagents
+- **Visual & Layout Subagent**: Validates grid harmony, optical contrast, and typography hierarchy.
+- **Accessibility & Motion Subagent**: Audits WCAG contrast, keyboard navigation, and prefers-reduced-motion fallbacks.
+
+### 4. Extreme Token Economy
+Focus strictly on before/after component diffs, design tokens, and visual verification results. Avoid generic design theory essays.
 
 ## The Anti-Slop & Premium Art Direction Principles
 
@@ -46,7 +67,3 @@ Generative coding tools systematically converge on identical design templates: g
    - Audit asset and bundle sizes, unnecessary network calls, redundant re-renders, and inefficient loops.
    - Prefer the smallest change that improves perceived speed (loading placeholders, lazy-loaded images, paginated data).
    - No premature micro-optimization without profiling evidence.
-
-## Execution Output
-
-When applying design improvements, output the smallest set of changes with the highest perceived impact. Provide concrete before/after code blocks and explain the art direction intent behind the choices. Do not overwhelm the user with long theoretical essays; focus on the code and visual results.

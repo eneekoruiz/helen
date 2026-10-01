@@ -6,22 +6,27 @@ version: 2.1.0
 
 # HELEN Apply
 
-One entry point for everything in HELEN. The user does not need to know which prompt or skill exists: you pick them.
+One entry point for everything in HELEN. The user does not need to know which prompt or skill exists: you pick them, clarify scope, delegate to specialized subagents, and execute in an autonomous convergence loop.
 
 ## Procedure
 
-1. **Detect the phase.** If the `helen` CLI is available, run `helen apply` (no goal). Otherwise inspect the repository (package.json, source, tests, CI, CHANGELOG, deploy config, docs) and estimate the phase from `helen-router`. State the evidence and say it is an estimate.
-2. **Choose the goal.**
-   - The user named an area: map it to a goal below (or run `helen apply "<their words>"`).
-   - The user only said "use HELEN" or "what should I do": propose the goals suggested for the detected phase and ask which to run. Do not run all of them unasked.
-3. **Load the playbook.** `helen apply <goal> --track` starts a tracked run: then `helen next` shows the current step with the prompt text or commands, `helen done "<what you did>"` advances, `helen skip "<reason>"` skips, `helen status` shows progress, `helen check` runs the project's typecheck, lint, test and build (a checkpoint step cannot be marked done until it passes). Without tracking, `helen apply <goal>` prints the steps and `--brief` prints a brief. Without the CLI, read `docs/prompts/playbooks.json`. If neither is available, present the plan in the default order: evidence of the current state → direction or design system → structure and layout → detailed polish → responsive and accessibility → verification (build, tests, visual check) → report.
-4. **Execute the steps in order.** By step kind:
-   - `prompt` or `flow`: read it (`helen prompts show <ref>`) and follow it.
-   - `checkpoint`: run it; if it fails, stop and report. Never advance past a failed checkpoint.
-   - `skill`: use the bundled skill. If missing, install it: `helen skills install <name> --target claude codex` (or `--target custom --dir <path>`).
-   - `external` (skills, plugins, CLIs and MCP servers): never install or connect on your own. Show `helen skills external <id>` output, remind the user to review it (`audit-third-party-tools-and-mcp`), and continue only with approval. Use at most ONE main design skill (taste-skill, impeccable or ui-ux-pro-max overlap). Large harnesses such as ECC overlap with HELEN itself: recommend a minimal or selective install (single skills, no hooks), never the whole bundle on top.
-5. **Verify** before reporting: build and tests, plus a visual check (screenshots or visual regression) for design and motion work.
-6. **Report**: steps done, skipped (and why), changes, risks, manual actions.
+1. **Detect the phase & clarify scope with an Interactive Questionnaire:**
+   - Detect phase via `helen apply` or codebase heuristics.
+   - Present targeted questions / questionnaire to lock in critical scope parameters:
+     * *Which goals/areas to prioritize?* (e.g. design, security, performance, release).
+     * *Clean Code & Refactor Scope:* Do you want broad architectural cleanup, or should we strictly isolate fixes to functional, security, and aesthetic changes?
+     * *Subagent Mode:* Delegate domain tasks to specialized subagents for parallel execution?
+2. **Choose the goal & lock the plan:**
+   - Map user responses to a playbook goal.
+3. **Execute in an Autonomous Convergence Loop:**
+   - Once scope is confirmed, shift into autonomous execution mode.
+   - Do NOT stop between steps to ask for permission.
+   - For complex tasks, spawn **Specialized Subagents** (e.g. Research, Audit, Design, Testing).
+   - Execute: Step → Verify → Test → Fix → Advance until all checkpoints and gates pass.
+4. **Token Economy:**
+   - Omit conversational filler. Deliver dense, high-signal briefs, diffs, and verification metrics.
+5. **Final 10/10 Report:**
+   - Report executed steps, subagent outputs, test/build status, and remaining zero-defect verdict.
 
 ## Goals
 
@@ -47,7 +52,7 @@ One entry point for everything in HELEN. The user does not need to know which pr
 
 ## Rules
 
-- **Level 100 Mandate**: Treat user requests as the Level 0 baseline. Exercise full technical mastery and broad scope ("manga ancha") to uncover and fix adjacent bugs, missing validations, and design defects during implementation.
-- Prompts guide one task; skills give standing know-how; catalog tools are third-party and optional.
-- Confirm before destructive or high-risk changes. Never invent content, metrics, testimonials, or claims.
-- Prefer minimal changes and verify with build, lint, and tests when they exist.
+- **Level 100 Mandate & Autonomous Convergence**: User requests are the Level 0 baseline. Exercise full technical mastery and broad scope ("manga ancha") to resolve adjacent issues autonomously until 100/100 quality is achieved.
+- **Interactive Scoping First**: Clarify trade-offs up front, then execute without interruptions.
+- **Subagents & Token Economy**: Leverage specialized subagents; communicate with maximum density and minimum tokens.
+- Confirm before destructive or irreversible changes (e.g. database wipe). Never invent synthetic metrics, logos, or claims.

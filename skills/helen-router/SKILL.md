@@ -1,12 +1,29 @@
 ---
 name: helen-router
-description: Use when the user asks what phase a project is in, what to do next, or which HELEN prompt or flow to run - detects the current project phase (start, building, finish features, before production, final audit, release, client handoff, maintenance, future knowledge), checks the transition checklist, and recommends the next step.
+description: Use when the user asks what phase a project is in, what to do next, or which HELEN prompt or flow to run - detects the current project phase, checks the transition checklist, presents an interactive scoping questionnaire, and recommends the next step.
 version: 2.1.0
 ---
 
 # HELEN Phase Router
 
-Act as a development operating system: show the current state, recommend the next phase, and point to the right prompt or flow.
+Act as a development operating system: show current state, clarify user scope via interactive questionnaire, recommend the next phase, and point to the right prompt, skill, or specialized subagent.
+
+## Operating Principles
+
+### 1. Interactive Phase & Scope Questionnaire
+After detecting phase signals, present a concise interactive questionnaire to lock in direction:
+- **Phase Confirmation**: "Detected Phase [X] based on evidence [Y]. Confirm or override?"
+- **Immediate Goal Scope**: "Are you aiming for a quick targeted fix (e.g. security patch, single UI component), or a full autonomous phase progression loop?"
+- **Refactoring Intent**: "Include Clean Code refactors in this transition or protect existing structure?"
+
+### 2. Autonomous Convergence Loop Handoff
+Once the user confirms the phase and scope, hand off directly to `helen-apply` or `helen-implementa` to run the matching playbook in an unbroken autonomous convergence loop until completion.
+
+### 3. Specialized Subagent Recommendation
+Recommend delegating the phase's exit checklist to specialized subagents (e.g. QA subagent for Phase 04, Security subagent for Phase 05, SEO/Release subagent for Phase 06).
+
+### 4. Extreme Token Economy
+Keep diagnosis to at most 10-12 high-density lines: phase, evidence, top 2-3 gaps, and the exact next command. Zero conversational filler.
 
 ## Phases
 
@@ -38,21 +55,6 @@ Pick the latest phase whose entry evidence is present and whose exit checklist i
 
 ## Procedure
 
-1. Gather evidence: inspect the repository (structure, recent commits, scripts in `package.json`, CI, docs). If the user described the project or the repository is not available, use their description as the evidence and say so. If there is no evidence at all, ask for it or list what you would inspect; never invent project details.
-2. Estimate the current phase and list critical friction on the happy path.
-3. Read that phase's README (`docs/prompts/<phase>/README.md`, section "Exit checklist") and answer it briefly.
-4. Recommend the next phase and the exact prompt/flow: `helen prompts list`, `helen prompts show <id>`, `helen prompts flow <flow>`.
-
-## Output (short)
-
-At most ~12 lines: detected phase with the evidence behind it, the 2-3 gaps that matter, and the command or prompt to run next. No long reports.
-
-## Next step
-
-Once the phase is known, use `helen-apply` to run a goal's playbook (`helen apply <goal>`).
-
-## Rules
-
-- Do not advance a release or hardening flow if a blocking checkpoint fails.
-- Confirm with the user before high-risk or destructive refactors.
-- If the HELEN prompts are not installed locally, say so and use the CLI (`helen prompts ...`, installed from the HELEN repository) or a version-pinned URL rather than an unpinned one.
+1. Gather evidence from repository structure, git log, `package.json`, CI, and docs.
+2. Present interactive questionnaire to validate phase and confirm scope.
+3. Recommend exact next prompt or playbook: `helen apply <goal>` or `helen prompts show <ref>`.

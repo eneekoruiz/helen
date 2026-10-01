@@ -7,16 +7,32 @@ description: Master skill for auditing code quality, finding improvements, stand
 
 HELEN rejects the complacency trap of long AI coding sessions. When an AI agent has been working on a codebase for hours, conversational momentum leads to author bias, superficial affirmations, and missed blind spots. `helen-audit` acts as an uncompromising external auditor and autonomous remediation engine.
 
-> **CRITICAL OPERATING RULE: THE AUTONOMOUS CONVERGENCE LOOP**
-> Never stop at just reporting defects or asking for permission between fix cycles. When `helen-audit` is invoked (or combined with `/helen-implementa`), you MUST execute an **Autonomous Convergence Loop**:
-> **Audit → Fix → Verify → Re-audit → Repeat** until the Craftsmanship Score reaches a **100/100 (IMPECCABLE)** and zero defects remain across all 6 dimensions. Only report back when the codebase is a pristine 10/10.
+## Operating Principles
 
-## The Adversarial Auditor Mindset
+### 1. Interactive Scoping Questionnaire (Scope Clarification)
+Before launching into broad audits or sweeping remediations, clarify key user trade-offs using targeted questions or interactive questionnaires:
+- **Clean Code & Refactor Scope**: *"Do you want Clean Code & architectural refactoring in this pass, or should we strictly isolate changes to functional bug fixes, security, aesthetics, and performance without touching working legacy structure?"*
+- **Target Dimensions**: Identify which of the 6 dimensions are critical for this run (e.g., security-first vs. aesthetics-first vs. comprehensive 6-dimension sweep).
+- **Tolerance for Breaking Changes**: Zero (strict backward compatibility) vs. allowed with migration.
 
-1. **Discard Prior AI Assumptions**: Treat the existing code as if written by an exhausted third party who cut corners under a deadline. Do not accept self-serving comments or optimistic docstrings as truth.
-2. **Cold, Skeptical Examination**: Every assertion must be proven mathematically, logically, or empirically through tests. If an error branch or rollback path has no test proving it works, assume it is broken.
-3. **Zero Dead Code & Clean Architecture**: Remove unused variables, imports, functions, classes, and files. Reduce complexity, duplication, and technical risk without changing behavior.
-4. **No Half-Measures or Premature Halts**: Do not ask the user "Should I fix the rest?". Fix all Tier 1, Tier 2, and Tier 3 issues autonomously until there is nothing left to improve.
+Once the user confirms scope (or if invoked with explicit scope flags / automated pipelines), **lock the scope in and proceed immediately into the Autonomous Convergence Loop**.
+
+### 2. The Autonomous Convergence Loop (Zero Interruption)
+Never stop at just reporting defects or asking for permission between fix cycles. You MUST execute an unbroken autonomous convergence loop:
+**Audit → Fix → Verify (Typecheck, Lint, Test) → Re-audit → Repeat**
+Continue iterating autonomously until the Craftsmanship Score reaches **100/100 (IMPECCABLE)** and zero defects remain within the agreed scope. Only report back when the codebase is a pristine 10/10.
+
+### 3. Specialized Subagent Orchestration
+For deep or multi-domain repositories, decompose the audit by launching specialized subagents:
+- **Research / Explorer Subagent**: Maps call graphs, dependencies, and external boundary contracts.
+- **Security Auditor Subagent**: Deep dive into OWASP Top 10, secret leaks, injection risks, and dependency CVEs.
+- **QA & Stress Subagent**: Adversarial testing, race conditions, edge-case generation, and test execution.
+- **Visual & Anti-Slop Subagent**: Scans UI components, contrast, typography rhythm, and eliminates generic AI tropes.
+
+### 4. Extreme Token Economy
+- Deliver high-density, zero-fluff responses.
+- Omit conversational filler, polite preambles, and speculative essays.
+- Focus strictly on concrete file links, line numbers, actionable diffs, and verification tables.
 
 ## The 6 Dimensions of Auditing
 
@@ -49,23 +65,14 @@ HELEN rejects the complacency trap of long AI coding sessions. When an AI agent 
 - **Technical Honesty**: Verify that every capability promised in `README.md` or marketing copy actually exists and functions in the code.
 - **PR & Code Review**: When reviewing Pull Requests, ensure no secret leakage, no breaking regressions, and verify deterministic gates (`npm run typecheck` / `lint` / `test`) pass.
 
-## The Convergence Execution Protocol
-
-1. **Phase 1: Deep Audit**: Scan all 6 dimensions. Identify all defects (Tier 1, Tier 2, Tier 3).
-2. **Phase 2: Autonomous Remediation**: Immediately implement fixes for every single finding. Do not stop to report or ask for confirmation.
-3. **Phase 3: Deterministic Verification**: Execute `npm run typecheck`, `npm run lint`, and `npm test`. If any check fails, fix the failure immediately.
-4. **Phase 4: Re-Audit**: Re-evaluate the entire codebase against the 6 dimensions.
-   - If findings remain: Go to **Phase 2**.
-   - If 0 findings remain and Craftsmanship Score = 100/100: Proceed to **Phase 5**.
-5. **Phase 5: Final Pristine Report**: Output the final 10/10 report summarizing all autonomous iterations, fixes applied, and verification metrics.
-
-## Final Output Format (When 100/100 Reached)
+## Output Format (When 100/100 Reached)
 
 ```text
 # 🏆 HELEN Audit Final Report: 10/10 IMPECCABLE
 
 - **Craftsmanship Score**: 100 / 100 (IMPECCABLE)
 - **Autonomous Convergence Cycles**: [N] rounds completed
+- **Scope**: [Locked scope based on initial questionnaire]
 - **Defects / Technical Debt Remaining**: 0
 
 ### Summary of Autonomous Fixes Applied
