@@ -2,6 +2,7 @@ import readline from 'node:readline';
 import { readProgress, formatStatus, formatNext, markDone, currentIndex, startProgress } from './progress.js';
 import { buildPlan, readPlaybooks, detectPhase } from './apply.js';
 import { runDoctor } from './doctor.js';
+import type { DoctorFixReport } from './doctorFix.js';
 import { listPromptEntries, readPrompt, searchPrompts } from './prompts.js';
 import { listSkills } from './skills.js';
 import { runInitProject } from './initProject.js';
@@ -272,7 +273,7 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
         const results = runDoctor(cwd);
         const issues = results.filter(r => r.status !== 'ok');
 
-        let autoFixReport: any = null;
+        let autoFixReport: DoctorFixReport | null = null;
         if (args.fix) {
           const { repairDoctorIssues } = await import('./doctorFix.js');
           autoFixReport = repairDoctorIssues(cwd);
