@@ -1,0 +1,161 @@
+import { Command } from 'commander';
+import { isJsonMode, printJsonAndExit } from '../core/jsonOutput.js';
+import { readProgress, formatStatus, runChecks, currentIndex, formatNext, markDone, skipStep } from '../core/progress.js';
+import path from 'node:path';
+import fs from 'node:fs';
+import { logger } from '../core/logger.js';
+
+export function registerProgressCommands(program: Command) {
+  // helen next / done / skip / status / check
+  program
+    .command('next')
+    .description('Show the current step of the tracked plan, with the prompt or commands to use')
+    .option('--short', 'Do not print the prompt text', false)
+    .action((opts: { short: boolean }) => {
+      try {
+        const progress = readProgress(process.cwd());
+        if (!progress) {
+          if (isJsonMode()) {
+            printJsonAndExit('next', { progress: null }, {
+              ok: false,
+              errors: ['Nothing is being tracked. Start with: helen apply <goal> --track'],
+              exitCode: 1,
+            });
+            return;
+          }
+          throw new Error('Nothing is being tracked. Start with: helen apply <goal> --track');
+        }
+        const idx = currentIndex(progress);
+        const currentStep = idx !== -1 ? progress.steps[idx] : null;
+        if (isJsonMode()) {
+          printJsonAndExit('next', {
+            goal: progress.goal,
+            title: progress.title,
+            phase: progress.phase,
+            currentIndex: idx,
+            totalSteps: progress.steps.length,
+            step: currentStep,
+            progress,
+          });
+          return;
+        }
+        console.log(formatNext(progress, !opts.short));
+      } catch (err) {
+        if (isJsonMode()) {
+          printJsonAndExit('next', {}, {
+            ok: false,
+            errors: [err instanceof Error ? err.message : String(err)],
+            exitCode: 1,
+          });
+          return;
+        }
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  program
+    .command('done [note...]')
+    .description('Mark the current step as done (checkpoints need a passing helen check)')
+    .option('--force', 'Allow a checkpoint without a passing check (say why in the note)', false)
+    .action((note: string[], opts: { force: boolean }) => {
+      try {
+        const progress = markDone(process.cwd(), note.join(' ') || undefined, opts.force);
+        if (isJsonMode()) {
+          printJsonAndExit('done', {
+            progress,
+            completedStepIndex: currentIndex(progress) === -1 ? progress.steps.length - 1 : currentIndex(progress) - 1,
+          });
+          return;
+        }
+        console.log(formatStatus(progress));
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        const isCheckpoint = msg.toLowerCase().includes('checkpoint');
+        if (isJsonMode()) {
+          printJsonAndExit('done', {}, {
+            ok: false,
+            errors: [msg],
+            exitCode: isCheckpoint ? 3 : 1,
+          });
+          return;
+        }
+        logger.error(msg);
+        process.exitCode = isCheckpoint ? 3 : 1;
+      }
+    });
+
+  program
+    .command('skip <reason...>')
+    .description('Skip the current step, recording why')
+    .action((reason: string[]) => {
+      try {
+        const progress = skipStep(process.cwd(), reason.join(' '));
+        if (isJsonMode()) {
+          printJsonAndExit('skip', { progress });
+          return;
+        }
+        console.log(formatStatus(progress));
+      } catch (err) {
+        if (isJsonMode()) {
+          printJsonAndExit('skip', {}, {
+            ok: false,
+            errors: [err instanceof Error ? err.message : String(err)],
+            exitCode: 1,
+          });
+          return;
+        }
+        logger.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
+
+  program
+    .command('status')
+    .description('Show progress of the tracked plan')
+    .option('--html', 'Output dashboard in HTML format', false)
+    .action(async (opts: { html: boolean }) => {
+      const progress = readProgress(process.cwd());
+      if (opts.html) {
+        const { generateReportData, renderReportHtml } = await import('../core/report.js');
+        const data = generateReportData(process.cwd());
+        const html = renderReportHtml(data);
+        const reportPath = path.join(process.cwd(), '.helen', 'report.html');
+        fs.mkdirSync(path.dirname(reportPath), { recursive: true });
+        fs.writeFileSync(reportPath, html, 'utf-8');
+        logger.success(`HTML report generated at: ${reportPath}`);
+        return;
+      }
+      if (isJsonMode()) {
+        printJsonAndExit('status', {
+          tracking: progress !== null,
+          progress,
+        });
+        return;
+      }
+      console.log(progress ? formatStatus(progress) : 'Nothing is being tracked. Start with: helen apply <goal> --track');
+    });
+
+  program
+    .command('check')
+    .description("Run the project's own typecheck, lint, test and build scripts as a gate")
+    .action(() => {
+      const run = runChecks(process.cwd());
+      if (isJsonMode()) {
+        printJsonAndExit('check', {
+          ok: run.ok,
+          at: run.at,
+          results: run.results,
+        }, {
+          ok: run.ok,
+          exitCode: run.ok ? 0 : 3, // checkpoint failure code 3
+        });
+        return;
+      }
+      if (run.results.length === 0) {
+        logger.warn('No typecheck, lint, test or build scripts found in package.json.');
+      }
+      run.ok ? logger.success('Checks passed.') : logger.error('Checks failed.');
+      process.exitCode = run.ok ? 0 : 3;
+    });
+}

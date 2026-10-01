@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 import * as p from '@clack/prompts';
 import path from 'node:path';
-import fs from 'node:fs';
 import { logger } from './core/logger.js';
 import { detectProject } from './core/projectDetector.js';
 import { runDoctor, printDoctorResults } from './core/doctor.js';
@@ -12,9 +11,10 @@ import { generateModuleDocs } from './core/docs.js';
 import { printPromptContent, printPromptList, printPromptPath, searchPrompts, shortId, listPromptEntries, resolvePromptEntry, readPrompt, findPromptOverlaps, type PromptKind } from './core/prompts.js';
 import { updatePhaseIndexes } from './core/promptIndex.js';
 import { ejectModule } from './core/moduleRunner.js';
-import { buildPlan, detectPhase, formatBrief, formatPlan, readPlaybooks, suggestedGoals, installedSkillNames, validatePlaybooks } from './core/apply.js';
+import { detectPhase, readPlaybooks, suggestedGoals, installedSkillNames, validatePlaybooks } from './core/apply.js';
 import { getCatalogItem, listCatalog, validateCatalog, compareCatalogItems, checkCatalogHealth } from './core/catalog.js';
-import { currentIndex, formatNext, formatStatus, markDone, readProgress, runChecks, skipStep, startProgress } from './core/progress.js';
+import { registerProgressCommands } from './commands/progressCmd.js';
+import { registerApplyCommand } from './commands/applyCmd.js';
 import { runAgentDoctor, updateAgentSetup } from './core/agentDoctor.js';
 import { readGuide } from './core/guide.js';
 import { setupProject, uninstallProject, detectInstalledAgents, type SetupAgent } from './core/setup.js';
@@ -866,158 +866,7 @@ export function createProgram(): Command {
       }
     });
 
-  // helen next / done / skip / status / check
-  program
-    .command('next')
-    .description('Show the current step of the tracked plan, with the prompt or commands to use')
-    .option('--short', 'Do not print the prompt text', false)
-    .action((opts: { short: boolean }) => {
-      try {
-        const progress = readProgress(process.cwd());
-        if (!progress) {
-          if (isJsonMode()) {
-            printJsonAndExit('next', { progress: null }, {
-              ok: false,
-              errors: ['Nothing is being tracked. Start with: helen apply <goal> --track'],
-              exitCode: 1,
-            });
-            return;
-          }
-          throw new Error('Nothing is being tracked. Start with: helen apply <goal> --track');
-        }
-        const idx = currentIndex(progress);
-        const currentStep = idx !== -1 ? progress.steps[idx] : null;
-        if (isJsonMode()) {
-          printJsonAndExit('next', {
-            goal: progress.goal,
-            title: progress.title,
-            phase: progress.phase,
-            currentIndex: idx,
-            totalSteps: progress.steps.length,
-            step: currentStep,
-            progress,
-          });
-          return;
-        }
-        console.log(formatNext(progress, !opts.short));
-      } catch (err) {
-        if (isJsonMode()) {
-          printJsonAndExit('next', {}, {
-            ok: false,
-            errors: [err instanceof Error ? err.message : String(err)],
-            exitCode: 1,
-          });
-          return;
-        }
-        logger.error(err instanceof Error ? err.message : String(err));
-        process.exitCode = 1;
-      }
-    });
-
-  program
-    .command('done [note...]')
-    .description('Mark the current step as done (checkpoints need a passing helen check)')
-    .option('--force', 'Allow a checkpoint without a passing check (say why in the note)', false)
-    .action((note: string[], opts: { force: boolean }) => {
-      try {
-        const progress = markDone(process.cwd(), note.join(' ') || undefined, opts.force);
-        if (isJsonMode()) {
-          printJsonAndExit('done', {
-            progress,
-            completedStepIndex: currentIndex(progress) === -1 ? progress.steps.length - 1 : currentIndex(progress) - 1,
-          });
-          return;
-        }
-        console.log(formatStatus(progress));
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        const isCheckpoint = msg.toLowerCase().includes('checkpoint');
-        if (isJsonMode()) {
-          printJsonAndExit('done', {}, {
-            ok: false,
-            errors: [msg],
-            exitCode: isCheckpoint ? 3 : 1,
-          });
-          return;
-        }
-        logger.error(msg);
-        process.exitCode = isCheckpoint ? 3 : 1;
-      }
-    });
-
-  program
-    .command('skip <reason...>')
-    .description('Skip the current step, recording why')
-    .action((reason: string[]) => {
-      try {
-        const progress = skipStep(process.cwd(), reason.join(' '));
-        if (isJsonMode()) {
-          printJsonAndExit('skip', { progress });
-          return;
-        }
-        console.log(formatStatus(progress));
-      } catch (err) {
-        if (isJsonMode()) {
-          printJsonAndExit('skip', {}, {
-            ok: false,
-            errors: [err instanceof Error ? err.message : String(err)],
-            exitCode: 1,
-          });
-          return;
-        }
-        logger.error(err instanceof Error ? err.message : String(err));
-        process.exitCode = 1;
-      }
-    });
-
-  program
-    .command('status')
-    .description('Show progress of the tracked plan')
-    .option('--html', 'Output dashboard in HTML format', false)
-    .action(async (opts: { html: boolean }) => {
-      const progress = readProgress(process.cwd());
-      if (opts.html) {
-        const { generateReportData, renderReportHtml } = await import('./core/report.js');
-        const data = generateReportData(process.cwd());
-        const html = renderReportHtml(data);
-        const reportPath = path.join(process.cwd(), '.helen', 'report.html');
-        fs.mkdirSync(path.dirname(reportPath), { recursive: true });
-        fs.writeFileSync(reportPath, html, 'utf-8');
-        logger.success(`HTML report generated at: ${reportPath}`);
-        return;
-      }
-      if (isJsonMode()) {
-        printJsonAndExit('status', {
-          tracking: progress !== null,
-          progress,
-        });
-        return;
-      }
-      console.log(progress ? formatStatus(progress) : 'Nothing is being tracked. Start with: helen apply <goal> --track');
-    });
-
-  program
-    .command('check')
-    .description("Run the project's own typecheck, lint, test and build scripts as a gate")
-    .action(() => {
-      const run = runChecks(process.cwd());
-      if (isJsonMode()) {
-        printJsonAndExit('check', {
-          ok: run.ok,
-          at: run.at,
-          results: run.results,
-        }, {
-          ok: run.ok,
-          exitCode: run.ok ? 0 : 3, // checkpoint failure code 3
-        });
-        return;
-      }
-      if (run.results.length === 0) {
-        logger.warn('No typecheck, lint, test or build scripts found in package.json.');
-      }
-      run.ok ? logger.success('Checks passed.') : logger.error('Checks failed.');
-      process.exitCode = run.ok ? 0 : 3;
-    });
+  registerProgressCommands(program);
 
   // helen setup
   program
@@ -1089,139 +938,7 @@ export function createProgram(): Command {
       console.log(guideText);
     });
 
-  // helen apply
-  program
-    .command('apply [goal...]')
-    .description('Analyze the project, detect its phase, and plan which HELEN prompts, skills and tools to use for a goal (e.g. "design", "release", "mejora el diseño")')
-    .option('--brief', 'Print a paste-ready brief for an AI agent instead of the plan', false)
-    .option('--track', 'Follow the plan step by step: then use helen next / done / skip / status / check', false)
-    .option('--auto', 'Run in semi-autonomous mode: verify checkpoints automatically and execute steps', false)
-    .option('--force', 'With --track: restart even if another plan is in progress', false)
-    .option('--install', 'Install the bundled skills the goal needs into --target', false)
-    .option('--target <targets...>', 'Where to install skills: claude, codex, custom', ['claude'])
-    .option('--dir <path>', 'Project-relative directory for the "custom" target')
-    .action(async (goalWords: string[], opts: { brief: boolean; track: boolean; auto: boolean; force: boolean; install: boolean; target: string[]; dir?: string }) => {
-      try {
-        const playbooks = readPlaybooks();
-        const cwd = process.cwd();
-        if (goalWords.length === 0) {
-          const detection = detectPhase(cwd);
-          const suggested = suggestedGoals(detection.phase, playbooks);
-          if (isJsonMode()) {
-            printJsonAndExit('apply', {
-              detection,
-              suggestedGoals: suggested,
-              goals: Object.entries(playbooks.goals).map(([id, g]) => ({ id, title: g.title, description: g.description, keywords: g.keywords })),
-            });
-            return;
-          }
-          console.log(`Detected phase: ${detection.phase} (confidence ${detection.confidence}; estimate, please confirm)`);
-          console.log(`Evidence: ${detection.evidence.join('; ')}`);
-          console.log(`Suggested goals for this phase: ${suggested.join(', ')}`);
-          console.log('\nAll goals:');
-          for (const [id, goal] of Object.entries(playbooks.goals)) console.log(`  ${id.padEnd(13)} ${goal.title}`);
-          console.log('\nRun: helen apply <goal>   (add --brief for an AI-ready brief, --install to install the needed skills)');
-          return;
-        }
-
-        const plan = buildPlan(cwd, goalWords.join(' '), playbooks);
-
-        if (opts.auto) {
-          const { startProgress: startProg, currentIndex: currIdx, markDone: doneStep, runChecks: checksRunner } = await import('./core/progress.js');
-          let prog = startProg(cwd, plan, true);
-          logger.section(`Autonomous Execution: ${plan.goal.title}`);
-          const autoLogs: string[] = [];
-
-          let idx = currIdx(prog);
-          while (idx !== -1) {
-            const currentStep = prog.steps[idx]!;
-
-            if (currentStep.kind === 'checkpoint') {
-              logger.info(`Checking gate: ${currentStep.ref}...`);
-              const checkRun = checksRunner(cwd);
-              if (!checkRun.ok) {
-                const failed = checkRun.results.filter(r => !r.ok).map(r => r.script).join(', ');
-                const errMsg = `Autonomous stop: checkpoint verification failed on scripts [${failed}].`;
-                if (isJsonMode()) {
-                  printJsonAndExit('apply', { plan, progress: prog, failedCheckpoint: currentStep }, {
-                    ok: false,
-                    errors: [errMsg],
-                    exitCode: 3,
-                  });
-                  return;
-                }
-                logger.error(errMsg);
-                process.exitCode = 3;
-                return;
-              }
-              prog = doneStep(cwd, 'Auto-verified quality gate');
-              autoLogs.push(`Verified checkpoint: ${currentStep.ref}`);
-              logger.success(`Passed checkpoint: ${currentStep.ref}`);
-            } else {
-              prog = doneStep(cwd, `Auto-staged step (${currentStep.kind}: ${currentStep.ref})`);
-              autoLogs.push(`Staged: ${currentStep.kind} ${currentStep.ref}`);
-              logger.success(`Staged: ${currentStep.kind} ${currentStep.ref}`);
-            }
-            idx = currIdx(prog);
-          }
-
-          if (isJsonMode()) {
-            printJsonAndExit('apply', {
-              plan,
-              progress: prog,
-              autoLogs,
-              completed: true,
-            });
-            return;
-          }
-          logger.success(`Autonomous execution of goal "${plan.goalId}" completed successfully!`);
-          return;
-        }
-
-        let progress = null;
-        if (opts.track) {
-          progress = startProgress(cwd, plan, opts.force);
-        }
-
-        let installedSkillsResult = null;
-        if (opts.install && plan.missingSkills.length > 0) {
-          installedSkillsResult = installSkills({
-            cwd,
-            targets: opts.target as SkillTarget[],
-            customDir: opts.dir,
-            skills: plan.missingSkills,
-          });
-        }
-
-        if (isJsonMode()) {
-          printJsonAndExit('apply', {
-            plan,
-            tracking: progress,
-            installedSkills: installedSkillsResult,
-          });
-          return;
-        }
-
-        console.log(opts.brief ? formatBrief(plan) : formatPlan(plan));
-        if (opts.track) {
-          console.log('\nTracking started (.helen/progress.json; add .helen/ to .gitignore if you do not want it in git). Next: helen next');
-        }
-        if (installedSkillsResult) {
-          logger.success(`Skills: ${installedSkillsResult.created.length} created, ${installedSkillsResult.skipped.length} skipped.`);
-        }
-      } catch (err) {
-        if (isJsonMode()) {
-          printJsonAndExit('apply', {}, {
-            ok: false,
-            errors: [err instanceof Error ? err.message : String(err)],
-            exitCode: 1,
-          });
-          return;
-        }
-        logger.error(err instanceof Error ? err.message : String(err));
-        process.exitCode = 1;
-      }
-    });
+  registerApplyCommand(program);
 
   // helen skills
   const skills = program
