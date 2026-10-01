@@ -35,7 +35,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
     "clean": "node -e \"const fs=require('fs');fs.rmSync('dist',{recursive:true,force:true});\"",
-    "evals": "node scripts/run-skill-evals.mjs",
+    "evals": "node scripts/run-skill-evals.mjs --concurrency 8",
     "prepare": "git config core.hooksPath .githooks || true"
   },
   "keywords": [

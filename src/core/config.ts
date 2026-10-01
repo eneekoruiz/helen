@@ -83,15 +83,15 @@ export function isModuleInstalled(cwd: string, moduleId: string): boolean {
   return config?.installedModules.includes(moduleId) ?? false;
 }
 
-export function getConfigValue(cwd: string, key: string): any {
+export function getConfigValue(cwd: string, key: string): unknown {
   const config = readConfig(cwd);
   if (!config) return undefined;
-  if (key in config) return (config as any)[key];
+  if (key in config) return ((config as unknown) as Record<string, unknown>)[key];
   if (config.settings && key in config.settings) return config.settings[key];
   return undefined;
 }
 
-export function setConfigValue(cwd: string, key: string, value: any): void {
+export function setConfigValue(cwd: string, key: string, value: unknown): void {
   const rootKeys = ['projectName', 'framework', 'packageManager'];
   if (rootKeys.includes(key)) {
     updateConfig(cwd, { [key]: value });

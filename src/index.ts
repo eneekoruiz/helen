@@ -371,7 +371,7 @@ export function createProgram(): Command {
     .alias('g')
     .description('Generate project entities (component, hook, page, entity)')
     .option('--dry-run', 'Preview without writing', false)
-    .action(async (type: any, name: string, opts: { dryRun: boolean }) => {
+    .action(async (type: "component" | "hook" | "page" | "entity", name: string, opts: { dryRun: boolean }) => {
       const cwd = process.cwd();
       await generateEntity({
         type,

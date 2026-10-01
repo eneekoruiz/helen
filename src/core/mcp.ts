@@ -225,10 +225,10 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
               },
             ],
           };
-        } catch (err: any) {
+        } catch (err: unknown) {
           return {
             isError: true,
-            content: [{ type: 'text', text: `Failed to mark done: ${err.message}` }],
+            content: [{ type: 'text', text: `Failed to mark done: ${(err as Error).message}` }],
           };
         }
       }
@@ -394,10 +394,10 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
           content: [{ type: 'text', text: `Unknown tool: "${name}"` }],
         };
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     return {
       isError: true,
-      content: [{ type: 'text', text: `Error executing ${name}: ${err?.message || String(err)}` }],
+      content: [{ type: 'text', text: `Error executing ${name}: ${(err as Error)?.message || String(err)}` }],
     };
   }
 }
@@ -419,7 +419,7 @@ export function startMcpServer(input: NodeJS.ReadableStream = process.stdin, out
     const trimmed = line.trim();
     if (!trimmed) return;
 
-    let msg: any;
+    let msg: unknown;
     try {
       msg = JSON.parse(trimmed);
     } catch {
@@ -431,7 +431,7 @@ export function startMcpServer(input: NodeJS.ReadableStream = process.stdin, out
       return;
     }
 
-    const { id, method, params } = msg;
+    const { id, method, params } = msg as Record<string, unknown>;
 
     // Notifications (no id)
     if (id === undefined || id === null) {
@@ -482,8 +482,8 @@ export function startMcpServer(input: NodeJS.ReadableStream = process.stdin, out
       }
 
       case 'tools/call': {
-        const { name, arguments: toolArgs } = params || {};
-        const callResult = await handleToolCall(name, toolArgs || {});
+        const { name, arguments: toolArgs } = (params as Record<string, any>) || {};
+        const callResult = await handleToolCall(name as string, toolArgs || {});
         sendResponse({
           jsonrpc: '2.0',
           id,

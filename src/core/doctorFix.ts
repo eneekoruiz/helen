@@ -52,8 +52,8 @@ export function repairDoctorIssues(cwd: string = process.cwd(), opts: { dryRun?:
         writeFileSafe(preCommitPath, hookContent, { dryRun: opts.dryRun });
         report.fixed.push('Installed .githooks/pre-commit');
       }
-    } catch (err: any) {
-      report.errors.push(`Failed to configure git hooks: ${err?.message || String(err)}`);
+    } catch (err: unknown) {
+      report.errors.push(`Failed to configure git hooks: ${(err as Error)?.message || String(err)}`);
     }
   }
 
@@ -87,8 +87,8 @@ export function repairDoctorIssues(cwd: string = process.cwd(), opts: { dryRun?:
     if (agentUpdate.instructionFiles.length > 0) {
       report.fixed.push(`Synchronized instruction blocks in: ${agentUpdate.instructionFiles.join(', ')}`);
     }
-  } catch (err: any) {
-    report.errors.push(`Failed to update agent setup: ${err?.message || String(err)}`);
+  } catch (err: unknown) {
+    report.errors.push(`Failed to update agent setup: ${(err as Error)?.message || String(err)}`);
   }
 
   // 5. Initialize .helenrc if missing
