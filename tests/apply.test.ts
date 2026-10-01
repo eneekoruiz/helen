@@ -54,7 +54,7 @@ describe('helen apply', () => {
 
   it('reports bundled skills that are missing until installed', () => {
     const before = buildPlan(tmp, 'design');
-    expect(before.missingSkills).toContain('helen-premium-design');
+    expect(before.missingSkills).toContain('helen-design');
 
     installSkills({ cwd: tmp, targets: ['claude'], skills: before.missingSkills });
     const after = buildPlan(tmp, 'design');

@@ -21,7 +21,7 @@ describe('HELEN MCP Server & Tools', () => {
     const data = JSON.parse(res.content[0].text);
     expect(Array.isArray(data)).toBe(true);
     expect(data.some((s: any) => s.name === 'helen-apply')).toBe(true);
-    expect(data.some((s: any) => s.name === 'helen-clean-code')).toBe(true);
+    expect(data.some((s: any) => s.name === 'helen-audit')).toBe(true);
   });
 
   it('handles helen_prompt_get tool call by promptId', async () => {

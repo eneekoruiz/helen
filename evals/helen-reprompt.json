@@ -28,8 +28,7 @@
         "Does not mention HELEN Reprompt Engine",
         "Does not rewrite the prompt",
         "Directly answers the question"
-      ],
-      "shouldTrigger": false
+      ]
     }
   ]
 }

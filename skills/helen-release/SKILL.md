@@ -1,6 +1,6 @@
 ---
 name: helen-release
-description: Use for any release question, decision or task: checking if code is ready to release, ship, tag or deploy (e.g. 'Can we tag vX today?', 'Release is today', flaky tests before shipping, CI failures before release), writing changelogs and release notes from commit lists, reviewing release blockers, or deciding release candidate (RC) readiness with an RC READY / NOT RC READY verdict. Use when auditing or implementing technical SEO and launch readiness (title tags, meta descriptions, noindex blockers, heading hierarchy, Open Graph, sitemaps, robots.txt); evaluating privacy and GDPR compliance (cookie consent banners, analytics and Meta pixel tracking disclosures, privacy policies); or verifying internationalization (i18n), raw translation keys in UI, and locale formatting. Use when preparing to hand off or deliver a project to a client or new maintainer, assembling delivery packages, conducting pre-demo browser smoke tests (checking console errors, broken assets, forms, mobile viewports), planning repository or file transfers (warning against sending .env or node_modules in zip archives), verifying credentials management, and writing handoff documentation and sign-offs.
+description: Master skill for release engineering, SEO technical compliance, version bumps, changelogs, privacy policies, and preparing clean handoffs to clients.
 ---
 
 
