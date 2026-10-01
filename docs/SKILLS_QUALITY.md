@@ -13,24 +13,25 @@ Grades are evaluated against explicit case criteria by an LLM judge with multi-r
 
 | Skill | Cases | Runs | Trigger | False Pos | Baseline (95% CI) | With skill (95% CI) | Delta (95% CI) | Grade | Errors |
 |---|---|---|---|---|---|---|---|---|---|
-| helen-a11y-perf | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
-| helen-anti-slop | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-design | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-design | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
 | helen-apply | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
-| helen-clean-code | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
-| helen-client-handoff | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
-| helen-copy-cro | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
-| helen-data-api | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
-| helen-impeccable | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-audit | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-release | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-copy | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-backend | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-audit | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
 | helen-implementa | 5 | 3x | 0/9 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 69 |
-| helen-improve | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-audit | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
 | helen-knowledge | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
-| helen-motion-3d | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
-| helen-premium-design | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
-| helen-qa-scale | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-design | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-design | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-audit | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
 | helen-release | 6 | 3x | 1/12 | 0% (0/6) | 15% | 17% | +1.7% [-2.6%, 6%] | Noise* | 73 |
+| helen-reprompt | 3 | 3x | 0/9 | 0% | 0% | 0% | +0% [0%, 0%] | Noise* | 45 |
 | helen-router | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
 | helen-security | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
-| helen-seo-compliance | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
+| helen-release | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
 | helen-strategy | 6 | 3x | 0/12 | 0% (0/6) | 0% | 0% | +0% [0%, 0%] | Noise* | 84 |
 
 * \*Noise: The 95% confidence interval spans zero, meaning the delta cannot be reliably distinguished from sample variance under current evaluation conditions. No letter grade is assigned.

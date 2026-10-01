@@ -20,7 +20,7 @@ describe('Skills installer', () => {
   });
 
   it('lists the bundled skills with a SKILL.md', () => {
-    expect(listSkills().map(skill => skill.name)).toContain('helen-clean-code');
+    expect(listSkills().map(skill => skill.name)).toContain('helen-audit');
   });
 
   it('every bundled skill has name and description frontmatter matching its folder', () => {
@@ -41,17 +41,17 @@ describe('Skills installer', () => {
   it('installs into the claude and codex directories', () => {
     const result = installSkills({ cwd: tmp, targets: ['claude', 'codex'] });
 
-    expect(fs.existsSync(path.join(tmp, '.claude/skills/helen-clean-code/SKILL.md'))).toBe(true);
-    expect(fs.existsSync(path.join(tmp, '.agents/skills/helen-clean-code/SKILL.md'))).toBe(true);
-    expect(result.created).toContain(path.join('.claude/skills/helen-clean-code/SKILL.md'));
-    expect(result.created).toContain(path.join('.agents/skills/helen-clean-code/SKILL.md'));
+    expect(fs.existsSync(path.join(tmp, '.claude/skills/helen-audit/SKILL.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tmp, '.agents/skills/helen-audit/SKILL.md'))).toBe(true);
+    expect(result.created).toContain(path.join('.claude/skills/helen-audit/SKILL.md'));
+    expect(result.created).toContain(path.join('.agents/skills/helen-audit/SKILL.md'));
     expect(result.skipped).toHaveLength(0);
   });
 
   it('supports a generic custom directory', () => {
     installSkills({ cwd: tmp, targets: ['custom'], customDir: 'my-agent/skills' });
 
-    expect(fs.existsSync(path.join(tmp, 'my-agent/skills/helen-clean-code/SKILL.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tmp, 'my-agent/skills/helen-audit/SKILL.md'))).toBe(true);
   });
 
   it('rejects custom dirs that escape the project or are missing', () => {
@@ -88,7 +88,7 @@ describe('Skills installer', () => {
   });
 
   it('installs flow skills only when requested', () => {
-    installSkills({ cwd: tmp, targets: ['claude'], skills: ['helen-clean-code'] });
+    installSkills({ cwd: tmp, targets: ['claude'], skills: ['helen-audit'] });
     expect(fs.existsSync(path.join(tmp, '.claude/skills/helen-flow-full-polish'))).toBe(false);
 
     installSkills({ cwd: tmp, targets: ['claude'], flows: true, skills: ['helen-flow-full-polish'] });

@@ -1,8 +1,10 @@
 ---
-name: helen-copy-cro
+name: helen-copy
 description: Use when writing, rewriting, or auditing website copy, headlines, and calls-to-action (CTAs) to improve conversion rate (CRO); eliminating AI buzzwords, generic filler, and unsupported marketing claims; optimizing contact forms and lead capture (reducing friction, specific button text); and handling requests for customer testimonials or social proof (declining to fabricate fake testimonials and offering honest alternatives).
-version: 2.1.0
 ---
+
+
+## From helen-copy-cro
 
 # Copy, Claims and Conversion
 

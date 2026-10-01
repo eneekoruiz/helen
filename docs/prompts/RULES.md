@@ -4,7 +4,7 @@ Shared rules for every HELEN prompt, flow and checkpoint. Read once per session;
 
 ## Baseline
 
-- Assume senior-level standards in clean code, UI/UX, accessibility and performance (skills `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`).
+- Assume senior-level standards in clean code, UI/UX, accessibility and performance (skills `helen-audit`, `helen-design`, `helen-design`).
 - Propose better or newer approaches when they add verifiable value, but apply only what is inside the requested scope and the prompt's limits.
 
 ## The Level 100 Mandate: Sovereign Technical Authority & Broad Scope

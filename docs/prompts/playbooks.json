@@ -91,7 +91,7 @@
         },
         {
           "kind": "skill",
-          "ref": "helen-premium-design",
+          "ref": "helen-design",
           "why": "Premium, anti-template design criteria"
         },
         {
@@ -162,7 +162,7 @@
       "steps": [
         {
           "kind": "skill",
-          "ref": "helen-copy-cro",
+          "ref": "helen-copy",
           "why": "Copy and conversion criteria"
         },
         {
@@ -208,7 +208,7 @@
       "steps": [
         {
           "kind": "skill",
-          "ref": "helen-motion-3d",
+          "ref": "helen-design",
           "why": "Motion rules and budget"
         },
         {
@@ -272,7 +272,7 @@
         },
         {
           "kind": "skill",
-          "ref": "helen-clean-code",
+          "ref": "helen-audit",
           "why": "Clean code criteria"
         },
         {
@@ -282,7 +282,7 @@
         },
         {
           "kind": "skill",
-          "ref": "helen-a11y-perf",
+          "ref": "helen-design",
           "why": "Accessibility and performance criteria"
         },
         {
@@ -358,7 +358,7 @@
       "steps": [
         {
           "kind": "skill",
-          "ref": "helen-seo-compliance",
+          "ref": "helen-release",
           "why": "SEO and compliance criteria"
         },
         {
@@ -400,7 +400,7 @@
       "steps": [
         {
           "kind": "skill",
-          "ref": "helen-qa-scale",
+          "ref": "helen-audit",
           "why": "QA and scale criteria"
         },
         {
@@ -519,7 +519,7 @@
       "steps": [
         {
           "kind": "skill",
-          "ref": "helen-client-handoff",
+          "ref": "helen-release",
           "why": "Handoff checklist"
         },
         {
@@ -601,7 +601,7 @@
       "steps": [
         {
           "kind": "skill",
-          "ref": "helen-data-api",
+          "ref": "helen-backend",
           "why": "Data and API criteria"
         },
         {
@@ -811,7 +811,7 @@
         },
         {
           "kind": "skill",
-          "ref": "helen-qa-scale",
+          "ref": "helen-audit",
           "why": "Adversarial QA and scale resilience"
         },
         {
@@ -831,7 +831,7 @@
         },
         {
           "kind": "skill",
-          "ref": "helen-seo-compliance",
+          "ref": "helen-release",
           "why": "SEO, OpenGraph, privacy and compliance"
         },
         {
@@ -875,12 +875,12 @@
         },
         {
           "kind": "skill",
-          "ref": "helen-premium-design",
+          "ref": "helen-design",
           "why": "Premium aesthetics and visual hierarchy"
         },
         {
           "kind": "skill",
-          "ref": "helen-copy-cro",
+          "ref": "helen-copy",
           "why": "Direct, honest copy and conversion architecture"
         },
         {
@@ -914,7 +914,7 @@
       "steps": [
         {
           "kind": "skill",
-          "ref": "helen-data-api",
+          "ref": "helen-backend",
           "why": "Validate data model and API state machines"
         },
         {
@@ -924,7 +924,7 @@
         },
         {
           "kind": "skill",
-          "ref": "helen-qa-scale",
+          "ref": "helen-audit",
           "why": "Stress test auth, concurrency, and volume"
         },
         {
@@ -934,7 +934,7 @@
         },
         {
           "kind": "skill",
-          "ref": "helen-clean-code",
+          "ref": "helen-audit",
           "why": "Maintainable frontend and backend structure"
         },
         {
@@ -967,12 +967,12 @@
         },
         {
           "kind": "skill",
-          "ref": "helen-premium-design",
+          "ref": "helen-design",
           "why": "Eliminate generic clichés and establish personal style"
         },
         {
           "kind": "skill",
-          "ref": "helen-motion-3d",
+          "ref": "helen-design",
           "why": "Subtle, performant micro-interactions and transitions"
         },
         {
@@ -1003,7 +1003,7 @@
       "steps": [
         {
           "kind": "skill",
-          "ref": "helen-copy-cro",
+          "ref": "helen-copy",
           "why": "High-clarity product descriptions and low friction CTAs"
         },
         {
@@ -1013,7 +1013,7 @@
         },
         {
           "kind": "skill",
-          "ref": "helen-data-api",
+          "ref": "helen-backend",
           "why": "Idempotent payment transactions and order states"
         },
         {

@@ -1,8 +1,10 @@
 ---
 name: helen-knowledge
-description: Use when drafting or reviewing Architectural Decision Records (ADRs) and trade-off logs; writing AGENTS.md, AI context files, runbooks, or onboarding documentation; or mitigating bus factor and project handover risks (transferring personal credentials, deployment keys, domain ownership, and undocumented deployment scripts before a team member leaves).
-version: 2.1.0
+description: Use when drafting or reviewing Architectural Decision Records (ADRs) and trade-off logs; writing AGENTS.md, AI context files, runbooks, or onboarding documentation; or mitigating bus factor and project handover risks (transferring personal credentials, deployment keys, domain ownership, and undocumented deployment scripts before a team member leaves). Use when joining an existing codebase or onboarding a new developer or AI agent - explains architecture, runbooks, dev commands, environment setup, and where to start in 10 minutes.
 ---
+
+
+## From helen-knowledge
 
 # Knowledge Preservation
 
@@ -26,3 +28,23 @@ Generate a compact rules file (for example `AGENTS.md` or `CLAUDE.md`) with: sta
 Operational steps to deploy, roll back, rotate credentials, and recover.
 
 Prompts: `generate-decision-log`, `audit-bus-factor-and-ownership`, `generate-ai-context`, `generate-operations-runbook`, `audit-developer-onboarding-and-knowledge-gaps`.
+
+## From helen-onboarding
+
+# Codebase Onboarding & Architectural Overview
+
+Accelerate developer and AI onboarding into this repository in 10 minutes.
+
+## Onboarding Checklist
+
+1. **Stack & Tooling**: Identify package manager, framework, language version, and key dependencies.
+2. **Local Environment**: Check required Node.js version, environment variable template (`.env.example`), and local database/service setup.
+3. **Common Commands**:
+   - Install dependencies: package manager install command.
+   - Run dev server: `npm run dev` or equivalent.
+   - Run checks: `npm run typecheck`, `npm run lint`, `npm test`.
+4. **Key Directories & Entry Points**:
+   - `src/`: Core logic and domain modules.
+   - `docs/`: Architectural decision records and guides.
+   - `tests/`: Automated unit and integration test suites.
+5. **Architectural Guidelines**: Read `AGENTS.md` and `.agents/rules/` for design and security constraints.

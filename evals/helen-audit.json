@@ -1,0 +1,251 @@
+{
+  "skill": "helen-audit",
+  "cases": [
+    {
+      "id": "apple-audit-request",
+      "prompt": "Conduct an Apple-grade audit on this repository's verification level and code craft. Discard any conversational complacency or prior AI praise and look for subtle invariant defects and failure modes. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Adopts an uncompromising, adversarial auditor posture without conversational flattery",
+        "Checks verification depth and distinguishes between vanity tests and proof of invariants",
+        "Audits error handling, failure paths, rollback integrity, and edge case resilience",
+        "Checks type craft, single responsibility, and elimination of dead or misleading code",
+        "Provides a structured verdict with a 0-100 Craftsmanship Score and prioritized remediation backlog"
+      ]
+    },
+    {
+      "id": "vanity-test-detection",
+      "prompt": "Review this test suite to determine if it actually proves invariant safety or is merely vanity coverage. Answer in chat only; do not modify or create files.\n```ts\nit('processes payment', async () => {\n  const res = await processOrder({ id: '123', amount: 50 });\n  expect(res).toBeDefined();\n});\n```",
+      "criteria": [
+        "Identifies expect(res).toBeDefined() as a low-signal vanity assertion",
+        "Flags missing verification of invariant outcomes (balance reduction, idempotency, receipt creation)",
+        "Highlights absence of failure case testing (network timeout, insufficient funds, duplicate submissions)",
+        "Recommends concrete adversarial assertions that prove correctness"
+      ]
+    },
+    {
+      "id": "ai-blind-spot-inspection",
+      "prompt": "I've been working with an AI for 4 hours and it keeps telling me the code is flawless. Audit this file as a fresh-eyes inspector for defects the AI is blind to. Answer in chat only; do not modify or create files.\n```ts\nexport async function syncData(items: any[]) {\n  for (const item of items) {\n    await db.save(item);\n  }\n  return { success: true };\n}\n```",
+      "criteria": [
+        "Identifies loose any[] typing and lack of domain validation",
+        "Flags sequential loop awaiting db.save without batching or concurrency limits (N+1 query bottleneck)",
+        "Points out that a failure halfway through leaves partial, uncommitted state without transactional rollback",
+        "Notes that returning { success: true } masks partial success or unhandled promise rejections"
+      ]
+    },
+    {
+      "id": "cross-platform-path-audit",
+      "prompt": "Audit this filesystem helper function for Apple-standard craft and multiplatform resilience. Answer in chat only; do not modify or create files.\n```ts\nexport function getCachePath(sub: string) {\n  return process.cwd() + '/.cache/' + sub + '/data.json';\n}\n```",
+      "criteria": [
+        "Flags hardcoded forward slashes breaking Windows path conventions",
+        "Recommends using path.join or path.resolve",
+        "Warns about missing directory existence verification or path traversal risks if sub contains relative segments",
+        "Suggests robust error and boundary handling"
+      ]
+    },
+    {
+      "id": "css-flex-align",
+      "expectTrigger": false,
+      "prompt": "How do I vertically center two divs inside a container using CSS Flexbox? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains display: flex and align-items: center",
+        "Provides a minimal and clean CSS code snippet",
+        "Does not trigger repository-level verification or code audit skills"
+      ]
+    },
+    {
+      "id": "git-commit-amend",
+      "expectTrigger": false,
+      "prompt": "What is the git command to amend the most recent commit message without changing any code? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Provides git commit --amend",
+        "Mentions -m flag or interactive editor behavior",
+        "Does not trigger deep code quality or verification skills"
+      ]
+    },
+    {
+      "id": "scan-more-improvements",
+      "prompt": "What else can we improve in this repository? Give me an exhaustive scan across backend, frontend, design, and performance with a prioritized backlog. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Sweeps across multiple dimensions: functionality, aesthetics, backend architecture, performance, and DX",
+        "Rejects superficial filler (like formatting or commenting) and focuses on high-leverage architectural and product improvements",
+        "Structures proposals into an actionable matrix (Quick Wins vs Strategic Upgrades)",
+        "Recommends specific next steps and cites files or modules"
+      ]
+    },
+    {
+      "id": "full-stack-audit-request",
+      "prompt": "I want more improvements for this project. Look at our current code and suggest meaningful upgrades for functionality, aesthetics, and test depth. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Addresses functionality, visual craft/aesthetics, and verification depth",
+        "Mentions delegating or applying relevant criteria for aesthetics and testing",
+        "Provides concrete, actionable proposals rather than vague generalities",
+        "Prioritizes proposals by impact and effort"
+      ]
+    },
+    {
+      "id": "backend-and-dx-enhancements",
+      "prompt": "Can you find more improvements for our backend architecture and developer experience? Look for bottlenecks, safety issues, and tooling polish. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Identifies backend optimization opportunities (batching, idempotency, runtime validation)",
+        "Examines developer experience (one-command workflows, error diagnostics, pre-commit gates)",
+        "Provides clear technical rationale for each proposed upgrade",
+        "Groups items into quick wins and deeper architectural changes"
+      ]
+    },
+    {
+      "id": "aesthetic-and-feature-upgrades",
+      "prompt": "What more improvements can we make to elevate this app from a basic prototype to an outstanding product? Look at UX, personality, and missing features. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Proposes distinctive visual craft and anti-slop refinements",
+        "Identifies missing user workflow capabilities (empty states, shortcuts, persistence)",
+        "Delivers a structured improvement roadmap",
+        "Keeps recommendations grounded in the actual codebase context"
+      ]
+    },
+    {
+      "id": "docker-ps-command",
+      "expectTrigger": false,
+      "prompt": "How do I list only the container IDs of all running Docker containers? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Provides docker ps -q or docker ps --format '{{.ID}}'",
+        "Explains the quiet or formatting flag",
+        "Does not trigger holistic repository improvement scanning skills"
+      ]
+    },
+    {
+      "id": "markdown-table-syntax",
+      "expectTrigger": false,
+      "prompt": "How do I align text to the right in a column within a GitHub-flavored Markdown table? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains the colon on the right side of the delimiter row (---:)",
+        "Provides a short valid Markdown table example",
+        "Does not trigger repository enhancement or audit skills"
+      ]
+    },
+    {
+      "id": "edge",
+      "prompt": "List the edge cases I should test for this endpoint that transfers credits between users: POST /transfer {from, to, amount}. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Includes negative, zero or huge amounts / malformed input",
+        "Includes double submission or retries (idempotency)",
+        "Includes concurrent transfers / race conditions",
+        "Includes transfer to self or to a nonexistent user",
+        "Includes partial failure between debit and credit (atomicity / rollback)",
+        "Suggests regression tests for the risky cases"
+      ]
+    },
+    {
+      "id": "scale",
+      "prompt": "Our product page loops over products and for each one queries its reviews from the database, then renders. It's fine with 20 products in staging. We launch with 20,000 products next week. Concerns? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Identifies the N+1 query pattern",
+        "Recommends batching/joins, pagination or caching",
+        "Mentions measuring or load testing before launch",
+        "Mentions cost or database load at scale",
+        "Prefers simple mitigations over a big re-architecture"
+      ]
+    },
+    {
+      "id": "logs",
+      "prompt": "Our error logs look like `console.log('error', err)` and sometimes include the full request body with the user's password. How should we improve observability? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Flags logging passwords/PII as a critical problem",
+        "Recommends structured logs with context (request id, user action, version)",
+        "Recommends an error tracking service or error boundaries (lightweight first)",
+        "Mentions alerting with ownership or actionable signals"
+      ]
+    },
+    {
+      "id": "retry-storm-protection",
+      "prompt": "When our downstream payment gateway has a 5-second outage, our API clients hammer us with immediate retries, crashing our database connection pool. How do we prevent this retry storm? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Recommends exponential backoff with jitter on client retries",
+        "Recommends implementing a circuit breaker pattern",
+        "Recommends rate limiting or request throttling at the API gateway",
+        "Addresses database connection pool bounds and queuing limits"
+      ]
+    },
+    {
+      "id": "css-flexbox-align",
+      "expectTrigger": false,
+      "prompt": "What is the difference between align-items and align-content in CSS Flexbox? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains align-items aligns items along the cross axis within a line",
+        "Explains align-content aligns flex lines along the cross axis when there is extra space (multi-line)",
+        "Mentions flex-wrap requirement for align-content"
+      ]
+    },
+    {
+      "id": "git-stash-branch",
+      "expectTrigger": false,
+      "prompt": "How do I take my stashed changes and apply them directly into a new git branch? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains `git stash branch <branchname> [<stash>]`",
+        "Explains that it creates the branch and applies the stash cleanly",
+        "Mentions that it drops the stash on success"
+      ]
+    },
+    {
+      "id": "dead-code",
+      "prompt": "Simplify this module without changing behavior. Answer in chat only; do not modify or create files.\n```ts\nimport { readFile } from 'node:fs/promises';\nimport path from 'node:path';\nimport { format } from 'date-fns';\n\nconst DEBUG = false;\n\nexport async function loadConfig(p: string) {\n  try {\n    const raw = await readFile(p, 'utf-8');\n    const data = JSON.parse(raw);\n    return data;\n  } catch (e) {\n    return {};\n  }\n}\n\nfunction oldLoader(p: string) { return require(p); }\n\nexport function getName(u: any) { if (u) { if (u.name) { return u.name; } else { return 'anonymous'; } } else { return 'anonymous'; } }\n```",
+      "criteria": [
+        "Removes or flags the unused imports (path and format) and the unused DEBUG constant",
+        "Removes or flags oldLoader as dead code after noting it should be confirmed unused",
+        "Flags the silent catch that returns {} as hiding errors (silent error handling)",
+        "Simplifies getName without changing behavior (e.g. u?.name ?? 'anonymous')",
+        "Keeps the exported API (loadConfig, getName) unchanged",
+        "Ends with a short report of changes rather than a long essay"
+      ]
+    },
+    {
+      "id": "no-big-refactor",
+      "prompt": "This project does not build yet (tsc fails with 40 errors). Please do a clean code pass on src/ to make it nicer. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Says the build must pass (or be fixed) before a clean code pass",
+        "Does not propose a large sweeping refactor while the build is broken",
+        "Suggests running the quality gates / typecheck first",
+        "Asks for or proposes the next concrete step instead of inventing code it has not seen"
+      ]
+    },
+    {
+      "id": "public-api",
+      "prompt": "Clean this up. Other packages import `fetchUser` and `UserDTO`. Answer in chat only; do not modify or create files.\n```ts\nexport interface UserDTO { id: string; user_name: string }\nexport async function fetchUser(id: string): Promise<UserDTO> {\n  const r = await fetch('/api/u/' + id);\n  const j = await r.json();\n  return j;\n}\n```",
+      "criteria": [
+        "Does not rename fetchUser, UserDTO or the user_name field without explicitly flagging it as a breaking change needing confirmation",
+        "Points out missing handling of non-OK HTTP responses",
+        "Keeps behavior the same for callers",
+        "Keeps the answer short and concrete"
+      ]
+    },
+    {
+      "id": "deep-nesting-cleanup",
+      "prompt": "Clean up this nested conditional function without breaking any behavior. Answer in chat only; do not modify or create files.\n```ts\nfunction processItem(item: any) {\n  if (item != null) {\n    if (item.active) {\n      if (item.count > 0) {\n        return item.price * item.count;\n      } else {\n        return 0;\n      }\n    } else {\n      return 0;\n    }\n  } else {\n    return 0;\n  }\n}\n```",
+      "criteria": [
+        "Uses guard clauses or early returns to flatten nested conditionals",
+        "Maintains exact return values and edge case behavior",
+        "Adds typing or maintains signature without gratuitous rewrites",
+        "Does not alter surrounding unmentioned code"
+      ]
+    },
+    {
+      "id": "nginx-reverse-proxy",
+      "expectTrigger": false,
+      "prompt": "Provide an Nginx configuration snippet for reverse proxying requests from port 80 to an upstream Node app on port 3000 with WebSocket support. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Includes proxy_pass directive pointing to upstream",
+        "Sets Upgrade and Connection HTTP headers for WebSocket proxying",
+        "Includes basic Host and X-Real-IP proxy headers"
+      ]
+    },
+    {
+      "id": "kubernetes-hpa",
+      "expectTrigger": false,
+      "prompt": "What are the key metrics and configuration fields in a Kubernetes HorizontalPodAutoscaler (HPA) v2 resource? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains targetCPUUtilizationPercentage or target average utilization",
+        "Mentions minReplicas and maxReplicas fields",
+        "References scaleTargetRef pointing to the Deployment"
+      ]
+    }
+  ]
+}
