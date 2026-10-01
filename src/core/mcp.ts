@@ -272,7 +272,7 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
         const results = runDoctor(cwd);
         const issues = results.filter(r => r.status !== 'ok');
 
-        let autoFixReport: Record<string, unknown> | null = null;
+        let autoFixReport: any = null;
         if (args.fix) {
           const { repairDoctorIssues } = await import('./doctorFix.js');
           autoFixReport = repairDoctorIssues(cwd);
