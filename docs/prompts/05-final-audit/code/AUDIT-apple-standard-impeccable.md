@@ -28,7 +28,7 @@ Before running deep inspection passes or applying fixes, clarify user constraint
 - **Execution Mode**: Autonomous Convergence Loop (Audit → Fix → Test → Re-audit until 100/100) vs. Advisory Audit Report.
 
 ### 2. Autonomous Convergence Loop
-When execution mode is requested, do not halt between fix batches. Autonomously fix every identified defect within scope, run tests/typechecks, re-audit, and repeat until 0 issues remain and the Craftsmanship Score reaches 100/100.
+When execution mode is requested, do not halt between fix batches. Autonomously fix every identified defect within scope, run tests/typechecks, execute the repository's CI pipeline locally, re-audit, and repeat until 0 issues remain and the Craftsmanship Score reaches 100/100.
 
 ### 3. Specialized Subagent Orchestration
 Delegate domain sweeps to specialized subagents:
@@ -36,8 +36,8 @@ Delegate domain sweeps to specialized subagents:
 - **Type Safety & Craft Subagent**: Eliminates `any` casts, unvalidated type assertions, and dead code.
 - **Ergonomics & Claims Subagent**: Validates documentation parity, clean CLI streams, and actionable error messages.
 
-### 4. Extreme Token Economy
-Deliver high-density findings with exact file paths, line numbers, and actionable diffs. Eliminate conversational filler.
+### 4. Extreme Token Economy & English Prompt Efficiency
+Deliver high-density findings with exact file paths, line numbers, and actionable diffs. Eliminate conversational filler. Formulate instructions and prompts in technical English to leverage BPE tokenizer efficiency (saving 30% to 50% token overhead).
 
 ## Requirements
 
@@ -68,6 +68,11 @@ Adopt the adversarial posture of an external inspector. Discard previous convers
 6. **Claim Honesty:**
    - Verify that every claim made in `README.md`, docs, CLI help text, or marketing copy is strictly matched by actual code behavior.
 
+7. **Continuous Integration (CI) Emulation Gate:**
+   - Inspect `.github/workflows/` (or repository CI configuration).
+   - Replicate and execute all CI steps locally (typecheck, lint, tests, build, and vulnerability audits).
+   - **Hard Invariant**: Under no circumstances can an `IMPECCABLE (95-100)` score be granted if any CI pipeline check fails or would fail on git push.
+
 ## Limits
 
 - Base all findings on verifiable code evidence (file, line number, reproducible failure vector).
@@ -77,7 +82,8 @@ Adopt the adversarial posture of an external inspector. Discard previous convers
 ## Output
 
 1. **Craftsmanship Score (0-100)** and Verdict: `IMPECCABLE (95-100)`, `CONDITIONAL PASS (80-94)`, or `DEFECTIVE (<80)`.
-2. **AI Blind Spots Uncovered**: Defects and regressions missed during prior conversational iterations.
-3. **Critical Correctness and Invariant Failures**: Detailed with file, line, and failure vector.
-4. **Ergonomic and DX Deficiencies**: Confusing errors, stream pollution, or inconsistent behavior.
-5. **Prioritized Remediation Backlog / Autonomous Convergence Steps**: Actions required to reach 100/100 perfection.
+2. **Continuous Integration (CI) Gate**: Local reproduction status of all workflow checks.
+3. **AI Blind Spots Uncovered**: Defects and regressions missed during prior conversational iterations.
+4. **Critical Correctness and Invariant Failures**: Detailed with file, line, and failure vector.
+5. **Ergonomic and DX Deficiencies**: Confusing errors, stream pollution, or inconsistent behavior.
+6. **Prioritized Remediation Backlog / Autonomous Convergence Steps**: Actions required to reach 100/100 perfection.

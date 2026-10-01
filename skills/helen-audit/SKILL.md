@@ -1,6 +1,7 @@
 ---
 name: helen-audit
 description: Master skill for auditing code quality, finding improvements, standardizing Apple-grade tests, checking edge cases, performing code reviews, and identifying technical debt in a zero-interruption autonomous convergence loop.
+version: 2.1.0
 ---
 
 # The HELEN Audit (Autonomous Quality & Convergence Engine)
@@ -19,20 +20,27 @@ Once the user confirms scope (or if invoked with explicit scope flags / automate
 
 ### 2. The Autonomous Convergence Loop (Zero Interruption)
 Never stop at just reporting defects or asking for permission between fix cycles. You MUST execute an unbroken autonomous convergence loop:
-**Audit → Fix → Verify (Typecheck, Lint, Test) → Re-audit → Repeat**
+**Audit → Fix → Verify (Typecheck, Lint, Test, CI) → Re-audit → Repeat**
 Continue iterating autonomously until the Craftsmanship Score reaches **100/100 (IMPECCABLE)** and zero defects remain within the agreed scope. Only report back when the codebase is a pristine 10/10.
 
-### 3. Specialized Subagent Orchestration
+### 3. Mandatory CI Pipeline Emulation (Non-Negotiable Impeccable Gate)
+**NEVER grant an "IMPECCABLE (10/10)" verdict without verifying the repository's Continuous Integration (CI) pipeline.**
+- Inspect `.github/workflows/` (or equivalent CI configuration files like GitLab CI, GitHub Actions, Bitbucket Pipelines).
+- Extract the exact commands executed by the remote CI runner (e.g., `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`, `node dist/cli.js lint`, `npm audit --audit-level=high`).
+- Execute each of these commands locally.
+- **Hard Gate**: If ANY step in the CI pipeline fails, the score is strictly capped below 80 (`DEFECTIVE`). A project cannot be declared impeccable if a git push would fail in GitHub Actions.
+
+### 4. Specialized Subagent Orchestration
 For deep or multi-domain repositories, decompose the audit by launching specialized subagents:
 - **Research / Explorer Subagent**: Maps call graphs, dependencies, and external boundary contracts.
 - **Security Auditor Subagent**: Deep dive into OWASP Top 10, secret leaks, injection risks, and dependency CVEs.
 - **QA & Stress Subagent**: Adversarial testing, race conditions, edge-case generation, and test execution.
 - **Visual & Anti-Slop Subagent**: Scans UI components, contrast, typography rhythm, and eliminates generic AI tropes.
 
-### 4. Extreme Token Economy
-- Deliver high-density, zero-fluff responses.
+### 5. Extreme Token Economy & English Prompt Efficiency
+- Deliver high-density, zero-fluff responses with concise diffs and verification tables.
 - Omit conversational filler, polite preambles, and speculative essays.
-- Focus strictly on concrete file links, line numbers, actionable diffs, and verification tables.
+- For maximum token compression, internal prompts and technical reasoning are conducted in English, taking advantage of BPE tokenizer efficiency (saving 30% to 50% token overhead compared to non-English languages).
 
 ## The 6 Dimensions of Auditing
 
@@ -63,7 +71,7 @@ For deep or multi-domain repositories, decompose the audit by launching speciali
 ### 6. Developer Experience & Ergonomics
 - **Actionable Diagnostics**: Error messages must state: what failed, why it failed, and the exact 1-step remediation command.
 - **Technical Honesty**: Verify that every capability promised in `README.md` or marketing copy actually exists and functions in the code.
-- **PR & Code Review**: When reviewing Pull Requests, ensure no secret leakage, no breaking regressions, and verify deterministic gates (`npm run typecheck` / `lint` / `test`) pass.
+- **PR & Code Review**: When reviewing Pull Requests, ensure no secret leakage, no breaking regressions, and verify deterministic gates (`npm run typecheck` / `lint` / `test` / `ci`) pass.
 
 ## Output Format (When 100/100 Reached)
 
@@ -82,4 +90,5 @@ For deep or multi-domain repositories, decompose the audit by launching speciali
 - ✅ Typecheck: 0 errors
 - ✅ Lint: 0 warnings/errors
 - ✅ Test Suite: 100% passing
+- ✅ Continuous Integration (CI): 100% passing (all jobs from .github/workflows verified locally)
 ```

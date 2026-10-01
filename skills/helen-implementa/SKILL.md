@@ -29,13 +29,14 @@ Decompose complex or multi-surface tasks into specialized subagents:
 - Spawn dedicated agents for parallel execution (e.g. backend API generation, frontend component implementation, test authoring).
 - Keep contexts focused, parallelize independent file writes, and synthesize results cleanly.
 
-### 4. Continuous Convergence Loop (Build → Typecheck → Lint → Test → Re-Audit)
+### 4. Continuous Convergence Loop (Build → Typecheck → Lint → Test → CI → Re-Audit)
 After each implementation pass, run the full verification cycle:
 1. **Build**: Does the project compile/build without errors?
 2. **Typecheck**: Zero type errors.
 3. **Lint**: Zero lint violations.
 4. **Tests**: All tests pass. If new code lacks tests, write them.
-5. **Re-Audit**: Re-scan for remaining issues or debt.
+5. **CI Pipeline Simulation**: Inspect `.github/workflows/` (or repository CI) and execute the exact remote commands locally. Never mark complete if CI would fail on push.
+6. **Re-Audit**: Re-scan for remaining issues or debt.
 
 If ANY check fails or ANY remaining issue is detected:
 - Diagnose the root cause (don't guess — read the error).
@@ -43,10 +44,11 @@ If ANY check fails or ANY remaining issue is detected:
 - Re-run the full cycle.
 - **Repeat continuously until green and 100% clean across the board.**
 
-### 5. Extreme Token Economy
+### 5. Extreme Token Economy & English Prompt Efficiency
 - Minimize conversational overhead.
 - No filler words, repeated apologies, or chatty step-by-step commentary.
 - Provide dense code diffs and concise verification summaries.
+- Conduct technical prompts and instructions in English to leverage BPE tokenizer efficiency (reducing token overhead by 30% to 50%).
 
 ## Output Format (When 100% Complete)
 
@@ -54,5 +56,5 @@ Output a single, comprehensive final report only AFTER all convergence rounds ar
 
 1. **Implementation & Fix Summary**: Numbered list of all changes applied, including proactive refactors.
 2. **Autonomous Convergence Rounds**: Number of iteration cycles executed.
-3. **Verification Results**: Final build, typecheck, lint, test status (all 100% green).
+3. **Verification Results**: Final build, typecheck, lint, test, and CI status (all 100% green).
 4. **Final Status**: Pristine 10/10 state confirmed.

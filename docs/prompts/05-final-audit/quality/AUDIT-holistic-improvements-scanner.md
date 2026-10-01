@@ -28,15 +28,20 @@ Conduct an exhaustive, demanding scan across the entire repository to discover h
    - Confirm which dimensions to prioritize and lock in the execution mode.
 
 2. **Autonomous Convergence Loop:**
-   - When execution mode is active, do not halt between fix batches. Autonomously fix every identified defect within scope, run tests/typechecks, re-audit, and repeat until 0 issues remain.
+   - When execution mode is active, do not halt between fix batches. Autonomously fix every identified defect within scope, run tests/typechecks, simulate full CI, re-audit, and repeat until 0 issues remain.
 
-3. **Specialized Subagent Orchestration:**
+3. **Mandatory CI Pipeline Emulation Gate:**
+   - Execute the exact suite configured in repository workflows (e.g. `.github/workflows/ci.yml`) locally before concluding any improvement pass.
+   - If CI fails or would fail on git push, the codebase cannot be marked 10/10.
+
+4. **Specialized Subagent Orchestration:**
    - Delegate domain sweeps to specialized subagents (Aesthetics & Anti-Slop, Backend & Performance, Verification & QA) to execute in parallel and isolate context.
 
-4. **Extreme Token Economy:**
+5. **Extreme Token Economy & English Prompt Efficiency:**
    - Deliver high-density findings with exact file paths, line numbers, and actionable diffs. Eliminate conversational boilerplate.
+   - Formulate prompts and technical evaluations in English to leverage BPE tokenizer efficiency (slashing token usage by 30% to 50%).
 
-5. **Exhaustive Scan Across the 6 Dimensions:**
+6. **Exhaustive Scan Across the 6 Dimensions:**
    - **Functionality:** Detect missing workflow steps (bulk actions, export/import, undo/redo) and edge-state UX.
    - **Aesthetics & Anti-Slop:** Hunt for generic AI templates (purple glows, uniform Bento grids, generic buzzwords) and apply bespoke art direction.
    - **Backend Architecture:** Identify query bottlenecks, unbatched API calls, and enforce runtime schema validation.
