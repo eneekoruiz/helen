@@ -97,7 +97,7 @@ Each phase README has quick decisions, an exit checklist and a generated index.
 
 ## Skills
 
-Bundled: `helen-apply` (entry point), `helen-router`, `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`, `helen-copy-cro`, `helen-motion-3d`, `helen-security`, `helen-seo-compliance`, `helen-qa-scale`, `helen-release`, `helen-client-handoff`, `helen-strategy`, `helen-data-api`, `helen-knowledge`, `helen-review`, `helen-onboarding`.
+Bundled: `helen-apply` (entry point), `helen-router`, `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`, `helen-copy-cro`, `helen-motion-3d`, `helen-security`, `helen-seo-compliance`, `helen-qa-scale`, `helen-release`, `helen-client-handoff`, `helen-strategy`, `helen-data-api`, `helen-knowledge`, `helen-review`, `helen-onboarding`, `helen-impeccable`, `helen-implementa`, `helen-improve`, `helen-anti-slop`, `helen-reprompt`.
 
 | Target | Folder |
 |---|---|
@@ -117,7 +117,7 @@ HELEN does not collect, store, or transmit any telemetry, analytics, user identi
 
 ## Architecture
 
-`src/core` holds the library logic (frontmatter parsing, prompt resolution, lint, playbooks, progress tracking, skills, catalog, doctor). `src/index.ts` is the command layer. The scaffolding modules write templates with dry-run, backups and a `.helenrc` manifest for rollback.
+`src/core` holds the library logic (frontmatter parsing, prompt resolution, lint, playbooks, progress tracking, skills, catalog, doctor, mcp). `src/commands` contains the modular CLI command logic, and `src/index.ts` acts as the command entry point loader. The scaffolding modules write templates with dry-run, backups and a `.helenrc` manifest for rollback.
 
 ## License
 
