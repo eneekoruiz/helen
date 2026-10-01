@@ -85,15 +85,28 @@ export function updateStateFile(cwd: string, progress: Progress): void {
   const statePath = path.join(cwd, '.helen', 'STATE.md');
   try {
     fs.mkdirSync(path.dirname(statePath), { recursive: true });
-    fs.writeFileSync(statePath, `${lines.join('\n')}\n`, 'utf-8');
+    writeWithRetry(statePath, `${lines.join('\n')}\n`);
   } catch {
     // Ignore error if writing STATE.md fails
   }
 }
 
+function writeWithRetry(filePath: string, content: string, maxRetries = 3): void {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      fs.writeFileSync(filePath, content, 'utf-8');
+      return;
+    } catch (err: unknown) {
+      if (i === maxRetries - 1) throw err;
+      const start = Date.now();
+      while (Date.now() - start < 100) { /* block */ }
+    }
+  }
+}
+
 function save(cwd: string, progress: Progress): void {
   fs.mkdirSync(path.dirname(progressFile(cwd)), { recursive: true });
-  fs.writeFileSync(progressFile(cwd), `${JSON.stringify(progress, null, 2)}\n`, 'utf-8');
+  writeWithRetry(progressFile(cwd), `${JSON.stringify(progress, null, 2)}\n`);
   updateStateFile(cwd, progress);
 }
 

@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import * as p from '@clack/prompts';
 import path from 'node:path';
+import fs from 'node:fs';
 import { logger } from './core/logger.js';
 import { detectProject } from './core/projectDetector.js';
 import { runDoctor, printDoctorResults } from './core/doctor.js';
@@ -972,8 +973,19 @@ export function createProgram(): Command {
   program
     .command('status')
     .description('Show progress of the tracked plan')
-    .action(() => {
+    .option('--html', 'Output dashboard in HTML format', false)
+    .action(async (opts: { html: boolean }) => {
       const progress = readProgress(process.cwd());
+      if (opts.html) {
+        const { generateReportData, renderReportHtml } = await import('./core/report.js');
+        const data = generateReportData(process.cwd());
+        const html = renderReportHtml(data);
+        const reportPath = path.join(process.cwd(), '.helen', 'report.html');
+        fs.mkdirSync(path.dirname(reportPath), { recursive: true });
+        fs.writeFileSync(reportPath, html, 'utf-8');
+        logger.success(`HTML report generated at: ${reportPath}`);
+        return;
+      }
       if (isJsonMode()) {
         printJsonAndExit('status', {
           tracking: progress !== null,
