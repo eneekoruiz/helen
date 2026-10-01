@@ -3,92 +3,44 @@ name: helen-release
 description: Master skill for release engineering, SEO technical compliance, version bumps, changelogs, privacy policies, and preparing clean handoffs to clients.
 ---
 
+# Release Engineering & Client Handoff (Release Master Skill)
 
-## From helen-release
+Decide if the project can be packaged as a release candidate (RC) or delivered to a client, with mathematical guarantees. This skill groups release candidate preparation, SEO/i18n compliance, and clean client handoff packaging.
 
-# Release Candidate
+## The Release Candidate Sequence
 
-Decide if the project can be packaged as a release candidate, with guarantees.
+1. **Build & Compile**: Verify the project builds completely from a cold start.
+2. **Deterministic Gates**: Run the linter, typechecker, and test suite. They must pass with zero exceptions. Never hide or cosmetically fix a type, build, or security error just to pass the gate.
+3. **Security Hardening**: Verify no `.env`, credentials, API tokens, or development access are exposed in the repository or documentation.
+4. **SEO & i18n Compliance**:
+   - Check `title`, meta description, Open Graph, canonical URLs, `robots.txt`, sitemaps, single `h1`, and heading order.
+   - Confirm there is no accidental `noindex` tag for production builds.
+   - Ensure every visible string goes through the i18n layer, language fallbacks work, and `hreflang` tags are correct.
+5. **Documentation & Handoff Preparation**:
+   - Ensure setup and deployment instructions reproduce on a clean machine.
+   - Clarify ownership: domains, hosting, databases, SaaS accounts, and where credentials live (name the vault, never the secret).
+   - Generate release notes, changelogs, and a demo package.
 
-## Sequence
+## Privacy, Legal, and Compliance Limits
 
-1. Load and pass the **build and compile** checkpoint.
-2. Fast build/test verification, then the **test suite** checkpoint.
-3. Security hardening, then the **security risk** checkpoint.
-4. i18n audit and final SEO audit.
-5. **Lint and typecheck** checkpoint before documenting.
-6. GitHub repository audit; release notes, changelog, and demo package.
-7. **Release readiness** checkpoint.
+- Identify personal data flows (analytics, logs, uploads, support data, third-party processors).
+- Review consent/cookie behavior, tracking, retention, and data minimization.
+- **Do not invent legal text, certifications, or privacy policies.** Flag gaps, draft placeholders, and recommend review by legal counsel.
+- Flag marketing claims such as "100% secure", "guaranteed", or "fully compliant" that need empirical evidence.
 
-The detailed prompts live in the HELEN library: `helen prompts flow release-candidate` prints the full flow and links to each step.
-
-## Conditions to advance
+## Conditions to Advance
 
 - Build, linter, and test suite pass with no exceptions.
 - No open secrets or critical security gaps.
 - Documentation and quickstarts match the real state of the software.
+- A browser smoke test (or manual reasoning) confirms every main route works, including deep links and back/forward navigation.
 
-## Stop when
+## Final Summary Output Format
 
-- Any checkpoint or critical verification fails. Never hide or cosmetically fix a type, build, or security error.
-- Indexability directives or language fallbacks are broken.
-- A destructive or high-risk change needs confirmation: ask the user first.
+When executing a release or handoff sequence, provide a concise final summary:
 
-## Final summary
-
-1. Verdict: `RC READY`, `RC WITH CAVEATS`, or `NOT RC READY`.
-2. Checks executed.
-3. Changes made during the flow.
-4. Remaining blockers.
-5. Draft release notes or pending items.
-
-## From helen-seo-compliance
-
-# SEO, i18n and Compliance
-
-## SEO and indexability
-
-- Check `title`, meta description, Open Graph, canonical URLs, `robots.txt`, sitemap, single `h1` and heading order, duplicate content.
-- Metadata must match the real product. Never add spam keywords or claims the product cannot support.
-- Confirm there is no accidental `noindex` in production.
-
-## Internationalization
-
-- Every visible string goes through the i18n layer; language fallbacks work; `hreflang` and language metadata are consistent.
-
-## Privacy, legal and compliance
-
-- Identify personal data, analytics, logs, uploads, support data, and third-party processors.
-- Review consent and cookie behavior, tracking, retention, deletion, export, and data minimization.
-- Check privacy policy, terms, licenses, and attribution. Flag claims such as "secure", "guaranteed", or "compliant" that need evidence.
-
-## Limits
-
-- Do not invent legal text or certifications; flag gaps and recommend review by the responsible person.
-- Stop and ask when a change affects legal, privacy, or pricing language.
-
-Related prompts: `audit-final-seo`, `enhance-privacy-and-legal-readiness`, `audit-i18n`. An external `seo` skill exists in the catalog (`helen skills external seo`).
-
-## From helen-client-handoff
-
-# Client Handoff
-
-## Checklist
-
-1. Setup and deployment reproduce on a clean machine.
-2. No credentials, tokens, or development access exposed in the repo or docs.
-3. Ownership is clear: domains, hosting, repositories, databases, SaaS accounts, and where credentials live (name the vault, never the secret).
-4. Links, forms, and CTAs work; media has alt text and sensible weight.
-5. A browser smoke test passes on every main route, including reload (deep links) and back/forward navigation, on mobile and desktop (a headless browser tool such as `playwright-cli` helps).
-6. Release notes, changelog, and a demo package exist.
-7. The receiver has a clear roadmap to keep operating.
-
-## Final summary
-
-1. Handoff package structure and links.
-2. Quality verification status.
-3. Documented technical and support risks.
-4. Access and IP transfer instructions.
-5. Sign-off recommendation.
-
-Run the verification checkpoints first (build, tests, security, release readiness). Flow: `helen prompts flow client-delivery`.
+1. **Verdict**: `RC READY`, `RC WITH CAVEATS`, or `NOT RC READY`.
+2. **Quality Verification Status**: Checks executed (build, lint, test, security).
+3. **Handoff Package & Links**: Where the release notes, changelog, and built assets are.
+4. **Access & IP Transfer Instructions**: Documented ownership transfers (domains, SaaS, credential vaults).
+5. **Remaining Blockers / Pending Items**: What must be resolved before the final sign-off.

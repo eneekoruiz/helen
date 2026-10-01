@@ -3,156 +3,50 @@ name: helen-design
 description: Master skill for premium UX/UI, eliminating AI tropes (slop), optimizing web accessibility, scroll behavior, transitions, and 3D web graphics.
 ---
 
+# Premium Design & Anti-Slop (UX/UI Master Skill)
 
-## From helen-premium-design
+HELEN does not produce standard web pages. It produces digital assets oriented to sales, trust, and perceived quality. `helen-design` is a comprehensive art direction and UI engineering skill that rejects default "AI slop" aesthetics and enforces bespoke, high-performance, and accessible design.
 
-# Premium Design
+## The Anti-Slop & Premium Art Direction Principles
 
-HELEN does not produce standard web pages. It produces digital assets oriented to sales, trust, and perceived quality. Conversion comes before decoration.
+Generative coding tools systematically converge on identical design templates: glowing purple radial gradients, glassmorphism cards, uniform 3-card Bento grids, and buzzword-laden corporate filler. This skill audits and refactors interfaces forensically to detect AI tells and replace them with intentional art direction.
 
-## Principles
+1. **Specific, not interchangeable**: Every choice must come from the brand, audience, and product context. Anything swappable with another brand is suspect.
+2. **Forensic Detection of AI Tells**:
+   - **Visual**: Eliminate the ubiquitous purple-to-indigo neon blurs, uniform `rounded-2xl` 3-column layouts, floating particle canvas gimmicks, and stacking `backdrop-blur-md` without hierarchy.
+   - **Copywriting**: Eliminate inflated vocabulary ("Unleash", "Elevate", "Delve", "Supercharge"), robotic symmetrical tricolons ("Fast. Secure. Reliable."), and fabricated social proof (fake testimonials/jobs).
+3. **Bespoke Craft & Tactile Physicality**:
+   - Break symmetrical grids with intentional asymmetry and scale.
+   - Ground animations in physical reality: spring physics, subtle hover state transitions, and immediate interaction feedback instead of continuous floating loops.
+   - Replace fuzzy colored glows with crisp, physical 1px borders or subtle drop shadows with real optical weight.
 
-1. **Specific, not interchangeable.** Every choice must come from the brand, audience and product context, not from generic trends. A premium site looks inevitably made for that client. Anything swappable with another brand is suspect.
-2. **Zero AI/template traces.** Watch for empty claims, inflated phrases, excessive symmetry, generic gradients, repeated cards, obvious icons, implausible testimonials, and microcopy without context.
-3. **Hierarchy first.** Check spacing, alignment, typography scale, contrast, density, and interaction feedback before adding effects.
-4. **Motion with a concept.** Subtle, purposeful micro-interactions. Respect `prefers-reduced-motion`. Never add effects that reduce legibility, conversion, performance, or accessibility.
-5. **Real responsive.** Design and verify mobile, tablet, and desktop, not just breakpoints that do not overflow.
-6. **Human tone.** Professional, specific copy. Never invent data, logos, testimonials, cases, or claims.
+## Typography & Layout Hierarchy
 
-## Workflow
+1. **Hierarchy First**: Check spacing, alignment, typography scale, contrast, density, and interaction feedback before adding decorative effects.
+2. **Typographic Point of View**:
+   - Choose a typeface pairing with friction and character: an idiosyncratic display font (e.g., bold humanist serif, industrial grotesque) for headlines, paired with a highly legible workhorse for functional UI.
+   - Vary typographical rhythm: avoid keeping every heading at `font-semibold` with uniform letter spacing.
+3. **Real Responsive Design**: Verify mobile, tablet, and desktop layouts with true responsive scaling, not just breakpoints that prevent overflow.
 
-1. Read the project and business goal. State assumptions.
-2. Audit: list issues by severity (Critical / Important / Optional) with concrete before/after substitutions.
-3. Apply the smallest set of changes with the highest perceived impact. When asked for many effects or trends at once, propose a restrained, prioritized subset tied to the brand and product (what each effect is for) instead of adding everything.
-4. Verify: build, and check the result at real viewport sizes when a browser is available.
+## Motion, 3D, and Cinematic Effects
 
-## Safety limits
+1. **Purposeful Motion**: Motion needs a concept and a function (attention, hierarchy, feedback). Decorative motion is the first thing to cut.
+2. **Graceful Degradation**: `prefers-reduced-motion` must be respected everywhere. Never add effects that reduce legibility or accessibility.
+3. **Native over Heavy Libraries**: Prefer native features (View Transitions API, CSS scroll-driven animations) over heavy JavaScript libraries when they are enough.
+4. **Performance Budgets for 3D**: Do not add heavy 3D (Spline, React Three Fiber), shaders, or video scrubbing without a strict performance budget (LCP, INP, total JS, perceived FPS). Isolate 3D components so the rest of the page works without them.
 
-- Do not sacrifice clarity to sound original; do not confuse minimalism with lack of personality.
-- Do not add heavy 3D, shaders, or video scrubbing without a performance budget (see `helen-a11y-perf`).
-- Propose new libraries or techniques; apply them only within the requested scope.
+## Accessibility (a11y) & Core Web Vitals
 
-## References
+1. **Minimum Accessibility Checks**:
+   - Keyboard navigation reaches every interactive element in a sensible order; focus states (`:focus-visible`) are always visible.
+   - Color contrast meets WCAG AA standards. The main flow does not depend solely on color or hover states.
+   - Semantic HTML (landmarks, correct heading order, `<button>` vs `<a>`), labelled form fields, and `alt` text for content images.
+   - Avoid "ARIA theater": Do not add redundant or incorrect ARIA attributes. Prefer native HTML semantics.
+2. **Core Performance**:
+   - Audit asset and bundle sizes, unnecessary network calls, redundant re-renders, and inefficient loops.
+   - Prefer the smallest change that improves perceived speed (loading placeholders, lazy-loaded images, paginated data).
+   - No premature micro-optimization without profiling evidence.
 
-- `references/vocabulary.md`: motion, effects, and library vocabulary the HELEN prompts assume.
-- For deeper flows, use the HELEN prompt library (`helen prompts list`), phase `03-finish-features`.
+## Execution Output
 
-## Layout patterns
-
-For portfolios and showcases see `references/layouts.md` (sandwich, showcase, sticky split).
-
-## From helen-anti-slop
-
-# Anti-AI Slop & Bespoke Human Craft
-
-HELEN rejects the default aesthetic and verbal slop generated by modern AI models. Generative coding tools systematically converge on identical design templates: dark-mode dashboards with glowing purple radial gradients, glassmorphism cards with faint white borders, uniform 3-card Bento grids, and buzzword-laden corporate filler. This skill audits interfaces forensically to detect AI tells and refactor them with distinctive human craft, authentic brand character, and intentional art direction.
-
-## Forensic Detection Checklist (The Slop Index)
-
-### 1. Visual & Layout AI Tells
-- **The AI Purple/Cyan Gradient**: Ubiquitous violet-to-blue neon blur circles (`bg-gradient-to-r from-purple-500 to-indigo-500`) behind cards or in hero text.
-- **Uniform Bento Grid Clichés**: Symmetrical 3-column layouts where every card has the identical border radius (`rounded-2xl`), uniform padding (`p-6`), and an icon inside a colored square container.
-- **Meaningless Canvas Gimmicks**: Floating canvas particle animations (`tsparticles`), waving mesh gradients, or rotating 3D wireframe spheres that have zero connection to the product's actual purpose.
-- **Glassmorphism Overkill**: Stacking `backdrop-blur-md bg-white/5 border border-white/10` on every single container without hierarchy.
-- **Typography Laziness**: Defaulting to Inter or Geist everywhere with identical font weights, leaving the interface with zero editorial point of view or hierarchy contrast.
-
-### 2. Copywriting & Tone AI Tells
-- **The Inflated Vocabulary of AI**: Words like "Unleash", "Elevate", "Seamless", "Delve", "Supercharge", "Cutting-edge", "Game-changer", "Next-gen", "Holistic", "Tapestry", "Reinvent", "Empower".
-- **Robotic Symmetrical Tricolons**: Taglines structured as three isolated verbs or adjectives: "Fast. Secure. Reliable.", "Built for scale. Designed for speed. Crafted for you."
-- **Generic Feature Filler**: Descriptions that say nothing specific: "Leverage advanced analytics to drive meaningful insights for your growing business."
-- **Fabricated Social Proof**: Fake quotes with synthetic job titles ("Product Manager at Top SaaS Corp") instead of real customer stories or truthful technical descriptions.
-
-## Bespoke Refactoring Playbook
-
-### 1. Establish an Intentional Art Direction
-Replace generic templates with an aesthetic school that expresses the product's true identity:
-- **Swiss / International Typographic**: Strict mathematical grid, asymmetrical white space, high-contrast grotesque typography, utilitarian clarity, zero decorative blur.
-- **Warm Editorial / Analog**: Earth-toned palettes (warm paper, deep espresso, terracotta), 1px solid physical borders, editorial serif headlines with rhythmic column layouts.
-- **Tactile / Industrial Utility**: Inset tactile shadows, mechanical toggles, high-density monospace data strips, crisp contrast borders, and purposeful visual feedback.
-- **Radical Minimalism**: Eliminating borders and card wrappers altogether; using pure typographic scale and spatial grouping to create structure.
-
-### 2. Typographic Point of View
-- Choose a typeface pairing with friction and character:
-  - An idiosyncratic display font (e.g. bold humanist serif, industrial grotesque, or geometric mono) for headlines.
-  - A clean, highly legible workhorse for functional interface copy.
-- Vary typographical rhythm: avoid keeping every heading at `font-semibold` with uniform letter spacing.
-
-### 3. Asymmetry & Tactile Physicality
-- Break symmetrical 3-card grids by varying card scale according to value (e.g., 2/3 featured interactive preview + 1/3 compact metric callout).
-- Replace fuzzy colored glows with crisp, physical 1px borders, subtle drop shadows with real optical weight, or bold architectural rules.
-- Ground animations in physical reality: spring physics, subtle hover state transitions, and immediate interaction feedback instead of continuous floating loops.
-
-## Output Format
-
-1. **AI Slop Index (0% to 100%)**:
-   - `0-15%`: Bespoke human craft; strong individual character.
-   - `16-45%`: Moderate template traces; easily remedied.
-   - `46-100%`: Heavy AI slop; completely interchangeable and generic.
-2. **Forensic Findings**: Concrete visual and copywriting tells identified with file and line numbers.
-3. **Art Direction Prescription**: A concrete aesthetic identity tailored specifically to the project's purpose.
-4. **Before / After Refactoring Diff**: Exact code changes showing how to transform generic cards, hero sections, and microcopy into bespoke components with human polish.
-
-## From helen-motion-3d
-
-# Motion, 3D and Cinematic Effects
-
-## Rules
-
-1. Motion needs a concept and a function (attention, hierarchy, feedback). Decorative motion is the first thing to cut.
-2. Set a **performance budget first**, then measure: LCP, CLS, INP, total JS, image/video/model weight, perceived FPS.
-3. Inspect lazy loading, preloads, posters, device pixel ratio, pausing off-screen canvases, reduced-motion behavior, and asset compression.
-4. Degrade gracefully (static poster, simpler scene) before removing the charm; never accept heavy loads without a fallback.
-5. `prefers-reduced-motion` must be respected everywhere.
-6. Prefer native features (View Transitions API, CSS scroll-driven animations) over heavy libraries when they are enough.
-
-## Choosing 3D
-
-Spline for fast interactive embeds; React Three Fiber when you need code-level control and integration. Decide by need, team skill, and budget, then isolate the 3D component so the rest of the page works without it.
-
-## Tools
-
-Catalog entries that help: `scroll-craft` (scroll-driven sites), `21st-dev` (ready components). Review any script they ship before running.
-
-Prompts: `audit-motion-and-3d-performance`, `enhance-view-transitions`, `generate-scroll-driven-sequences`, `generate-3d-foundation`, `generate-shader-experience`.
-
-## From helen-a11y-perf
-
-# Accessibility and Performance Pass
-
-Fix basic, high-impact accessibility and performance problems. Evidence over guesswork.
-
-## Accessibility
-
-Minimum checks:
-
-- Keyboard navigation reaches every interactive element in a sensible order; focus is always visible.
-- Color contrast is sufficient; the main flow does not depend only on color or hover.
-- Semantic HTML (landmarks, headings in order, buttons vs links), labelled form fields, alt text for content images.
-- Basic screen reader support; respects `prefers-reduced-motion`.
-
-Beyond the checklist: clear error text, predictable interfaces, easy error recovery, plain language.
-
-Limit: do not add wrong or redundant ARIA just to look accessible ("aria theater"). Native semantics first.
-
-## Performance
-
-Minimum checks:
-
-- Asset and bundle sizes, unnecessary network calls, redundant re-renders, inefficient loops, blocking synchronous work on the main thread, initial load time.
-- Prefer the smallest change that improves perceived speed: loading placeholders, lazy-loaded images, paginated data.
-
-Limits: no premature micro-optimization without profiling evidence; no complex caching, debounce, or memoization without understanding its lifecycle; never trade correctness for milliseconds.
-
-For animation-heavy or 3D sites, define a performance budget first (frame rate, JS weight, LCP) and verify against it.
-
-## Delivery format (minimal)
-
-```text
-Improvements applied. / Completed with warnings.
-
-Changes applied:
-- 1-3 bullets
-
-Manual actions needed:
-- None. / specific actions
-```
+When applying design improvements, output the smallest set of changes with the highest perceived impact. Provide concrete before/after code blocks and explain the art direction intent behind the choices. Do not overwhelm the user with long theoretical essays; focus on the code and visual results.

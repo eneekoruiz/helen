@@ -272,7 +272,7 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
         const results = runDoctor(cwd);
         const issues = results.filter(r => r.status !== 'ok');
 
-        let autoFixReport: any = null;
+        let autoFixReport: Record<string, unknown> | null = null;
         if (args.fix) {
           const { repairDoctorIssues } = await import('./doctorFix.js');
           autoFixReport = repairDoctorIssues(cwd);
@@ -411,7 +411,7 @@ export function startMcpServer(input: NodeJS.ReadableStream = process.stdin, out
     terminal: false,
   });
 
-  const sendResponse = (response: any) => {
+  const sendResponse = (response: Record<string, unknown>) => {
     output.write(JSON.stringify(response) + '\n');
   };
 

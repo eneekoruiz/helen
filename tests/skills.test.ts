@@ -81,7 +81,7 @@ describe('Skills installer', () => {
     expect(new Set(names).size).toBe(names.length);
     for (const flow of flows) {
       const content = flow.files!['SKILL.md']!;
-      expect(content).toMatch(new RegExp(`^---\\nname: ${flow.name}\\ndescription: ".+"\\n---`));
+      expect(content).toMatch(new RegExp(`^---\\r?\\nname: ${flow.name}\\r?\\ndescription: ".+"\\r?\\n---`));
       expect(content).not.toMatch(/\]\([^)]*\.md\)/);
       expect(content).not.toContain('## Objetivo');
     }
