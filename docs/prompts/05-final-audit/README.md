@@ -38,4 +38,5 @@ Before moving on to 06-release:
 | [audit-public-presentation](presentation/AUDIT-public-presentation.md) | AUDIT | Decide whether the project deserves public exposure and whether README, screenshots, GitHub metadata and Open Graph match reality. |
 | [audit-holistic-improvements-scanner](quality/AUDIT-holistic-improvements-scanner.md) | AUDIT | Exhaustive scan for repository improvements across 6 dimensions with interactive scoping and autonomous convergence loops. |
 | [audit-technical-debt-backlog](quality/AUDIT-technical-debt-backlog.md) | AUDIT | Audit codebase for technical debt, legacy patterns, and prioritize a structured mitigation backlog. |
+| [enhance-simplify-document](quality/ENHANCE-simplify-document.md) | ENHANCE | Surgical document simplification pass — same content, lighter language. Applies KISS and DRY without altering structure or meaning. |
 <!-- HELEN:INDEX:END -->
