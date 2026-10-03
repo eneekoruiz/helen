@@ -155,7 +155,11 @@ export function registerProgressCommands(program: Command) {
       if (run.results.length === 0) {
         logger.warn('No typecheck, lint, test or build scripts found in package.json.');
       }
-      run.ok ? logger.success('Checks passed.') : logger.error('Checks failed.');
+      if (run.ok) {
+        logger.success('Checks passed.');
+      } else {
+        logger.error('Checks failed.');
+      }
       process.exitCode = run.ok ? 0 : 3;
     });
 }

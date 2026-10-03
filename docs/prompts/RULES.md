@@ -41,9 +41,28 @@ Each prompt's `## Output` section overrides this default.
 - Never skip, delete or weaken a test, lint rule or checkpoint to get a green result.
 - Never install or connect a third-party skill, plugin, CLI or MCP server without showing its commands and getting approval.
 
-## Verification loop
+## Verification loop & Gates
 
-For changes: apply, run the project's checks (`helen check` or its own build, lint, typecheck and tests), re-apply only if a material gap remains (at most two retries), then report. No claims of perfection while risks remain.
+- **Continuous Convergence**: For changes: apply, run the project's checks (`helen check` or its own build, lint, typecheck, tests, and local CI emulation), re-apply only if a material gap remains (at most two retries), then report. No claims of perfection while risks remain.
+- **Mandatory Playwright + Chromium E2E Gate (UI & Frontend)**: For all visual, design, layout, or user-facing features, execute Playwright with Chromium (headless). Validate real DOM rendering, responsive viewport behavior (mobile 375px, tablet 768px, desktop 1440px), interactive states, and ensure zero unhandled browser console errors. A visual feature is never complete until proven in Chromium.
+
+## The Senior Model Cascade Protocol (Cost & Token Optimization)
+
+Senior workflow always minimizes token expenditure by cascading models from cheapest to most capable:
+1. **Tier 1 (Eco / Light)**: Always attempt the task with the smallest, cheapest model available (`flash_lite`, `haiku`, `gpt-4o-mini`).
+2. **Automated Verification**: Run deterministic checks (typecheck, lint, unit tests, Playwright Chromium render).
+3. **Escalate on Failure**:
+   - If Tier 1 output passes all verification gates → **ACCEPT immediately** (saving up to 90% of token costs).
+   - If Tier 1 fails or generates broken code → escalate to **Tier 2 (Workhorse)** (`flash`, `sonnet`, `gpt-4o`).
+   - If Tier 2 fails complex invariants or reasoning ceilings → escalate to **Tier 3 (Frontier / Flagship)** (`pro`, `opus`, `o1`, `gpt-4.5`).
+4. Never jump directly to the most expensive flagship model when a deterministic test gate can validate a smaller model's output.
+
+## Token Minimization & Parallel Subagent Orchestration
+
+- **Subagent Parallelism**: Decompose multi-file or multi-domain tasks into focused, parallel subagents (e.g. styles, API, tests, QA) with isolated contexts rather than bloating a single conversational context window.
+- **Reactive Event Handling**: Avoid polling loops or repetitive status queries that consume unnecessary tokens; react to completion events.
+- **Dense Output**: Deliver high-density code diffs and verification tables. Omit conversational filler, apologies, or speculative preambles.
+- **English Prompt Compression**: Prompts and internal technical instructions are drafted in English to exploit BPE tokenizer compression (saving 30% to 50% token overhead). Always answer the user in their preferred language.
 
 ## Memory
 

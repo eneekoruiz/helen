@@ -18,15 +18,26 @@ Before starting design passes or visual overhauls, present an interactive questi
 
 ### 2. Autonomous Design Convergence Loop
 Once visual intent is locked, run an autonomous loop until completion:
-**Audit Visuals / A11y → Refactor Components → Verify (Build, Responsiveness, WCAG AA) → Repeat**
+**Audit Visuals / A11y → Refactor Components → Verify (Build, Playwright Chromium, Responsiveness, WCAG AA) → Repeat**
 Do not pause to ask intermediate questions on color codes or spacing values. Drive the design to Level 100 Apple-grade polish autonomously.
 
-### 3. Specialized Subagents
-- **Visual & Layout Subagent**: Validates grid harmony, optical contrast, and typography hierarchy.
-- **Accessibility & Motion Subagent**: Audits WCAG contrast, keyboard navigation, and prefers-reduced-motion fallbacks.
+### 3. The Senior Model Cascade Protocol
+Always minimize design token burn by cascading models from cheapest to most capable:
+- **Tier 1 (Eco / Light)**: First attempt component styling, token updates, and layout scaffolding with the cheapest/smallest model (`flash_lite`, `haiku`, `gpt-4o-mini`).
+- **Automated Chromium Gate**: Run Playwright headless Chromium tests against the component.
+- **Escalation Trigger**: If Tier 1 passes Playwright render and visual checks, **ACCEPT immediately** (saving up to 90% tokens). If rendering fails, layout overflows, or complex responsive micro-interactions are broken, escalate to **Tier 2 (Workhorse)** (`flash`, `sonnet`, `gpt-4o`), and only invoke **Tier 3 (Flagship)** (`pro`, `opus`) for complex shader math, 3D Canvas scenes, or intricate SVG generative art.
 
-### 4. Extreme Token Economy
-Focus strictly on before/after component diffs, design tokens, and visual verification results. Avoid generic design theory essays.
+### 4. Mandatory Playwright + Chromium E2E Testing Gate
+**A visual change is NEVER considered complete without real browser execution:**
+- Execute headless Chromium via Playwright on the affected routes or component previews.
+- **Viewport Triad**: Verify optical rendering across 3 mandatory viewports: Mobile (375x667), Tablet (768x1024), Desktop (1440x900).
+- **Console Hygiene**: Zero uncaught JavaScript exceptions, zero CSP violations, zero 404 image assets in browser logs.
+- **Layout Stability**: Assert no horizontal viewport overflow (`scrollWidth <= clientWidth`) and no clipped text elements.
+
+### 5. Specialized Subagents & Token Minimization
+- **Visual & Layout Subagent**: Validates grid harmony, optical contrast, and typography hierarchy in parallel.
+- **Accessibility & Motion Subagent**: Audits WCAG contrast, keyboard navigation, and prefers-reduced-motion fallbacks.
+- **Extreme Token Economy**: Focus strictly on before/after component diffs, design tokens, and visual verification results. Avoid generic design theory essays. Use English prompts for 30-50% BPE token compression.
 
 ## The Anti-Slop & Premium Art Direction Principles
 

@@ -151,7 +151,7 @@ export function readPrompt(
     }
   }
   if (options?.level100 !== false && entry.kind !== 'master' && entry.kind !== 'guide') {
-    content += `\n\n---\n> **HELEN Level 100 Execution Mandate**: This prompt is the Level 0 baseline. You possess sovereign technical authority and broad mandate ("manga ancha") to proactively search for, surface, and resolve adjacent bugs, unhandled errors, and architectural weaknesses along the path. Always deliver Level 100 excellence.\n`;
+    content += `\n\n---\n> **HELEN Level 100 Execution Mandate**: This prompt is the Level 0 baseline. You possess sovereign technical authority and broad mandate ("manga ancha") to proactively search for, surface, and resolve adjacent bugs, unhandled errors, and architectural weaknesses along the path. Always deliver Level 100 excellence.\n>\n> **Execution protocol (applies to every prompt, see RULES.md)**:\n> 1. **Model cascade**: run the task on the cheapest/smallest model first; audit the result with deterministic gates (typecheck, lint, tests, CI, browser); escalate to the next tier only on verified failure, up to the most capable model.\n> 2. **Parallelism**: split independent work into parallel subagents with isolated context; never poll, react to completions; dense output, no filler.\n> 3. **Browser proof**: any UI or visual change is verified in headless Chromium via Playwright (375, 768 and 1440 px, zero console errors) before it counts as done.\n> 4. **No false 10/10**: never approve without running the repository's full CI pipeline locally.\n`;
   }
   if (options?.replyLang) {
     content += `\n\n---\n**Reply Language**: Please respond in ${options.replyLang}.\n`;

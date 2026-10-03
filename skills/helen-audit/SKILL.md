@@ -30,17 +30,25 @@ Continue iterating autonomously until the Craftsmanship Score reaches **100/100 
 - Execute each of these commands locally.
 - **Hard Gate**: If ANY step in the CI pipeline fails, the score is strictly capped below 80 (`DEFECTIVE`). A project cannot be declared impeccable if a git push would fail in GitHub Actions.
 
-### 4. Specialized Subagent Orchestration
+### 4. Mandatory Playwright + Chromium Testing Gate (Frontend & UI)
+For web applications, UI components, and client-facing pages, code cannot be certified without real browser execution:
+- Execute Playwright with headless Chromium across mobile (375px), tablet (768px), and desktop (1440px) viewports.
+- Confirm zero uncaught runtime exceptions, zero unhandled promise rejections, zero missing assets (404), and no layout overflow bugs.
+- If no Playwright suite exists, scaffold and run a minimal headless Chromium smoke test before granting approval.
+
+### 5. Senior Model Cascade Protocol
+- Start audit sweeps and initial remediation passes using the lowest/cheapest model tier.
+- Run deterministic gates (lint, tests, Chromium E2E).
+- If the small model solves the problem cleanly, accept it immediately (saving up to 90% tokens).
+- Escalate to intermediate or flagship tiers only when the small model fails complex verification or architecture boundaries.
+
+### 6. Specialized Subagent Orchestration & Token Economy
 For deep or multi-domain repositories, decompose the audit by launching specialized subagents:
 - **Research / Explorer Subagent**: Maps call graphs, dependencies, and external boundary contracts.
 - **Security Auditor Subagent**: Deep dive into OWASP Top 10, secret leaks, injection risks, and dependency CVEs.
 - **QA & Stress Subagent**: Adversarial testing, race conditions, edge-case generation, and test execution.
-- **Visual & Anti-Slop Subagent**: Scans UI components, contrast, typography rhythm, and eliminates generic AI tropes.
-
-### 5. Extreme Token Economy & English Prompt Efficiency
-- Deliver high-density, zero-fluff responses with concise diffs and verification tables.
-- Omit conversational filler, polite preambles, and speculative essays.
-- For maximum token compression, internal prompts and technical reasoning are conducted in English, taking advantage of BPE tokenizer efficiency (saving 30% to 50% token overhead compared to non-English languages).
+- **Visual & Anti-Slop Subagent**: Scans UI components with Playwright Chromium, contrast, typography rhythm, and eliminates generic AI tropes.
+- **Extreme Token Economy**: Deliver high-density, zero-fluff responses with concise diffs and verification tables. Draft prompts in English for 30-50% BPE token compression. Avoid polling loops; react asynchronously.
 
 ## The 6 Dimensions of Auditing
 
@@ -91,4 +99,5 @@ For deep or multi-domain repositories, decompose the audit by launching speciali
 - ✅ Lint: 0 warnings/errors
 - ✅ Test Suite: 100% passing
 - ✅ Continuous Integration (CI): 100% passing (all jobs from .github/workflows verified locally)
+- ✅ Playwright + Chromium E2E: 100% passing (0 console errors, mobile/tablet/desktop viewports verified)
 ```

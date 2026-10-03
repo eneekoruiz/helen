@@ -24,6 +24,12 @@ When the user asks you to "reprompt" or use `helen-reprompt` on a request, you m
 3. **Reasoning & Code Alignment:**
    - Over 90% of model pre-training data for software engineering, GitHub repositories, and API documentation is in English. Translating the prompt into technical English activates richer latent representations and produces cleaner, bug-free implementations on the first try.
 
+4. **The Senior Model Cascade (Token & Cost Minimizer):**
+   - Start with the smallest/cheapest model tier (e.g., `flash_lite`, `haiku`, `gpt-4o-mini`).
+   - Run automated verification gates (lint, typecheck, tests, Playwright Chromium).
+   - If green, accept immediately (saving 80-90% token cost).
+   - If failed, escalate sequentially to intermediate tier (`flash`, `sonnet`, `gpt-4o`) and finally flagship tier (`pro`, `opus`, `o1`). Never start with the most expensive model when a smaller model can succeed.
+
 ---
 
 ## 🛠️ Execution Protocol
@@ -32,7 +38,8 @@ When the user asks you to "reprompt" or use `helen-reprompt` on a request, you m
 Analyze the user's messy prompt:
 - What is their actual objective?
 - Are there critical ambiguities or trade-offs? (e.g. Should Clean Code & large refactoring be touched or strictly excluded?). If critical trade-offs exist, formulate a targeted interactive questionnaire for the user.
-- Can this task be parallelized or decomposed using **Specialized Subagents**?
+- Can this task be parallelized or decomposed using **Specialized Subagents** to conserve context tokens?
+- Does this involve UI/frontend work requiring the **Mandatory Playwright + Chromium E2E Gate**?
 
 ### Step 2: The Rewrite (Output this to the user in English)
 Formulate the ultimate prompt in **English** using this high-efficiency structure:
@@ -40,19 +47,21 @@ Formulate the ultimate prompt in **English** using this high-efficiency structur
 ### 🎯 Context & Goal
 [Clear, precise definition of what needs to be built, audited, or fixed]
 
-### 🔄 Execution Mode: Autonomous Convergence Loop
+### 🔄 Execution Mode: Autonomous Convergence Loop & Model Cascade
+- Model Tier: Start with the lowest/cheapest model tier; verify via deterministic gates; escalate only upon verified failure.
 - Execute continuously: Audit/Implement → Test → Verify → Re-audit until 100% complete.
 - Zero intermediate pauses or permission halts.
 - Conserve tokens: deliver high-density diffs and tables with zero conversational filler.
-- Delegate complex subtasks to specialized subagents (e.g. research, QA, security) where applicable.
+- Delegate complex or multi-file subtasks to specialized subagents in parallel with isolated contexts.
 
 ### 🚧 Constraints & Invariants
 - [Rule 1: e.g., Zero 'any' types or loose casts]
 - [Rule 2: e.g., Clean code refactor included OR strictly isolated to functional bug fixes]
 - [Rule 3: e.g., Mandatory CI pipeline emulation: must pass all steps from .github/workflows/ci.yml locally]
+- [Rule 4: e.g., Mandatory Playwright + Chromium verification: UI must pass headless browser rendering & interaction tests with zero console errors]
 
 ### 📋 Expected Output
-[Exact file paths, concise diffs, and deterministic verification gates]
+[Exact file paths, concise diffs, and deterministic verification gates (including CI & Playwright Chromium)]
 ```
 
 ### Step 3: Self-Execution
