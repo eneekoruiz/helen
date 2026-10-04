@@ -16,7 +16,7 @@ Design a complete quality methodology for a repository instead of running isolat
 
 ## Use when
 
-- Setting up how a project (or HELEN itself) guarantees quality; after several improvement rounds, before final audits.
+- Setting up how a project (or HELEN itself) verifies quality; after several improvement rounds, before final audits.
 
 ## Requirements
 

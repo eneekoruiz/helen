@@ -4,6 +4,7 @@ import { createEmptyResult } from '../../core/context.js';
 import { patchPackageJson, readJson, writeFileSafe } from '../../core/fs.js';
 import fs from 'node:fs';
 import path from 'node:path';
+import { recordFileResult } from '../results.js';
 
 const meta: HelenModule['meta'] = {
   id: 'guardrails',
@@ -30,25 +31,29 @@ const meta: HelenModule['meta'] = {
 const preCommit = `#!/bin/sh
 # HELEN pre-commit: fast checks on staged files only, no dependencies.
 # Skip once with: git commit --no-verify
-fail=0
-files=$(git diff --cached --name-only --diff-filter=ACM)
-[ -z "$files" ] && exit 0
-
-for f in $files; do
-  case "$f" in
-    *.env|.env|.env.*|*/.env|*/.env.*)
-      case "$f" in *.example|*.sample|*.template) ;; *) echo "✖ $f: environment files must not be committed"; fail=1 ;; esac ;;
-  esac
-  [ -f "$f" ] || continue
-  size=$(wc -c < "$f")
-  if [ "$size" -gt 5242880 ]; then echo "✖ $f: larger than 5 MB (use Git LFS or external storage)"; fail=1; fi
-  if git diff --cached -U0 -- "$f" | grep -qE '^\\+(<<<<<<<|>>>>>>>) '; then echo "✖ $f: merge conflict markers"; fail=1; fi
-  if git diff --cached -U0 -- "$f" | grep -qE '^\\+.*(-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{36}|sk-(live|proj)-[A-Za-z0-9_-]{16,}|xox[baprs]-[A-Za-z0-9-]{10,})'; then
-    echo "✖ $f: looks like it contains a secret (value not shown)"; fail=1
-  fi
-done
-
-[ "$fail" -eq 0 ] || { echo "Commit blocked by .githooks/pre-commit"; exit 1; }
+node --input-type=commonjs <<'HELEN_NODE'
+const { execFileSync } = require('node:child_process');
+const path = require('node:path');
+const git = (...args) => execFileSync('git', args, { maxBuffer: 32 * 1024 * 1024 });
+let failed = false;
+try {
+  const files = git('diff', '--cached', '--name-only', '-z', '--diff-filter=ACMR').toString().split('\\0').filter(Boolean);
+  for (const file of files) {
+    const fail = (reason) => { console.error('✖ ' + JSON.stringify(file) + ': ' + reason); failed = true; };
+    const name = path.posix.basename(file);
+    if ((name === '.env' || name.startsWith('.env.') || name.endsWith('.env')) && !/\\.(example|sample|template)$/.test(name)) fail('environment files must not be committed');
+    const blob = git('show', ':' + file);
+    if (blob.length > 5242880) fail('larger than 5 MB (use Git LFS or external storage)');
+    const content = blob.toString();
+    if (/^(<<<<<<<|>>>>>>>) /m.test(content)) fail('merge conflict markers');
+    if (/-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{36}|sk-(live|proj)-[A-Za-z0-9_-]{16,}|xox[baprs]-[A-Za-z0-9-]{10,}/.test(content)) fail('looks like it contains a secret (value not shown)');
+  }
+} catch {
+  console.error('Unable to inspect staged files; commit blocked.');
+  failed = true;
+}
+if (failed) { console.error('Commit blocked by .githooks/pre-commit'); process.exit(1); }
+HELEN_NODE
 `;
 
 const prePush = `#!/bin/sh
@@ -95,9 +100,9 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
     ['.github/dependabot.yml', dependabot],
   ];
   for (const [rel, content] of files) {
-    const status = writeFileSafe(path.join(cwd, rel), content, { dryRun, force });
+    const status = writeFileSafe(path.join(cwd, rel), content, { dryRun, force, root: cwd });
     if (status === 'created' || status === 'overwritten') {
-      result.created.push(rel);
+      recordFileResult(result, rel, status);
       if (!dryRun && rel.startsWith('.githooks/')) fs.chmodSync(path.join(cwd, rel), 0o755);
     } else {
       result.skipped.push(rel);
@@ -107,7 +112,7 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
   const pkg = readJson<{ scripts?: Record<string, string> }>(path.join(cwd, 'package.json'));
   if (pkg && !pkg.scripts?.prepare) {
     const status = patchPackageJson(cwd, { scripts: { prepare: 'git config core.hooksPath .githooks || true' } }, { dryRun });
-    if (status === 'modified') result.modified.push('package.json');
+    recordFileResult(result, 'package.json', status);
     result.nextSteps.push('Run your package manager install once to activate the hooks');
   } else {
     result.nextSteps.push('Activate the hooks: git config core.hooksPath .githooks (a prepare script already exists)');

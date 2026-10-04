@@ -6,28 +6,15 @@ version: 2.1.0
 
 # Data, Schema and API Contracts (Backend Master Skill)
 
-Robust backends eliminate contradictory domain states, enforce runtime validation at boundaries, and guarantee idempotent mutations. `helen-backend` audits and refactors backend architecture with mathematical rigor.
+Robust backends eliminate contradictory domain states, enforce runtime validation at boundaries, and verify mutation idempotency. `helen-backend` audits and refactors backend architecture with mathematical rigor.
 
-## Operating Principles
+## Execution contract
 
-### 1. Interactive Scoping Questionnaire
-Before mutating API endpoints or data models, clarify trade-offs via a structured questionnaire:
-- **Breaking Changes**: Zero tolerance (strict backwards compatibility with deprecation headers) vs. version bump permitted?
-- **Migration & Persistence**: Are migrations transactional with rollback scripts, or stateless prototyping?
-- **Clean Code vs. Fast Patch**: Refactor underlying service architecture or apply a surgical schema patch?
-
-### 2. Autonomous Convergence Loop
-Once contract boundaries are defined:
-**Schema Audit → Type & Runtime Validation (Zod/Valibot) → Idempotency Verification → Regression Testing → Repeat**
-Iterate autonomously until all endpoints and database models pass contract tests with zero defects.
-
-### 3. Specialized Subagents
-- **Contract & Schema Subagent**: Inspects serialization, nullability, enum exhaustiveness, and OpenAPI spec parity.
-- **Migration & Concurrency Subagent**: Analyzes race conditions, N+1 query patterns, and double-submit transaction safety.
-
-### 4. Extreme Token Economy
-Communicate purely through TypeScript interfaces, Zod schemas, HTTP status matrices, and reproducible curl/fetch snippets. Zero fluff.
-
+- Preserve intent, exclusions and authorization. Audit-only stays read-only. Reuse context; ask only for essential unknowns.
+- Define observable acceptance, baseline and verification before edits. Verify domain outcomes, compatibility and reproducible CI commands; report unavailable checks and residual risks.
+- Inspect → act → verify → re-audit → discover further evidence-backed improvements → repeat. After initial checks, find more actionable improvements without another user request. Apply when authorized, otherwise report. No arbitrary retry cap. Finish when acceptance passes and fresh discovery finds no further actionable improvement within scope, or disclose an external blocker. Change failing hypotheses; respect cancellation and explicit resource limits.
+- Start with the cheapest available model when selectable; escalate only for verified failure or unresolved reasoning. State unavailable controls.
+- Delegate independent domains to focused specialist agents with exclusive ownership; integrate and verify. Reuse evidence, batch reads, avoid polling and duplicate output. Write concise English instructions; answer in the user's language. Measure tokens/cost; never claim fixed savings or perfection.
 ## Contract Review Checklist
 
 1. Identify public and internal APIs, CLI contracts, config schemas, webhooks, and third-party integrations.

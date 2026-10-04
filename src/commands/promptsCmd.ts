@@ -1,7 +1,7 @@
-import { Command } from 'commander';
+import { Command, InvalidArgumentError } from 'commander';
 import { isJsonMode, printJsonAndExit } from '../core/jsonOutput.js';
 import { logger } from '../core/logger.js';
-import { printPromptContent, printPromptList, printPromptPath, searchPrompts, shortId, listPromptEntries, resolvePromptEntry, readPrompt, findPromptOverlaps, type PromptKind } from '../core/prompts.js';
+import { printPromptList, printPromptPath, searchPrompts, shortId, listPromptEntries, resolvePromptEntry, readPrompt, findPromptOverlaps, type PromptKind } from '../core/prompts.js';
 import { updatePhaseIndexes } from '../core/promptIndex.js';
 import { runLint } from '../index.js';
 
@@ -97,7 +97,8 @@ export function registerPromptsCommands(program: Command) {
     .description('Print a prompt, step, checkpoint, or flow')
     .option('--fill <pairs...>', 'Fill variables in format key=value')
     .option('--reply-lang <lang>', 'Target language for the AI response (e.g. es, en, fr)')
-    .action((promptName: string, opts: { fill?: string[]; replyLang?: string }) => {
+    .option('--no-protocol', 'Omit shared rules only when already loaded in the agent session')
+    .action((promptName: string, opts: { fill?: string[]; replyLang?: string; protocol: boolean }) => {
       try {
         const entry = resolvePromptEntry(promptName);
         const fillDict: Record<string, string> = {};
@@ -107,7 +108,7 @@ export function registerPromptsCommands(program: Command) {
             if (k && rest.length > 0) fillDict[k] = rest.join('=');
           }
         }
-        const content = readPrompt(promptName, undefined, { fill: Object.keys(fillDict).length ? fillDict : undefined, replyLang: opts.replyLang });
+        const content = readPrompt(promptName, undefined, { fill: Object.keys(fillDict).length ? fillDict : undefined, replyLang: opts.replyLang, protocol: opts.protocol });
         if (isJsonMode()) {
           printJsonAndExit('prompts:show', {
             id: shortId(entry),
@@ -137,9 +138,15 @@ export function registerPromptsCommands(program: Command) {
   prompts
     .command('overlaps')
     .description('Identify overlapping prompts by word-set Jaccard similarity')
-    .option('--threshold <val>', 'Similarity threshold between 0.0 and 1.0', '0.45')
-    .action((opts: { threshold: string }) => {
-      const thresh = parseFloat(opts.threshold) || 0.45;
+    .option('--threshold <val>', 'Similarity threshold between 0.0 and 1.0', value => {
+      const threshold = Number(value);
+      if (!value.trim() || !Number.isFinite(threshold) || threshold < 0 || threshold > 1) {
+        throw new InvalidArgumentError('Threshold must be a number between 0 and 1.');
+      }
+      return threshold;
+    }, 0.45)
+    .action((opts: { threshold: number }) => {
+      const thresh = opts.threshold;
       const overlaps = findPromptOverlaps(undefined, thresh);
       if (isJsonMode()) {
         printJsonAndExit('prompts:overlaps', {
@@ -192,10 +199,11 @@ export function registerPromptsCommands(program: Command) {
   prompts
     .command('flow <flow>')
     .description('Print an executable flow such as full-polish, release-candidate, or client-delivery')
-    .action((flow: string) => {
+    .option('--no-protocol', 'Omit shared rules only when already loaded in the agent session')
+    .action((flow: string, opts: { protocol: boolean }) => {
       try {
         const entry = resolvePromptEntry(flow);
-        const content = readPrompt(flow);
+        const content = readPrompt(flow, undefined, { protocol: opts.protocol });
         if (isJsonMode()) {
           printJsonAndExit('prompts:flow', {
             id: shortId(entry),
@@ -206,7 +214,7 @@ export function registerPromptsCommands(program: Command) {
           });
           return;
         }
-        printPromptContent(flow);
+        console.log(content);
       } catch (err) {
         if (isJsonMode()) {
           printJsonAndExit('prompts:flow', {}, {

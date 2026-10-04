@@ -95,14 +95,18 @@ export function runAgentDoctor(cwd: string): DoctorCheck[] {
   }
 
   if (fs.existsSync(path.join(cwd, '.helen'))) {
-    const progress = readProgress(cwd);
-    if (progress) {
-      const index = currentIndex(progress);
-      checks.push({
-        label: 'Tracked plan',
-        status: 'ok',
-        message: index === -1 ? `"${progress.goal}" finished` : `"${progress.goal}" at step ${index + 1}/${progress.steps.length}. Continue: helen next`,
-      });
+    try {
+      const progress = readProgress(cwd);
+      if (progress) {
+        const index = currentIndex(progress);
+        checks.push({
+          label: 'Tracked plan',
+          status: 'ok',
+          message: index === -1 ? `"${progress.goal}" finished` : `"${progress.goal}" at step ${index + 1}/${progress.steps.length}. Continue: helen next`,
+        });
+      }
+    } catch (err) {
+      checks.push({ label: 'Tracked plan', status: 'error', message: `${err instanceof Error ? err.message : String(err)}. Restore .helen/progress.json from a valid backup.` });
     }
     if (!isIgnored(cwd, '.helen')) checks.push({ label: '.gitignore', status: 'warn', message: '.helen/ (local progress) is not ignored' });
   }

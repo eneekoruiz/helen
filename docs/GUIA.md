@@ -16,6 +16,19 @@ HELEN es un repositorio con **tres capas** más un **cerebro** que las conecta:
 
 ## 1. Dónde ver lo que hay
 
+Para revisar cambios de scaffolding antes de ejecutarlos, usa `helen add quality
+--preview --force`, `helen update --preview` o `helen init --preview`. La vista
+previa muestra diferencias, dependencias y copias previstas sin escribir; admite
+`--json`. El contenido de archivos de entorno y credenciales se oculta.
+
+Las operaciones de módulos, generación, expulsión y rollback guardan un registro
+antes de modificar archivos. Si se interrumpen, `helen recover` lista el comando
+de recuperación; `helen recover <id> --dry-run` lo valida y `helen recover <id>`
+restaura el estado anterior. Si hay ediciones posteriores, se detiene para
+preservarlas. Los registros locales de `.helen/operations` se excluyen de Git y
+se eliminan al completar la operación. La instalación de dependencias, `init-project`, setup,
+skills y herramientas externas queda fuera de este registro de archivos.
+
 | Quieres ver... | Comando |
 |---|---|
 | Todos los prompts, flows y checkpoints | `helen prompts list` (filtra con `--kind flow`) |
@@ -172,19 +185,16 @@ La fase detectada por `helen apply` es una **estimación** basada en archivos (p
 |---|---|
 | helen-apply | Punto de entrada: detecta fase y aplica la meta |
 | helen-router | Solo saber en qué fase estás |
-| helen-clean-code | Refactor seguro, cero código muerto |
-| helen-premium-design | Diseño premium y anti-plantilla (+ vocabulario y patrones de layout) |
-| helen-a11y-perf | Accesibilidad y rendimiento |
-| helen-copy-cro | Textos, claims y conversión |
-| helen-motion-3d | Animación, scroll, 3D con presupuesto |
+| helen-audit | Calidad, refactor seguro, QA, rendimiento y observabilidad |
+| helen-design | Diseño, accesibilidad, animación, scroll y 3D |
+| helen-copy | Textos, claims y conversión |
 | helen-security | Secretos, inyecciones, dependencias |
-| helen-seo-compliance | SEO, i18n, privacidad |
-| helen-qa-scale | QA adversarial, escala, observabilidad |
-| helen-release | Release candidate |
-| helen-client-handoff | Entrega a cliente |
+| helen-release | Release candidate, SEO, privacidad y entrega a cliente |
 | helen-strategy | Benchmark, roadmap, ROI |
-| helen-data-api | Contratos de API y modelo de datos |
+| helen-backend | Contratos de API y modelo de datos |
 | helen-knowledge | ADRs, contexto para IA, runbook |
+| helen-implementa | Implementación autónoma con verificación |
+| helen-reprompt | Aclarar y mejorar una petición antes de ejecutarla |
 
 ## 7. Herramientas de terceros (catálogo) y seguridad
 

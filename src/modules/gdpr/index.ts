@@ -1,3 +1,4 @@
+import { recordFileResult } from '../results.js';
 import type { HelenModule } from '../types.js';
 import type { HelenContext, ModuleResult } from '../../core/context.js';
 import { createEmptyResult } from '../../core/context.js';
@@ -90,7 +91,7 @@ export function CookieBanner() {
 }
 `;
 
-  const context = `import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+  const context = `import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
 type Consent = 'accepted' | 'denied' | 'undecided';
 
@@ -106,18 +107,22 @@ export function CookieProvider({ children }: { children: ReactNode }) {
   const [consent, setConsent] = useState<Consent>('undecided');
 
   useEffect(() => {
-    const saved = localStorage.getItem('cookie-consent') as Consent;
-    if (saved) setConsent(saved);
+    try {
+      const saved = localStorage.getItem('cookie-consent');
+      if (saved === 'accepted' || saved === 'denied') setConsent(saved);
+    } catch {
+      // Consent stays undecided when storage is unavailable.
+    }
   }, []);
 
   const acceptAll = () => {
     setConsent('accepted');
-    localStorage.setItem('cookie-consent', 'accepted');
+    try { localStorage.setItem('cookie-consent', 'accepted'); } catch { /* Keep consent in memory. */ }
   };
 
   const denyAll = () => {
     setConsent('denied');
-    localStorage.setItem('cookie-consent', 'denied');
+    try { localStorage.setItem('cookie-consent', 'denied'); } catch { /* Keep consent in memory. */ }
   };
 
   return (
@@ -134,10 +139,23 @@ export function useCookieConsent() {
 }
 `;
 
-  writeFileSafe(path.join(cwd, 'src/components/CookieBanner.tsx'), banner, { dryRun, force });
-  writeFileSafe(path.join(cwd, 'src/context/CookieContext.tsx'), context, { dryRun, force });
-  
-  result.created.push('src/components/CookieBanner.tsx', 'src/context/CookieContext.tsx');
+  const files: Array<[string, string]> = [
+    ['src/components/CookieBanner.tsx', banner],
+    ['src/context/CookieContext.tsx', context],
+    ...(['PrivacyPolicy', 'CookiePolicy', 'Terms'] as const).map((name): [string, string] => [
+      `src/pages/legal/${name}.tsx`,
+      `/** Replace this placeholder with your reviewed policy before publishing. */
+export function ${name}() {
+  return <main><h1>${name === 'Terms' ? 'Terms of Service' : name === 'PrivacyPolicy' ? 'Privacy Policy' : 'Cookie Policy'}</h1><p>Policy pending review. Add your organization, contact details, data processing purposes, retention periods and applicable rights here.</p></main>;
+}
+`,
+    ]),
+  ];
+  for (const [file, content] of files) {
+    const status = writeFileSafe(path.join(cwd, file), content, { dryRun, force, root: cwd });
+    recordFileResult(result, file, status);
+  }
+  result.nextSteps.push(...meta.nextSteps);
 
   return result;
 }

@@ -1,5 +1,5 @@
 import pc from 'picocolors';
-import { listPromptEntries, readPrompt, type PromptEntry } from './prompts.js';
+import { listPromptEntries, readPromptEntry, type PromptEntry } from './prompts.js';
 import { readPlaybooks, type PlaybookStep } from './apply.js';
 
 export interface TokenEstimate {
@@ -18,6 +18,7 @@ export interface TokenEstimate {
 }
 
 export interface TokenBudgetSummary {
+  measurement: { kind: 'estimate'; method: 'characters/3.8'; pricing: 'historical-reference'; includes: 'input-only' };
   target: string;
   totalPrompts: number;
   totalTokens: number;
@@ -61,9 +62,9 @@ export function computeTokenBudget(target?: string): TokenBudgetSummary {
   // If target matches a playbook, filter prompts in that playbook
   if (target) {
     const playbooks = readPlaybooks();
-    const playbook = playbooks.goals[target];
+    const playbook = Object.hasOwn(playbooks.goals, target) ? playbooks.goals[target] : undefined;
     if (playbook) {
-      const stepRefs = new Set(playbook.steps.filter((s: PlaybookStep) => s.kind === 'prompt').map((s: PlaybookStep) => s.ref));
+      const stepRefs = new Set(playbook.steps.filter((s: PlaybookStep) => ['prompt', 'flow', 'checkpoint'].includes(s.kind)).map((s: PlaybookStep) => s.ref));
       entries = entries.filter(e => {
         return stepRefs.has(e.id) || Array.from(stepRefs).some(ref => e.id === ref || e.id.endsWith(`/${ref}`));
       });
@@ -77,7 +78,7 @@ export function computeTokenBudget(target?: string): TokenBudgetSummary {
   let totalTokens = 0;
 
   for (const entry of entries) {
-    const content = readPrompt(entry.id) || '';
+    const content = readPromptEntry(entry);
     const words = content.trim().split(/\s+/).filter(Boolean).length;
     const tokens = estimateTokens(content);
     totalTokens += tokens;
@@ -94,6 +95,7 @@ export function computeTokenBudget(target?: string): TokenBudgetSummary {
   }
 
   return {
+    measurement: { kind: 'estimate', method: 'characters/3.8', pricing: 'historical-reference', includes: 'input-only' },
     target: target || 'all',
     totalPrompts: breakdown.length,
     totalTokens,
@@ -109,6 +111,7 @@ export function printTokenBudget(summary: TokenBudgetSummary): void {
   console.log(`  Estimated Total Tokens: ${pc.bold(pc.yellow(summary.totalTokens.toLocaleString()))}`);
   console.log();
   console.log(pc.bold('  Projected Cost (per full context pass):'));
+  console.log(pc.dim('  Approximate token counts and historical reference rates; these are not current price quotes.'));
   console.log(`    • Gemini 1.5 Flash : $${summary.totalCost.geminiFlash.toFixed(4)}`);
   console.log(`    • Gemini 1.5 Pro   : $${summary.totalCost.geminiPro.toFixed(4)}`);
   console.log(`    • Claude 3.5 Sonnet: $${summary.totalCost.claudeSonnet.toFixed(4)}`);

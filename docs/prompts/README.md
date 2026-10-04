@@ -1,6 +1,6 @@
 # HELEN Prompt Library
 
-Prompts for every moment of a project, written in English (fewer tokens), organized by phase, and connected through playbooks.
+Prompts for every moment of a project, written in concise English, organized by phase, and connected through playbooks.
 
 - **Start here:** `helen apply` detects the project phase and proposes goals. `helen apply <goal>` gives the ordered steps.
 - **Rules every prompt follows:** [RULES.md](RULES.md). **How prompts are written:** [CONTRACT.md](CONTRACT.md).

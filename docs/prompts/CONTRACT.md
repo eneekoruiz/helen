@@ -64,6 +64,12 @@ aliases:                 # optional: old ids that resolve to this prompt
 - Reference other prompts by id (`audit-final-seo`) or relative link; flows must link their steps.
 - Third-party tools are referenced through the catalog (`helen skills external <id>`), never with install commands inline.
 
+## Acceptance and evaluation
+
+Define observable outcomes, baseline behavior and evidence before changing instructions. Shared execution rules live in RULES.md; do not repeat the full protocol in each prompt. A prompt must preserve its action mode and original scope. Completion includes autonomous discovery of further evidence-backed opportunities without an arbitrary retry cap.
+
+Freeze representative task criteria before tuning. Include ambiguity, read-only exclusions, negative triggers and missing-context cases. Compare baseline and candidate fairly on task outcomes and independent judgment, tracking errors, tokens, retries and cost. Failed provider calls are unavailable evidence, not quality scores. Static lint verifies structure and cannot establish outcome quality.
+
 ## After changing prompts
 
 1. `helen prompts index` to regenerate phase indexes.

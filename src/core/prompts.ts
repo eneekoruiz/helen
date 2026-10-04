@@ -3,8 +3,17 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pc from 'picocolors';
 import { parseFrontmatter } from './frontmatter.js';
+import { EXECUTION_CONTRACT } from './executionProtocol.js';
 
 export type PromptKind = 'master' | 'guide' | 'flow' | 'checkpoint' | 'prompt';
+
+export interface ReadPromptOptions {
+  fill?: Record<string, string>;
+  replyLang?: string;
+  protocol?: boolean;
+  /** Legacy option retained for callers; prefer protocol. */
+  level100?: boolean;
+}
 
 export interface PromptEntry {
   id: string;
@@ -83,16 +92,11 @@ function toEntry(root: string, absolutePath: string, id: string, kind: PromptKin
   };
 }
 
-const cache = new Map<string, PromptEntry[]>();
-
 export function getPromptsRoot(): string {
   return PROMPTS_ROOT;
 }
 
 export function listPromptEntries(root: string = PROMPTS_ROOT): PromptEntry[] {
-  const cached = cache.get(root);
-  if (cached) return cached;
-
   const entries: PromptEntry[] = GUIDES.filter(guide => fs.existsSync(path.join(root, guide.file))).map(guide =>
     toEntry(root, path.join(root, guide.file), guide.id, guide.kind),
   );
@@ -116,14 +120,12 @@ export function listPromptEntries(root: string = PROMPTS_ROOT): PromptEntry[] {
   }
 
   entries.sort((a, b) => a.id.localeCompare(b.id));
-  cache.set(root, entries);
   return entries;
 }
 
 /** Resolve by full id, short id (file name), relative path, or a legacy alias. */
-export function resolvePromptEntry(query: string, root: string = PROMPTS_ROOT): PromptEntry {
+export function resolvePromptEntry(query: string, root: string = PROMPTS_ROOT, entries: readonly PromptEntry[] = listPromptEntries(root)): PromptEntry {
   const normalized = query.replaceAll('\\', '/').replace(/^docs\/prompts\//, '').replace(/\.md$/i, '').toLowerCase();
-  const entries = listPromptEntries(root);
   const short = (entry: PromptEntry) => entry.id.split('/').at(-1)!;
 
   const found =
@@ -141,17 +143,26 @@ export function resolvePromptEntry(query: string, root: string = PROMPTS_ROOT): 
 export function readPrompt(
   query: string,
   root: string = PROMPTS_ROOT,
-  options?: { fill?: Record<string, string>; replyLang?: string; level100?: boolean }
+  options?: ReadPromptOptions
 ): string {
   const entry = resolvePromptEntry(query, root);
+  return readPromptEntry(entry, options);
+}
+
+/** Read an already-resolved entry without rescanning the entire library. */
+export function readPromptEntry(
+  entry: PromptEntry,
+  options?: ReadPromptOptions,
+): string {
   let content = fs.readFileSync(entry.absolutePath, 'utf-8');
   if (options?.fill) {
     for (const [key, val] of Object.entries(options.fill)) {
-      content = content.replaceAll(new RegExp(`{{\\s*${key}\\s*}}`, 'g'), val);
+      const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      content = content.replace(new RegExp(`{{\\s*${escapedKey}\\s*}}`, 'g'), () => val);
     }
   }
-  if (options?.level100 !== false && entry.kind !== 'master' && entry.kind !== 'guide') {
-    content += `\n\n---\n> **HELEN Level 100 Execution Mandate**: This prompt is the Level 0 baseline. You possess sovereign technical authority and broad mandate ("manga ancha") to proactively search for, surface, and resolve adjacent bugs, unhandled errors, and architectural weaknesses along the path. Always deliver Level 100 excellence.\n>\n> **Execution protocol (applies to every prompt, see RULES.md)**:\n> 1. **Model cascade**: run the task on the cheapest/smallest model first; audit the result with deterministic gates (typecheck, lint, tests, CI, browser); escalate to the next tier only on verified failure, up to the most capable model.\n> 2. **Parallelism**: split independent work into parallel subagents with isolated context; never poll, react to completions; dense output, no filler.\n> 3. **Browser proof**: any UI or visual change is verified in headless Chromium via Playwright (375, 768 and 1440 px, zero console errors) before it counts as done.\n> 4. **No false 10/10**: never approve without running the repository's full CI pipeline locally.\n`;
+  if ((options?.protocol ?? options?.level100 ?? true) && entry.kind !== 'master' && entry.kind !== 'guide') {
+    content += `\n\n---\n${EXECUTION_CONTRACT}\n`;
   }
   if (options?.replyLang) {
     content += `\n\n---\n**Reply Language**: Please respond in ${options.replyLang}.\n`;

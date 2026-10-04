@@ -1,11 +1,27 @@
 import { Command } from 'commander';
 import { isJsonMode, printJsonAndExit } from '../core/jsonOutput.js';
-import { readProgress, formatStatus, runChecks, currentIndex, formatNext, markDone, skipStep } from '../core/progress.js';
+import { readProgress, formatStatus, runChecks, currentIndex, formatNext, markDone, skipStep, resumeProgress } from '../core/progress.js';
 import path from 'node:path';
 import fs from 'node:fs';
 import { logger } from '../core/logger.js';
+import { repositoryFingerprint } from '../core/workflowContext.js';
 
 export function registerProgressCommands(program: Command) {
+  program.command('resume')
+    .description('Resume the tracked session with decisions, repository context and current/stale verification evidence')
+    .option('--decision <text>', 'Record a durable project decision before resuming')
+    .action((opts: { decision?: string }) => {
+      try {
+        const result = resumeProgress(process.cwd(), opts.decision);
+        if (isJsonMode()) { printJsonAndExit('resume', result); return; }
+        console.log(result.instructions);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (isJsonMode()) { printJsonAndExit('resume', {}, { ok: false, errors: [message], exitCode: 1 }); return; }
+        logger.error(message);
+        process.exitCode = 1;
+      }
+    });
   // helen next / done / skip / status / check
   program
     .command('next')
@@ -36,6 +52,7 @@ export function registerProgressCommands(program: Command) {
             totalSteps: progress.steps.length,
             step: currentStep,
             progress,
+            instructions: formatNext(progress, !opts.short),
           });
           return;
         }
@@ -123,6 +140,10 @@ export function registerProgressCommands(program: Command) {
         const reportPath = path.join(process.cwd(), '.helen', 'report.html');
         fs.mkdirSync(path.dirname(reportPath), { recursive: true });
         fs.writeFileSync(reportPath, html, 'utf-8');
+        if (isJsonMode()) {
+          printJsonAndExit('status', { tracking: progress !== null, progress, reportPath });
+          return;
+        }
         logger.success(`HTML report generated at: ${reportPath}`);
         return;
       }
@@ -130,10 +151,11 @@ export function registerProgressCommands(program: Command) {
         printJsonAndExit('status', {
           tracking: progress !== null,
           progress,
+          verification: !progress?.lastCheck ? 'missing' : progress.lastCheck.fingerprint === repositoryFingerprint(process.cwd()) ? 'current' : 'stale',
         });
         return;
       }
-      console.log(progress ? formatStatus(progress) : 'Nothing is being tracked. Start with: helen apply <goal> --track');
+      console.log(progress ? formatStatus(progress, process.cwd()) : 'Nothing is being tracked. Start with: helen apply <goal> --track');
     });
 
   program

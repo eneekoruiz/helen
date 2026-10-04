@@ -1,103 +1,44 @@
 ---
 name: helen-audit
-description: Master skill for auditing code quality, finding improvements, standardizing Apple-grade tests, checking edge cases, performing code reviews, and identifying technical debt in a zero-interruption autonomous convergence loop.
+description: Audit correctness, user workflows, security, performance and verification depth with specialist agents, evidence-backed findings and autonomous discovery; remediate when authorized.
 version: 2.1.0
 ---
 
-# The HELEN Audit (Autonomous Quality & Convergence Engine)
+# HELEN Audit
 
-HELEN rejects the complacency trap of long AI coding sessions. When an AI agent has been working on a codebase for hours, conversational momentum leads to author bias, superficial affirmations, and missed blind spots. `helen-audit` acts as an uncompromising external auditor and autonomous remediation engine.
+Inspect with fresh eyes. Prior praise and passing tests do not establish correctness. Audit-only requests are read-only; implement fixes when the user has authorized remediation. Reuse existing scope and ask only for essential missing information.
 
-## Operating Principles
+## Acceptance before inspection
 
-### 1. Interactive Scoping Questionnaire (Scope Clarification)
-Before launching into broad audits or sweeping remediations, clarify key user trade-offs using targeted questions or interactive questionnaires:
-- **Clean Code & Refactor Scope**: *"Do you want Clean Code & architectural refactoring in this pass, or should we strictly isolate changes to functional bug fixes, security, aesthetics, and performance without touching working legacy structure?"*
-- **Target Dimensions**: Identify which of the 6 dimensions are critical for this run (e.g., security-first vs. aesthetics-first vs. comprehensive 6-dimension sweep).
-- **Tolerance for Breaking Changes**: Zero (strict backward compatibility) vs. allowed with migration.
+Define audit dimensions, observable success criteria, compatibility boundaries and verification commands from repository evidence. Record baseline behavior and missing context. Distinguish facts, inferences and unknowns. Never fabricate files, line references, failure reproductions, successful checks or quality scores.
 
-Once the user confirms scope (or if invoked with explicit scope flags / automated pipelines), **lock the scope in and proceed immediately into the Autonomous Convergence Loop**.
+## Six dimensions
 
-### 2. The Autonomous Convergence Loop (Zero Interruption)
-Never stop at just reporting defects or asking for permission between fix cycles. You MUST execute an unbroken autonomous convergence loop:
-**Audit → Fix → Verify (Typecheck, Lint, Test, CI) → Re-audit → Repeat**
-Continue iterating autonomously until the Craftsmanship Score reaches **100/100 (IMPECCABLE)** and zero defects remain within the agreed scope. Only report back when the codebase is a pristine 10/10.
+1. **Functionality and workflow:** incomplete journeys, manual bottlenecks, empty/loading/error states, batch operations and recovery.
+2. **Verification depth:** tests that assert outcomes instead of merely execution; malformed and huge inputs, duplicate submissions, retries, timeouts, permission failures and concurrency.
+3. **Failure and rollback:** partial state, locks, temporary files, atomicity, interruption recovery and actionable errors.
+4. **Contracts and craft:** boundary validation, type integrity, domain invariants, dead code and responsibility boundaries. Preserve public contracts.
+5. **Performance and observability:** scale, N+1 patterns, bounded concurrency, cost, caching, log context, secret leakage and supported OS behavior.
+6. **Developer experience and claims:** setup friction, CLI streams, diagnostics, documentation parity, accessibility and visual interaction where applicable.
 
-### 3. Mandatory CI Pipeline Emulation (Non-Negotiable Impeccable Gate)
-**NEVER grant an "IMPECCABLE (10/10)" verdict without verifying the repository's Continuous Integration (CI) pipeline.**
-- Inspect `.github/workflows/` (or equivalent CI configuration files like GitLab CI, GitHub Actions, Bitbucket Pipelines).
-- Extract the exact commands executed by the remote CI runner (e.g., `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`, `node dist/cli.js lint`, `npm audit --audit-level=high`).
-- Execute each of these commands locally.
-- **Hard Gate**: If ANY step in the CI pipeline fails, the score is strictly capped below 80 (`DEFECTIVE`). A project cannot be declared impeccable if a git push would fail in GitHub Actions.
+## Autonomous discovery and remediation
 
-### 4. Mandatory Playwright + Chromium Testing Gate (Frontend & UI)
-For web applications, UI components, and client-facing pages, code cannot be certified without real browser execution:
-- Execute Playwright with headless Chromium across mobile (375px), tablet (768px), and desktop (1440px) viewports.
-- Confirm zero uncaught runtime exceptions, zero unhandled promise rejections, zero missing assets (404), and no layout overflow bugs.
-- If no Playwright suite exists, scaffold and run a minimal headless Chromium smoke test before granting approval.
+Inspect → report or remediate according to authorization → verify → independently re-audit → discover further opportunities → repeat.
 
-### 5. Senior Model Cascade Protocol
-- Start audit sweeps and initial remediation passes using the lowest/cheapest model tier.
-- Run deterministic gates (lint, tests, Chromium E2E).
-- If the small model solves the problem cleanly, accept it immediately (saving up to 90% tokens).
-- Escalate to intermediate or flagship tiers only when the small model fails complex verification or architecture boundaries.
+After initial checks pass, explicitly ask: "What further evidence-backed improvement would materially improve the requested repository or workflow?" Inspect adjacent consumers and failure paths. Do not wait for the user to request more ideas. Apply actionable findings when remediation is authorized, then verify and repeat discovery. Keep audit-only passes read-only and report proposed changes.
 
-### 6. Specialized Subagent Orchestration & Token Economy
-For deep or multi-domain repositories, decompose the audit by launching specialized subagents:
-- **Research / Explorer Subagent**: Maps call graphs, dependencies, and external boundary contracts.
-- **Security Auditor Subagent**: Deep dive into OWASP Top 10, secret leaks, injection risks, and dependency CVEs.
-- **QA & Stress Subagent**: Adversarial testing, race conditions, edge-case generation, and test execution.
-- **Visual & Anti-Slop Subagent**: Scans UI components with Playwright Chromium, contrast, typography rhythm, and eliminates generic AI tropes.
-- **Extreme Token Economy**: Deliver high-density, zero-fluff responses with concise diffs and verification tables. Draft prompts in English for 30-50% BPE token compression. Avoid polling loops; react asynchronously.
+There is no arbitrary retry or iteration cap. Finish when criteria are satisfied and a fresh discovery pass finds no more actionable findings within scope, or disclose the concrete blocker requiring input, authorization or external access. Never repeat an unchanged failed attempt. Respect cancellation and explicit resource limits; record outside-scope proposals rather than silently expanding authority.
 
-## The 6 Dimensions of Auditing
+## Verification
 
-### 1. Functional & Product Capabilities
-- **Workflow Incompleteness**: Identify dead-ends where users or developers have to perform manual steps (e.g., lack of export/import, missing batch actions, no undo/redo).
-- **Graceful State Handling**: Ensure zero-states, loading states, empty searches, and error states provide helpful recommendations rather than empty screens.
+Inspect CI and run locally reproducible build, typecheck, lint, tests and workflow commands. For affected UI, run Playwright Chromium at 375, 768 and 1440 px with interactions, reduced motion, overflow and browser-error checks. Report command, outcome and limitations; missing browser or hosted OS access remains unverified. Do not scaffold or modify files in an audit-only task. Never weaken tests to obtain green results.
 
-### 2. Verification Depth & QA Scale
-- **Proof vs. Vanity Tests**: Expose tests that merely execute lines without asserting invariant outcomes. Replace them with adversarial edge cases (empty strings, huge payloads, network timeouts, boundary numbers).
-- **Adversarial QA**: Test or reason through malformed data, duplicate actions, slow network, cancelled actions, permission failures, partial failures, and repeated retries.
-- **Race Conditions**: Check concurrency, double-submit protection, out-of-order event resolution, and state recovery.
+## Cheapest model cascade and specialists
 
-### 3. Failure Path & Rollback Integrity
-- When an operation throws or aborts halfway, does it leave corrupt state, dangling file locks, or orphan temporary directories?
-- Are destructive actions transactional? Can an aborted step be safely retried without manual database cleanup?
-- Never swallow errors silently or log them without diagnostic context (`catch (e) {}` is an automatic blocker).
+Start with the cheapest available model when selection is supported; escalate only for verified failure or unresolved reasoning. Passing existing tests does not replace acceptance. State when selection is unavailable.
 
-### 4. Impeccable Code Craft ("Apple-Grade Polish")
-- **Type Integrity**: Zero `any`, zero unrefined `unknown`, and zero unsafe type assertions (`as TargetType` without runtime validation).
-- **Single Responsibility**: No monolithic functions doing orchestration, parsing, and I/O simultaneously.
-- **Explicit Invariants**: Make invalid domain states unrepresentable in data types rather than relying on defensive runtime `if` checks.
+Delegate independent domain sweeps to specialist contracts/backend, security, QA/recovery, visual/accessibility and claims/documentation agents. Provide relevant files, acceptance criteria and read-only or exclusive-write boundaries. Reuse compact evidence and integrate findings; run sequentially if agents are unavailable. Use concise English technical instructions and answer in the user's language. Measure tokens and cost before claiming savings.
 
-### 5. Performance, Scale & Observability
-- **Scale and Cost**: Identify bottlenecks (unbounded loops, synchronous work, N+1 patterns). Review caching, batching, pagination, and rate limits.
-- **Observability**: Failures must be visible at the right level of detail. Remove noise, add missing context, and check for sensitive data leakage in logs (secrets, PII).
-- **Multiplatform Parity**: Guarantee seamless operation across Windows, Linux, and macOS without path separator (`/` vs `\`) or line-ending (`\n` vs `\r\n`) glitches.
+## Output
 
-### 6. Developer Experience & Ergonomics
-- **Actionable Diagnostics**: Error messages must state: what failed, why it failed, and the exact 1-step remediation command.
-- **Technical Honesty**: Verify that every capability promised in `README.md` or marketing copy actually exists and functions in the code.
-- **PR & Code Review**: When reviewing Pull Requests, ensure no secret leakage, no breaking regressions, and verify deterministic gates (`npm run typecheck` / `lint` / `test` / `ci`) pass.
-
-## Output Format (When 100/100 Reached)
-
-```text
-# 🏆 HELEN Audit Final Report: 10/10 IMPECCABLE
-
-- **Craftsmanship Score**: 100 / 100 (IMPECCABLE)
-- **Autonomous Convergence Cycles**: [N] rounds completed
-- **Scope**: [Locked scope based on initial questionnaire]
-- **Defects / Technical Debt Remaining**: 0
-
-### Summary of Autonomous Fixes Applied
-- [List of all issues detected and fixed during the convergence loop]
-
-### Deterministic Verification Gates
-- ✅ Typecheck: 0 errors
-- ✅ Lint: 0 warnings/errors
-- ✅ Test Suite: 100% passing
-- ✅ Continuous Integration (CI): 100% passing (all jobs from .github/workflows verified locally)
-- ✅ Playwright + Chromium E2E: 100% passing (0 console errors, mobile/tablet/desktop viewports verified)
-```
+Report scope and criteria; prioritized findings with files, evidence, impact, fix and effort; changes applied when authorized; check results marked passed, failed, unavailable or not applicable; additional opportunities discovered; residual risks and blockers. No perfection score or guaranteed zero defects.

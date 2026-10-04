@@ -1,3 +1,4 @@
+import { recordFileResult } from '../results.js';
 import type { HelenModule } from '../types.js';
 import type { HelenContext, ModuleResult } from '../../core/context.js';
 import { createEmptyResult } from '../../core/context.js';
@@ -41,9 +42,8 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
   } else {
     dockerfileContent = getDefaultDockerfile();
   }
-  const r1 = writeFileSafe(path.join(cwd, 'Dockerfile'), dockerfileContent, { dryRun, force });
-  if (r1 === 'created' || r1 === 'overwritten') result.created.push('Dockerfile');
-  else result.skipped.push('Dockerfile');
+  const r1 = writeFileSafe(path.join(cwd, 'Dockerfile'), dockerfileContent, { dryRun, force, root: cwd });
+  recordFileResult(result, 'Dockerfile', r1);
 
   // docker-compose.yml
   const composeTemplatePath = getTemplatePath('docker/docker-compose.yml');
@@ -53,9 +53,8 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
   } else {
     composeContent = getDefaultCompose();
   }
-  const r2 = writeFileSafe(path.join(cwd, 'docker-compose.yml'), composeContent, { dryRun, force });
-  if (r2 === 'created' || r2 === 'overwritten') result.created.push('docker-compose.yml');
-  else result.skipped.push('docker-compose.yml');
+  const r2 = writeFileSafe(path.join(cwd, 'docker-compose.yml'), composeContent, { dryRun, force, root: cwd });
+  recordFileResult(result, 'docker-compose.yml', r2);
 
   // .dockerignore
   const dockerignore = `node_modules
@@ -69,9 +68,8 @@ coverage
 .DS_Store
 Thumbs.db
 `;
-  const r3 = writeFileSafe(path.join(cwd, '.dockerignore'), dockerignore, { dryRun, force });
-  if (r3 === 'created' || r3 === 'overwritten') result.created.push('.dockerignore');
-  else result.skipped.push('.dockerignore');
+  const r3 = writeFileSafe(path.join(cwd, '.dockerignore'), dockerignore, { dryRun, force, root: cwd });
+  recordFileResult(result, '.dockerignore', r3);
 
   // Patch package.json scripts
   const patchResult = patchPackageJson(cwd, {
@@ -81,7 +79,7 @@ Thumbs.db
       'docker:down': 'docker compose down',
     },
   }, { dryRun });
-  if (patchResult === 'modified') result.modified.push('package.json');
+  recordFileResult(result, 'package.json', patchResult);
 
   result.nextSteps.push('Run docker compose up to test');
   result.nextSteps.push('Adjust Dockerfile if using pnpm or yarn');
@@ -109,12 +107,13 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # SPA fallback
 RUN echo 'server { \\
   listen 80; \\
+  root /usr/share/nginx/html; \\
   location / { \\
-    root /usr/share/nginx/html; \\
     index index.html; \\
     try_files $uri $uri/ /index.html; \\
   } \\
   location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?)$ { \\
+    try_files $uri =404; \\
     expires 1y; \\
     add_header Cache-Control "public, immutable"; \\
   } \\

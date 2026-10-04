@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { getSkillsRoot } from './skills.js';
+import { z } from 'zod';
 
 export type CatalogStatus = 'active' | 'caution' | 'discontinued';
 
@@ -22,16 +23,24 @@ export interface CatalogItem {
   verified: string;
 }
 
-interface CatalogFile {
-  version: number;
-  note: string;
-  items: CatalogItem[];
-}
+const catalogSchema = z.object({
+  items: z.array(z.object({
+    id: z.string(), name: z.string(), category: z.string(),
+    kind: z.enum(['skill', 'plugin', 'cli', 'reference', 'service', 'mcp']),
+    status: z.enum(['active', 'caution', 'discontinued']),
+    source: z.string(), summary: z.string(), install: z.array(z.string()),
+    license: z.string(), phases: z.array(z.string()), notes: z.string().optional(), verified: z.string(),
+  })),
+});
 
 export function readCatalog(root: string = getSkillsRoot()): CatalogItem[] {
   const file = path.join(root, 'catalog.json');
   if (!fs.existsSync(file)) return [];
-  return (JSON.parse(fs.readFileSync(file, 'utf-8')) as CatalogFile).items;
+  try {
+    return catalogSchema.parse(JSON.parse(fs.readFileSync(file, 'utf-8'))).items;
+  } catch (error) {
+    throw new Error(`Invalid catalog ${file}: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 export function listCatalog(category?: string, root?: string, kind?: string): CatalogItem[] {
@@ -60,8 +69,14 @@ export interface CatalogIssue {
 /** Structural errors, plus warnings for entries not re-verified recently. */
 export function validateCatalog(root?: string, today: Date = new Date()): CatalogIssue[] {
   const issues: CatalogIssue[] = [];
+  let items: CatalogItem[];
+  try {
+    items = readCatalog(root);
+  } catch (error) {
+    return [{ id: 'catalog', level: 'error', message: error instanceof Error ? error.message : String(error) }];
+  }
   const seen = new Set<string>();
-  for (const item of readCatalog(root)) {
+  for (const item of items) {
     const add = (level: CatalogIssue['level'], message: string) => issues.push({ id: item.id, level, message });
     if (seen.has(item.id)) add('error', 'duplicate id');
     seen.add(item.id);

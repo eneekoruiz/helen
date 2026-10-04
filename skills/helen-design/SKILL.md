@@ -8,37 +8,13 @@ version: 2.1.0
 
 HELEN does not produce standard web pages. It produces digital assets oriented to sales, trust, and perceived quality. `helen-design` is a comprehensive art direction and UI engineering skill that rejects default "AI slop" aesthetics and enforces bespoke, high-performance, and accessible design.
 
-## Operating Principles
+## Execution contract
 
-### 1. Interactive Scoping Questionnaire
-Before starting design passes or visual overhauls, present an interactive questionnaire to lock in visual intent:
-- **Aesthetic Direction**: Swiss / Grotesque, Warm Editorial / Analog, Industrial Utility, or Radical Minimalist?
-- **Motion & 3D Budget**: Subtle tactile spring micro-interactions only, or cinematic scroll-driven / 3D experiences?
-- **Scope Isolation**: Restrict changes strictly to UI tokens, components, and layout without touching core business logic or backend contracts?
-
-### 2. Autonomous Design Convergence Loop
-Once visual intent is locked, run an autonomous loop until completion:
-**Audit Visuals / A11y → Refactor Components → Verify (Build, Playwright Chromium, Responsiveness, WCAG AA) → Repeat**
-Do not pause to ask intermediate questions on color codes or spacing values. Drive the design to Level 100 Apple-grade polish autonomously.
-
-### 3. The Senior Model Cascade Protocol
-Always minimize design token burn by cascading models from cheapest to most capable:
-- **Tier 1 (Eco / Light)**: First attempt component styling, token updates, and layout scaffolding with the cheapest/smallest model (`flash_lite`, `haiku`, `gpt-4o-mini`).
-- **Automated Chromium Gate**: Run Playwright headless Chromium tests against the component.
-- **Escalation Trigger**: If Tier 1 passes Playwright render and visual checks, **ACCEPT immediately** (saving up to 90% tokens). If rendering fails, layout overflows, or complex responsive micro-interactions are broken, escalate to **Tier 2 (Workhorse)** (`flash`, `sonnet`, `gpt-4o`), and only invoke **Tier 3 (Flagship)** (`pro`, `opus`) for complex shader math, 3D Canvas scenes, or intricate SVG generative art.
-
-### 4. Mandatory Playwright + Chromium E2E Testing Gate
-**A visual change is NEVER considered complete without real browser execution:**
-- Execute headless Chromium via Playwright on the affected routes or component previews.
-- **Viewport Triad**: Verify optical rendering across 3 mandatory viewports: Mobile (375x667), Tablet (768x1024), Desktop (1440x900).
-- **Console Hygiene**: Zero uncaught JavaScript exceptions, zero CSP violations, zero 404 image assets in browser logs.
-- **Layout Stability**: Assert no horizontal viewport overflow (`scrollWidth <= clientWidth`) and no clipped text elements.
-
-### 5. Specialized Subagents & Token Minimization
-- **Visual & Layout Subagent**: Validates grid harmony, optical contrast, and typography hierarchy in parallel.
-- **Accessibility & Motion Subagent**: Audits WCAG contrast, keyboard navigation, and prefers-reduced-motion fallbacks.
-- **Extreme Token Economy**: Focus strictly on before/after component diffs, design tokens, and visual verification results. Avoid generic design theory essays. Use English prompts for 30-50% BPE token compression.
-
+- Preserve intent, exclusions and authorization. Audit-only stays read-only. Reuse context; ask only for essential unknowns.
+- Define observable acceptance, baseline and verification before edits. Verify domain outcomes, compatibility and reproducible CI commands; report unavailable checks and residual risks.
+- Inspect → act → verify → re-audit → discover further evidence-backed improvements → repeat. After initial checks, find more actionable improvements without another user request. Apply when authorized, otherwise report. No arbitrary retry cap. Finish when acceptance passes and fresh discovery finds no further actionable improvement within scope, or disclose an external blocker. Change failing hypotheses; respect cancellation and explicit resource limits.
+- Start with the cheapest available model when selectable; escalate only for verified failure or unresolved reasoning. State unavailable controls.
+- Delegate independent domains to focused specialist agents with exclusive ownership; integrate and verify. Reuse evidence, batch reads, avoid polling and duplicate output. Write concise English instructions; answer in the user's language. Measure tokens/cost; never claim fixed savings or perfection.
 ## The Anti-Slop & Premium Art Direction Principles
 
 Generative coding tools systematically converge on identical design templates: glowing purple radial gradients, glassmorphism cards, uniform 3-card Bento grids, and buzzword-laden corporate filler. This skill audits and refactors interfaces forensically to detect AI tells and replace them with intentional art direction.
@@ -78,3 +54,6 @@ Generative coding tools systematically converge on identical design templates: g
    - Audit asset and bundle sizes, unnecessary network calls, redundant re-renders, and inefficient loops.
    - Prefer the smallest change that improves perceived speed (loading placeholders, lazy-loaded images, paginated data).
    - No premature micro-optimization without profiling evidence.
+## Browser evidence
+
+For affected UI, run Playwright Chromium at 375, 768 and 1440 px. Verify keyboard flow, contrast, reduced motion, interactions, layout overflow and browser errors. Mark blocked checks unverified; do not modify files in audit-only work.

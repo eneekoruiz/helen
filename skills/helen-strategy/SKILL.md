@@ -8,25 +8,13 @@ version: 2.1.0
 
 Strategic clarity precedes line-by-line coding. `helen-strategy` guides product roadmapping, competitor benchmarking, design foundation, and risk analysis using interactive discovery and autonomous synthesis.
 
-## Operating Principles
+## Execution contract
 
-### 1. Interactive Discovery Questionnaire
-Kick off strategy sessions with a structured questionnaire to extract crucial constraints:
-- **Core ICP & Problem**: Who is the exact target persona and what single urgent pain is being solved?
-- **Competitive Positioning**: Who are the primary alternatives, and what is our defensible differentiator (speed, niche, UX simplicity)?
-- **Scope & Kill Criteria**: What features are strictly out of scope? What metrics determine if an initiative should be killed?
-- **Clean Code vs. Rapid MVP**: Is the goal a production-grade hardened architecture or an experimental prototype?
-
-### 2. Autonomous Synthesis Loop
-Once constraints are established via the questionnaire, autonomously research, synthesize, and benchmark without requiring micromanaged prompts. Deliver complete strategic artifacts (`DESIGN.md`, `ROADMAP.md`, `ADR-001.md`).
-
-### 3. Specialized Subagent Orchestration
-- **Market & Competitor Researcher Subagent**: Discovers real public products, feature matrices, and pricing teardowns.
-- **Tech Stack & Architecture Risk Subagent**: Audits scalability limitations, lock-in risks, and third-party API dependencies.
-
-### 4. Extreme Token Economy
-Present findings in dense comparison matrices, bulleted trade-off summaries, and actionable decision trees. Avoid filler business buzzwords.
-
+- Preserve intent, exclusions and authorization. Audit-only stays read-only. Reuse context; ask only for essential unknowns.
+- Define observable acceptance, baseline and verification before edits. Verify domain outcomes, compatibility and reproducible CI commands; report unavailable checks and residual risks.
+- Inspect → act → verify → re-audit → discover further evidence-backed improvements → repeat. After initial checks, find more actionable improvements without another user request. Apply when authorized, otherwise report. No arbitrary retry cap. Finish when acceptance passes and fresh discovery finds no further actionable improvement within scope, or disclose an external blocker. Change failing hypotheses; respect cancellation and explicit resource limits.
+- Start with the cheapest available model when selectable; escalate only for verified failure or unresolved reasoning. State unavailable controls.
+- Delegate independent domains to focused specialist agents with exclusive ownership; integrate and verify. Reuse evidence, batch reads, avoid polling and duplicate output. Write concise English instructions; answer in the user's language. Measure tokens/cost; never claim fixed savings or perfection.
 ## Competitive Benchmark
 
 1. Identify competitors and substitutes.

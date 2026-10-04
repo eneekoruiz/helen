@@ -16,6 +16,29 @@ describe('helen init-project', () => {
     fs.rmSync(tmp, { recursive: true, force: true });
   });
 
+  it('rejects invalid goals and agents before creating a project', async () => {
+    await expect(runInitProject({ cwd: tmp, name: 'invalid-goal', goal: 'not-a-goal' })).rejects.toThrow(/No goal matches/);
+    await expect(runInitProject({ cwd: tmp, name: 'invalid-agent', agents: ['unknown'] })).rejects.toThrow(/Unknown agent/);
+    expect(fs.readdirSync(tmp)).toEqual([]);
+  });
+
+  it('rejects names that escape the project root before writing', async () => {
+    await expect(runInitProject({ cwd: tmp, name: '../outside-project' })).rejects.toThrow(/inside/);
+    expect(fs.readdirSync(tmp)).toEqual([]);
+  });
+
+  it('rejects a file used as the project directory', async () => {
+    fs.writeFileSync(path.join(tmp, 'file'), 'keep');
+    await expect(runInitProject({ cwd: tmp, name: 'file' })).rejects.toThrow(/not a directory/);
+    expect(fs.readFileSync(path.join(tmp, 'file'), 'utf8')).toBe('keep');
+  });
+
+  it('uses the current folder name rather than a dot as the package name', async () => {
+    await runInitProject({ cwd: tmp, name: '.', agents: ['codex'] });
+    const pkg = JSON.parse(fs.readFileSync(path.join(tmp, 'package.json'), 'utf8'));
+    expect(pkg.name).toBe(path.basename(tmp));
+  });
+
   it('initializes an empty directory with setup, guardrails and plan', async () => {
     const result = await runInitProject({ cwd: tmp });
 

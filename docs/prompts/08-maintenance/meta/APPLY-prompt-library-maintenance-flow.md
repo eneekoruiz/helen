@@ -11,7 +11,7 @@ stage: maintenance
 
 ## Goal
 
-Keep the HELEN prompt library small in intent, wide in coverage, coherent, reachable from the CLI and free of duplication, improving it with current research, bounded reflection, memory and reproducible verification.
+Keep the HELEN prompt library small in intent, wide in coverage, coherent, reachable from the CLI and free of duplication, improving it with current research, evidence-backed reflection, memory and reproducible verification.
 
 ## Use when
 
@@ -19,15 +19,16 @@ Keep the HELEN prompt library small in intent, wide in coverage, coherent, reach
 
 ## Steps
 
-Loop until an audit finds no material gap (at most two re-applications per prompt family per pass):
+Define evaluation criteria before changing instructions; loop until a fresh discovery finds no material actionable gap, without an arbitrary retry cap:
 
 1. **Read** [CONTRACT](../../CONTRACT.md), [RULES](../../RULES.md) and `.quality_audit_log.md`.
 2. **Research** current sources when a change depends on external practices, models, tools, security or regulation.
 3. **Audit the library:** one clear intent per prompt; no two prompts with the same intent (merge and keep the old id as an alias); correct phase folder; flows end in `-flow.md` and gates in `-checkpoint.md`; every prompt has the required sections and a concise English style.
-4. **Apply minimal changes:** prefer fixing the contract, a flow or metadata over rewriting many prompts.
-5. **Regenerate and validate:** `helen prompts index`, `helen prompts lint` (frontmatter, sections, language, links, aliases, playbooks), `npm test`.
-6. **Update consumers:** playbook steps (`docs/prompts/playbooks.json`), bundled skills that cite prompt ids, the guide.
-7. **Log** in `.quality_audit_log.md`: date, files, sources, reasoning, verification, residual risk.
+4. **Evaluate** representative cases against frozen criteria; report provider errors as unavailable evidence. Compare outcome quality and actual token cost before claiming improvements.
+5. **Apply minimal changes:** prefer fixing the contract, a flow or metadata over rewriting many prompts.
+6. **Regenerate and validate:** `helen prompts index`, `helen prompts lint` (frontmatter, sections, language, links, aliases, playbooks), `npm test`.
+7. **Update consumers:** playbook steps (`docs/prompts/playbooks.json`), bundled skills that cite prompt ids, the guide.
+8. **Log** in `.quality_audit_log.md`: date, files, sources, reasoning, verification, residual risk.
 
 ## Stop when
 

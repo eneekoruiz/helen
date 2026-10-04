@@ -4,7 +4,7 @@ HELEN evaluates skill quality by running standardized prompts against two enviro
 1. **Baseline**: Clean project with no skill installed.
 2. **With skill**: Project with the target skill installed in `.claude/skills/<skill>/`.
 
-An LLM judge compares the answers against concrete criteria and grades both outputs. Runs are repeated across multiple iterations ($N$) to calculate sample variance, standard deviation, and 95% confidence intervals using Student's t-distribution.
+An LLM judge compares answers against predeclared criteria; optional deterministic assertions check exact observable output contracts independently. Failed execution is **unmeasured**, never a zero score. These chat-only cases measure response behavior and routing, not end-to-end repository implementation. Define acceptance first using [EVALUATION_PLAN.md](../docs/EVALUATION_PLAN.md).
 
 ---
 
@@ -41,6 +41,8 @@ Evaluation cases are stored in `evals/<skill-name>.json`.
 
 ### Properties
 
+Cases may optionally define `checks`: literal `includes`/`excludes` assertions with a `value` string, or `json-equals` assertions with `path` and expected JSON `value`. Specify the exact output contract in the prompt before requiring exact output. A failed assertion is a measured task failure; missing execution remains unmeasured.
+
 | Field | Type | Description |
 |---|---|---|
 | `skill` | `string` | Must match the file name (`<skill>.json`) and a valid folder in `skills/<skill>/`. |
@@ -55,18 +57,22 @@ Evaluation cases are stored in `evals/<skill-name>.json`.
 ## Statistical Methodology
 
 1. **Runs per Case (`--runs N`)**: Each case runs $N$ times (default: 3).
-2. **Confidence Intervals**: 95% two-tailed Student's t-interval ($df = N - 1$).
-3. **Paired Delta**: $\Delta_i = \text{withSkill}_i - \text{baseline}_i$.
-4. **Noise Detection**: If the 95% confidence interval of $\Delta$ includes $0$ ($CI_{lower} \le 0 \le CI_{upper}$), the difference is labeled **Noise** and no letter grade (A/B/C) is assigned.
-5. **Grades**:
-   - **A**: $\Delta \ge +20\%$ and With-Skill score $\ge 85\%$.
-   - **B**: With-Skill score $\ge 75\%$.
-   - **C**: Below $75\%$ or negative delta.
-   - **Noise**: Confidence interval crosses zero.
+2. **Valid Pairs**: Only matching successful baseline/skill observations contribute to a paired delta. Judge grades map to unique criterion indices.
+3. **Independent Cases**: Average valid paired runs within each case; case means are the independent unit for Student-t intervals. Multiple trials on one case do not establish task coverage.
+4. **Evidence Status**: UNMEASURED (no valid pairs), HISTORICAL (old/missing content fingerprint), INSUFFICIENT (one independent case), INCONCLUSIVE (delta interval includes zero), or MEASURED. No letter grades or perfection claims.
+5. **Activation**: Natural routing is separate from effectiveness. Optional forced activation is a distinct reported condition.
+6. **Telemetry**: Record provider-reported tokens/costs/durations. Unknown telemetry stays unknown; costs and savings are not inferred from language. CLI-call budgets count invocations, which may include multiple internal model/tool turns.
+7. **Acceptance Exit Status**: Requested current pairs, all with-skill criteria and expected natural activation must pass. Otherwise the live runner exits nonzero even though the report is written.
 
 ---
 
 ## CLI Options
+
+Live runs require an explicit `--max-calls` budget and an authenticated Claude CLI supporting `claude auth status`. Local preflight prevents repeated missing-provider failures. The first baseline call gates concurrency so an initial quota refusal stops after one invocation. Authenticated status alone does not establish available quota.
+
+`--force` reruns cached cases; model and content fingerprints prevent stale reuse. `--force-trigger` opts into a separately reported forced-skill condition; default runs avoid that extra invocation. Previous result versions are archived before replacement. Quota/authentication blockers stop retries and new calls.
+
+The 2026-10-04 pilot encountered a provider weekly-limit refusal: zero valid pairs. Effectiveness and confusion rates remain unmeasured; do not retry until provider access changes.
 
 ```bash
 # Dry run: view planned calls and call budget estimate
@@ -76,7 +82,7 @@ npm run evals -- --dry-run
 npm run evals -- --runs 3 --max-calls 50 --skill helen-release
 
 # Run a specific case subset
-npm run evals -- --cases rc,skip-tests
+npm run evals -- helen-reprompt --model haiku --runs 3 --cases question-remains-question,explicit-exclusion-preserved --max-calls 28 --concurrency 2
 
 # Generate report from already cached runs without network calls
 npm run evals -- --report-only

@@ -652,6 +652,139 @@
       ],
       "notes": "Pairs with generate-portfolio-layout-patterns. nicolodemarca.com did not resolve at verification time; add sites here as you find them.",
       "verified": "2026-09-30"
+    },
+    {
+      "id": "apple-hig",
+      "name": "Apple Human Interface Guidelines (HIG)",
+      "category": "design",
+      "kind": "skill",
+      "status": "active",
+      "source": "https://developer.apple.com/design/human-interface-guidelines",
+      "summary": "Authoritative Apple Human Interface Guidelines for iOS, macOS, iPadOS, and visionOS: clarity, deference, depth, touch targets, SF Symbols, tactile physics, and system ergonomics.",
+      "install": [
+        "npx skills add https://github.com/agent-skills/apple-design --skill apple-hig"
+      ],
+      "license": "MIT",
+      "phases": [
+        "03-finish-features",
+        "05-final-audit"
+      ],
+      "notes": "Enforces Apple-grade visual ergonomics, accessibility contrast, safe areas, dynamic typography rhythm, and native sensory feedback.",
+      "verified": "2026-10-04"
+    },
+    {
+      "id": "marketingskills",
+      "name": "Marketing Skills (Corey Haines)",
+      "category": "copy",
+      "kind": "skill",
+      "status": "active",
+      "source": "https://github.com/coreyhaines31/marketingskills",
+      "summary": "Curated library of 40+ specialized marketing and growth skills for coding agents: positioning, copywriting, conversion audits, and go-to-market execution.",
+      "install": [
+        "npx skills add coreyhaines31/marketingskills"
+      ],
+      "license": "MIT",
+      "phases": [
+        "03-finish-features",
+        "07-client-handoff"
+      ],
+      "notes": "Umbrella repository by Corey Haines. Bundles specialized skills for landing pages, user acquisition, email marketing, and value proposition design.",
+      "verified": "2026-10-04"
+    },
+    {
+      "id": "seo-audit",
+      "name": "SEO Audit (Marketing Skills)",
+      "category": "seo",
+      "kind": "skill",
+      "status": "active",
+      "source": "https://github.com/coreyhaines31/marketingskills",
+      "summary": "Structured diagnostic skill for technical and on-page SEO: crawlability, Core Web Vitals, indexation traps, metadata integrity, and competitive SERP ranking factors.",
+      "install": [
+        "npx skills add coreyhaines31/marketingskills --skill seo-audit"
+      ],
+      "license": "MIT",
+      "phases": [
+        "04-before-production",
+        "07-client-handoff"
+      ],
+      "notes": "Pairs with HELEN prompt audit-final-seo and verify-links-forms-ctas.",
+      "verified": "2026-10-04"
+    },
+    {
+      "id": "schema-markup",
+      "name": "Schema Markup & Structured Data",
+      "category": "seo",
+      "kind": "skill",
+      "status": "active",
+      "source": "https://github.com/coreyhaines31/marketingskills",
+      "summary": "Implements and validates JSON-LD Schema.org structured data (Organization, SoftwareApplication, Product, FAQPage, Article) for rich snippets and AI search discoverability (GEO/LLMO).",
+      "install": [
+        "npx skills add coreyhaines31/marketingskills --skill schema-markup"
+      ],
+      "license": "MIT",
+      "phases": [
+        "03-finish-features",
+        "04-before-production"
+      ],
+      "notes": "Generates valid JSON-LD structured tags to maximize Google Rich Results and LLM search discoverability.",
+      "verified": "2026-10-04"
+    },
+    {
+      "id": "site-architecture",
+      "name": "Site Architecture & Internal Linking",
+      "category": "seo",
+      "kind": "skill",
+      "status": "active",
+      "source": "https://github.com/coreyhaines31/marketingskills",
+      "summary": "Designs semantic URL hierarchies, hub-and-spoke topic clusters, canonical paths, and internal link equity distribution to optimize search crawler indexation.",
+      "install": [
+        "npx skills add coreyhaines31/marketingskills --skill site-architecture"
+      ],
+      "license": "MIT",
+      "phases": [
+        "01-start-project",
+        "02-building"
+      ],
+      "notes": "Prevents orphan pages and structural keyword cannibalization during initial routing setup.",
+      "verified": "2026-10-04"
+    },
+    {
+      "id": "social-content",
+      "name": "Social Content & Viral Hook Engineering",
+      "category": "copy",
+      "kind": "skill",
+      "status": "active",
+      "source": "https://github.com/coreyhaines31/marketingskills",
+      "summary": "Platform-specific frameworks for crafting high-engagement technical social content (X/Twitter threads, LinkedIn posts, GitHub releases) with reverse-engineered hook patterns.",
+      "install": [
+        "npx skills add coreyhaines31/marketingskills --skill social-content"
+      ],
+      "license": "MIT",
+      "phases": [
+        "06-release",
+        "07-client-handoff"
+      ],
+      "notes": "Designed to turn product launches and technical features into compelling developer-focused social posts.",
+      "verified": "2026-10-04"
+    },
+    {
+      "id": "sales-enablement",
+      "name": "Sales Enablement & Pitch Craft",
+      "category": "copy",
+      "kind": "skill",
+      "status": "active",
+      "source": "https://github.com/coreyhaines31/marketingskills",
+      "summary": "Creates high-impact B2B sales collateral: one-pagers, feature comparison matrices against competitors, buyer objection playbooks, and ROI demonstration scripts.",
+      "install": [
+        "npx skills add coreyhaines31/marketingskills --skill sales-enablement"
+      ],
+      "license": "MIT",
+      "phases": [
+        "07-client-handoff",
+        "08-maintenance"
+      ],
+      "notes": "Bridges technical software capabilities with commercial sales conversations.",
+      "verified": "2026-10-04"
     }
   ]
 }

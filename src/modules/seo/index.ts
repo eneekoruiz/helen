@@ -1,3 +1,4 @@
+import { recordFileResult } from '../results.js';
 import type { HelenModule } from '../types.js';
 import type { HelenContext, ModuleResult } from '../../core/context.js';
 import { createEmptyResult } from '../../core/context.js';
@@ -66,15 +67,13 @@ export function SEO({ title, description, canonical, ogImage, noIndex }: SEOProp
   );
 }
 `;
-  const r1 = writeFileSafe(path.join(cwd, 'src/components/SEO.tsx'), seoComponent, { dryRun, force });
-  if (r1 === 'created' || r1 === 'overwritten') result.created.push('src/components/SEO.tsx');
-  else result.skipped.push('src/components/SEO.tsx');
+  const r1 = writeFileSafe(path.join(cwd, 'src/components/SEO.tsx'), seoComponent, { dryRun, force, root: cwd });
+  recordFileResult(result, 'src/components/SEO.tsx', r1);
 
   // robots.txt
   const robots = `User-agent: *\nAllow: /\n\nSitemap: https://example.com/sitemap.xml\n`;
-  const r2 = writeFileSafe(path.join(cwd, 'public/robots.txt'), robots, { dryRun, force });
-  if (r2 === 'created' || r2 === 'overwritten') result.created.push('public/robots.txt');
-  else result.skipped.push('public/robots.txt');
+  const r2 = writeFileSafe(path.join(cwd, 'public/robots.txt'), robots, { dryRun, force, root: cwd });
+  recordFileResult(result, 'public/robots.txt', r2);
 
   // manifest.json
   const manifest = JSON.stringify({
@@ -89,9 +88,8 @@ export function SEO({ title, description, canonical, ogImage, noIndex }: SEOProp
       { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
     ],
   }, null, 2);
-  const r3 = writeFileSafe(path.join(cwd, 'public/manifest.json'), manifest, { dryRun, force });
-  if (r3 === 'created' || r3 === 'overwritten') result.created.push('public/manifest.json');
-  else result.skipped.push('public/manifest.json');
+  const r3 = writeFileSafe(path.join(cwd, 'public/manifest.json'), manifest, { dryRun, force, root: cwd });
+  recordFileResult(result, 'public/manifest.json', r3);
 
   result.nextSteps.push('Replace example.com in robots.txt');
   result.nextSteps.push('Add icon files to public/icons/');

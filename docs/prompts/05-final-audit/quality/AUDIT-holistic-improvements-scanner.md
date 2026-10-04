@@ -1,7 +1,7 @@
 ---
 action: AUDIT
 phase: 05-final-audit
-summary: Exhaustive scan for repository improvements across 6 dimensions with interactive scoping and autonomous convergence loops.
+summary: Discover evidence-backed workflow, design, architecture, performance, verification and developer-experience improvements.
 modifies_code: false
 aliases:
   - audit-more-improvements
@@ -9,55 +9,39 @@ aliases:
   - audit-enhancements
 ---
 
-# Holistic Repository Improvement Scanner (Más Mejoras)
+# Holistic Repository Improvement Scanner
 
 ## Goal
 
-Conduct an exhaustive, demanding scan across the entire repository to discover high-value improvements in functionality, visual craft, backend architecture, performance, test depth, and developer experience. Execute in an autonomous loop once scope is confirmed.
+Find useful improvements across repository functionality, visual interaction, contracts, performance, verification and developer experience. Follow [RULES.md](../../RULES.md); proactively discover additional opportunities without requiring repeated user prompts.
 
 ## Use when
 
-- You want to answer "What else can we improve?" across the entire codebase without superficial filler.
-- The core features are working and you want to elevate the project to production-grade excellence.
-- You need to clarify scope trade-offs (e.g. clean code vs. isolated bug fixes) before running an autonomous remediation pass.
+- The user requests repository-wide quality or further improvements.
+- Core features work but workflows, failure recovery or verification may be incomplete.
 
 ## Requirements
 
-1. **Interactive Scoping Questionnaire (Mandatory Kickoff):**
-   - Clarify whether Clean Code & architectural refactoring should be included, or strictly isolated to functional bug fixes, security, aesthetics, and performance without touching working legacy structure.
-   - Confirm which dimensions to prioritize and lock in the execution mode.
-
-2. **Autonomous Convergence Loop:**
-   - When execution mode is active, do not halt between fix batches. Autonomously fix every identified defect within scope, run tests/typechecks, simulate full CI, re-audit, and repeat until 0 issues remain.
-
-3. **Mandatory CI Pipeline Emulation Gate:**
-   - Execute the exact suite configured in repository workflows (e.g. `.github/workflows/ci.yml`) locally before concluding any improvement pass.
-   - If CI fails or would fail on git push, the codebase cannot be marked 10/10.
-
-4. **Specialized Subagent Orchestration:**
-   - Delegate domain sweeps to specialized subagents (Aesthetics & Anti-Slop, Backend & Performance, Verification & QA) to execute in parallel and isolate context.
-
-5. **Extreme Token Economy & English Prompt Efficiency:**
-   - Deliver high-density findings with exact file paths, line numbers, and actionable diffs. Eliminate conversational boilerplate.
-   - Formulate prompts and technical evaluations in English to leverage BPE tokenizer efficiency (slashing token usage by 30% to 50%).
-
-6. **Exhaustive Scan Across the 6 Dimensions:**
-   - **Functionality:** Detect missing workflow steps (bulk actions, export/import, undo/redo) and edge-state UX.
-   - **Aesthetics & Anti-Slop:** Hunt for generic AI templates (purple glows, uniform Bento grids, generic buzzwords) and apply bespoke art direction.
-   - **Backend Architecture:** Identify query bottlenecks, unbatched API calls, and enforce runtime schema validation.
-   - **Performance:** Inspect bundle footprint, heavy blocking dependencies, and caching strategies.
-   - **Verification Depth:** Uncover vanity tests; replace with boundary cases, network failure simulations, and multiplatform filesystem tests.
-   - **Developer Experience:** Review setup scripts, CLI ergonomics, automated pre-commit gates, and actionable error messages.
+1. Reuse existing scope, exclusions and authorization. Ask only for essential unknowns; define observable acceptance and baseline checks before changes.
+2. Inspect six dimensions:
+   - Functionality: incomplete journeys, batch operations, recovery and empty/error states.
+   - Design/accessibility: hierarchy, responsive interactions, keyboard use, reduced motion and product identity.
+   - Contracts: validation, idempotency, public compatibility and transaction boundaries.
+   - Performance: measurable bottlenecks, queries, bundles, caching and resource cost.
+   - Verification: invariant assertions, adversarial inputs, interruptions and supported OS behavior.
+   - Developer experience: setup, context handoff, diagnostics, CLI streams and documentation accuracy.
+3. Delegate independent domain sweeps to focused specialists with relevant context and ownership; integrate their evidence. Preserve cheapest model cascade.
+4. Run locally reproducible project and CI checks. For affected UI, obtain Playwright Chromium evidence at 375, 768 and 1440 px; mark unavailable checks unverified.
+5. After initial findings or completed fixes, explicitly ask what additional evidence-backed improvement would materially improve the authorized outcome. Inspect adjacent consumers and overlooked failure paths. Repeat discovery without an arbitrary iteration cap.
+6. Apply actionable findings when remediation is authorized, then verify and rediscover. Otherwise stay read-only and report findings. Finish after acceptance is met and fresh discovery finds no further actionable improvement within scope, or disclose a concrete blocker.
 
 ## Limits
 
-- Base all findings on verifiable code evidence (file, line number, reproducible failure command).
-- Once scope is confirmed via the questionnaire, execute autonomously without intermediate interruptions.
-- Reject trivial filler; every proposal must deliver measurable user, architectural, or developer value.
+- Never silently turn a request for ideas into implementation.
+- Prioritize observable benefit, not cosmetic churn, hypothetical feature counts or guaranteed perfection.
+- Respect user exclusions, cancellation and explicit resource limits. Record outside-scope proposals.
+- Do not repeat unchanged failures or fabricate checks, metrics or files.
 
 ## Output
 
-1. **Executive Improvement Diagnostic**: Summary of the repository's biggest leverage points.
-2. **Dimension-by-Dimension Findings**: Concrete enhancements with files, rationale, and recommended HELEN skills.
-3. **Action Matrix**: Prioritized into Quick Wins (< 30 min), Strategic Upgrades, and Polish.
-4. **Autonomous Execution Plan**: The sequence of autonomous convergence steps to achieve a pristine 10/10 codebase.
+An evidence-backed improvement matrix: finding, affected file/workflow, benefit, effort, dependencies, acceptance and verification. Separate applied changes, proposed work, external blockers and residual risks. State the final discovery outcome.

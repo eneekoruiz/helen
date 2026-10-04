@@ -1,3 +1,4 @@
+import { recordFileResult } from '../results.js';
 import type { HelenModule } from '../types.js';
 import type { HelenContext, ModuleResult } from '../../core/context.js';
 import { createEmptyResult } from '../../core/context.js';
@@ -52,10 +53,16 @@ function getSystemTheme(): 'light' | 'dark' {
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window === 'undefined') return 'system';
-    return (localStorage.getItem(STORAGE_KEY) as Theme) ?? 'system';
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved === 'light' || saved === 'dark' ? saved : 'system';
+    } catch {
+      return 'system';
+    }
   });
 
-  const resolved = theme === 'system' ? getSystemTheme() : theme;
+  const [systemTheme, setSystemTheme] = useState(getSystemTheme);
+  const resolved = theme === 'system' ? systemTheme : theme;
 
   useEffect(() => {
     const root = document.documentElement;
@@ -67,7 +74,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (theme === 'system') {
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
-      const handler = () => setThemeState('system');
+      const handler = () => setSystemTheme(mq.matches ? 'dark' : 'light');
+      handler();
       mq.addEventListener('change', handler);
       return () => mq.removeEventListener('change', handler);
     }
@@ -75,7 +83,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const setTheme = (t: Theme) => {
     setThemeState(t);
-    localStorage.setItem(STORAGE_KEY, t);
+    try {
+      localStorage.setItem(STORAGE_KEY, t);
+    } catch {
+      // The theme still works when browser storage is unavailable.
+    }
   };
 
   return (
@@ -85,9 +97,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 }
 `;
-  const r1 = writeFileSafe(path.join(cwd, 'src/components/ThemeProvider.tsx'), provider, { dryRun, force });
-  if (r1 === 'created' || r1 === 'overwritten') result.created.push('src/components/ThemeProvider.tsx');
-  else result.skipped.push('src/components/ThemeProvider.tsx');
+  const r1 = writeFileSafe(path.join(cwd, 'src/components/ThemeProvider.tsx'), provider, { dryRun, force, root: cwd });
+  recordFileResult(result, 'src/components/ThemeProvider.tsx', r1);
 
   // useTheme hook
   const hook = `import { useContext } from 'react';
@@ -101,9 +112,8 @@ export function useTheme() {
   return ctx;
 }
 `;
-  const r2 = writeFileSafe(path.join(cwd, 'src/hooks/useTheme.ts'), hook, { dryRun, force });
-  if (r2 === 'created' || r2 === 'overwritten') result.created.push('src/hooks/useTheme.ts');
-  else result.skipped.push('src/hooks/useTheme.ts');
+  const r2 = writeFileSafe(path.join(cwd, 'src/hooks/useTheme.ts'), hook, { dryRun, force, root: cwd });
+  recordFileResult(result, 'src/hooks/useTheme.ts', r2);
 
   // ThemeToggle component
   const toggle = `import { useTheme } from '../hooks/useTheme';
@@ -119,10 +129,12 @@ export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <div role="radiogroup" aria-label="Theme selector" style={{ display: 'flex', gap: '4px' }}>
+    <div role="group" aria-label="Theme selector" style={{ display: 'flex', gap: '4px' }}>
       {options.map((opt) => (
         <button
           key={opt.value}
+          type="button"
+          aria-label={\`\${opt.value} mode\`}
           onClick={() => setTheme(opt.value)}
           aria-pressed={theme === opt.value}
           title={\`\${opt.value} mode\`}
@@ -142,9 +154,8 @@ export function ThemeToggle() {
   );
 }
 `;
-  const r3 = writeFileSafe(path.join(cwd, 'src/components/ThemeToggle.tsx'), toggle, { dryRun, force });
-  if (r3 === 'created' || r3 === 'overwritten') result.created.push('src/components/ThemeToggle.tsx');
-  else result.skipped.push('src/components/ThemeToggle.tsx');
+  const r3 = writeFileSafe(path.join(cwd, 'src/components/ThemeToggle.tsx'), toggle, { dryRun, force, root: cwd });
+  recordFileResult(result, 'src/components/ThemeToggle.tsx', r3);
 
   result.nextSteps.push('Wrap app with <ThemeProvider>');
   result.nextSteps.push('Add <ThemeToggle /> to your navbar');

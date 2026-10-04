@@ -74,4 +74,17 @@ describe('helen apply', () => {
   it('rejects an unknown goal with the list of valid ones', () => {
     expect(() => buildPlan(tmp, 'qwerty')).toThrow(/Goals:/);
   });
+
+  it('does not resolve inherited Object properties as goal ids', () => {
+    expect(resolveGoal('constructor')).toBeUndefined();
+    expect(resolveGoal('__proto__')).toBeUndefined();
+  });
+
+  it('loads custom playbooks from the requested project directory', () => {
+    fs.mkdirSync(path.join(tmp, '.helen'));
+    fs.writeFileSync(path.join(tmp, '.helen', 'playbooks.json'), JSON.stringify({
+      goals: { custom: { title: 'Custom workflow', description: 'Local', keywords: ['LOCALWORKFLOW'], steps: [] } },
+    }));
+    expect(buildPlan(tmp, 'localworkflow').goalId).toBe('custom');
+  });
 });

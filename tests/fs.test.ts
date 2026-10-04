@@ -1,10 +1,29 @@
 import { describe, it, expect } from 'vitest';
-import { writeFileSafe, patchPackageJson, readJson, detectConflict } from '../src/core/fs.js';
+import { writeFileSafe, patchPackageJson, readJson, detectConflict, isPathInside, isSafeProjectPath } from '../src/core/fs.js';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'fs-extra';
 
 describe('File System Helpers', () => {
+  it('checks path components rather than matching directory prefixes', () => {
+    const root = path.resolve(os.tmpdir(), 'helen-root');
+    expect(isPathInside(root, path.join(root, 'child.txt'))).toBe(true);
+    expect(isPathInside(root, `${root}-sibling/file.txt`)).toBe(false);
+    expect(isSafeProjectPath(root, path.join(root, '..', 'outside.txt'))).toBe(false);
+  });
+
+  it('rejects directory junctions that escape the intended root', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'helen-links-'));
+    const project = path.join(root, 'project');
+    const outside = path.join(root, 'outside');
+    fs.ensureDirSync(project);
+    fs.ensureDirSync(outside);
+    fs.symlinkSync(outside, path.join(project, 'linked'), 'junction');
+    expect(isSafeProjectPath(project, path.join(project, 'linked', 'file.txt'))).toBe(false);
+    expect(writeFileSafe(path.join(project, 'linked', 'file.txt'), 'unsafe')).toBe('skipped');
+    expect(fs.existsSync(path.join(outside, 'file.txt'))).toBe(false);
+    fs.removeSync(root);
+  });
   describe('writeFileSafe', () => {
     it('should create a new file', () => {
       const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'helen-fs-'));
@@ -65,6 +84,17 @@ describe('File System Helpers', () => {
   });
 
   describe('patchPackageJson', () => {
+    it('does not rewrite or back up an unchanged package', () => {
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'helen-fs-'));
+      try {
+        const file = path.join(tmpDir, 'package.json');
+        fs.writeFileSync(file, '{ "name": "test" }\n');
+        const before = fs.readFileSync(file, 'utf8');
+        expect(patchPackageJson(tmpDir, { name: 'test' })).toBe('skipped');
+        expect(fs.readFileSync(file, 'utf8')).toBe(before);
+        expect(fs.existsSync(`${file}.helen-backup`)).toBe(false);
+      } finally { fs.removeSync(tmpDir); }
+    });
     it('should merge scripts into package.json', () => {
       const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'helen-fs-'));
       fs.writeJsonSync(path.join(tmpDir, 'package.json'), {

@@ -1,9 +1,12 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { EventEmitter } from 'node:events';
 import {
   renderCinematicFrame,
   renderEnekoRuizWordmark,
   renderHelenWordmark,
   shouldAnimateCinematicArt,
+  playCinematicSequence,
+  startupWelcomeIdentity,
 } from '../src/core/cinematicArt.js';
 
 describe('Cinematic terminal identities', () => {
@@ -63,9 +66,62 @@ describe('Cinematic terminal identities', () => {
   it('animates only in capable interactive terminals', () => {
     expect(shouldAnimateCinematicArt({ isTTY: true, term: 'xterm-256color' })).toBe(true);
     expect(shouldAnimateCinematicArt({ isTTY: false })).toBe(false);
+    expect(shouldAnimateCinematicArt({ isTTY: true, inputTTY: false })).toBe(false);
     expect(shouldAnimateCinematicArt({ isTTY: true, reducedMotion: true })).toBe(false);
     expect(shouldAnimateCinematicArt({ isTTY: true, ci: true })).toBe(false);
     expect(shouldAnimateCinematicArt({ isTTY: true, term: 'dumb' })).toBe(false);
+  });
+});
+
+describe('Skippable playback', () => {
+  afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });
+
+  function input(raw = false, flowing = false) {
+    return Object.assign(new EventEmitter(), {
+      isTTY: true, isRaw: raw, readableFlowing: flowing,
+      setRawMode: vi.fn(), resume: vi.fn(), pause: vi.fn(),
+    });
+  }
+
+  it('skips after a key and restores the original input state and cursor', async () => {
+    const stream = input();
+    const writes: string[] = [];
+    const render = vi.fn(() => 'frame');
+    await playCinematicSequence(text => writes.push(text), stream, render, true, async () => { stream.emit('data', Buffer.from(' ')); });
+    expect(render).toHaveBeenCalledTimes(1);
+    expect(stream.setRawMode.mock.calls).toEqual([[true], [false]]);
+    expect(stream.pause).toHaveBeenCalledOnce();
+    expect(stream.listenerCount('data')).toBe(0);
+    expect(writes.at(-1)).toContain('\x1b[?25h');
+  });
+
+  it('restores state after a render exception without disturbing existing listeners', async () => {
+    const stream = input(true, true);
+    const existing = vi.fn();
+    stream.on('data', existing);
+    const write = vi.fn();
+    await expect(playCinematicSequence(write, stream, () => { throw new Error('render failed'); }, true)).rejects.toThrow('render failed');
+    expect(stream.setRawMode.mock.calls).toEqual([[true], [true]]);
+    expect(stream.pause).not.toHaveBeenCalled();
+    expect(stream.listeners('data')).toEqual([existing]);
+    expect(write.mock.calls.at(-1)?.[0]).toContain('\x1b[?25h');
+  });
+
+  it('uses a shorter optional sequence while retaining full playback', async () => {
+    const delays: number[] = [];
+    await playCinematicSequence(() => {}, input(), () => '', true, async ms => { delays.push(ms); });
+    expect(delays.reduce((sum, ms) => sum + ms, 0)).toBeLessThan(600);
+  });
+
+  it('never starts a welcome for automation, reduced motion, or explicit disabling', () => {
+    const runtime = { inputTTY: true, welcome: 'signature', capabilities: { isTTY: true, reducedMotion: false, ci: false, term: 'xterm' } };
+    expect(startupWelcomeIdentity({}, runtime)).toBe('signature');
+    expect(startupWelcomeIdentity({ welcome: 'off' }, runtime)).toBeNull();
+    expect(startupWelcomeIdentity({ animation: false }, runtime)).toBeNull();
+    expect(startupWelcomeIdentity({}, { ...runtime, inputTTY: false })).toBeNull();
+    for (const capabilities of [{ isTTY: false }, { isTTY: true, ci: true }, { isTTY: true, reducedMotion: true }, { isTTY: true, term: 'dumb' }]) {
+      expect(startupWelcomeIdentity({}, { ...runtime, capabilities: { ...runtime.capabilities, ...capabilities } })).toBeNull();
+    }
   });
 });
 

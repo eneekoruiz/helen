@@ -1,15 +1,16 @@
+import { recordFileResult, addMissingDependencies } from '../results.js';
 import type { HelenModule } from '../types.js';
 import type { HelenContext, ModuleResult } from '../../core/context.js';
 import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe, patchPackageJson } from '../../core/fs.js';
+import { writeFileSafe } from '../../core/fs.js';
 import path from 'node:path';
 
 const meta: HelenModule['meta'] = {
   id: 'pwa',
   name: 'Progressive Web App',
   category: 'Infrastructure',
-  summary: 'Vite PWA plugin + manifest + offline support',
-  description: 'Configures vite-plugin-pwa for offline capabilities, service worker registration, and a complete web manifest for app-like behavior.',
+  summary: 'Vite PWA plugin dependency + manifest + registration scaffold',
+  description: 'Creates a manifest and service-worker registration scaffold. Add VitePWA to your Vite configuration to enable offline support.',
   problemItSolves: 'Websites without PWA support feel slower and cannot work offline or be installed on mobile devices.',
   whenToUse: 'Any web application where mobile experience and offline access are important.',
   whenNotToUse: 'Internal dashboard apps where offline access is not possible/secure.',
@@ -17,10 +18,12 @@ const meta: HelenModule['meta'] = {
   filesModified: ['vite.config.ts', 'package.json'],
   runtimeDependencies: [],
   devDependencies: ['vite-plugin-pwa'],
-  requirements: ['Vite project'],
+  requirements: ['Vite project', 'Node.js >= 20.19 or >= 22.12'],
   risks: ['Service workers can cache stale content if not configured correctly.'],
   nextSteps: [
     'Customize manifest.webmanifest with your app colors and icons',
+    'Add VitePWA({ registerType: "autoUpdate", manifest: false }) to vite.config.ts plugins',
+    'Import src/pwa-register.ts in src/main.tsx',
     'Verify offline support in DevTools'
   ],
   riskLevel: 'medium',
@@ -57,15 +60,31 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
     ]
   }, null, 2);
 
-  writeFileSafe(path.join(cwd, 'public/manifest.webmanifest'), manifest, { dryRun, force });
-  result.created.push('public/manifest.webmanifest');
+  const files: Array<[string, string]> = [
+    ['public/manifest.webmanifest', manifest],
+    ['src/pwa-register.ts', `/// <reference types="vite-plugin-pwa/client" />
+import { registerSW } from 'virtual:pwa-register';
 
-  patchPackageJson(cwd, {
+registerSW({
+  immediate: true,
+  onRegisterError(error: unknown) {
+    console.error('[PWA] Service worker registration failed:', error);
+  },
+});
+`],
+  ];
+  for (const [file, content] of files) {
+    const status = writeFileSafe(path.join(cwd, file), content, { dryRun, force, root: cwd });
+    recordFileResult(result, file, status);
+  }
+
+  const status = addMissingDependencies(cwd, {
     devDependencies: {
-      'vite-plugin-pwa': '^0.20.0'
+      'vite-plugin-pwa': '^2.0.0'
     }
   }, { dryRun });
-  result.modified.push('package.json');
+  recordFileResult(result, 'package.json', status);
+  result.nextSteps.push(...meta.nextSteps);
 
   return result;
 }

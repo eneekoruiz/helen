@@ -51,7 +51,7 @@ Inspect all user-facing screens, components, styles, and copy for unmistakable A
 
 ## Output
 
-1. **AI Slop Index (0% to 100%)**: Objective evaluation of template vs. human craft.
+1. **Evidence-backed design assessment**: Specific repeated patterns, their effect on the intended audience, and uncertainty; do not invent an objective numerical score.
 2. **Catalog of AI Tells**: Exhaustive list of detected visual and verbal tropes with exact file and line references.
 3. **Bespoke Art Direction Blueprint**: Palette, typography pairings, border styles, and spacing philosophy.
 4. **Before and After Component Refactors**: Concrete diffs demonstrating how to transform generic cards and copy into distinctive, human-crafted components.

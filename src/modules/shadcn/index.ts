@@ -1,7 +1,8 @@
+import { recordFileResult, addMissingDependencies } from '../results.js';
 import type { HelenModule } from '../types.js';
 import type { HelenContext, ModuleResult } from '../../core/context.js';
 import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe, patchPackageJson, patchJson } from '../../core/fs.js';
+import { writeFileSafe, patchJson } from '../../core/fs.js';
 import path from 'node:path';
 
 const meta: HelenModule['meta'] = {
@@ -47,7 +48,7 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
     }
   };
   const r1 = patchJson(path.join(cwd, 'components.json'), componentsJson, { dryRun });
-  if (r1 === 'created' || r1 === 'modified') result.created.push('components.json');
+  recordFileResult(result, 'components.json', r1);
 
   // lib/utils.ts
   const utilsTs = `import { type ClassValue, clsx } from "clsx"
@@ -58,18 +59,18 @@ export function cn(...inputs: ClassValue[]) {
 }
 `;
 
-  const r2 = writeFileSafe(path.join(cwd, 'src/lib/utils.ts'), utilsTs, { dryRun, force });
-  if (r2 === 'created' || r2 === 'overwritten') result.created.push('src/lib/utils.ts');
+  const r2 = writeFileSafe(path.join(cwd, 'src/lib/utils.ts'), utilsTs, { dryRun, force, root: cwd });
+  recordFileResult(result, 'src/lib/utils.ts', r2);
 
   // package.json
-  const r3 = patchPackageJson(cwd, {
+  const r3 = addMissingDependencies(cwd, {
     dependencies: {
       "lucide-react": "^0.344.0",
       "clsx": "^2.1.0",
       "tailwind-merge": "^2.2.1"
     }
   }, { dryRun });
-  if (r3 === 'modified') result.modified.push('package.json');
+  recordFileResult(result, 'package.json', r3);
 
   return result;
 }

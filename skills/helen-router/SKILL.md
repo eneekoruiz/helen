@@ -1,30 +1,20 @@
 ---
 name: helen-router
-description: Use when the user asks what phase a project is in, what to do next, or which HELEN prompt or flow to run - detects the current project phase, checks the transition checklist, presents an interactive scoping questionnaire, and recommends the next step.
+description: Use when the user asks what phase a project is in, what to do next, or which HELEN prompt or flow to run - detects the project phase from evidence, checks transition criteria, reuses existing scope and recommends the next step.
 version: 2.1.0
 ---
 
 # HELEN Phase Router
 
-Act as a development operating system: show current state, clarify user scope via interactive questionnaire, recommend the next phase, and point to the right prompt, skill, or specialized subagent.
+Act as a development operating system: show current state, infer scope from existing context, recommend the next phase, and point to the right prompt, skill, or specialized subagent.
 
-## Operating Principles
+## Execution contract
 
-### 1. Interactive Phase & Scope Questionnaire
-After detecting phase signals, present a concise interactive questionnaire to lock in direction:
-- **Phase Confirmation**: "Detected Phase [X] based on evidence [Y]. Confirm or override?"
-- **Immediate Goal Scope**: "Are you aiming for a quick targeted fix (e.g. security patch, single UI component), or a full autonomous phase progression loop?"
-- **Refactoring Intent**: "Include Clean Code refactors in this transition or protect existing structure?"
-
-### 2. Autonomous Convergence Loop Handoff
-Once the user confirms the phase and scope, hand off directly to `helen-apply` or `helen-implementa` to run the matching playbook in an unbroken autonomous convergence loop until completion.
-
-### 3. Specialized Subagent Recommendation
-Recommend delegating the phase's exit checklist to specialized subagents (e.g. QA subagent for Phase 04, Security subagent for Phase 05, SEO/Release subagent for Phase 06).
-
-### 4. Extreme Token Economy
-Keep diagnosis to at most 10-12 high-density lines: phase, evidence, top 2-3 gaps, and the exact next command. Zero conversational filler.
-
+- Preserve intent, exclusions and authorization. Audit-only stays read-only. Reuse context; ask only for essential unknowns.
+- Define observable acceptance, baseline and verification before edits. Verify domain outcomes, compatibility and reproducible CI commands; report unavailable checks and residual risks.
+- Inspect → act → verify → re-audit → discover further evidence-backed improvements → repeat. After initial checks, find more actionable improvements without another user request. Apply when authorized, otherwise report. No arbitrary retry cap. Finish when acceptance passes and fresh discovery finds no further actionable improvement within scope, or disclose an external blocker. Change failing hypotheses; respect cancellation and explicit resource limits.
+- Start with the cheapest available model when selectable; escalate only for verified failure or unresolved reasoning. State unavailable controls.
+- Delegate independent domains to focused specialist agents with exclusive ownership; integrate and verify. Reuse evidence, batch reads, avoid polling and duplicate output. Write concise English instructions; answer in the user's language. Measure tokens/cost; never claim fixed savings or perfection.
 ## Phases
 
 1. `01-start-project`: initial risk scan, benchmark, roadmap, technology lifecycle.
@@ -56,5 +46,5 @@ Pick the latest phase whose entry evidence is present and whose exit checklist i
 ## Procedure
 
 1. Gather evidence from repository structure, git log, `package.json`, CI, and docs.
-2. Present interactive questionnaire to validate phase and confirm scope.
+2. Infer phase and scope from existing context; ask only for essential unknowns.
 3. Recommend exact next prompt or playbook: `helen apply <goal>` or `helen prompts show <ref>`.

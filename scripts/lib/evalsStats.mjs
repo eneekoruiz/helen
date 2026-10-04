@@ -21,7 +21,15 @@ const T_TABLE_95 = {
   18: 2.101,
   19: 2.093,
   20: 2.086,
+  21: 2.080,
+  22: 2.074,
+  23: 2.069,
+  24: 2.064,
   25: 2.060,
+  26: 2.056,
+  27: 2.052,
+  28: 2.048,
+  29: 2.045,
   30: 2.042,
 };
 
@@ -33,8 +41,12 @@ export function studentTCriticalValue(df) {
     const closest = keys.reduce((prev, curr) => (Math.abs(curr - df) < Math.abs(prev - df) ? curr : prev));
     return T_TABLE_95[closest];
   }
-  if (df <= 30) return 2.042;
-  return 1.960;
+  // Large-df quantile expansion; rounded to the same precision as the NIST table.
+  const z = 1.959963984540054;
+  const critical = z + (z ** 3 + z) / (4 * df)
+    + (5 * z ** 5 + 16 * z ** 3 + 3 * z) / (96 * df ** 2)
+    + (3 * z ** 7 + 19 * z ** 5 + 17 * z ** 3 - 15 * z) / (384 * df ** 3);
+  return Math.round(critical * 1000) / 1000;
 }
 
 export function mean(values) {
@@ -54,6 +66,7 @@ export function sampleStdDev(values) {
 }
 
 export function confidenceInterval95(values) {
+  if (!values?.length || values.some(value => !Number.isFinite(value))) throw new Error('Confidence summaries require finite observations');
   const avg = mean(values);
   const n = values?.length ?? 0;
   if (n <= 1) {
@@ -80,16 +93,17 @@ export function confidenceInterval95(values) {
 }
 
 export function pairedDeltaConfidenceInterval(baselineScores, withSkillScores) {
+  if (baselineScores.length !== withSkillScores.length) throw new Error('Paired scores must have equal lengths');
   const n = Math.min(baselineScores?.length ?? 0, withSkillScores?.length ?? 0);
   if (n === 0) {
-    return { mean: 0, stdDev: 0, marginOfError: 0, lower: 0, upper: 0, isNoise: true };
+    throw new Error('Paired deltas require observations');
   }
   const diffs = [];
   for (let i = 0; i < n; i++) {
     diffs.push(withSkillScores[i] - baselineScores[i]);
   }
   const ci = confidenceInterval95(diffs);
-  const isNoise = n > 1 ? ci.lower <= 0 && ci.upper >= 0 : ci.mean === 0;
+  const isNoise = n <= 1 || (ci.lower <= 0 && ci.upper >= 0);
   return {
     ...ci,
     isNoise,

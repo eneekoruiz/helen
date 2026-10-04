@@ -1,23 +1,40 @@
 import readline from 'node:readline';
-import { readProgress, formatStatus, formatNext, markDone, currentIndex, startProgress } from './progress.js';
-import { buildPlan, readPlaybooks, detectPhase } from './apply.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import { readProgress, formatStatus, formatNext, markDone, currentIndex, startProgress, resumeProgress } from './progress.js';
+import { buildPlan, readPlaybooks, detectPhase, formatBrief } from './apply.js';
+import { workProfile, repositoryFingerprint } from './workflowContext.js';
 import { runDoctor } from './doctor.js';
 import type { DoctorFixReport } from './doctorFix.js';
 import { listPromptEntries, readPrompt, searchPrompts } from './prompts.js';
 import { listSkills } from './skills.js';
 import { runInitProject } from './initProject.js';
+import { parseFrontmatter } from './frontmatter.js';
+import { installedHelenSkills, runAgentDoctor } from './agentDoctor.js';
+import { withStderrLogging } from './logger.js';
 
 export interface McpTool {
   name: string;
   description: string;
   inputSchema: {
     type: 'object';
-    properties: Record<string, any>;
+    properties: Record<string, { type: string; description: string }>;
     required?: string[];
   };
 }
 
 export const HELEN_MCP_TOOLS: McpTool[] = [
+  {
+    name: 'helen_resume',
+    description: 'Resume recorded progress and decisions, with current or stale verification and a concise next action.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        cwd: { type: 'string', description: 'Project directory (defaults to current working directory)' },
+        decision: { type: 'string', description: 'Optional durable project decision to record' },
+      },
+    },
+  },
   {
     name: 'helen_status',
     description: 'Inspect the current project phase, tracked plan, completed steps, and pending checkpoints.',
@@ -40,7 +57,7 @@ export const HELEN_MCP_TOOLS: McpTool[] = [
   },
   {
     name: 'helen_done',
-    description: 'Mark the current task as done. Runs automated checkpoint quality gates and advances project state.',
+    description: 'Mark the current task as done and advance project state. Checkpoints require a recorded passing helen check.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -52,13 +69,15 @@ export const HELEN_MCP_TOOLS: McpTool[] = [
   },
   {
     name: 'helen_apply',
-    description: 'Plan or execute a HELEN playbook / goal (e.g. strategy, design, code, qa, security, compliance).',
+    description: 'Plan a HELEN goal, optionally track it or export a repository-aware agent brief.',
     inputSchema: {
       type: 'object',
       properties: {
         goal: { type: 'string', description: 'Goal or playbook name to apply (e.g. strategy, design, code, qa, release, security)' },
         cwd: { type: 'string', description: 'Project directory (defaults to current working directory)' },
         track: { type: 'boolean', description: 'Whether to track the generated plan in .helen/progress.json' },
+        brief: { type: 'boolean', description: 'Include a concise repository-aware agent brief' },
+        profile: { type: 'string', description: 'Explicit context depth: quick, standard, exhaustive; same acceptance gates' },
       },
       required: ['goal'],
     },
@@ -76,19 +95,20 @@ export const HELEN_MCP_TOOLS: McpTool[] = [
   },
   {
     name: 'helen_prompt_get',
-    description: 'Search or retrieve structured, battle-tested prompt templates from the HELEN English prompt library.',
+    description: 'Search or retrieve structured English prompt templates from the HELEN library.',
     inputSchema: {
       type: 'object',
       properties: {
         promptId: { type: 'string', description: 'Specific prompt ID to read (e.g. design/system, qa/smoke-test)' },
         search: { type: 'string', description: 'Keywords to search prompts across title, tags, and description' },
         limit: { type: 'number', description: 'Maximum search results to return (default 5)' },
+        protocol: { type: 'boolean', description: 'Include shared execution rules (default true); omit only if already loaded' },
       },
     },
   },
   {
     name: 'helen_skills_list',
-    description: 'List all available HELEN agent skills, descriptions, and trigger conditions.',
+    description: 'List available HELEN agent skills, trigger descriptions, and whether each is installed in the project.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -111,11 +131,29 @@ export const HELEN_MCP_TOOLS: McpTool[] = [
   },
 ];
 
-export async function handleToolCall(name: string, args: Record<string, any> = {}): Promise<{ content: Array<{ type: 'text'; text: string }>; isError?: boolean }> {
-  const cwd = args.cwd || process.cwd();
+export async function handleToolCall(name: string, args: Record<string, unknown> = {}): Promise<{ content: Array<{ type: 'text'; text: string }>; isError?: boolean }> {
+  return withStderrLogging(() => executeToolCall(name, args));
+}
 
+async function executeToolCall(name: string, args: Record<string, unknown>): Promise<{ content: Array<{ type: 'text'; text: string }>; isError?: boolean }> {
   try {
+    const tool = HELEN_MCP_TOOLS.find(tool => tool.name === name);
+    if (!isRecord(args)) throw new Error('Tool arguments must be an object');
+    if (tool) {
+      for (const key of tool.inputSchema.required ?? []) {
+        if (!(key in args)) throw new Error(`Missing required argument: ${key}`);
+      }
+      for (const [key, value] of Object.entries(args)) {
+        const property = tool.inputSchema.properties[key];
+        if (property && typeof value !== property.type) throw new Error(`Invalid argument ${key}: expected ${property.type}`);
+      }
+      if (args.limit !== undefined && (!Number.isInteger(args.limit) || (args.limit as number) < 0)) throw new Error('limit must be a non-negative integer');
+    }
+    const cwd = typeof args.cwd === 'string' && args.cwd ? args.cwd : process.cwd();
     switch (name) {
+      case 'helen_resume': {
+        return { content: [{ type: 'text', text: JSON.stringify(resumeProgress(cwd, args.decision as string | undefined), null, 2) }] };
+      }
       case 'helen_status': {
         const progress = readProgress(cwd);
         if (!progress) {
@@ -152,7 +190,8 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
                   phase: progress.phase,
                   currentStepIndex: activeIdx,
                   totalSteps: progress.steps.length,
-                  formattedStatus: formatStatus(progress),
+                  formattedStatus: formatStatus(progress, cwd),
+                  verification: !progress.lastCheck ? 'missing' : progress.lastCheck.fingerprint === repositoryFingerprint(cwd) ? 'current' : 'stale',
                   steps: progress.steps.map((s, idx) => ({
                     index: idx + 1,
                     kind: s.kind,
@@ -180,7 +219,7 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
         const activeIdx = currentIndex(progress);
         if (activeIdx === -1) {
           return {
-            content: [{ type: 'text', text: 'All planned steps are completed! Project is ready for release.' }],
+            content: [{ type: 'text', text: formatStatus(progress) }],
           };
         }
         const current = progress.steps[activeIdx]!;
@@ -208,7 +247,7 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
 
       case 'helen_done': {
         try {
-          const updated = markDone(cwd, args.note, Boolean(args.force));
+          const updated = markDone(cwd, args.note as string | undefined, args.force === true);
           const nextIdx = currentIndex(updated);
           return {
             content: [
@@ -235,13 +274,14 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
       }
 
       case 'helen_apply': {
-        const goal = args.goal;
+        const goal = args.goal as string;
         const track = Boolean(args.track);
-        const playbooks = readPlaybooks();
+        const playbooks = readPlaybooks(undefined, cwd);
 
         const plan = buildPlan(cwd, goal, playbooks);
+        const profile = workProfile(args.profile as string | undefined);
         if (track) {
-          startProgress(cwd, plan, true);
+          startProgress(cwd, plan, false, profile);
         }
 
         return {
@@ -254,6 +294,8 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
                   title: plan.goal.title,
                   stepsCount: plan.goal.steps.length,
                   tracked: track,
+                  profile,
+                  ...(args.brief ? { brief: formatBrief(plan, cwd, profile) } : {}),
                   missingSkills: plan.missingSkills,
                   steps: plan.goal.steps.map(s => ({
                     kind: s.kind,
@@ -270,14 +312,13 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
       }
 
       case 'helen_doctor': {
-        const results = runDoctor(cwd);
-        const issues = results.filter(r => r.status !== 'ok');
-
         let autoFixReport: DoctorFixReport | null = null;
         if (args.fix) {
           const { repairDoctorIssues } = await import('./doctorFix.js');
           autoFixReport = repairDoctorIssues(cwd);
         }
+        const results = [...runDoctor(cwd), ...runAgentDoctor(cwd)];
+        const issues = results.filter(r => r.status !== 'ok');
 
         return {
           content: [
@@ -304,7 +345,7 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
 
       case 'helen_prompt_get': {
         if (args.promptId) {
-          const content = readPrompt(args.promptId);
+          const content = readPrompt(args.promptId as string, undefined, { protocol: args.protocol !== false });
           if (!content) {
             return {
               isError: true,
@@ -317,7 +358,7 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
         }
 
         if (args.search) {
-          const matches = searchPrompts(args.search.split(/\s+/)).slice(0, args.limit || 5);
+          const matches = searchPrompts(args.search as string).slice(0, (args.limit as number | undefined) ?? 5);
           return {
             content: [
               {
@@ -338,7 +379,7 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
           };
         }
 
-        const entries = listPromptEntries().slice(0, args.limit || 10);
+        const entries = listPromptEntries().slice(0, (args.limit as number | undefined) ?? 10);
         return {
           content: [
             {
@@ -355,15 +396,22 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
 
       case 'helen_skills_list': {
         const skills = listSkills();
+        const installed = new Set(installedHelenSkills(cwd).map(skill => skill.name));
         return {
           content: [
             {
               type: 'text',
               text: JSON.stringify(
-                skills.map(s => ({
-                  name: s.name,
-                  hasCustomFiles: Boolean(s.files),
-                })),
+                skills.map(s => {
+                  const document = s.files?.['SKILL.md'] ?? (s.dir ? fs.readFileSync(path.join(s.dir, 'SKILL.md'), 'utf-8') : '');
+                  const description = parseFrontmatter(document).data.description;
+                  return {
+                    name: s.name,
+                    hasCustomFiles: Boolean(s.files),
+                    description: typeof description === 'string' ? description : '',
+                    installed: installed.has(s.name),
+                  };
+                }),
                 null,
                 2
               ),
@@ -374,10 +422,10 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
 
       case 'helen_init_project': {
         const res = await runInitProject({
-          cwd: args.cwd || cwd,
-          name: args.name,
-          goal: args.goal,
-          dryRun: args.dryRun,
+          cwd,
+          name: args.name as string | undefined,
+          goal: args.goal as string | undefined,
+          dryRun: args.dryRun as boolean | undefined,
         });
         return {
           content: [
@@ -401,6 +449,10 @@ export async function handleToolCall(name: string, args: Record<string, any> = {
       content: [{ type: 'text', text: `Error executing ${name}: ${(err as Error)?.message || String(err)}` }],
     };
   }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
 /**
@@ -432,10 +484,15 @@ export function startMcpServer(input: NodeJS.ReadableStream = process.stdin, out
       return;
     }
 
-    const { id, method, params } = msg as Record<string, unknown>;
+    if (!isRecord(msg) || msg.jsonrpc !== '2.0' || typeof msg.method !== 'string' ||
+        (msg.id !== undefined && msg.id !== null && typeof msg.id !== 'string' && typeof msg.id !== 'number')) {
+      sendResponse({ jsonrpc: '2.0', id: null, error: { code: -32600, message: 'Invalid Request' } });
+      return;
+    }
+    const { id, method, params } = msg;
 
     // Notifications (no id)
-    if (id === undefined || id === null) {
+    if (id === undefined) {
       if (method === 'notifications/initialized') {
         // Handshake complete
         return;
@@ -483,8 +540,12 @@ export function startMcpServer(input: NodeJS.ReadableStream = process.stdin, out
       }
 
       case 'tools/call': {
-        const { name, arguments: toolArgs } = (params as Record<string, any>) || {};
-        const callResult = await handleToolCall(name as string, toolArgs || {});
+        if (!isRecord(params) || typeof params.name !== 'string' ||
+            (params.arguments !== undefined && !isRecord(params.arguments))) {
+          sendResponse({ jsonrpc: '2.0', id, error: { code: -32602, message: 'Invalid params' } });
+          break;
+        }
+        const callResult = await handleToolCall(params.name, params.arguments as Record<string, unknown> | undefined);
         sendResponse({
           jsonrpc: '2.0',
           id,

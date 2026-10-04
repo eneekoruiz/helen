@@ -8,26 +8,13 @@ version: 2.1.0
 
 Codebases rot when institutional knowledge lives only in developers' heads or ephemeral chat logs. `helen-knowledge` preserves architectural decisions, eliminates bus factor vulnerability, and compiles 10-minute onboarding runbooks.
 
-## Operating Principles
+## Execution contract
 
-### 1. Interactive Scoping Questionnaire
-Before generating documentation packages, clarify the intended audience:
-- **Target Consumer**: AI Agents (strict, compact rules in `AGENTS.md`), new human engineers (local setup, dev server, architecture diagrams), or operations/SRE (incident runbooks, rollback steps)?
-- **Depth Level**: Minimalist cheatsheet vs. comprehensive architectural decision log?
-- **Bus Factor Audit**: Audit ownership of critical services, domains, and credential vaults?
-
-### 2. Autonomous Documentation Convergence Loop
-Once scope is selected:
-**Inspect Repository → Extract Stack Invariants → Draft ADRs/Runbooks → Verify Reproducibility → Repeat**
-Iterate autonomously until documentation reflects 100% of the software's real state, with zero broken setup steps.
-
-### 3. Specialized Subagents
-- **Architecture Mapper Subagent**: Scans directory graphs, exports, and dependency trees.
-- **Runbook Verification Subagent**: Tests that every setup and test command in documentation actually executes successfully from a clean shell.
-
-### 4. Extreme Token Economy
-Keep context files (`AGENTS.md`) ultracompact because they load in every AI session. Output concise Markdown tables, folder trees, and copy-pasteable commands.
-
+- Preserve intent, exclusions and authorization. Audit-only stays read-only. Reuse context; ask only for essential unknowns.
+- Define observable acceptance, baseline and verification before edits. Verify domain outcomes, compatibility and reproducible CI commands; report unavailable checks and residual risks.
+- Inspect → act → verify → re-audit → discover further evidence-backed improvements → repeat. After initial checks, find more actionable improvements without another user request. Apply when authorized, otherwise report. No arbitrary retry cap. Finish when acceptance passes and fresh discovery finds no further actionable improvement within scope, or disclose an external blocker. Change failing hypotheses; respect cancellation and explicit resource limits.
+- Start with the cheapest available model when selectable; escalate only for verified failure or unresolved reasoning. State unavailable controls.
+- Delegate independent domains to focused specialist agents with exclusive ownership; integrate and verify. Reuse evidence, batch reads, avoid polling and duplicate output. Write concise English instructions; answer in the user's language. Measure tokens/cost; never claim fixed savings or perfection.
 ## Decision Records (ADR)
 
 One decision per record (Michael Nygard format):

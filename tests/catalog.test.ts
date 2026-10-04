@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { getCatalogItem, listCatalog, readCatalog, validateCatalog } from '../src/core/catalog.js';
 
 describe('External skills catalog', () => {
@@ -44,5 +47,16 @@ describe('External skills catalog', () => {
     const stale = validateCatalog(undefined, later);
     expect(stale.length).toBe(items.length);
     expect(stale.every(issue => issue.level === 'warn')).toBe(true);
+  });
+
+  it.each([null, {}, { items: [null] }, { items: [{ ...items[0], install: null }] }])('reports malformed catalog structure without crashing its validator', value => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'helen-catalog-'));
+    try {
+      fs.writeFileSync(path.join(root, 'catalog.json'), JSON.stringify(value));
+      expect(() => readCatalog(root)).toThrow('Invalid catalog');
+      expect(validateCatalog(root)).toEqual([expect.objectContaining({ level: 'error', message: expect.stringContaining('Invalid catalog') })]);
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
   });
 });

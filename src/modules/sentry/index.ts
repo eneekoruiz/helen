@@ -1,7 +1,8 @@
+import { recordFileResult, addMissingDependencies } from '../results.js';
 import type { HelenModule } from '../types.js';
 import type { HelenContext, ModuleResult } from '../../core/context.js';
 import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe, patchPackageJson } from '../../core/fs.js';
+import { writeFileSafe } from '../../core/fs.js';
 import path from 'node:path';
 
 const meta: HelenModule['meta'] = {
@@ -66,15 +67,16 @@ export function initSentry() {
 }
 `;
 
-  writeFileSafe(path.join(cwd, 'src/lib/sentry.ts'), sentryTs, { dryRun, force });
-  result.created.push('src/lib/sentry.ts');
+  const fileStatus = writeFileSafe(path.join(cwd, 'src/lib/sentry.ts'), sentryTs, { dryRun, force, root: cwd });
+  recordFileResult(result, 'src/lib/sentry.ts', fileStatus);
 
-  patchPackageJson(cwd, {
+  const packageStatus = addMissingDependencies(cwd, {
     dependencies: {
       '@sentry/react': '^8.0.0'
     }
   }, { dryRun });
-  result.modified.push('package.json');
+  recordFileResult(result, 'package.json', packageStatus);
+  result.nextSteps.push(...meta.nextSteps);
 
   return result;
 }

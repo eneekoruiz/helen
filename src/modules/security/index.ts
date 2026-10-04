@@ -1,3 +1,4 @@
+import { recordFileResult } from '../results.js';
 import type { HelenModule } from '../types.js';
 import type { HelenContext, ModuleResult } from '../../core/context.js';
 import { createEmptyResult } from '../../core/context.js';
@@ -41,11 +42,12 @@ const envSchema = z.object({
   // Enforced production environment vs local development fallback
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   VITE_APP_URL: z.string().url().refine((url) => {
-    const isProd = (typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process.env && (globalThis as any).process.env.NODE_ENV === 'production');
+    const isProd = (import.meta as { env?: { PROD?: boolean } }).env?.PROD || (typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process.env?.NODE_ENV === 'production');
+    const parsed = new URL(url);
     if (isProd) {
-      return url.startsWith('https://');
+      return parsed.protocol === 'https:';
     }
-    return url.startsWith('http://localhost') || url.startsWith('https://') || url.startsWith('http://127.0.0.1');
+    return parsed.protocol === 'https:' || (parsed.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname));
   }, {
     message: 'Security Violation: VITE_APP_URL must resolve to a secure HTTPS endpoint in production.'
   }).default('http://localhost:5173'),
@@ -115,9 +117,8 @@ export const env = validateEnv();
 `;
   }
 
-  const r1 = writeFileSafe(path.join(cwd, 'src/lib/env.ts'), envTs, { dryRun, force });
-  if (r1 === 'created' || r1 === 'overwritten') result.created.push('src/lib/env.ts');
-  else result.skipped.push('src/lib/env.ts');
+  const r1 = writeFileSafe(path.join(cwd, 'src/lib/env.ts'), envTs, { dryRun, force, root: cwd });
+  recordFileResult(result, 'src/lib/env.ts', r1);
 
   // sanitize.ts
   let sanitizeTs = '';
@@ -209,9 +210,8 @@ export function sanitizeUrl(url: string): string {
 `;
   }
 
-  const r2 = writeFileSafe(path.join(cwd, 'src/lib/sanitize.ts'), sanitizeTs, { dryRun, force });
-  if (r2 === 'created' || r2 === 'overwritten') result.created.push('src/lib/sanitize.ts');
-  else result.skipped.push('src/lib/sanitize.ts');
+  const r2 = writeFileSafe(path.join(cwd, 'src/lib/sanitize.ts'), sanitizeTs, { dryRun, force, root: cwd });
+  recordFileResult(result, 'src/lib/sanitize.ts', r2);
 
   // src/lib/security.ts (Strict mode only)
   if (securityLevel === 'strict') {
@@ -308,9 +308,8 @@ export function generateCSPDirectives(): string {
   ].join('; ');
 }
 `;
-    const r4 = writeFileSafe(path.join(cwd, 'src/lib/security.ts'), securityTs, { dryRun, force });
-    if (r4 === 'created' || r4 === 'overwritten') result.created.push('src/lib/security.ts');
-    else result.skipped.push('src/lib/security.ts');
+    const r4 = writeFileSafe(path.join(cwd, 'src/lib/security.ts'), securityTs, { dryRun, force, root: cwd });
+    recordFileResult(result, 'src/lib/security.ts', r4);
   }
 
   // Security headers reference doc
@@ -337,9 +336,8 @@ ${securityLevel === 'strict' ? `
 Configure these in your hosting platform (Vercel, Nginx, Cloudflare, etc.).
 `}
 `;
-  const r3 = writeFileSafe(path.join(cwd, 'docs/security-headers.md'), headersDoc, { dryRun, force });
-  if (r3 === 'created' || r3 === 'overwritten') result.created.push('docs/security-headers.md');
-  else result.skipped.push('docs/security-headers.md');
+  const r3 = writeFileSafe(path.join(cwd, 'docs/security-headers.md'), headersDoc, { dryRun, force, root: cwd });
+  recordFileResult(result, 'docs/security-headers.md', r3);
 
   result.nextSteps.push('Fill .env.local with your values');
   result.nextSteps.push('Configure security headers in your hosting platform');

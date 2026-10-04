@@ -1,3 +1,4 @@
+import { recordFileResult } from '../results.js';
 import type { HelenModule } from '../types.js';
 import type { HelenContext, ModuleResult } from '../../core/context.js';
 import { createEmptyResult } from '../../core/context.js';
@@ -20,8 +21,8 @@ const meta: HelenModule['meta'] = {
   filesCreated: ['vitest.config.ts', 'src/test/setup.ts', 'src/test/example.test.ts'],
   filesModified: ['package.json'],
   runtimeDependencies: [],
-  devDependencies: ['vitest', '@testing-library/react', '@testing-library/jest-dom', '@testing-library/user-event', 'jsdom'],
-  requirements: ['React project', 'TypeScript recommended'],
+  devDependencies: ['vitest', '@vitest/coverage-v8', '@testing-library/react', '@testing-library/jest-dom', '@testing-library/user-event', 'jsdom'],
+  requirements: ['Node.js >= 20.19 or >= 22.12', 'React project', 'TypeScript recommended'],
   risks: ['May conflict with existing vitest.config.ts'],
   nextSteps: ['Run npm run test to verify setup', 'Write your first real test'],
   riskLevel: 'low',
@@ -59,9 +60,8 @@ export default defineConfig({
 });
 `;
   }
-  const r1 = writeFileSafe(path.join(cwd, 'vitest.config.ts'), vitestContent, { dryRun, force });
-  if (r1 === 'created' || r1 === 'overwritten') result.created.push('vitest.config.ts');
-  else result.skipped.push('vitest.config.ts');
+  const r1 = writeFileSafe(path.join(cwd, 'vitest.config.ts'), vitestContent, { dryRun, force, root: cwd });
+  recordFileResult(result, 'vitest.config.ts', r1);
 
   // Test setup file
   const setupContent = `import '@testing-library/jest-dom';
@@ -92,9 +92,8 @@ Object.defineProperty(window, 'ResizeObserver', {
   value: ResizeObserverMock,
 });
 `;
-  const r2 = writeFileSafe(path.join(cwd, 'src/test/setup.ts'), setupContent, { dryRun, force });
-  if (r2 === 'created' || r2 === 'overwritten') result.created.push('src/test/setup.ts');
-  else result.skipped.push('src/test/setup.ts');
+  const r2 = writeFileSafe(path.join(cwd, 'src/test/setup.ts'), setupContent, { dryRun, force, root: cwd });
+  recordFileResult(result, 'src/test/setup.ts', r2);
 
   // Example test
   const exampleTest = `import { describe, it, expect } from 'vitest';
@@ -112,9 +111,8 @@ describe('Example test suite', () => {
   });
 });
 `;
-  const r3 = writeFileSafe(path.join(cwd, 'src/test/example.test.ts'), exampleTest, { dryRun, force });
-  if (r3 === 'created' || r3 === 'overwritten') result.created.push('src/test/example.test.ts');
-  else result.skipped.push('src/test/example.test.ts');
+  const r3 = writeFileSafe(path.join(cwd, 'src/test/example.test.ts'), exampleTest, { dryRun, force, root: cwd });
+  recordFileResult(result, 'src/test/example.test.ts', r3);
 
   // Patch package.json
   const patchResult = patchPackageJson(cwd, {
@@ -124,7 +122,7 @@ describe('Example test suite', () => {
       'test:coverage': 'vitest run --coverage',
     },
   }, { dryRun });
-  if (patchResult === 'modified') result.modified.push('package.json');
+  recordFileResult(result, 'package.json', patchResult);
 
   result.nextSteps.push('Run npm run test to verify');
   result.nextSteps.push('Write your first component test');

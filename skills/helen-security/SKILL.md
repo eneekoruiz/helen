@@ -8,27 +8,13 @@ version: 2.1.0
 
 Security is an uncompromising prerequisite for production software. `helen-security` forensically audits codebases for secret leaks, injection vectors, malicious dependencies, and insecure permissions, applying immediate safe mitigations in an autonomous loop.
 
-## Operating Principles
+## Execution contract
 
-### 1. Interactive Scoping Questionnaire
-Before running deep penetration or hardening sweeps, clarify security scope:
-- **Security Profile**: Simple (standard env validation, basic HTML escaping) vs. Strict (fail-fast Zod, AES-GCM ciphers, strict CSP, SHA-256 integrity)?
-- **Third-Party & Dependency Tolerance**: Auto-patch low/moderate vulnerabilities with safe version bumps or report for review?
-- **Public vs. Internal Exposure**: Is the service directly public-facing (requiring strict rate-limiting and DDoS/CORS lockdown) or internal tooling?
-
-### 2. Autonomous Security Convergence Loop
-Once the security profile is locked:
-**Secret Scan → Input Validation Audit → Dependency CVE Sweep → Patch & Mitigate → Verify Build/Tests → Repeat**
-Iterate autonomously until 100% of critical and high-severity security vectors are mitigated. Never stop to ask permission to fix an obvious secret leak or unescaped input.
-
-### 3. Specialized Subagents
-- **Secret & Credential Scanner Subagent**: Uses regex patterns to detect API keys, private tokens, and exposed `.env` files.
-- **Dependency & CVE Auditor Subagent**: Audits `package-lock.json` or `pnpm-lock.yaml` against vulnerability databases.
-- **Injection & Path Traversal Subagent**: Inspects SQL, shell exec, file path resolution, and dangerouslySetInnerHTML.
-
-### 4. Extreme Token Economy
-Report findings with file paths, violated OWASP rules, and before/after code remediation diffs. Never print secret values or lecture on security theory.
-
+- Preserve intent, exclusions and authorization. Audit-only stays read-only. Reuse context; ask only for essential unknowns.
+- Define observable acceptance, baseline and verification before edits. Verify domain outcomes, compatibility and reproducible CI commands; report unavailable checks and residual risks.
+- Inspect → act → verify → re-audit → discover further evidence-backed improvements → repeat. After initial checks, find more actionable improvements without another user request. Apply when authorized, otherwise report. No arbitrary retry cap. Finish when acceptance passes and fresh discovery finds no further actionable improvement within scope, or disclose an external blocker. Change failing hypotheses; respect cancellation and explicit resource limits.
+- Start with the cheapest available model when selectable; escalate only for verified failure or unresolved reasoning. State unavailable controls.
+- Delegate independent domains to focused specialist agents with exclusive ownership; integrate and verify. Reuse evidence, batch reads, avoid polling and duplicate output. Write concise English instructions; answer in the user's language. Measure tokens/cost; never claim fixed savings or perfection.
 ## Audit and Mitigation Criteria
 
 1. **Secrets and configuration:** Hardcoded credentials, tokens, passwords, and committed `.env` files.

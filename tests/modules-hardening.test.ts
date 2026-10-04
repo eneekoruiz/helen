@@ -5,6 +5,12 @@ import path from 'node:path';
 import os from 'node:os';
 import fs from 'fs-extra';
 import type { HelenContext } from '../src/core/context.js';
+import { runModule } from '../src/core/moduleRunner.js';
+import ts from 'typescript';
+import vm from 'node:vm';
+import { z } from 'zod';
+import { tailwindModule } from '../src/modules/tailwind/index.js';
+import { shadcnModule } from '../src/modules/shadcn/index.js';
 
 describe('Module Hardening - Idempotency & Dry-Run', () => {
   let tmpDir: string;
@@ -223,5 +229,68 @@ describe('Module Hardening - Idempotency & Dry-Run', () => {
       expect(contentJson.translatable).toBeDefined();
       expect(contentJson.universal).toBeDefined();
     });
+  });
+
+  it('reports skipped files on repeated experimental module execution', async () => {
+    for (const id of ['cms', 'gdpr', 'pwa', 'i18n', 'sentry']) {
+      const mod = getModule(id);
+      if (!mod) throw new Error(`${id} module not found`);
+      const first = await mod.execute(ctx);
+      const second = await mod.execute(ctx);
+      expect(second.created, id).toEqual([]);
+      expect(second.modified, id).toEqual([]);
+      expect(second.skipped, id).toEqual(expect.arrayContaining([...first.created, ...first.modified]));
+      for (const file of mod.meta.filesCreated) {
+        expect(fs.existsSync(path.join(tmpDir, file)), `${id}: ${file}`).toBe(true);
+      }
+    }
+  });
+
+  it('preserves existing dependency versions and module-specific pins', async () => {
+    const pkgPath = path.join(tmpDir, 'package.json');
+    const pkg = fs.readJsonSync(pkgPath);
+    pkg.devDependencies.vitest = '^2.1.9';
+    fs.writeJsonSync(pkgPath, pkg);
+    await runModule('testing', ctx);
+    const testingPkg = fs.readJsonSync(pkgPath);
+    expect(testingPkg.devDependencies.vitest).toBe('^2.1.9');
+    expect(testingPkg.devDependencies['@vitest/coverage-v8']).toBe('^2.1.9');
+    await runModule('i18n', ctx);
+    expect(fs.readJsonSync(pkgPath).dependencies.i18next).toBe('^23.0.0');
+  });
+
+  it('reports forced replacements as modified and preserves user dependency versions', async () => {
+    for (const mod of [getModule('i18n')!, getModule('sentry')!, getModule('pwa')!, tailwindModule, shadcnModule]) {
+      const id = mod.meta.id;
+      const pkgPath = path.join(tmpDir, 'package.json');
+      const pkg = fs.readJsonSync(pkgPath);
+      for (const dep of mod.meta.runtimeDependencies ?? []) pkg.dependencies[dep] = '9.9.9';
+      for (const dep of mod.meta.devDependencies ?? []) pkg.devDependencies[dep] = '9.9.9';
+      fs.writeJsonSync(pkgPath, pkg);
+      const first = await mod.execute(ctx);
+      const forced = await mod.execute({ ...ctx, force: true });
+      expect(forced.created, id).toEqual([]);
+      expect([...forced.modified, ...forced.skipped], id).toEqual(expect.arrayContaining(first.created));
+      expect(forced.modified.length, id).toBeGreaterThan(0);
+      const updated = fs.readJsonSync(pkgPath);
+      for (const dep of mod.meta.runtimeDependencies ?? []) expect(updated.dependencies[dep], dep).toBe('9.9.9');
+      for (const dep of mod.meta.devDependencies ?? []) expect(updated.devDependencies[dep], dep).toBe('9.9.9');
+    }
+  });
+
+  it('enforces HTTPS using Vite production flags and validates local hostnames', async () => {
+    const mod = getModule('security');
+    if (!mod) throw new Error('security module not found');
+    await mod.execute({ ...ctx, settings: { securityLevel: 'strict' } });
+    const source = fs.readFileSync(path.join(tmpDir, 'src/lib/env.ts'), 'utf-8')
+      .replaceAll('import.meta', '({ env: runtimeEnv })');
+    const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+    const execute = (runtimeEnv: Record<string, unknown>) => vm.runInNewContext(compiled, {
+      runtimeEnv, URL, exports: {}, require: () => ({ z }),
+    });
+    expect(() => execute({ PROD: true, VITE_APP_URL: 'http://localhost:5173' })).toThrow('secure HTTPS');
+    expect(() => execute({ PROD: false, VITE_APP_URL: 'http://localhost.attacker.example' })).toThrow('secure HTTPS');
+    expect(() => execute({ PROD: true, VITE_APP_URL: 'https://example.com' })).not.toThrow();
+    expect(() => execute({ PROD: false, VITE_APP_URL: 'http://localhost:5173' })).not.toThrow();
   });
 });

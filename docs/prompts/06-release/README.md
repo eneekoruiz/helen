@@ -27,7 +27,7 @@ Before moving on to 07-client-handoff:
 | Prompt | Type | Summary |
 |---|---|---|
 | [apply-deploy-github-and-hosting](deploy/APPLY-deploy-github-and-hosting.md) | APPLY | Push the code to a private GitHub repository and connect a host (Vercel, Cloudflare...) with safe environment variables and a verified deploy. |
-| [apply-release-candidate-flow](flow/APPLY-release-candidate-flow.md) | APPLY flow | Flow: decide whether the project can become a release candidate and package it with guarantees. RC READY, RC WITH CAVEATS or NOT RC READY. |
+| [apply-release-candidate-flow](flow/APPLY-release-candidate-flow.md) | APPLY flow | Flow: verify and package a release candidate with evidence. Verdict: RC READY, RC WITH CAVEATS or NOT RC READY. |
 | [audit-release-readiness-checkpoint](flow/AUDIT-release-readiness-checkpoint.md) | checkpoint | Final release gate: verification, honest docs and claims, no secrets, resolved or accepted findings. PASS, PASS WITH CAVEATS or FAIL. |
 | [apply-automated-release-and-changelog-workflows](notes/APPLY-automated-release-and-changelog-workflows.md) | APPLY | Set up GitHub Actions for tagged releases, verified builds, SemVer and PR-based changelog drafts, with least-privilege tokens. |
 | [generate-release-notes-changelog-and-demo-package](notes/GENERATE-release-notes-changelog-and-demo-package.md) | GENERATE | Write the changelog, release notes, migration notes, demo script and announcement copy that match what actually ships. |

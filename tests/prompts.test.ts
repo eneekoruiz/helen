@@ -76,6 +76,27 @@ describe('Prompt library', () => {
     expect(idFromRelativePath('02-building/clean-code/APPLY-clean-code-pass-flow.md')).toBe('02-building/clean-code/apply-clean-code-pass-flow');
     expect(idFromRelativePath('x/README.md')).toBe('x/README');
   });
+
+  it('fills placeholders with literal keys and values', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'helen-fill-'));
+    try {
+      fs.writeFileSync(path.join(root, 'RULES.md'), '{{ a.b }} {{ axb }}');
+      expect(readPrompt('rules', root, { fill: { 'a.b': '$& $` $\u0027' } })).toBe('$& $` $\u0027 {{ axb }}');
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('reflects prompt files added after listing the library', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'helen-refresh-'));
+    try {
+      expect(listPromptEntries(root)).toEqual([]);
+      fs.writeFileSync(path.join(root, 'RULES.md'), '# Updated rules');
+      expect(resolvePromptEntry('rules', root).title).toBe('Updated rules');
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
 });
 
 describe('Frontmatter parser', () => {
@@ -88,6 +109,11 @@ describe('Frontmatter parser', () => {
 
   it('handles documents without frontmatter', () => {
     expect(parseFrontmatter('# Only a title').hasFrontmatter).toBe(false);
+  });
+
+  it('preserves hash characters inside quoted summaries', () => {
+    expect(parseFrontmatter('---\nsummary: "Use # tags" # comment\n---\n').data.summary).toBe('Use # tags');
+    expect(parseFrontmatter('---\nsummary: plain text # comment\n---\n').data.summary).toBe('plain text');
   });
 });
 

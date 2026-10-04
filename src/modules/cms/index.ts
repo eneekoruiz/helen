@@ -1,10 +1,10 @@
+import { recordFileResult } from '../results.js';
 import type { HelenModule } from '../types.js';
 import type { HelenContext, ModuleResult } from '../../core/context.js';
 import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe } from '../../core/fs.js';
+import { writeFileSafe, fileExists } from '../../core/fs.js';
 import { isModuleInstalled } from '../../core/config.js';
 import path from 'node:path';
-import fs from 'fs-extra';
 
 const meta: HelenModule['meta'] = {
   id: 'cms',
@@ -44,8 +44,8 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
 
   // Audit if i18n is configured in the target project
   const hasI18n = isModuleInstalled(cwd, 'i18n') || 
-                  fs.existsSync(path.join(cwd, 'src/i18n/config.ts')) ||
-                  fs.existsSync(path.join(cwd, 'src/i18n/config.js'));
+                  fileExists(path.join(cwd, 'src/i18n/config.ts')) ||
+                  fileExists(path.join(cwd, 'src/i18n/config.js'));
 
   // 1. Initial content JSON
   let contentJson = '';
@@ -89,14 +89,17 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
 import { useTranslation } from 'react-i18next';
 import defaultContent from '../cms/content.json';
 
+type CMSContent = ${hasI18n ? '{ translatable: Record<string, Record<string, string>>; universal: Record<string, string> }' : 'Record<string, string>'};
+
 interface CMSContextType {
   isAdmin: boolean;
   isEditing: boolean;
   setIsEditing: (val: boolean) => void;
-  currentLanguage: string;
-  setCurrentLanguage: (lang: string) => void;
-  content: typeof defaultContent;
-  updateContent: (key: string, value: any, isUniversal?: boolean) => void;
+  content: CMSContent;
+  getContent: (key: string, isUniversal?: boolean) => string;
+  currentLanguage?: string;
+  setCurrentLanguage?: (lang: string) => void;
+  updateContent: (key: string, value: string, isUniversal?: boolean) => void;
   resetContent: () => void;
   logout: () => void;
 }
@@ -104,18 +107,30 @@ interface CMSContextType {
 const CMSContext = createContext<CMSContextType | undefined>(undefined);
 const STORAGE_KEY = 'helen-cms-content';
 
+function isRecord(value: unknown): value is Record<string, string> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) && Object.values(value).every((item) => typeof item === 'string');
+}
+
+function isContent(value: unknown): value is CMSContent {
+  ${hasI18n ? `if (typeof value !== 'object' || value === null || !('universal' in value) || !('translatable' in value)) return false;
+  return isRecord(value.universal) && typeof value.translatable === 'object' && value.translatable !== null && !Array.isArray(value.translatable) && Object.values(value.translatable).every(isRecord);` : 'return isRecord(value);'}
+}
+
 export function CMSProvider({ children }: { children: ReactNode }) {
   const { i18n } = useTranslation();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentLanguage, setCurrentLanguageState] = useState(i18n.language || 'en');
-  const [content, setContent] = useState<typeof defaultContent>(() => {
+  const [content, setContent] = useState<CMSContent>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch {}
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed: unknown = JSON.parse(saved);
+          if (isContent(parsed)) return parsed;
+        }
+      } catch {
+        console.warn('[HELEN CMS] Stored content unavailable; using defaults.');
       }
     }
     return defaultContent;
@@ -126,7 +141,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       setIsAdmin(true);
       setIsEditing(true);
       window.history.replaceState({}, document.title, '/');
-      alert('✨ HELEN CMS: Modo Edición activado. Autenticado como Administrador.');
+      // This is a local editing mode, not an authentication boundary.
     }
   }, []);
 
@@ -135,7 +150,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     i18n.changeLanguage(lang);
   };
 
-  const updateContent = (key: string, value: any, isUniversal = false) => {
+  const updateContent = (key: string, value: string, isUniversal = false) => {
     setContent((prev) => {
       const next = { ...prev };
       if (isUniversal) {
@@ -148,16 +163,16 @@ export function CMSProvider({ children }: { children: ReactNode }) {
           [lang]: { ...langContent, [key]: value }
         };
       }
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { console.warn('[HELEN CMS] Changes are kept in memory; storage unavailable.'); }
       return next;
     });
   };
 
   const resetContent = () => {
     if (confirm('¿Seguro que deseas restablecer el contenido original? Se perderán todos los cambios.')) {
-      localStorage.removeItem(STORAGE_KEY);
+      try { localStorage.removeItem(STORAGE_KEY); } catch { console.warn('[HELEN CMS] Storage unavailable.'); }
       setContent(defaultContent);
-      window.location.reload();
+
     }
   };
 
@@ -175,6 +190,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       currentLanguage,
       setCurrentLanguage,
       content,
+      getContent: (key, universal = false) => ${hasI18n ? "universal ? content.universal[key] ?? '' : content.translatable[currentLanguage]?.[key] ?? content.translatable[currentLanguage.split('-')[0]]?.[key] ?? content.translatable.en?.[key] ?? ''" : "content[key] ?? ''"},
       updateContent,
       resetContent,
       logout
@@ -194,12 +210,17 @@ export function useCMS() {
     contextCode = `import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import defaultContent from '../cms/content.json';
 
+type CMSContent = ${hasI18n ? '{ translatable: Record<string, Record<string, string>>; universal: Record<string, string> }' : 'Record<string, string>'};
+
 interface CMSContextType {
   isAdmin: boolean;
   isEditing: boolean;
   setIsEditing: (val: boolean) => void;
-  content: typeof defaultContent;
-  updateContent: (key: string, value: any) => void;
+  content: CMSContent;
+  getContent: (key: string, isUniversal?: boolean) => string;
+  currentLanguage?: string;
+  setCurrentLanguage?: (lang: string) => void;
+  updateContent: (key: string, value: string, isUniversal?: boolean) => void;
   resetContent: () => void;
   logout: () => void;
 }
@@ -207,16 +228,28 @@ interface CMSContextType {
 const CMSContext = createContext<CMSContextType | undefined>(undefined);
 const STORAGE_KEY = 'helen-cms-content';
 
+function isRecord(value: unknown): value is Record<string, string> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) && Object.values(value).every((item) => typeof item === 'string');
+}
+
+function isContent(value: unknown): value is CMSContent {
+  ${hasI18n ? `if (typeof value !== 'object' || value === null || !('universal' in value) || !('translatable' in value)) return false;
+  return isRecord(value.universal) && typeof value.translatable === 'object' && value.translatable !== null && !Array.isArray(value.translatable) && Object.values(value.translatable).every(isRecord);` : 'return isRecord(value);'}
+}
+
 export function CMSProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [content, setContent] = useState<typeof defaultContent>(() => {
+  const [content, setContent] = useState<CMSContent>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch {}
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed: unknown = JSON.parse(saved);
+          if (isContent(parsed)) return parsed;
+        }
+      } catch {
+        console.warn('[HELEN CMS] Stored content unavailable; using defaults.');
       }
     }
     return defaultContent;
@@ -227,23 +260,23 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       setIsAdmin(true);
       setIsEditing(true);
       window.history.replaceState({}, document.title, '/');
-      alert('✨ HELEN CMS: Modo Edición activado. Autenticado como Administrador.');
+      // This is a local editing mode, not an authentication boundary.
     }
   }, []);
 
-  const updateContent = (key: string, value: any) => {
+  const updateContent = (key: string, value: string, _isUniversal = false) => {
     setContent((prev) => {
       const next = { ...prev, [key]: value };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { console.warn('[HELEN CMS] Changes are kept in memory; storage unavailable.'); }
       return next;
     });
   };
 
   const resetContent = () => {
     if (confirm('¿Seguro que deseas restablecer el contenido original? Se perderán todos los cambios.')) {
-      localStorage.removeItem(STORAGE_KEY);
+      try { localStorage.removeItem(STORAGE_KEY); } catch { console.warn('[HELEN CMS] Storage unavailable.'); }
       setContent(defaultContent);
-      window.location.reload();
+
     }
   };
 
@@ -259,6 +292,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       isEditing,
       setIsEditing,
       content,
+      getContent: (key) => ${hasI18n ? "universal ? content.universal[key] ?? '' : content.translatable[currentLanguage]?.[key] ?? content.translatable[currentLanguage.split('-')[0]]?.[key] ?? content.translatable.en?.[key] ?? ''" : "content[key] ?? ''"},
       updateContent,
       resetContent,
       logout
@@ -284,7 +318,7 @@ interface EditableTextProps {
   isUniversal?: boolean;
   style?: React.CSSProperties;
   className?: string;
-  tagName?: keyof React.ReactHTML;
+  tagName?: 'span' | 'p' | 'h1' | 'h2' | 'h3' | 'div';
 }
 
 export function EditableText({
@@ -294,25 +328,16 @@ export function EditableText({
   className,
   tagName = 'span'
 }: EditableTextProps) {
-  const { isEditing, content, updateContent, currentLanguage } = useCMS() as any;
+  const { isEditing, getContent, updateContent } = useCMS();
 
-  let value = '';
-  if (content.translatable || content.universal) {
-    if (isUniversal) {
-      value = content.universal?.[contentKey] || '';
-    } else {
-      value = content.translatable?.[currentLanguage || 'en']?.[contentKey] || '';
-    }
-  } else {
-    value = content[contentKey] || '';
-  }
+  const value = getContent(contentKey, isUniversal);
 
   const handleBlur = (e: React.FocusEvent<HTMLSpanElement>) => {
     const text = e.target.textContent || '';
     updateContent(contentKey, text, isUniversal);
   };
 
-  const Tag = tagName as any;
+  const Tag = tagName;
 
   if (!isEditing) {
     return <Tag style={style} className={className}>{value}</Tag>;
@@ -357,18 +382,9 @@ export function EditableImage({
   className,
   alt
 }: EditableImageProps) {
-  const { isEditing, content, updateContent, currentLanguage } = useCMS() as any;
+  const { isEditing, getContent, updateContent } = useCMS();
 
-  let src = '';
-  if (content.universal || content.translatable) {
-    if (isUniversal) {
-      src = content.universal?.[contentKey] || '';
-    } else {
-      src = content.translatable?.[currentLanguage || 'en']?.[contentKey] || '';
-    }
-  } else {
-    src = content[contentKey] || '';
-  }
+  const src = getContent(contentKey, isUniversal);
 
   const handleClick = (e: React.MouseEvent) => {
     if (!isEditing) return;
@@ -440,23 +456,11 @@ export function EditableLink({
   style,
   className
 }: EditableLinkProps) {
-  const { isEditing, content, updateContent, currentLanguage } = useCMS() as any;
+  const { isEditing, getContent, updateContent } = useCMS();
 
-  let text = '';
-  let href = '';
-
-  if (content.translatable || content.universal) {
-    if (isUniversal) {
-      text = content.universal?.[textKey] || '';
-      href = content.universal?.[urlKey] || '';
-    } else {
-      text = content.translatable?.[currentLanguage || 'en']?.[textKey] || '';
-      href = content.translatable?.[currentLanguage || 'en']?.[urlKey] || '';
-    }
-  } else {
-    text = content[textKey] || '';
-    href = content[urlKey] || '';
-  }
+  const text = getContent(textKey, isUniversal);
+  const href = getContent(urlKey, isUniversal) || getContent(urlKey, true);
+  const safeHref = /^(https?:|mailto:|tel:|[/]|#)/i.test(href) ? href : '';
 
   const handleClick = (e: React.MouseEvent) => {
     if (!isEditing) return;
@@ -475,7 +479,7 @@ export function EditableLink({
 
   return (
     <a
-      href={isEditing ? '#' : href}
+      href={isEditing ? '#' : safeHref}
       onClick={handleClick}
       className={className}
       style={{
@@ -494,7 +498,7 @@ export function EditableLink({
   const toolbarCode = `import { useCMS } from '../../context/CMSContext';
 
 export function CMSToolbar() {
-  const { isEditing, resetContent, logout, currentLanguage, setCurrentLanguage } = useCMS() as any;
+  const { isEditing, resetContent, logout, currentLanguage, setCurrentLanguage } = useCMS();
 
   if (!isEditing) return null;
 
@@ -502,7 +506,7 @@ export function CMSToolbar() {
 
   return (
     <div style={{
-      position: 'fixed',
+      position: 'sticky',
       top: 0,
       left: 0,
       right: 0,
@@ -512,6 +516,8 @@ export function CMSToolbar() {
       padding: '10px 20px',
       zIndex: 9999,
       display: 'flex',
+      flexWrap: 'wrap',
+      gap: '10px',
       alignItems: 'center',
       justifyContent: 'space-between',
       borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
@@ -534,14 +540,14 @@ export function CMSToolbar() {
         </span>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '15px' }}>
         {isI18n && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <label htmlFor="cms-lang-select" style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Idioma:</label>
             <select
               id="cms-lang-select"
               value={currentLanguage}
-              onChange={(e) => setCurrentLanguage(e.target.value)}
+              onChange={(e) => setCurrentLanguage?.(e.target.value)}
               style={{
                 background: '#1e293b',
                 color: '#fff',
@@ -608,22 +614,18 @@ export function CMSToolbar() {
 }
 `;
 
-  // Write all CMS files into target folder
-  writeFileSafe(path.join(cwd, 'src/cms/content.json'), contentJson, { dryRun, force });
-  writeFileSafe(path.join(cwd, 'src/context/CMSContext.tsx'), contextCode, { dryRun, force });
-  writeFileSafe(path.join(cwd, 'src/components/CMS/EditableText.tsx'), textCode, { dryRun, force });
-  writeFileSafe(path.join(cwd, 'src/components/CMS/EditableImage.tsx'), imgCode, { dryRun, force });
-  writeFileSafe(path.join(cwd, 'src/components/CMS/EditableLink.tsx'), linkCode, { dryRun, force });
-  writeFileSafe(path.join(cwd, 'src/components/CMS/CMSToolbar.tsx'), toolbarCode, { dryRun, force });
-
-  result.created.push(
-    'src/cms/content.json',
-    'src/context/CMSContext.tsx',
-    'src/components/CMS/EditableText.tsx',
-    'src/components/CMS/EditableImage.tsx',
-    'src/components/CMS/EditableLink.tsx',
-    'src/components/CMS/CMSToolbar.tsx'
-  );
+  const files: Array<[string, string]> = [
+    ['src/cms/content.json', contentJson],
+    ['src/context/CMSContext.tsx', contextCode],
+    ['src/components/CMS/EditableText.tsx', textCode],
+    ['src/components/CMS/EditableImage.tsx', imgCode],
+    ['src/components/CMS/EditableLink.tsx', linkCode],
+    ['src/components/CMS/CMSToolbar.tsx', toolbarCode],
+  ];
+  for (const [file, content] of files) {
+    const status = writeFileSafe(path.join(cwd, file), content, { dryRun, force, root: cwd });
+    recordFileResult(result, file, status);
+  }
 
   return result;
 }

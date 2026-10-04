@@ -1,7 +1,8 @@
+import { recordFileResult, addMissingDependencies } from '../results.js';
 import type { HelenModule } from '../types.js';
 import type { HelenContext, ModuleResult } from '../../core/context.js';
 import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe, patchPackageJson } from '../../core/fs.js';
+import { writeFileSafe } from '../../core/fs.js';
 import path from 'node:path';
 
 const meta: HelenModule['meta'] = {
@@ -42,8 +43,8 @@ export default {
   plugins: [],
 }
 `;
-  const r1 = writeFileSafe(path.join(cwd, 'tailwind.config.js'), tailwindConfig, { dryRun, force });
-  if (r1 === 'created' || r1 === 'overwritten') result.created.push('tailwind.config.js');
+  const r1 = writeFileSafe(path.join(cwd, 'tailwind.config.js'), tailwindConfig, { dryRun, force, root: cwd });
+  recordFileResult(result, 'tailwind.config.js', r1);
 
   // postcss.config.js
   const postcssConfig = `export default {
@@ -53,8 +54,8 @@ export default {
   },
 }
 `;
-  const r2 = writeFileSafe(path.join(cwd, 'postcss.config.js'), postcssConfig, { dryRun, force });
-  if (r2 === 'created' || r2 === 'overwritten') result.created.push('postcss.config.js');
+  const r2 = writeFileSafe(path.join(cwd, 'postcss.config.js'), postcssConfig, { dryRun, force, root: cwd });
+  recordFileResult(result, 'postcss.config.js', r2);
 
   // index.css
   const indexCss = `@tailwind base;
@@ -62,18 +63,18 @@ export default {
 @tailwind utilities;
 `;
 
-  const r3 = writeFileSafe(path.join(cwd, 'src/index.css'), indexCss, { dryRun, force });
-  if (r3 === 'created' || r3 === 'overwritten') result.created.push('src/index.css');
+  const r3 = writeFileSafe(path.join(cwd, 'src/index.css'), indexCss, { dryRun, force, root: cwd });
+  recordFileResult(result, 'src/index.css', r3);
 
   // package.json
-  const r4 = patchPackageJson(cwd, {
+  const r4 = addMissingDependencies(cwd, {
     devDependencies: {
       tailwindcss: '^3.4.1',
       postcss: '^8.4.35',
       autoprefixer: '^10.4.18',
     }
   }, { dryRun });
-  if (r4 === 'modified') result.modified.push('package.json');
+  recordFileResult(result, 'package.json', r4);
 
   return result;
 }

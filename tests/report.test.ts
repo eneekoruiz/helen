@@ -40,4 +40,29 @@ describe('helen report', () => {
     const content = fs.readFileSync(filePath, 'utf-8');
     expect(content).toContain('HELEN Project Dashboard');
   });
+
+  it('rejects a report directory linked outside the project', () => {
+    const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'helen-report-outside-'));
+    try {
+      fs.symlinkSync(outside, path.join(tmp, '.helen'), process.platform === 'win32' ? 'junction' : 'dir');
+      expect(() => writeReport(tmp)).toThrow('inside the project');
+      expect(fs.readdirSync(outside)).toEqual([]);
+    } finally {
+      fs.rmSync(path.join(tmp, '.helen'), { force: true });
+      fs.rmSync(outside, { recursive: true, force: true });
+    }
+  });
+
+  it('escapes project, step and diagnostic text instead of executing markup', () => {
+    const data = generateReportData(tmp);
+    const payload = '<img src=x onerror="alert(1)">';
+    data.project.name = payload;
+    data.phase.current = payload;
+    data.steps = [{ number: 1, kind: payload, ref: payload, why: payload, status: 'pending', isCheckpoint: false }];
+    data.health.checks = [{ label: payload, message: payload, status: 'ok" onclick="alert(1)' }];
+    const html = renderReportHtml(data);
+    expect(html).not.toContain(payload);
+    expect(html).toContain('&lt;img src=x onerror=&quot;alert(1)&quot;&gt;');
+    expect(html).not.toContain('class="status-ok" onclick=');
+  });
 });

@@ -1,63 +1,35 @@
 ---
 name: helen-implementa
-description: Use when the user says 'implement it', 'just do it', 'aplica todo', 'implementa', or wants autonomous end-to-end implementation of a plan, feature, or improvement set without micromanagement; executing with full technical freedom, self-correction loops, and Level 100 excellence until no further improvements can be detected.
+description: Execute authorized plans, features and improvement sets end to end with measurable acceptance, cheapest model cascade, specialist agents and autonomous improvement discovery.
 version: 2.1.0
 ---
 
-# Autonomous Implementation Engine (Implementa)
+# HELEN Implementation
 
-HELEN recognizes that the highest-leverage moment in a developer's workflow is the transition from plan to execution. Most AI assistants stall at this boundary, generating verbose plans and then waiting passively for line-by-line approval or stopping after partial progress. `helen-implementa` eliminates this friction entirely.
+Treat "implement it", "just do it", "aplica todo" and "implementa" as implementation instructions. Own execution and verification without asking repeatedly whether to continue. An audit request alone does not authorize mutation.
 
-When the user says "implement it", "just do it", "aplica todo", "implementa", or triggers an audit/improvement flow, the agent shifts into **Sovereign Execution & Autonomous Convergence Mode**: full technical freedom, autonomous decision-making, continuous self-correction loops, and relentless quality escalation until no further improvements can be detected and the codebase reaches a pristine 10/10 state.
+## Acceptance and scope
 
-## Execution Philosophy
+Inspect repository evidence and existing instructions. Define observable acceptance criteria, baseline behavior, required invariants and verification commands before editing. Resolve routine decisions autonomously; ask only for essential missing information. Preserve compatibility, exclusions and user authorization. Adjacent improvements are included when they support the authorized goal; unrelated rewrites and irreversible external actions require their own authorization.
 
-### 1. Interactive Scoping Questionnaire (When Under-Specified)
-If the user's implementation intent has significant architectural or trade-off ambiguities, ask targeted questions up-front before coding:
-- Clarify whether Clean Code/refactoring is welcomed or forbidden.
-- Clarify breaking change tolerance and database migration strategy.
-Once answers are received, immediately lock in scope and begin the zero-interruption execution loop.
+## Autonomous implementation and discovery
 
-### 2. Sovereign Technical Authority & Zero-Interruption Loop
-- You are NOT a passive typist awaiting instruction-by-instruction guidance. You are the senior engineer who owns the implementation end-to-end.
-- **Never stop halfway to ask "Should I fix the rest?" or "Do you want me to continue?"**. Fix EVERYTHING within scope until 0 issues remain.
-- The user's plan, ticket, or verbal description is the Level 0 floor. Your job is Level 100 delivery.
-- You have "manga ancha" (absolute broad scope): if you encounter adjacent bugs, broken edge cases, missing validations, stale imports, dead code, or architectural debt along the path, FIX THEM. Don't ask. Don't defer. Fix.
+1. Order tasks by dependencies and give independent domain work to specialized backend/contracts, UI/accessibility, security, QA/recovery or documentation agents with exclusive file ownership and small contexts.
+2. Implement, verify acceptance and diagnose failures from evidence. Never weaken checks or fabricate successful results.
+3. Re-audit affected workflows, edge cases, consumers and documentation. After the original checklist passes, explicitly ask what further evidence-backed improvement would materially improve the authorized outcome.
+4. Apply actionable improvements and repeat verification and discovery without an arbitrary retry or iteration cap. Do not wait for the user to ask for more ideas.
+5. Finish when acceptance is met and a fresh discovery pass finds no additional actionable improvement within scope. If progress needs external access, missing input or authorization, report the concrete blocker and completed evidence; do not repeat unchanged failures. Respect cancellation and explicit resource limits.
 
-### 3. Specialized Subagent Orchestration & Model Cascade
-- **The Senior Model Cascade**: Implement passes begin with the smallest/cheapest model tier (`flash_lite`, `haiku`, `gpt-4o-mini`). Run automated verification immediately. Accept if clean; escalate to workhorse (`flash`, `sonnet`, `gpt-4o`) or flagship (`pro`, `opus`) only when deterministic gates fail.
-- **Subagent Parallelism**: Decompose complex or multi-surface tasks into specialized subagents:
-  - Spawn dedicated agents for parallel execution (e.g. backend API generation, frontend component implementation, test authoring).
-  - Keep contexts focused, parallelize independent file writes, and synthesize results cleanly.
+## Verification
 
-### 4. Continuous Convergence Loop (Build → Typecheck → Lint → Test → CI → Playwright Chromium → Re-Audit)
-After each implementation pass, run the full verification cycle:
-1. **Build**: Does the project compile/build without errors?
-2. **Typecheck**: Zero type errors.
-3. **Lint**: Zero lint violations.
-4. **Tests**: All tests pass. If new code lacks tests, write them.
-5. **CI Pipeline Simulation**: Inspect `.github/workflows/` (or repository CI) and execute the exact remote commands locally. Never mark complete if CI would fail on push.
-6. **Playwright + Chromium Verification (Frontend & UI)**: Execute headless Chromium tests across viewports (mobile, tablet, desktop) to verify real DOM rendering, interactions, and confirm 0 browser console errors.
-7. **Re-Audit**: Re-scan for remaining issues or debt.
+Run build, typecheck, lint, relevant tests and locally reproducible CI commands. For affected UI, run Playwright Chromium at 375, 768 and 1440 px, exercising interactions, reduced motion, layout and browser errors. Label checks passed, failed, unavailable or not applicable; local commands do not prove hosted matrix execution. Add meaningful regression tests for defects and invariants; avoid vanity tests.
 
-If ANY check fails or ANY remaining issue is detected:
-- Diagnose the root cause (don't guess — read the error).
-- Fix it autonomously.
-- Re-run the full cycle.
-- **Repeat continuously until green and 100% clean across the board.**
+## Cheapest model cascade and token economy
 
-### 5. Extreme Token Economy & English Prompt Efficiency
-- Minimize conversational overhead.
-- No filler words, repeated apologies, or chatty step-by-step commentary.
-- Avoid polling loops; react asynchronously to background completions.
-- Provide dense code diffs and concise verification summaries.
-- Conduct technical prompts and instructions in English to leverage BPE tokenizer efficiency (reducing token overhead by 30% to 50%).
+Start with the cheapest available model when selection is supported. Escalate only after verified failure or unresolved reasoning prevents progress. Acceptance criteria must be satisfied in addition to existing tests. Keep the current model when selection is unavailable and state the limitation.
 
-## Output Format (When 100% Complete)
+Use concise English technical instructions, focused specialist contexts, reused evidence and dense summaries. Batch independent reads; react to agent completion instead of polling. Rerun broad checks when new changes or unresolved risks justify them. Answer in the user's language. Measure actual input/output tokens, retries and cost; never claim fixed savings from English or model tiers.
 
-Output a single, comprehensive final report only AFTER all convergence rounds are done and the codebase is verified:
+## Output
 
-1. **Implementation & Fix Summary**: Numbered list of all changes applied, including proactive refactors.
-2. **Autonomous Convergence Rounds**: Number of iteration cycles executed.
-3. **Verification Results**: Final build, typecheck, lint, test, CI, and Playwright Chromium status (all 100% green).
-4. **Final Status**: Pristine 10/10 state confirmed.
+Report implemented changes and discovered improvements, acceptance/check evidence, convergence rounds, blocked or unverified items and residual risks. Use verified outcomes instead of perfection scores or guaranteed zero defects.

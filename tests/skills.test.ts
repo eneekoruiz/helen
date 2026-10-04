@@ -54,6 +54,21 @@ describe('Skills installer', () => {
     expect(fs.existsSync(path.join(tmp, 'my-agent/skills/helen-audit/SKILL.md'))).toBe(true);
   });
 
+  it('skips skill destinations reached through a directory junction', () => {
+    const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'helen-skills-outside-'));
+    try {
+      fs.mkdirSync(path.join(tmp, '.agents'));
+      fs.symlinkSync(outside, path.join(tmp, '.agents', 'skills'), 'junction');
+      const result = installSkills({ cwd: tmp, targets: ['codex'], skills: ['helen-audit'] });
+      expect(result.created).toEqual([]);
+      expect(result.skipped.length).toBeGreaterThan(0);
+      expect(fs.readdirSync(outside)).toEqual([]);
+    } finally {
+      fs.rmSync(path.join(tmp, '.agents', 'skills'), { force: true });
+      fs.rmSync(outside, { recursive: true, force: true });
+    }
+  });
+
   it('rejects custom dirs that escape the project or are missing', () => {
     expect(() => resolveTargetDir('custom')).toThrow(/requires --dir/);
     expect(() => resolveTargetDir('custom', '../outside')).toThrow(/inside the project/);
@@ -84,6 +99,8 @@ describe('Skills installer', () => {
       expect(content).toMatch(new RegExp(`^---\\r?\\nname: ${flow.name}\\r?\\ndescription: ".+"\\r?\\n---`));
       expect(content).not.toMatch(/\]\([^)]*\.md\)/);
       expect(content).not.toContain('## Objetivo');
+      expect(content).toContain('HELEN execution contract');
+      expect(content).toContain('Improvement discovery');
     }
   });
 

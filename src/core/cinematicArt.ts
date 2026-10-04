@@ -121,6 +121,7 @@ export interface CinematicArtOptions {
 
 export interface TerminalCapabilities {
   isTTY: boolean;
+  inputTTY?: boolean;
   reducedMotion?: boolean;
   term?: string;
   ci?: boolean;
@@ -975,6 +976,7 @@ function colorize(
 
 export function shouldAnimateCinematicArt(capabilities: TerminalCapabilities): boolean {
   return capabilities.isTTY
+    && capabilities.inputTTY !== false
     && !capabilities.reducedMotion
     && !capabilities.ci
     && capabilities.term !== 'dumb';
@@ -1047,13 +1049,71 @@ export function shouldUseAsciiArt(): boolean {
   );
 }
 
-async function runIdentity(identity: IdentityName): Promise<void> {
+export interface CinematicPlaybackOptions {
+  /** Short startup variant; full command playback stays available. */
+  brief?: boolean;
+}
+
+export interface CinematicInput {
+  isTTY?: boolean;
+  isRaw?: boolean;
+  readableFlowing: boolean | null;
+  setRawMode?: (enabled: boolean) => unknown;
+  on(event: 'data', listener: () => void): unknown;
+  removeListener(event: 'data', listener: () => void): unknown;
+  resume(): unknown;
+  pause(): unknown;
+}
+
+/** Skip on any key and restore terminal state even if rendering fails. */
+export async function playCinematicSequence(
+  write: (text: string) => unknown,
+  input: CinematicInput,
+  render: (progress: number) => string,
+  brief = false,
+  wait: (ms: number) => Promise<void> = sleep,
+): Promise<void> {
+  let skipped = false;
+  let attached = false;
+  let changedRaw = false;
+  const wasRaw = Boolean(input.isRaw);
+  const wasFlowing = input.readableFlowing === true;
+  const onKey = () => { skipped = true; };
+  const frames = brief ? 16 : 64;
+  try {
+    if (input.isTTY && input.setRawMode) {
+      input.setRawMode(true);
+      changedRaw = true;
+      input.on('data', onKey);
+      attached = true;
+      input.resume();
+    }
+    write(HIDE_CURSOR + CLEAR_SCREEN);
+    for (let frame = 0; frame < frames && !skipped; frame++) {
+      write(ESC + 'H' + CLEAR_BELOW + render(frame / (frames - 1)) + RESET);
+      await wait(brief ? 30 : 24);
+    }
+    if (!skipped) await wait(brief ? 80 : 420);
+    write('\n');
+  } finally {
+    if (attached) input.removeListener('data', onKey);
+    try {
+      if (changedRaw) input.setRawMode?.(wasRaw);
+    } finally {
+      if (attached && !wasFlowing) input.pause();
+      write(RESET + SHOW_CURSOR);
+    }
+  }
+}
+
+async function runIdentity(identity: IdentityName, options: CinematicPlaybackOptions = {}): Promise<void> {
   const width  = clamp(process.stdout.columns ?? 80, 20, 120);
   const height = clamp((process.stdout.rows ?? 22) - 1, 7, 26);
   const color  = process.env.NO_COLOR === undefined;
   const ascii  = shouldUseAsciiArt();
   const animate = shouldAnimateCinematicArt({
     isTTY: Boolean(process.stdout.isTTY),
+    inputTTY: Boolean(process.stdin.isTTY && process.stdin.setRawMode),
     reducedMotion: reducedMotionRequested(),
     term: process.env.TERM,
     ci: Boolean(process.env.CI),
@@ -1066,31 +1126,38 @@ async function runIdentity(identity: IdentityName): Promise<void> {
     return;
   }
 
-  const frameCount = identity === 'eneko-ruiz' ? 64 : 58;
-  const frameDuration = 24;
-  process.stdout.write(HIDE_CURSOR + CLEAR_SCREEN);
-
-  try {
-    for (let frame = 0; frame < frameCount; frame++) {
-      process.stdout.write(ESC + 'H' + CLEAR_BELOW);
-      process.stdout.write(renderCinematicFrame(
-        identity, frame / (frameCount - 1),
-        { width, height, color, ascii },
-      ));
-      process.stdout.write(RESET);
-      await sleep(frameDuration);
-    }
-    await sleep(identity === 'eneko-ruiz' ? 420 : 350);
-    process.stdout.write('\n');
-  } finally {
-    process.stdout.write(SHOW_CURSOR);
-  }
+  await playCinematicSequence(
+    text => process.stdout.write(text), process.stdin,
+    progress => renderCinematicFrame(identity, progress, { width, height, color, ascii }),
+    options.brief,
+  );
 }
 
-export async function runHelenArt(): Promise<void> {
-  await runIdentity('helen');
+export async function runHelenArt(options: CinematicPlaybackOptions = {}): Promise<void> {
+  await runIdentity('helen', options);
 }
 
-export async function runEnekoRuizArt(): Promise<void> {
-  await runIdentity('eneko-ruiz');
+export async function runEnekoRuizArt(options: CinematicPlaybackOptions = {}): Promise<void> {
+  await runIdentity('eneko-ruiz', options);
+}
+
+export function startupWelcomeIdentity(
+  options: { welcome?: string; animation?: boolean },
+  runtime = {
+    inputTTY: Boolean(process.stdin.isTTY), welcome: process.env.HELEN_WELCOME,
+    capabilities: {
+      isTTY: Boolean(process.stdout.isTTY), reducedMotion: reducedMotionRequested(),
+      ci: Boolean(process.env.CI), term: process.env.TERM,
+    } as TerminalCapabilities,
+  },
+): 'helen' | 'signature' | null {
+  if (options.animation === false || !runtime.inputTTY || !shouldAnimateCinematicArt(runtime.capabilities)) return null;
+  const selected = options.welcome ?? runtime.welcome ?? 'off';
+  return selected === 'helen' || selected === 'signature' ? selected : null;
+}
+
+export async function runStartupWelcome(options: { welcome?: string; animation?: boolean }): Promise<void> {
+  const identity = startupWelcomeIdentity(options);
+  if (identity === 'signature') await runEnekoRuizArt({ brief: true });
+  if (identity === 'helen') await runHelenArt({ brief: true });
 }

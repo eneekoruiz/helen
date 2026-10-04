@@ -1,9 +1,11 @@
 # HELEN
 
+Repository-aware briefs, durable session continuity, explicit context profiles, optional startup branding, and evidence-first prompt evaluation are documented in [Workflow and quality](docs/WORKFLOW-QUALITY.md).
+
 HELEN is a workflow kit for building projects with AI agents (Claude Code, Codex, Antigravity or any agent that reads `SKILL.md` folders):
 
 - **Prompts** (`docs/prompts`): 94 English, lint-checked task prompts and flows, organized by project phase.
-- **Skills** (`skills/`): 15 bundled agent skills that load the right prompts automatically.
+- **Skills** (`skills/`): 12 bundled agent skills that load the right prompts automatically.
 - **Playbooks** (`helen apply`): detect the project phase and plan which prompts, skills and tools to use for a goal.
 - **Catalog** (`helen skills catalog`): vetted third-party skills, CLIs, MCP servers and references, with install commands HELEN prints but never runs.
 - **Scaffolding**: optional modules for React + Vite + TypeScript projects (`helen init`, `helen add`).
@@ -13,6 +15,8 @@ HELEN is a workflow kit for building projects with AI agents (Claude Code, Codex
 [![Tested: Vitest](https://img.shields.io/badge/Tested%20with-Vitest-orange.svg?style=flat-square)](https://vitest.dev)
 
 ## Install
+
+Requires Node.js 20 or Node.js 22 and newer. CI covers Node 20/22/24 on Linux and Node 22 on Windows/macOS.
 
 ```bash
 npm install -g helen-cli
@@ -65,6 +69,8 @@ helen doctor --json
 
 Standard exit codes: `0` (Success), `1` (Error), `2` (Warnings present), `3` (Checkpoint gate failed).
 
+`helen apply --auto` runs configured checkpoint scripts and pauses at prompt, skill, or external-tool instructions that require an agent or person to execute them. It does not mark those instructions complete automatically.
+
 ## Commands
 
 | Area | Commands |
@@ -79,6 +85,32 @@ Standard exit codes: `0` (Success), `1` (Error), `2` (Warnings present), `3` (Ch
 | Library quality | `helen lint [--json]` (prompts, indexes, playbooks, skills, catalog, evals) · `npm run evals` (multi-run skill quality with 95% CI) |
 | Guardrails | `helen add guardrails`: dependency-free pre-commit (blocks `.env`, secrets, conflict markers, huge files) and pre-push (typecheck, lint, test, build) hooks + grouped weekly Dependabot |
 | Scaffolding | `helen init` · `helen create <name>` · `helen add <modules...>` · `helen modules` · `helen explain <module>` · `helen update` · `helen eject <module>` · `helen rollback` |
+| Change previews and recovery | `helen add <modules...> --preview [--force]` · `helen update --preview` · `helen init --preview` · `helen generate <type> <name> --preview` · `helen recover [id] [--dry-run]` |
+
+### Preview and recover project changes
+
+`--preview` shows file diffs, composed dependency changes and planned backups without
+writing files or running dependency installation. Existing files are skipped unless
+`--force` is supplied; `update` already uses force. Add `--json` for a structured
+`data.changes` list. Environment and credential files have their contents redacted.
+
+Module installation/update, generation, ejection and rollback record original file
+bytes before each mutation and replace files atomically. If an operation fails or
+its process is interrupted, `helen doctor` and `helen recover` show its recovery ID:
+
+```bash
+helen recover                  # list unfinished operations and commands
+helen recover <id> --dry-run   # validate the recovery without restoring files
+helen recover <id>             # restore the state before that operation
+```
+
+Recover before starting another project mutation. Recovery validates every file
+first and stops if later edits conflict with recorded versions; it does not discard
+those edits. Records stay locally in `.helen/operations`, with a Git ignore rule;
+snapshot contents are never printed by the recovery listing. Successful operations
+remove their snapshots. Empty scaffolding directories can remain after recovery.
+External scaffolders, dependency-manager installs, `init-project`, setup/skill installation and
+third-party service actions are outside this file journal's scope.
 
 Prompt ids accept the full id, the short id (without the action prefix), a path, or a legacy alias.
 
@@ -97,7 +129,7 @@ Each phase README has quick decisions, an exit checklist and a generated index.
 
 ## Skills
 
-Bundled: `helen-apply` (entry point), `helen-router`, `helen-clean-code`, `helen-premium-design`, `helen-a11y-perf`, `helen-copy-cro`, `helen-motion-3d`, `helen-security`, `helen-seo-compliance`, `helen-qa-scale`, `helen-release`, `helen-client-handoff`, `helen-strategy`, `helen-data-api`, `helen-knowledge`, `helen-review`, `helen-onboarding`, `helen-impeccable`, `helen-implementa`, `helen-improve`, `helen-anti-slop`, `helen-reprompt`.
+Bundled: `helen-apply` (entry point), `helen-router`, `helen-audit`, `helen-backend`, `helen-copy`, `helen-design`, `helen-security`, `helen-release`, `helen-strategy`, `helen-knowledge`, `helen-implementa`, `helen-reprompt`.
 
 | Target | Folder |
 |---|---|
@@ -109,7 +141,7 @@ Quality per skill (trigger rate, baseline vs with-skill pass rate) is measured b
 
 ## Zero Telemetry Guarantee
 
-HELEN does not collect, store, or transmit any telemetry, analytics, user identifiers, project code, or prompt logs to external cloud servers. All parsing, evaluation, reports, and MCP server communications run strictly locally on your machine.
+HELEN does not collect or transmit telemetry or analytics. Parsing, reports, progress tracking, and the MCP server run locally. The optional `npm run evals` command invokes your authenticated Claude CLI and sends evaluation prompts and answers to its model provider; it stores results locally in `evals/results`. It is never run automatically by HELEN.
 
 ## Third-party tools
 

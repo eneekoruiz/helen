@@ -14,6 +14,11 @@ export interface GeneratorOptions {
  */
 export async function generateEntity(options: GeneratorOptions): Promise<boolean> {
   const { type, name, cwd, dryRun } = options;
+  const reserved = new Set(['class', 'function', 'var', 'let', 'const', 'return', 'default', 'export', 'import', 'new', 'delete', 'interface', 'type', 'enum', 'extends', 'implements', 'yield', 'await', 'true', 'false', 'null', 'this', 'super', 'switch', 'case', 'throw', 'try', 'catch', 'finally', 'for', 'while', 'do', 'if', 'else', 'break', 'continue', 'with', 'in', 'instanceof', 'void', 'typeof', 'debugger']);
+  for (const word of ['arguments', 'eval', 'package', 'private', 'protected', 'public', 'static']) reserved.add(word);
+  if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(name) || reserved.has(name)) {
+    throw new Error('Name must be a valid TypeScript identifier (for example, Profile or useProfile).');
+  }
   
   // Basic path mapping
   const paths: Record<string, string> = {
@@ -24,7 +29,7 @@ export async function generateEntity(options: GeneratorOptions): Promise<boolean
   };
 
   const targetDir = path.join(cwd, paths[type] || 'src');
-  const fileName = `${name}.${type === 'hook' ? 'ts' : 'tsx'}`;
+  const fileName = `${name}.${type === 'hook' || type === 'entity' ? 'ts' : 'tsx'}`;
   const filePath = path.join(targetDir, fileName);
 
   const templates: Record<string, string> = {
@@ -54,9 +59,7 @@ export function use${name}() {
   return { value, setValue };
 }
 `,
-    page: `import React from 'react';
-
-export default function ${name}Page() {
+    page: `export default function ${name}Page() {
   return (
     <main className="p-8">
       <h1>${name} Page</h1>
@@ -72,11 +75,10 @@ export default function ${name}Page() {
 
 export function create${name}(data: Partial<${name}>): ${name} {
   return {
-    id: crypto.randomUUID(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    ...data,
-  } as ${name};
+    id: data.id ?? crypto.randomUUID(),
+    createdAt: data.createdAt ?? new Date(),
+    updatedAt: data.updatedAt ?? new Date(),
+  };
 }
 `,
   };
@@ -89,7 +91,7 @@ export function create${name}(data: Partial<${name}>): ${name} {
   }
 
   logger.info(`Generating ${type}: ${name}...`);
-  const result = writeFileSafe(filePath, content, { dryRun, vars: { name } });
+  const result = writeFileSafe(filePath, content, { dryRun, vars: { name }, root: cwd });
   
   return result !== 'skipped';
 }

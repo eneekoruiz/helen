@@ -1,6 +1,6 @@
 ---
 title: Autonomous Implementation (Implementa)
-summary: Execute a plan autonomously with full technical freedom, self-correction loops, and Level 100 quality until zero improvements remain.
+summary: Execute authorized improvements with measurable acceptance, specialist agents, verification and autonomous discovery.
 action: APPLY
 phase: 03-finish-features
 repeatable: true
@@ -14,54 +14,38 @@ aliases:
 
 # Autonomous Implementation Flow
 
-> Read [RULES.md](../../RULES.md) once per session.
+Follow [RULES.md](../../RULES.md) once per session.
 
 ## Goal
-Execute a complete plan or improvement set autonomously with full technical freedom, self-correction loops, and Level 100 quality.
+
+Deliver the authorized plan and independently discover further actionable improvements without repeated requests to continue.
 
 ## Use when
-You have received a plan, improvement list, audit findings, or implementation request and the user wants sovereign, end-to-end execution.
 
-## Limits
-- Do not stop and ask "shall I proceed?". The user already said implement.
-- Do not change irreversible business-critical data without explicit permission.
+The user authorizes end-to-end implementation of features, audit findings or an improvement set.
 
 ## Requirements
 
-- **Completeness**: Implement 100% of the scope.
-- **Autonomy**: Make confident technical decisions.
-- **Proactive Quality**: Leave every file you touch cleaner, safer, and more robust than you found it.
+- Define measurable acceptance, invariants and verification before editing.
+- Preserve compatibility, original scope and exclusions.
+- Use the cheapest available model cascade and focused specialist agents when supported.
 
 ## Steps
 
-### 1. Scope Lock
-1. Parse the full scope: every item, every file, every change.
-2. List all discrete tasks. Number them.
-3. Order by dependency (foundational → consumers → tests → docs).
+1. Inspect context and baseline behavior; order tasks by dependency. Clarify only essential unknowns.
+2. Give independent specialists relevant files, acceptance criteria and exclusive ownership.
+3. Implement authorized changes; verify outcomes, build, typecheck, lint, tests and locally reproducible CI commands. Check affected UI in Playwright Chromium.
+4. Diagnose failures from evidence, fix and re-verify without an arbitrary retry cap. Do not repeat unchanged attempts.
+5. After original acceptance passes, independently discover further improvements in workflows, failure paths, contracts, performance and documentation. Apply actionable findings within authorization, verify and repeat discovery.
+6. Finish when criteria pass and a fresh discovery finds no further actionable improvement within scope, or disclose the concrete blocker. Respect cancellation and explicit resource limits.
 
-### 2. Execution (Per Batch)
-1. **Implement** the changes with full technical mastery.
-2. **Hunt adjacent defects**: scan the surrounding code for bugs, type issues, missing validations, dead imports. Fix them.
-3. **Verify** after each batch: build, typecheck, lint, test.
-4. **Self-correct**: if any check fails, diagnose, fix, re-verify (max 3 rounds).
-5. **Proceed** to the next batch only when the current one is fully green.
+## Limits
 
-### 3. Final Sweep
-1. Run full project verification: build + typecheck + lint + tests.
-2. Scan for any remaining `any` types, empty catches, TODO comments, dead code.
-3. Verify documentation accuracy against the new implementation.
+- Do not ask repeatedly whether to continue authorized work.
+- Obtain authorization for irreversible external actions outside existing authorization.
+- Do not weaken checks, silently expand scope or invent successful verification.
+- Mark unavailable checks unverified; report residual risks rather than perfection.
 
 ## Output
 
-Deliver a concise implementation report:
-
-| Section | Content |
-|---|---|
-| **Implemented** | Numbered list of all changes with file paths |
-| **Proactive Fixes** | Adjacent issues found and resolved |
-| **Verification** | Build ✅/❌, Types ✅/❌, Lint ✅/❌, Tests ✅/❌ |
-| **Excluded** | Items out of scope with reason (if any) |
-
-Verdict:
-- `✅ COMPLETE — All items implemented, all checks green.`
-- `⚠️ PARTIAL — N items implemented, M excluded.`
+Report implemented items, proactively discovered improvements, acceptance/check evidence, blocked or outside-scope work, convergence rounds and residual risks. Distinguish locally verified commands from unexecuted hosted checks.

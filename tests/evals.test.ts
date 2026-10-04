@@ -13,6 +13,11 @@ import {
 } from '../src/core/evals.js';
 
 describe('Eval Statistics', () => {
+  it('does not manufacture zero scores or confidence from absent observations', () => {
+    expect(() => confidenceInterval95([])).toThrow('require finite observations');
+    expect(() => confidenceInterval95([NaN])).toThrow('require finite observations');
+    expect(() => pairedDeltaConfidenceInterval([], [])).toThrow('require observations');
+  });
   it('computes mean and standard deviation correctly', () => {
     const data = [80, 90, 100];
     expect(mean(data)).toBe(90);
@@ -23,7 +28,11 @@ describe('Eval Statistics', () => {
     expect(studentTCriticalValue(1)).toBe(12.706);
     expect(studentTCriticalValue(2)).toBe(4.303);
     expect(studentTCriticalValue(9)).toBe(2.262);
-    expect(studentTCriticalValue(50)).toBe(1.960);
+    expect(studentTCriticalValue(21)).toBe(2.080);
+    expect(studentTCriticalValue(29)).toBe(2.045);
+    expect(studentTCriticalValue(31)).toBe(2.040);
+    expect(studentTCriticalValue(50)).toBe(2.009);
+    expect(studentTCriticalValue(100)).toBe(1.984);
   });
 
   it('computes 95% confidence intervals with t-distribution for small N', () => {
@@ -69,6 +78,11 @@ describe('Eval Statistics', () => {
     expect(calculateGrade(5, 60, false)).toBe('C');
   });
 
+  it('does not claim statistical significance from a single paired run', () => {
+    expect(pairedDeltaConfidenceInterval([0], [100]).isNoise).toBe(true);
+    expect(() => pairedDeltaConfidenceInterval([0, 50], [100])).toThrow('equal lengths');
+  });
+
   it('computes false positive rates for negative test cases', () => {
     const cases = [
       { expectTrigger: false, triggered: false },
@@ -105,6 +119,12 @@ describe('Stream JSON Parsing', () => {
 });
 
 describe('Eval Spec Validation', () => {
+  it('validates deterministic acceptance checks and rejects malformed checks', () => {
+    const base = { skill: 'helen-release', cases: [{ id: 'check-case', prompt: 'Answer in chat only.', criteria: ['Evidence'], checks: [{ type: 'excludes', value: '100/100' }, { type: 'json-equals', path: 'evidence.verified', value: true }] }] };
+    expect(validateEvalSpec(base, 'helen-release.json')).toEqual([]);
+    const invalid = { ...base, cases: [{ ...base.cases[0], checks: [{ type: 'execute', value: 'shell' }] }] };
+    expect(validateEvalSpec(invalid, 'helen-release.json')).toContain('helen-release.json case #1: invalid deterministic check #1');
+  });
   it('validates bundled eval files successfully', () => {
     const issues = validateAllEvals();
     expect(issues).toEqual([]);

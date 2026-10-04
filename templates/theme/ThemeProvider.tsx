@@ -20,10 +20,16 @@ function getSystemTheme(): 'light' | 'dark' {
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window === 'undefined') return 'system';
-    return (localStorage.getItem(STORAGE_KEY) as Theme) ?? 'system';
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved === 'light' || saved === 'dark' ? saved : 'system';
+    } catch {
+      return 'system';
+    }
   });
 
-  const resolved = theme === 'system' ? getSystemTheme() : theme;
+  const [systemTheme, setSystemTheme] = useState(getSystemTheme);
+  const resolved = theme === 'system' ? systemTheme : theme;
 
   useEffect(() => {
     const root = document.documentElement;
@@ -32,9 +38,23 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     root.setAttribute('data-theme', resolved);
   }, [resolved]);
 
+  useEffect(() => {
+    if (theme === 'system') {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      const handler = () => setSystemTheme(mq.matches ? 'dark' : 'light');
+      handler();
+      mq.addEventListener('change', handler);
+      return () => mq.removeEventListener('change', handler);
+    }
+  }, [theme]);
+
   const setTheme = (t: Theme) => {
     setThemeState(t);
-    localStorage.setItem(STORAGE_KEY, t);
+    try {
+      localStorage.setItem(STORAGE_KEY, t);
+    } catch {
+      // The theme still works when browser storage is unavailable.
+    }
   };
 
   return (

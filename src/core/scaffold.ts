@@ -17,6 +17,11 @@ export interface ScaffoldOptions {
  */
 export async function scaffoldProject(options: ScaffoldOptions): Promise<boolean> {
   const { name, type, cwd } = options;
+  // These names enter package-manager shell commands and must be a single safe folder name.
+  if (!/^[a-z0-9][a-z0-9._-]*$/i.test(name) || (type !== 'vite-react-ts' && type !== 'next-ts')) {
+    logger.error('Use a project name containing only letters, numbers, dots, underscores, and hyphens, starting with a letter or number.');
+    return false;
+  }
   const projectDir = path.join(cwd, name);
 
   if (fs.existsSync(projectDir)) {

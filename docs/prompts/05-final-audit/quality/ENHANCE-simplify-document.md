@@ -13,7 +13,7 @@ aliases:
 
 ## Goal
 
-Return the complete document with the same structure, the same information, and the same length — but with any paragraph, sentence, or word that "creaks" (overly technical, jargon-heavy, unnecessarily dense, or repetitive) rewritten into plain, human language. The rest must remain almost identical.
+Return the complete document with the same structure, all distinct information, and a comparable level of detail — but with any paragraph, sentence, or word that "creaks" (overly technical, jargon-heavy, unnecessarily dense, or repetitive) rewritten into plain, human language. The rest must remain almost identical.
 
 ## Use when
 
@@ -21,9 +21,9 @@ Return the complete document with the same structure, the same information, and 
 - You want a cleaner reading experience without losing detail, nuance, or the existing voice.
 - You need the full document returned — not a summary, not a list of suggestions.
 
-## Scoping questionnaire (ask before running)
+## Scope from existing context
 
-Present these two targeted questions and wait for answers before making any changes:
+Reuse the user's stated audience and depth. If unspecified, use a light touch and preserve technical terms. Ask only when an essential ambiguity would materially change meaning:
 
 1. **Simplification depth:**
    - A) Light touch — only rewrite sentences that clearly creak; minimal changes everywhere else.
@@ -37,11 +37,11 @@ Present these two targeted questions and wait for answers before making any chan
 
 ## Requirements
 
-Apply changes strictly within the scope confirmed in the questionnaire. Every requirement below is non-negotiable:
+Apply changes strictly within the original scope. Every requirement below is non-negotiable:
 
 1. **Return the full document.** No truncations, no ellipses, no "the rest remains unchanged." The user must receive a complete, ready-to-use version.
 
-2. **KISS (Keep It Simple, Stupid):** Every rewritten sentence must be shorter and cleaner than the original. If a sentence survives simplification unchanged, it was already fine — keep it.
+2. **KISS (Keep It Simple, Stupid):** Make rewritten sentences clearer and concise while preserving meaning; length alone is not a success criterion. If a sentence survives simplification unchanged, it was already fine — keep it.
 
 3. **DRY (Don't Repeat Yourself):** If the same idea appears more than once across paragraphs (identical claims, repeated definitions, restated conclusions), merge or cut the duplicate occurrence. Do not introduce new content to compensate.
 

@@ -1,3 +1,4 @@
+import { recordFileResult } from '../results.js';
 import type { HelenModule } from '../types.js';
 import type { HelenContext, ModuleResult } from '../../core/context.js';
 import { createEmptyResult } from '../../core/context.js';
@@ -61,9 +62,8 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
     '',
   ].join('\n');
 
-  const r1 = writeFileSafe(path.join(cwd, '.github/workflows/ci.yml'), ciYml, { dryRun, force });
-  if (r1 === 'created' || r1 === 'overwritten') result.created.push('.github/workflows/ci.yml');
-  else result.skipped.push('.github/workflows/ci.yml');
+  const r1 = writeFileSafe(path.join(cwd, '.github/workflows/ci.yml'), ciYml, { dryRun, force, root: cwd });
+  recordFileResult(result, '.github/workflows/ci.yml', r1);
 
   result.nextSteps.push('Push to GitHub to trigger CI');
   return result;

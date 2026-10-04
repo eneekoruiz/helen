@@ -140,6 +140,37 @@ describe('CLI Global --json Commands & Shapes', () => {
     expect(doneRes.json.data.progress.steps[0].status).toBe('done');
   });
 
+  it('auto leaves instructions pending and preserves existing tracking', () => {
+    const res = runCli(['apply', 'strategy', '--auto', '--json'], tmp);
+    expect(res.status).toBe(0);
+    expect(res.json.data.completed).toBe(false);
+    expect(res.json.data.progress.steps.every((step: { status: string }) => step.status === 'pending')).toBe(true);
+    const replacement = runCli(['apply', 'design', '--auto', '--json'], tmp);
+    expect(replacement.status).toBe(1);
+    expect(replacement.json.errors[0]).toContain('still in progress');
+  });
+
+  it('keeps check script stdout out of the JSON envelope', () => {
+    fs.writeFileSync(path.join(tmp, 'package.json'), JSON.stringify({ scripts: { test: 'node -e "console.log(123)"' } }));
+    const res = runCli(['check', '--json'], tmp);
+    expect(res.status).toBe(0);
+    expect(res.json.command).toBe('check');
+    expect(res.json.data.results).toEqual([{ script: 'test', ok: true }]);
+  });
+
+  it('returns a JSON failure envelope for corrupt progress and invalid command options', () => {
+    fs.mkdirSync(path.join(tmp, '.helen'));
+    fs.writeFileSync(path.join(tmp, '.helen/progress.json'), '{broken');
+    const status = runCli(['status', '--json'], tmp);
+    expect(status.status).toBe(1);
+    expect(status.json.ok).toBe(false);
+    expect(status.json.errors[0]).toContain('Invalid progress file');
+    const invalid = runCli(['status', '--unknown', '--json'], tmp);
+    expect(invalid.status).toBe(1);
+    expect(invalid.json.ok).toBe(false);
+    expect(invalid.json.errors[0]).toContain('unknown option');
+  });
+
   it('fails with exit code 3 when checkpoint requirement is not met', () => {
     // Create progress with a checkpoint step
     fs.mkdirSync(path.join(tmp, '.helen'), { recursive: true });
@@ -167,6 +198,15 @@ describe('CLI Global --json Commands & Shapes', () => {
     expect(promptsList.json.data.prompts.length).toBeGreaterThan(50);
   });
 
+  it('honors a zero overlap threshold and rejects values outside its range', () => {
+    const zero = runCli(['prompts', 'overlaps', '--threshold', '0', '--json'], root);
+    expect(zero.status).toBe(0);
+    expect(zero.json.data.threshold).toBe(0);
+    const invalid = runCli(['prompts', 'overlaps', '--threshold', '1.1', '--json'], root);
+    expect(invalid.status).toBe(1);
+    expect(invalid.json.errors[0]).toContain('between 0 and 1');
+  });
+
   it('outputs valid JSON for skills list --json', () => {
     const skillsList = runCli(['skills', 'list', '--json'], root);
     expect(skillsList.status).toBe(0);
@@ -179,5 +219,25 @@ describe('CLI Global --json Commands & Shapes', () => {
     expect(catalogRes.status).toBe(0);
     expect(catalogRes.json.command).toBe('skills:catalog');
     expect(catalogRes.json.data.items.length).toBeGreaterThan(10);
+  });
+
+  it('rejects animation JSON requests without emitting terminal frames', () => {
+    const res = runCli(['scripts', 'signature', '--json'], tmp);
+    expect(res.status).toBe(1);
+    expect(res.json.command).toBe('scripts:signature');
+    expect(res.json.errors[0]).toContain('without --json');
+  });
+
+  it('rejects unsupported completion shells with an actionable JSON error', () => {
+    const res = runCli(['completion', 'typo', '--json'], tmp);
+    expect(res.status).toBe(1);
+    expect(res.json.errors[0]).toContain('Supported shells');
+  });
+
+  it('warns when token-budget filters match no prompt', () => {
+    const res = runCli(['token-budget', 'no-such-target-qzx', '--json'], tmp);
+    expect(res.status).toBe(2);
+    expect(res.json.data.totalPrompts).toBe(0);
+    expect(res.json.warnings[0]).toContain('No prompts match');
   });
 });

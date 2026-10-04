@@ -1,18 +1,20 @@
 {
   "skill": "helen-reprompt",
-  "model": "sonnet",
-  "date": "2026-10-01",
+  "model": "haiku",
+  "date": "2026-10-04",
+  "fingerprint": "304771b8eb2223a9c3d3a5c83600d943a5ed70493bf8c04b13ca75e37327f7a4",
   "runsPerCase": 3,
   "cases": [
     {
       "skill": "helen-reprompt",
-      "id": "reprompt-messy",
+      "fingerprint": "304771b8eb2223a9c3d3a5c83600d943a5ed70493bf8c04b13ca75e37327f7a4",
+      "id": "question-remains-question",
       "expectTrigger": true,
       "runsCount": 3,
       "triggeredCount": 0,
       "triggerRate": 0,
-      "baseline": 0,
-      "withSkill": 0,
+      "baseline": null,
+      "withSkill": null,
       "baselineStats": {
         "mean": 0,
         "stdDev": 0,
@@ -39,129 +41,169 @@
         {
           "run": 1,
           "triggered": false,
-          "forcedTriggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": false,
+          "baselineOk": false,
+          "skillOk": false,
+          "condition": "natural",
+          "checks": {
+            "baseline": null,
+            "withSkill": null
+          },
           "baseline": null,
           "withSkill": null,
+          "metrics": {
+            "tokens": null,
+            "costUsd": null,
+            "durationMs": null
+          },
           "criteria": [
             {
-              "text": "Identifies the user's messy prompt",
+              "text": "Rewrites concisely in English while preserving evaluation as evaluation",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Rewrites the prompt into a structured English prompt",
+              "text": "Does not convert suggestions into an implementation authorization",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "The new prompt includes Context & Goal, Constraints, and Expected Output",
+              "text": "Acknowledges missing repository evidence and avoids inventing files or measurements",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "States that it will immediately execute the rewritten prompt",
+              "text": "Uses observable evaluation criteria and does not promise perfection or fixed English token savings",
               "baseline": null,
               "withSkill": null,
               "note": ""
             }
           ],
-          "errors": 5,
+          "errors": 4,
           "answers": {
-            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
-            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+            "baseline": "You've hit your weekly limit · resets 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets 9am (Europe/Madrid)"
           }
         },
         {
           "run": 2,
           "triggered": false,
-          "forcedTriggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": false,
+          "baselineOk": false,
+          "skillOk": false,
+          "condition": "natural",
+          "checks": {
+            "baseline": null,
+            "withSkill": null
+          },
           "baseline": null,
           "withSkill": null,
+          "metrics": {
+            "tokens": null,
+            "costUsd": null,
+            "durationMs": null
+          },
           "criteria": [
             {
-              "text": "Identifies the user's messy prompt",
+              "text": "Rewrites concisely in English while preserving evaluation as evaluation",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Rewrites the prompt into a structured English prompt",
+              "text": "Does not convert suggestions into an implementation authorization",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "The new prompt includes Context & Goal, Constraints, and Expected Output",
+              "text": "Acknowledges missing repository evidence and avoids inventing files or measurements",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "States that it will immediately execute the rewritten prompt",
+              "text": "Uses observable evaluation criteria and does not promise perfection or fixed English token savings",
               "baseline": null,
               "withSkill": null,
               "note": ""
             }
           ],
-          "errors": 5,
+          "errors": 4,
           "answers": {
-            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
-            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+            "baseline": "You've hit your weekly limit · resets 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets 9am (Europe/Madrid)"
           }
         },
         {
           "run": 3,
           "triggered": false,
-          "forcedTriggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": false,
+          "baselineOk": false,
+          "skillOk": false,
+          "condition": "natural",
+          "checks": {
+            "baseline": null,
+            "withSkill": null
+          },
           "baseline": null,
           "withSkill": null,
+          "metrics": {
+            "tokens": null,
+            "costUsd": null,
+            "durationMs": null
+          },
           "criteria": [
             {
-              "text": "Identifies the user's messy prompt",
+              "text": "Rewrites concisely in English while preserving evaluation as evaluation",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Rewrites the prompt into a structured English prompt",
+              "text": "Does not convert suggestions into an implementation authorization",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "The new prompt includes Context & Goal, Constraints, and Expected Output",
+              "text": "Acknowledges missing repository evidence and avoids inventing files or measurements",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "States that it will immediately execute the rewritten prompt",
+              "text": "Uses observable evaluation criteria and does not promise perfection or fixed English token savings",
               "baseline": null,
               "withSkill": null,
               "note": ""
             }
           ],
-          "errors": 5,
+          "errors": 4,
           "answers": {
-            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
-            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+            "baseline": "You've hit your weekly limit · resets 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets 9am (Europe/Madrid)"
           }
         }
       ],
-      "errors": 15
+      "errors": 12
     },
     {
       "skill": "helen-reprompt",
-      "id": "reprompt-vague",
+      "fingerprint": "304771b8eb2223a9c3d3a5c83600d943a5ed70493bf8c04b13ca75e37327f7a4",
+      "id": "explicit-exclusion-preserved",
       "expectTrigger": true,
       "runsCount": 3,
       "triggeredCount": 0,
       "triggerRate": 0,
-      "baseline": 0,
-      "withSkill": 0,
+      "baseline": null,
+      "withSkill": null,
       "baselineStats": {
         "mean": 0,
         "stdDev": 0,
@@ -188,250 +230,158 @@
         {
           "run": 1,
           "triggered": false,
-          "forcedTriggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": false,
+          "baselineOk": false,
+          "skillOk": false,
+          "condition": "natural",
+          "checks": {
+            "baseline": null,
+            "withSkill": null
+          },
           "baseline": null,
           "withSkill": null,
+          "metrics": {
+            "tokens": null,
+            "costUsd": null,
+            "durationMs": null
+          },
           "criteria": [
             {
-              "text": "Recognizes the 'reprompt' trigger",
+              "text": "Preserves both UI-redesign and provider-change exclusions",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Translates the vague intent into a concrete performance audit and optimization prompt in English",
+              "text": "Defines duplicate-submission or idempotency acceptance and regression evidence",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "The rewritten prompt is highly structured",
+              "text": "Includes a further evidence-backed discovery pass without arbitrary retry limit",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions self-execution",
+              "text": "Does not treat autonomous discovery as authority to ignore exclusions",
               "baseline": null,
               "withSkill": null,
               "note": ""
             }
           ],
-          "errors": 5,
+          "errors": 4,
           "answers": {
-            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
-            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+            "baseline": "You've hit your weekly limit · resets 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets 9am (Europe/Madrid)"
           }
         },
         {
           "run": 2,
           "triggered": false,
-          "forcedTriggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": false,
+          "baselineOk": false,
+          "skillOk": false,
+          "condition": "natural",
+          "checks": {
+            "baseline": null,
+            "withSkill": null
+          },
           "baseline": null,
           "withSkill": null,
+          "metrics": {
+            "tokens": null,
+            "costUsd": null,
+            "durationMs": null
+          },
           "criteria": [
             {
-              "text": "Recognizes the 'reprompt' trigger",
+              "text": "Preserves both UI-redesign and provider-change exclusions",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Translates the vague intent into a concrete performance audit and optimization prompt in English",
+              "text": "Defines duplicate-submission or idempotency acceptance and regression evidence",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "The rewritten prompt is highly structured",
+              "text": "Includes a further evidence-backed discovery pass without arbitrary retry limit",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions self-execution",
+              "text": "Does not treat autonomous discovery as authority to ignore exclusions",
               "baseline": null,
               "withSkill": null,
               "note": ""
             }
           ],
-          "errors": 5,
+          "errors": 4,
           "answers": {
-            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
-            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+            "baseline": "You've hit your weekly limit · resets 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets 9am (Europe/Madrid)"
           }
         },
         {
           "run": 3,
           "triggered": false,
-          "forcedTriggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": false,
+          "baselineOk": false,
+          "skillOk": false,
+          "condition": "natural",
+          "checks": {
+            "baseline": null,
+            "withSkill": null
+          },
           "baseline": null,
           "withSkill": null,
+          "metrics": {
+            "tokens": null,
+            "costUsd": null,
+            "durationMs": null
+          },
           "criteria": [
             {
-              "text": "Recognizes the 'reprompt' trigger",
+              "text": "Preserves both UI-redesign and provider-change exclusions",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Translates the vague intent into a concrete performance audit and optimization prompt in English",
+              "text": "Defines duplicate-submission or idempotency acceptance and regression evidence",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "The rewritten prompt is highly structured",
+              "text": "Includes a further evidence-backed discovery pass without arbitrary retry limit",
               "baseline": null,
               "withSkill": null,
               "note": ""
             },
             {
-              "text": "Mentions self-execution",
+              "text": "Does not treat autonomous discovery as authority to ignore exclusions",
               "baseline": null,
               "withSkill": null,
               "note": ""
             }
           ],
-          "errors": 5,
+          "errors": 4,
           "answers": {
-            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
-            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
+            "baseline": "You've hit your weekly limit · resets 9am (Europe/Madrid)",
+            "withSkill": "You've hit your weekly limit · resets 9am (Europe/Madrid)"
           }
         }
       ],
-      "errors": 15
-    },
-    {
-      "skill": "helen-reprompt",
-      "id": "anti-trigger-unrelated",
-      "expectTrigger": true,
-      "runsCount": 3,
-      "triggeredCount": 0,
-      "triggerRate": 0,
-      "baseline": 0,
-      "withSkill": 0,
-      "baselineStats": {
-        "mean": 0,
-        "stdDev": 0,
-        "marginOfError": 0,
-        "lower": 0,
-        "upper": 0
-      },
-      "withSkillStats": {
-        "mean": 0,
-        "stdDev": 0,
-        "marginOfError": 0,
-        "lower": 0,
-        "upper": 0
-      },
-      "deltaStats": {
-        "mean": 0,
-        "stdDev": 0,
-        "marginOfError": 0,
-        "lower": 0,
-        "upper": 0,
-        "isNoise": true
-      },
-      "runs": [
-        {
-          "run": 1,
-          "triggered": false,
-          "forcedTriggered": false,
-          "baseline": null,
-          "withSkill": null,
-          "criteria": [
-            {
-              "text": "Does not mention HELEN Reprompt Engine",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Does not rewrite the prompt",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Directly answers the question",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            }
-          ],
-          "errors": 5,
-          "answers": {
-            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
-            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
-          }
-        },
-        {
-          "run": 2,
-          "triggered": false,
-          "forcedTriggered": false,
-          "baseline": null,
-          "withSkill": null,
-          "criteria": [
-            {
-              "text": "Does not mention HELEN Reprompt Engine",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Does not rewrite the prompt",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Directly answers the question",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            }
-          ],
-          "errors": 5,
-          "answers": {
-            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
-            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
-          }
-        },
-        {
-          "run": 3,
-          "triggered": false,
-          "forcedTriggered": false,
-          "baseline": null,
-          "withSkill": null,
-          "criteria": [
-            {
-              "text": "Does not mention HELEN Reprompt Engine",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Does not rewrite the prompt",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            },
-            {
-              "text": "Directly answers the question",
-              "baseline": null,
-              "withSkill": null,
-              "note": ""
-            }
-          ],
-          "errors": 5,
-          "answers": {
-            "baseline": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)",
-            "withSkill": "You've hit your weekly limit · resets Oct 5, 9am (Europe/Madrid)"
-          }
-        }
-      ],
-      "errors": 15
+      "errors": 12
     }
   ]
 }

@@ -1,7 +1,7 @@
 ---
 action: APPLY
 phase: 06-release
-summary: Flow: decide whether the project can become a release candidate and package it with guarantees. RC READY, RC WITH CAVEATS or NOT RC READY.
+summary: Flow: verify and package a release candidate with evidence. Verdict: RC READY, RC WITH CAVEATS or NOT RC READY.
 modifies_code: true
 repeatable: false
 stage: final
@@ -11,7 +11,7 @@ stage: final
 
 ## Goal
 
-Decide whether the project can become a release candidate and package it with guarantees.
+Decide whether the project can become a release candidate and package it with reproducible verification.
 
 ## Use when
 

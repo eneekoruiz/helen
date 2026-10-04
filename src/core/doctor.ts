@@ -1,6 +1,7 @@
 import pc from 'picocolors';
 import { detectProject, type ProjectInfo } from './projectDetector.js';
 import { logger } from './logger.js';
+import { listOperations } from './operations.js';
 
 export interface DoctorCheck {
   label: string;
@@ -14,6 +15,13 @@ export interface DoctorCheck {
 export function runDoctor(cwd: string): DoctorCheck[] {
   const project = detectProject(cwd);
   const checks: DoctorCheck[] = [];
+  try {
+    const pending = listOperations(cwd);
+    checks.push({ label: 'Operation recovery', status: pending.length ? 'error' : 'ok',
+      message: pending.length ? `Unfinished ${pending[0]!.kind}. Run: ${pending[0]!.recoveryCommand}` : 'No unfinished operations' });
+  } catch (error) {
+    checks.push({ label: 'Operation recovery', status: 'error', message: error instanceof Error ? error.message : String(error) });
+  }
 
   // package.json
   checks.push({

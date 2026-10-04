@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildPlan } from '../src/core/apply.js';
 import { currentIndex, formatNext, formatStatus, markDone, readProgress, runChecks, skipStep, startProgress } from '../src/core/progress.js';
 
@@ -13,6 +13,7 @@ describe('progress tracking', () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     fs.rmSync(tmp, { recursive: true, force: true });
   });
 
@@ -38,6 +39,44 @@ describe('progress tracking', () => {
   it('requires a reason to skip', () => {
     startProgress(tmp, buildPlan(tmp, 'security'));
     expect(() => skipStep(tmp, '  ')).toThrow(/why/);
+  });
+
+  it('preserves the previous progress and removes temporary files when a save fails', () => {
+    startProgress(tmp, buildPlan(tmp, 'strategy'));
+    const file = path.join(tmp, '.helen', 'progress.json');
+    const before = fs.readFileSync(file, 'utf-8');
+    vi.spyOn(fs, 'renameSync').mockImplementation(() => { throw new Error('filesystem unavailable'); });
+    expect(() => markDone(tmp)).toThrow('filesystem unavailable');
+    expect(fs.readFileSync(file, 'utf-8')).toBe(before);
+    expect(fs.readdirSync(path.dirname(file)).some(name => name.endsWith('.tmp'))).toBe(false);
+  });
+
+  it('refuses to save through a .helen junction outside the project', () => {
+    const project = path.join(tmp, 'project');
+    const outside = path.join(tmp, 'outside');
+    fs.mkdirSync(project);
+    fs.mkdirSync(outside);
+    fs.symlinkSync(outside, path.join(project, '.helen'), process.platform === 'win32' ? 'junction' : 'dir');
+    expect(() => startProgress(project, buildPlan(project, 'strategy'))).toThrow(/inside the project/);
+    expect(fs.readdirSync(outside)).toEqual([]);
+  });
+
+  it('rejects malformed progress rather than treating corrupt data as completed', () => {
+    fs.mkdirSync(path.join(tmp, '.helen'));
+    fs.writeFileSync(path.join(tmp, '.helen', 'progress.json'), JSON.stringify({ steps: [] }));
+    expect(() => readProgress(tmp)).toThrow(/Invalid progress file/);
+  });
+
+  it('requires a fresh check after advancing to another checkpoint', () => {
+    const plan = buildPlan(tmp, 'quality');
+    plan.goal = { ...plan.goal, steps: [plan.goal.steps[0]!, plan.goal.steps[0]!] };
+    startProgress(tmp, plan);
+    fs.writeFileSync(path.join(tmp, 'package.json'), JSON.stringify({ scripts: { test: 'x' } }));
+    runChecks(tmp, () => true);
+    markDone(tmp);
+    expect(() => markDone(tmp)).toThrow(/helen check/);
+    runChecks(tmp, () => true);
+    expect(currentIndex(markDone(tmp))).toBe(-1);
   });
 
   it('gates a checkpoint on a passing check', () => {
@@ -69,6 +108,31 @@ describe('progress tracking', () => {
 
   it('a project with no check scripts never passes the gate silently', () => {
     expect(runChecks(tmp, () => true).ok).toBe(false);
+  });
+
+  it('invalidates a passing gate when a later runner or package parsing throws', () => {
+    startProgress(tmp, buildPlan(tmp, 'quality'));
+    const pkgFile = path.join(tmp, 'package.json');
+    fs.writeFileSync(pkgFile, JSON.stringify({ scripts: { test: 'x' } }));
+    runChecks(tmp, () => true);
+    expect(() => runChecks(tmp, () => { throw new Error('runner failed'); })).toThrow('runner failed');
+    expect(() => markDone(tmp)).toThrow(/helen check/);
+    runChecks(tmp, () => true);
+    fs.writeFileSync(pkgFile, '{broken');
+    expect(() => runChecks(tmp, () => true)).toThrow();
+    expect(() => markDone(tmp)).toThrow(/helen check/);
+  });
+
+  it('rejects a recorded passing gate with failed or missing script results', () => {
+    startProgress(tmp, buildPlan(tmp, 'quality'));
+    const file = path.join(tmp, '.helen', 'progress.json');
+    const progress = readProgress(tmp)!;
+    progress.lastCheck = { ok: true, at: new Date().toISOString(), results: [{ script: 'test', ok: false }] };
+    fs.writeFileSync(file, JSON.stringify(progress));
+    expect(() => markDone(tmp)).toThrow(/Check status must agree/);
+    progress.lastCheck.results = [];
+    fs.writeFileSync(file, JSON.stringify(progress));
+    expect(() => markDone(tmp)).toThrow(/Check status must agree/);
   });
 
   it('shows everything needed for the current step', () => {

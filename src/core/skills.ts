@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeFileSafe } from './fs.js';
-import { listPromptEntries } from './prompts.js';
+import { listPromptEntries, readPromptEntry } from './prompts.js';
 import { parseFrontmatter } from './frontmatter.js';
 
 /**
@@ -75,7 +75,7 @@ export function listFlowSkills(): SkillInfo[] {
   return listPromptEntries()
     .filter(entry => entry.kind === 'flow')
     .map((entry): SkillInfo => {
-      const raw = fs.readFileSync(entry.absolutePath, 'utf-8');
+      const raw = readPromptEntry(entry);
       const body = raw
         .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n+/, '')
         .replace(/\[([^\]]+)\]\(([^)]+\.md)\)/g, (_match, label: string, target: string) => {
@@ -136,7 +136,7 @@ export function installSkills(options: InstallSkillsOptions, root: string = SKIL
     for (const skill of selected) {
       for (const [relative, content] of Object.entries(skillFiles(skill))) {
         const destination = path.join(options.cwd, targetDir, skill.name, relative);
-        const outcome = writeFileSafe(destination, content, { dryRun: options.dryRun, force: options.force });
+        const outcome = writeFileSafe(destination, content, { dryRun: options.dryRun, force: options.force, root: options.cwd });
         result[outcome].push(path.relative(options.cwd, destination));
       }
     }

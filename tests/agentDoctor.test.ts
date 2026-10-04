@@ -62,9 +62,19 @@ describe('HELEN doctor and update', () => {
 
   it('reports a tracked plan and an unignored .helen folder', () => {
     fs.mkdirSync(path.join(tmp, '.helen'));
-    fs.writeFileSync(path.join(tmp, '.helen/progress.json'), JSON.stringify({ goal: 'design', title: 'x', phase: '03', startedAt: '', steps: [{ kind: 'prompt', ref: 'a', why: '', status: 'pending' }] }));
+    fs.writeFileSync(path.join(tmp, '.helen/progress.json'), JSON.stringify({ goal: 'design', title: 'x', phase: '03', startedAt: new Date().toISOString(), steps: [{ kind: 'prompt', ref: 'a', why: '', status: 'pending' }] }));
     const checks = labels(runAgentDoctor(tmp));
     expect(checks).toContain('ok Tracked plan');
     expect(checks).toContain('warn .gitignore');
+  });
+
+  it('reports corrupt tracking without overwriting it or losing other diagnostics', () => {
+    fs.mkdirSync(path.join(tmp, '.helen'));
+    const file = path.join(tmp, '.helen/progress.json');
+    fs.writeFileSync(file, '{broken');
+    const checks = runAgentDoctor(tmp);
+    expect(labels(checks)).toContain('error Tracked plan');
+    expect(labels(checks)).toContain('warn .gitignore');
+    expect(fs.readFileSync(file, 'utf-8')).toBe('{broken');
   });
 });

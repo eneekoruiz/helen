@@ -6,6 +6,7 @@ import { detectProject } from './projectDetector.js';
 import { buildPlan, detectPhase, readPlaybooks, suggestedGoals } from './apply.js';
 import { startProgress, readProgress } from './progress.js';
 import { createEmptyResult, type HelenContext } from './context.js';
+import { isSafeProjectPath } from './fs.js';
 
 export interface InitProjectOptions {
   name?: string;
@@ -45,6 +46,14 @@ export async function runInitProject(options: InitProjectOptions): Promise<InitP
   const actionsTaken: string[] = [];
   const nextSteps: string[] = [];
   const dryRun = Boolean(options.dryRun);
+  const playbooks = readPlaybooks();
+  const validAgents: SetupAgent[] = ['claude', 'codex', 'antigravity'];
+  const requestedAgents = (options.agents?.length ? options.agents : validAgents) as SetupAgent[];
+  if (requestedAgents.some(agent => !validAgents.includes(agent))) {
+    throw new Error(`Unknown agent. Supported agents: ${validAgents.join(', ')}`);
+  }
+  // Validate explicit goals before creating directories or installing files.
+  if (options.goal) buildPlan(options.cwd, options.goal, playbooks);
 
   // 1. Determine target directory
   let targetDir = options.cwd;
@@ -52,6 +61,12 @@ export async function runInitProject(options: InitProjectOptions): Promise<InitP
 
   if (options.name && options.name !== '.' && options.name !== './') {
     targetDir = path.resolve(options.cwd, options.name);
+    if (!isSafeProjectPath(options.cwd, targetDir)) {
+      throw new Error('Project name must resolve to a directory inside the current project.');
+    }
+    if (fs.existsSync(targetDir) && !fs.statSync(targetDir).isDirectory()) {
+      throw new Error(`Project path is not a directory: ${targetDir}`);
+    }
     if (!fs.existsSync(targetDir)) {
       actionsTaken.push(`Create project directory: ${options.name}`);
       if (!dryRun) {
@@ -68,7 +83,7 @@ export async function runInitProject(options: InitProjectOptions): Promise<InitP
   // Ensure a minimal package.json exists if directory is completely empty
   const pkgPath = path.join(targetDir, 'package.json');
   if (!fs.existsSync(pkgPath)) {
-    const defaultPkgName = options.name ? path.basename(options.name) : path.basename(targetDir);
+    const defaultPkgName = path.basename(path.resolve(targetDir));
     const minimalPkg = {
       name: defaultPkgName,
       version: '0.1.0',
@@ -82,11 +97,6 @@ export async function runInitProject(options: InitProjectOptions): Promise<InitP
   }
 
   // 2. Setup agent instructions and skills
-  const validAgents: SetupAgent[] = ['claude', 'codex', 'antigravity'];
-  const requestedAgents = (options.agents?.length ? options.agents : validAgents).filter(a =>
-    validAgents.includes(a as SetupAgent)
-  ) as SetupAgent[];
-
   const setupRes = setupProject({
     cwd: targetDir,
     agents: requestedAgents,
@@ -127,7 +137,6 @@ export async function runInitProject(options: InitProjectOptions): Promise<InitP
   }
 
   // 4. Determine phase and goal, then start tracking
-  const playbooks = readPlaybooks();
   const detection = detectPhase(targetDir);
   let chosenGoal = options.goal;
 

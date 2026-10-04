@@ -1,7 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { writeFileSafe } from './fs.js';
+import { writeFileSafe, isSafeProjectPath } from './fs.js';
 import { installSkills, type InstallSkillsResult, type SkillTarget } from './skills.js';
+import { EXECUTION_CONTRACT } from './executionProtocol.js';
+import { createHash } from 'node:crypto';
 
 export const BLOCK_START = '<!-- HELEN:START (managed by helen setup, edit outside this block) -->';
 export const BLOCK_END = '<!-- HELEN:END -->';
@@ -29,18 +31,12 @@ export function helenBlock(): string {
     '',
     'This project uses HELEN (prompts, skills and a tools catalog).',
     '',
-    '- **Level 100 Mandate & Autonomous Convergence Loop**: The user prompt is the Level 0 floor; your mission is Level 100 excellence. You have absolute technical authority and broad mandate ("manga ancha") to proactively hunt, surface, and fix adjacent bugs, missing validations, edge cases, and design slop. Once scope is locked, execute an autonomous loop (Audit → Fix → Test → Re-audit) without intermediate interruptions or asking for permission until achieving 100/100 (zero defects).',
-    '- **The Senior Model Cascade Protocol**: Always attempt tasks with the lowest/cheapest model tier first (`flash_lite`, `haiku`, `gpt-4o-mini`). Run automated verification gates immediately. Accept if clean; escalate to workhorse (`flash`, `sonnet`, `gpt-4o`) or flagship (`pro`, `opus`) only when deterministic gates fail. Never default to flagship models without proving necessity.',
-    '- **Mandatory Playwright + Chromium Verification Gate**: For all visual, UI, layout, and frontend changes, verify real browser rendering using Playwright with headless Chromium across mobile (375px), tablet (768px), and desktop (1440px) viewports with zero console errors. No UI task is complete without passing Chromium execution.',
-    '- **Mandatory CI Pipeline Verification**: Never grant an IMPECCABLE (10/10) verdict without verifying the repository Continuous Integration (CI) pipeline locally (matching all steps from `.github/workflows/ci.yml`). If CI would fail on push, the approval is strictly blocked.',
-    '- **Interactive Scoping Questionnaires**: Before launching broad audits, refactors, or improvements, present a targeted interactive questionnaire to clarify critical trade-offs (e.g., asking whether Clean Code & architectural refactoring should be included, or strictly isolated to functional/security/aesthetic fixes without altering working structures).',
-    '- **Specialized Subagents & Parallelism**: Decompose multi-faceted tasks into specialized subagents executing in parallel with isolated contexts. Avoid polling loops; react asynchronously to completions.',
-    '- **Token Economy & English Prompt Efficiency**: Strictly conserve tokens. Formulate technical prompts in English to leverage BPE tokenizer efficiency (slashing token overhead by 30% to 50% vs non-English languages). Deliver high-density, zero-fluff responses omitting conversational filler.',
+    EXECUTION_CONTRACT,
     '- When asked to "use HELEN", or where the project stands, or what to do next: use the `helen-apply` skill, or run `helen apply`.',
     '- To work an area ("apply all the design improvements", "prepare the release"): `helen apply <goal>` prints the steps; `helen apply <goal> --track` follows them one by one with `helen next`, `helen done`, `helen check`.',
     '- Prompts: `helen prompts list`, `helen prompts show <id>`. Skills live in `.claude/skills` and `.agents/skills`. Guide: `helen guide`.',
     '- Never install an external tool, plugin or MCP server without showing its commands (`helen skills external <id>`) and getting explicit approval. Use at most one main design skill. Prefer read-only, least-privilege, development-environment MCP connections.',
-    '- Never invent content, testimonials, metrics, logos or claims. Stop if a checkpoint fails.',
+    '- Never invent content, testimonials, metrics, logos or claims. Repair failed checkpoints autonomously; never bypass them.',
     BLOCK_END,
   ].join('\n');
 }
@@ -68,7 +64,7 @@ export function installAntigravityRules(cwd: string, dryRun = false): string[] {
     },
     {
       file: 'quality.md',
-      content: `# HELEN Quality & Autonomous Execution Rules\n- Level 0 is the floor, Level 100 is the standard: the agent operates with absolute technical freedom and broad mandate ("manga ancha") to fix adjacent bugs and elevate craft.\n- Senior Model Cascade: Start with the cheapest model tier; escalate only upon failing automated test/lint/browser verification gates.\n- Playwright + Chromium Gate: All frontend/UI features must pass headless Chromium browser tests across mobile, tablet, and desktop with zero console errors.\n- Autonomous Convergence Loop: Once scope is agreed upon, iterate autonomously (Audit → Fix → Test → Re-audit) until 100/100 perfection with zero interruptions.\n- Interactive Scoping: Use questionnaires before initiating broad tasks to clarify whether clean code refactors are requested or excluded.\n- Specialized Subagents & Parallelism: Delegate heavy domain tasks and research to dedicated subagents in parallel with isolated contexts.\n- Token Efficiency: Output dense, high-signal diffs and tables with zero conversational filler. Avoid polling loops.\n- Maintain strict TypeScript types without any-casts; never bypass git hooks (--no-verify is prohibited).\n`,
+      content: `# HELEN Quality & Autonomous Execution Rules\n${EXECUTION_CONTRACT}\n- Maintain runtime-validated types; never weaken checks or bypass git hooks.\n`,
     },
     {
       file: 'design.md',
@@ -78,9 +74,17 @@ export function installAntigravityRules(cwd: string, dryRun = false): string[] {
 
   for (const { file, content } of rules) {
     const target = path.join(rulesDir, file);
-    if (!fs.existsSync(target)) {
-      writeFileSafe(target, content, { dryRun });
-      created.push(`.agents/rules/${file}`);
+    if (!isSafeProjectPath(cwd, target)) continue;
+    const existing = fs.existsSync(target) && fs.lstatSync(target).isFile() ? fs.readFileSync(target, 'utf8') : null;
+    // Migrate only the exact previously generated quality file; preserve custom text.
+    const legacyQuality = file === 'quality.md' && existing !== null
+      && createHash('sha256').update(existing.replaceAll('\r\n', '\n')).digest('hex') === '1d5265b6bc64cc6173c2072ea7fb95b815555b3033bd458d521dc554d2420ce5';
+    if (existing === null || existing.includes(BLOCK_START) || legacyQuality) {
+      const block = `${BLOCK_START}\n${content.trimEnd()}\n${BLOCK_END}`;
+      const updated = upsertBlock(legacyQuality ? null : existing, block);
+      if (updated !== existing && writeFileSafe(target, updated, { dryRun, force: true, root: cwd }) !== 'skipped') {
+        created.push(`.agents/rules/${file}`);
+      }
     }
   }
 
@@ -130,9 +134,10 @@ export function uninstallProject(options: { cwd: string; dryRun?: boolean }): Un
 
   for (const file of ['AGENTS.md', 'CLAUDE.md']) {
     const full = path.join(options.cwd, file);
-    if (fs.existsSync(full)) {
+    if (fs.existsSync(full) && isSafeProjectPath(options.cwd, full)) {
       const content = fs.readFileSync(full, 'utf-8');
       const updated = removeBlock(content);
+      if (updated === content) continue;
       if (!options.dryRun) {
         if (!updated.trim()) {
           fs.unlinkSync(full);
@@ -150,7 +155,7 @@ export function uninstallProject(options: { cwd: string; dryRun?: boolean }): Un
   ];
 
   for (const dir of skillDirs) {
-    if (fs.existsSync(dir)) {
+    if (fs.existsSync(dir) && isSafeProjectPath(options.cwd, dir)) {
       for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
         if (entry.isDirectory() && entry.name.startsWith('helen-')) {
           const skillPath = path.join(dir, entry.name);
@@ -179,20 +184,27 @@ export function setupProject(options: SetupOptions & { global?: boolean }): Setu
   if (options.global) {
     const home = process.env.HOME || process.env.USERPROFILE || '';
     if (options.agents.includes('claude')) {
-      installSkills({ cwd: home, targets: ['custom'], customDir: '.claude/skills', dryRun: options.dryRun, force: options.force });
+      const globalSkills = installSkills({ cwd: home, targets: ['custom'], customDir: '.claude/skills', flows: options.flows, dryRun: options.dryRun, force: options.force });
+      for (const outcome of ['created', 'overwritten', 'skipped'] as const) skills[outcome].push(...globalSkills[outcome].map(file => path.join(home, file)));
     }
     if (options.agents.includes('antigravity')) {
-      installSkills({ cwd: home, targets: ['custom'], customDir: '.gemini/config/skills', dryRun: options.dryRun, force: options.force });
+      const globalSkills = installSkills({ cwd: home, targets: ['custom'], customDir: '.gemini/config/skills', flows: options.flows, dryRun: options.dryRun, force: options.force });
+      for (const outcome of ['created', 'overwritten', 'skipped'] as const) skills[outcome].push(...globalSkills[outcome].map(file => path.join(home, file)));
     }
   }
 
-  const instructionFiles = ['AGENTS.md'];
-  if (options.agents.includes('claude')) instructionFiles.push('CLAUDE.md');
+  const requestedFiles = ['AGENTS.md'];
+  if (options.agents.includes('claude')) requestedFiles.push('CLAUDE.md');
+  const instructionFiles: string[] = [];
 
-  for (const file of instructionFiles) {
+  for (const file of requestedFiles) {
     const target = path.join(options.cwd, file);
+    if (!isSafeProjectPath(options.cwd, target)) continue;
     const existing = fs.existsSync(target) ? fs.readFileSync(target, 'utf-8') : null;
-    writeFileSafe(target, upsertBlock(existing, helenBlock()), { dryRun: options.dryRun, force: true });
+    const updated = upsertBlock(existing, helenBlock());
+    if (existing === updated || writeFileSafe(target, updated, { dryRun: options.dryRun, force: true, root: options.cwd }) !== 'skipped') {
+      instructionFiles.push(file);
+    }
   }
 
   if (options.agents.includes('antigravity') || options.agents.includes('codex')) {

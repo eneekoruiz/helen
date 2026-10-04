@@ -2,24 +2,27 @@ import { Command } from 'commander';
 import { isJsonMode, printJsonAndExit } from '../core/jsonOutput.js';
 import { readPlaybooks, detectPhase, suggestedGoals, buildPlan, formatBrief, formatPlan } from '../core/apply.js';
 import { installSkills, type SkillTarget } from '../core/skills.js';
-import { startProgress, currentIndex, markDone, runChecks } from '../core/progress.js';
+import { startProgress, currentIndex, markDone, runChecks, readProgress, formatNext } from '../core/progress.js';
 import { logger } from '../core/logger.js';
+import { workProfile } from '../core/workflowContext.js';
 
 export function registerApplyCommand(program: Command) {
   program
     .command('apply [goal...]')
     .description('Analyze the project, detect its phase, and plan which HELEN prompts, skills and tools to use for a goal (e.g. "design", "release", "mejora el diseño")')
     .option('--brief', 'Print a paste-ready brief for an AI agent instead of the plan', false)
+    .option('--profile <profile>', 'Explicit context depth: quick, standard, exhaustive (same acceptance gates)', 'standard')
     .option('--track', 'Follow the plan step by step: then use helen next / done / skip / status / check', false)
-    .option('--auto', 'Run in semi-autonomous mode: verify checkpoints automatically and execute steps', false)
-    .option('--force', 'With --track: restart even if another plan is in progress', false)
+    .option('--auto', 'Verify checkpoints automatically, then pause at instructions for an agent or person', false)
+    .option('--force', 'With --track or --auto: restart even if another plan is in progress', false)
     .option('--install', 'Install the bundled skills the goal needs into --target', false)
     .option('--target <targets...>', 'Where to install skills: claude, codex, custom', ['claude'])
     .option('--dir <path>', 'Project-relative directory for the "custom" target')
-    .action(async (goalWords: string[], opts: { brief: boolean; track: boolean; auto: boolean; force: boolean; install: boolean; target: string[]; dir?: string }) => {
+    .action(async (goalWords: string[], opts: { brief: boolean; profile: string; track: boolean; auto: boolean; force: boolean; install: boolean; target: string[]; dir?: string }) => {
       try {
         const playbooks = readPlaybooks();
         const cwd = process.cwd();
+        const profile = workProfile(opts.profile);
         if (goalWords.length === 0) {
           const detection = detectPhase(cwd);
           const suggested = suggestedGoals(detection.phase, playbooks);
@@ -43,7 +46,10 @@ export function registerApplyCommand(program: Command) {
         const plan = buildPlan(cwd, goalWords.join(' '), playbooks);
 
         if (opts.auto) {
-          let prog = startProgress(cwd, plan, true);
+          let prog = startProgress(cwd, plan, opts.force, profile);
+          const installedSkillsResult = opts.install && plan.missingSkills.length > 0
+            ? installSkills({ cwd, targets: opts.target as SkillTarget[], customDir: opts.dir, skills: plan.missingSkills })
+            : null;
           logger.section(`Autonomous Execution: ${plan.goal.title}`);
           const autoLogs: string[] = [];
 
@@ -55,10 +61,10 @@ export function registerApplyCommand(program: Command) {
               logger.info(`Checking gate: ${currentStep.ref}...`);
               const checkRun = runChecks(cwd);
               if (!checkRun.ok) {
-                const failed = checkRun.results.filter(r => !r.ok).map(r => r.script).join(', ');
+                const failed = checkRun.results.length === 0 ? 'no check scripts found' : checkRun.results.filter(r => !r.ok).map(r => r.script).join(', ');
                 const errMsg = `Autonomous stop: checkpoint verification failed on scripts [${failed}].`;
                 if (isJsonMode()) {
-                  printJsonAndExit('apply', { plan, progress: prog, failedCheckpoint: currentStep }, {
+                  printJsonAndExit('apply', { plan, progress: readProgress(cwd), failedCheckpoint: currentStep }, {
                     ok: false,
                     errors: [errMsg],
                     exitCode: 3,
@@ -69,13 +75,17 @@ export function registerApplyCommand(program: Command) {
                 process.exitCode = 3;
                 return;
               }
-              prog = markDone(cwd, 'Auto-verified quality gate', true);
+              prog = markDone(cwd, 'Auto-verified quality gate');
               autoLogs.push(`Verified checkpoint: ${currentStep.ref}`);
               logger.success(`Passed checkpoint: ${currentStep.ref}`);
             } else {
-              prog = markDone(cwd, `Auto-staged step (${currentStep.kind}: ${currentStep.ref})`, true);
-              autoLogs.push(`Staged: ${currentStep.kind} ${currentStep.ref}`);
-              logger.success(`Staged: ${currentStep.kind} ${currentStep.ref}`);
+              // Instructions need an agent or person to execute them. Staging is not completion.
+              if (isJsonMode()) {
+                printJsonAndExit('apply', { plan, progress: prog, autoLogs, installedSkills: installedSkillsResult, completed: false, nextStep: currentStep, instructions: formatNext(prog) });
+              } else {
+                console.log(formatNext(prog));
+              }
+              return;
             }
             idx = currentIndex(prog);
           }
@@ -85,6 +95,7 @@ export function registerApplyCommand(program: Command) {
               plan,
               progress: prog,
               autoLogs,
+              installedSkills: installedSkillsResult,
               completed: true,
             });
             return;
@@ -95,7 +106,7 @@ export function registerApplyCommand(program: Command) {
 
         let progress = null;
         if (opts.track) {
-          progress = startProgress(cwd, plan, opts.force);
+          progress = startProgress(cwd, plan, opts.force, profile);
         }
 
         let installedSkillsResult = null;
@@ -113,11 +124,13 @@ export function registerApplyCommand(program: Command) {
             plan,
             tracking: progress,
             installedSkills: installedSkillsResult,
+            ...(opts.brief ? { brief: formatBrief(plan, cwd, profile) } : {}),
+            profile,
           });
           return;
         }
 
-        console.log(opts.brief ? formatBrief(plan) : formatPlan(plan));
+        console.log(opts.brief ? formatBrief(plan, cwd, profile) : formatPlan(plan));
         if (opts.track) {
           console.log('\nTracking started (.helen/progress.json; add .helen/ to .gitignore if you do not want it in git). Next: helen next');
         }

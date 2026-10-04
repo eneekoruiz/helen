@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { computeTokenBudget, estimateTokens, calculateCost } from '../src/core/tokenBudget.js';
+import { readPlaybooks } from '../src/core/apply.js';
+import { resolvePromptEntry } from '../src/core/prompts.js';
 
 describe('helen token-budget', () => {
   it('estimates tokens based on text length heuristic', () => {
@@ -29,5 +31,17 @@ describe('helen token-budget', () => {
     expect(summary.target).toBe('strategy');
     expect(summary.totalPrompts).toBeGreaterThan(0);
     expect(summary.totalPrompts).toBeLessThan(50);
+  });
+
+  it('includes flows and checkpoints required by the selected playbook', () => {
+    const refs = readPlaybooks().goals.quality!.steps
+      .filter(step => ['prompt', 'flow', 'checkpoint'].includes(step.kind))
+      .map(step => resolvePromptEntry(step.ref).id);
+    const summary = computeTokenBudget('quality');
+    for (const id of refs) expect(summary.breakdown.map(entry => entry.id)).toContain(id);
+  });
+
+  it('treats prototype property names as ordinary unmatched filters', () => {
+    expect(computeTokenBudget('constructor').totalPrompts).toBe(0);
   });
 });

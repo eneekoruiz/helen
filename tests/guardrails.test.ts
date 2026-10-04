@@ -55,4 +55,21 @@ describe('guardrails module', () => {
     git('add', '-f', '.env');
     expect(commit().status).not.toBe(0);
   });
+
+  it('inspects staged blobs for filenames with spaces even after working files are deleted', async () => {
+    await run();
+    const git = (...args: string[]) => execFileSync('git', args, { cwd: tmp });
+    git('init', '-q');
+    const name = 'file with spaces.ts';
+    const secret = `sk-live-${'b'.repeat(24)}`;
+    fs.writeFileSync(path.join(tmp, name), `export const token = '${secret}';\n`);
+    git('add', name);
+    fs.unlinkSync(path.join(tmp, name));
+    const hook = fs.readFileSync(path.join(tmp, '.githooks/pre-commit'), 'utf-8');
+    const source = hook.split("<<'HELEN_NODE'\n")[1].split('\nHELEN_NODE')[0];
+    const result = spawnSync(process.execPath, ['--input-type=commonjs', '-e', source], { cwd: tmp, encoding: 'utf-8', timeout: 10000 });
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('file with spaces.ts');
+    expect(result.stderr).not.toContain(secret);
+  });
 });

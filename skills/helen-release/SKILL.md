@@ -6,29 +6,15 @@ version: 2.1.0
 
 # Release Engineering & Client Handoff (Release Master Skill)
 
-Decide if the project can be packaged as a release candidate (RC) or delivered to a client, with mathematical guarantees. This skill groups release candidate preparation, SEO/i18n compliance, and clean client handoff packaging.
+Decide if the project can be packaged as a release candidate (RC) or delivered to a client, with reproducible verification evidence. This skill groups release candidate preparation, SEO/i18n compliance, and clean client handoff packaging.
 
-## Operating Principles
+## Execution contract
 
-### 1. Interactive Scoping Questionnaire
-Before beginning release packaging, clarify deployment and delivery parameters:
-- **Release Target & Versioning**: What is the target bump (patch, minor, major) and distribution channel (npm, Docker, Vercel, static export)?
-- **Handoff Mode**: Internal engineering release vs. client handover package with credential transfer protocols?
-- **Strictness Level**: Fail-fast on minor SEO/a11y warnings or require only build/typecheck/security pass?
-
-### 2. Autonomous Release Convergence Loop
-Once release parameters are locked:
-**Build & Compile → Test & Security Scan → SEO/i18n Verification → Asset Optimization → Package → Repeat**
-Iterate autonomously through all verification gates. Do not stop until all checks pass and the final release candidate is fully compiled and tagged.
-
-### 3. Specialized Subagents
-- **SEO & Compliance Subagent**: Audits OpenGraph, canonical URLs, robots.txt, sitemaps, and legal claim compliance.
-- **Smoke Test & Verification Subagent**: Runs browser smoke tests across deep routes, back/forward navigation, and responsive viewports.
-- **Changelog & Documentation Subagent**: Generates clean semantic release notes and handoff runbooks.
-
-### 4. Extreme Token Economy
-Provide high-density release summaries: verification tables, semver tags, and checksums. Zero fluff.
-
+- Preserve intent, exclusions and authorization. Audit-only stays read-only. Reuse context; ask only for essential unknowns.
+- Define observable acceptance, baseline and verification before edits. Verify domain outcomes, compatibility and reproducible CI commands; report unavailable checks and residual risks.
+- Inspect → act → verify → re-audit → discover further evidence-backed improvements → repeat. After initial checks, find more actionable improvements without another user request. Apply when authorized, otherwise report. No arbitrary retry cap. Finish when acceptance passes and fresh discovery finds no further actionable improvement within scope, or disclose an external blocker. Change failing hypotheses; respect cancellation and explicit resource limits.
+- Start with the cheapest available model when selectable; escalate only for verified failure or unresolved reasoning. State unavailable controls.
+- Delegate independent domains to focused specialist agents with exclusive ownership; integrate and verify. Reuse evidence, batch reads, avoid polling and duplicate output. Write concise English instructions; answer in the user's language. Measure tokens/cost; never claim fixed savings or perfection.
 ## The Release Candidate Sequence
 
 1. **Build & Compile**: Verify the project builds completely from a cold start.
@@ -49,7 +35,8 @@ Provide high-density release summaries: verification tables, semver tags, and ch
 # 🚀 HELEN Release Verdict: [RC READY | RC WITH CAVEATS | NOT RC READY]
 
 - **Version Bump**: [e.g. v2.1.0]
-- **Verification Gates**: Build (Pass), Types (Pass), Tests (Pass), Security (Pass), SEO (Pass)
+- **Verification Gates**: [Command, actual result and unavailable checks]
 - **Handoff Package**: [Path to changelog and built assets]
 - **Ownership & Access**: [Documented transfers]
 ```
+Prepare release artifacts within authorization; tags, publication and account transfers require existing explicit authorization.

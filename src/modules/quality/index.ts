@@ -1,3 +1,4 @@
+import { recordFileResult } from '../results.js';
 import type { HelenModule } from '../types.js';
 import type { HelenContext, ModuleResult } from '../../core/context.js';
 import { createEmptyResult } from '../../core/context.js';
@@ -63,9 +64,8 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
     null,
     2,
   );
-  const eslintResult = writeFileSafe(path.join(cwd, '.eslintrc.json'), eslintConfig, { dryRun, force });
-  if (eslintResult === 'created' || eslintResult === 'overwritten') result.created.push('.eslintrc.json');
-  else result.skipped.push('.eslintrc.json');
+  const eslintResult = writeFileSafe(path.join(cwd, '.eslintrc.json'), eslintConfig, { dryRun, force, root: cwd });
+  recordFileResult(result, '.eslintrc.json', eslintResult);
 
   // .prettierrc
   const prettierConfig = JSON.stringify(
@@ -82,9 +82,8 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
     null,
     2,
   );
-  const prettierResult = writeFileSafe(path.join(cwd, '.prettierrc'), prettierConfig, { dryRun, force });
-  if (prettierResult === 'created' || prettierResult === 'overwritten') result.created.push('.prettierrc');
-  else result.skipped.push('.prettierrc');
+  const prettierResult = writeFileSafe(path.join(cwd, '.prettierrc'), prettierConfig, { dryRun, force, root: cwd });
+  recordFileResult(result, '.prettierrc', prettierResult);
 
   // .prettierignore
   const prettierIgnore = `dist/
@@ -95,9 +94,8 @@ coverage/
 pnpm-lock.yaml
 package-lock.json
 `;
-  const ignoreResult = writeFileSafe(path.join(cwd, '.prettierignore'), prettierIgnore, { dryRun, force });
-  if (ignoreResult === 'created' || ignoreResult === 'overwritten') result.created.push('.prettierignore');
-  else result.skipped.push('.prettierignore');
+  const ignoreResult = writeFileSafe(path.join(cwd, '.prettierignore'), prettierIgnore, { dryRun, force, root: cwd });
+  recordFileResult(result, '.prettierignore', ignoreResult);
 
   // Patch package.json scripts
   const patchResult = patchPackageJson(cwd, {
@@ -106,10 +104,10 @@ package-lock.json
       'lint:fix': 'eslint src/ --ext .ts,.tsx --fix',
       format: 'prettier --write "src/**/*.{ts,tsx,css,json}"',
       'format:check': 'prettier --check "src/**/*.{ts,tsx,css,json}"',
-      typecheck: 'tsc --noEmit',
+      typecheck: 'tsc -b --noEmit',
     },
   }, { dryRun });
-  if (patchResult === 'modified') result.modified.push('package.json');
+  recordFileResult(result, 'package.json', patchResult);
 
   result.nextSteps.push('Run npm run lint to check for issues');
   result.nextSteps.push('Run npm run format to auto-format code');

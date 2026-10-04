@@ -1,7 +1,8 @@
+import { recordFileResult, addMissingDependencies } from '../results.js';
 import type { HelenModule } from '../types.js';
 import type { HelenContext, ModuleResult } from '../../core/context.js';
 import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe, patchPackageJson } from '../../core/fs.js';
+import { writeFileSafe } from '../../core/fs.js';
 import path from 'node:path';
 
 const meta: HelenModule['meta'] = {
@@ -73,20 +74,24 @@ export default i18n;
     }
   }, null, 2);
 
-  writeFileSafe(path.join(cwd, 'src/i18n/config.ts'), i18nConfig, { dryRun, force });
-  writeFileSafe(path.join(cwd, 'src/i18n/locales/en.json'), enJson, { dryRun, force });
-  writeFileSafe(path.join(cwd, 'src/i18n/locales/es.json'), esJson, { dryRun, force });
-  
-  result.created.push('src/i18n/config.ts', 'src/i18n/locales/en.json', 'src/i18n/locales/es.json');
+  for (const [file, content] of [
+    ["src/i18n/config.ts", i18nConfig],
+    ["src/i18n/locales/en.json", enJson],
+    ["src/i18n/locales/es.json", esJson],
+  ]) {
+    const status = writeFileSafe(path.join(cwd, file), content, { dryRun, force, root: cwd });
+    recordFileResult(result, file, status);
+  }
 
-  patchPackageJson(cwd, {
+  const packageStatus = addMissingDependencies(cwd, {
     dependencies: {
       'i18next': '^23.0.0',
       'react-i18next': '^13.0.0',
       'i18next-browser-languagedetector': '^7.0.0'
     }
   }, { dryRun });
-  result.modified.push('package.json');
+  recordFileResult(result, 'package.json', packageStatus);
+  result.nextSteps.push(...meta.nextSteps);
 
   return result;
 }

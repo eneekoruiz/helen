@@ -1,3 +1,4 @@
+import { recordFileResult } from '../results.js';
 import type { HelenModule } from '../types.js';
 import type { HelenContext, ModuleResult } from '../../core/context.js';
 import { createEmptyResult } from '../../core/context.js';
@@ -42,9 +43,8 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
     'files.trimTrailingWhitespace': true,
     'files.insertFinalNewline': true,
   }, null, 2);
-  const r1 = writeFileSafe(path.join(cwd, '.vscode/settings.json'), settings, { dryRun, force });
-  if (r1 === 'created' || r1 === 'overwritten') result.created.push('.vscode/settings.json');
-  else result.skipped.push('.vscode/settings.json');
+  const r1 = writeFileSafe(path.join(cwd, '.vscode/settings.json'), settings, { dryRun, force, root: cwd });
+  recordFileResult(result, '.vscode/settings.json', r1);
 
   // VS Code extensions
   const extensions = JSON.stringify({
@@ -58,9 +58,8 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
       'streetsidesoftware.code-spell-checker',
     ],
   }, null, 2);
-  const r2 = writeFileSafe(path.join(cwd, '.vscode/extensions.json'), extensions, { dryRun, force });
-  if (r2 === 'created' || r2 === 'overwritten') result.created.push('.vscode/extensions.json');
-  else result.skipped.push('.vscode/extensions.json');
+  const r2 = writeFileSafe(path.join(cwd, '.vscode/extensions.json'), extensions, { dryRun, force, root: cwd });
+  recordFileResult(result, '.vscode/extensions.json', r2);
 
   // .env.example
   const envExample = `# ── App ──────────────────────────────────────────
@@ -80,9 +79,8 @@ VITE_APP_NAME=My App
 # ── API (optional) ──────────────────────────────
 # VITE_API_URL=https://api.example.com
 `;
-  const r3 = writeFileSafe(path.join(cwd, '.env.example'), envExample, { dryRun, force });
-  if (r3 === 'created' || r3 === 'overwritten') result.created.push('.env.example');
-  else result.skipped.push('.env.example');
+  const r3 = writeFileSafe(path.join(cwd, '.env.example'), envExample, { dryRun, force, root: cwd });
+  recordFileResult(result, '.env.example', r3);
 
   // scripts/easter-egg.ts (self-contained HELEN terminal art)
   const easterEggTs = `/**
@@ -186,9 +184,8 @@ main().catch(error => {
   process.exitCode = 1;
 });
 `;
-  const r4 = writeFileSafe(path.join(cwd, 'scripts/easter-egg.ts'), easterEggTs, { dryRun, force });
-  if (r4 === 'created' || r4 === 'overwritten') result.created.push('scripts/easter-egg.ts');
-  else result.skipped.push('scripts/easter-egg.ts');
+  const r4 = writeFileSafe(path.join(cwd, 'scripts/easter-egg.ts'), easterEggTs, { dryRun, force, root: cwd });
+  recordFileResult(result, 'scripts/easter-egg.ts', r4);
 
   result.nextSteps.push('Copy .env.example to .env.local');
   result.nextSteps.push('Install recommended VS Code extensions');

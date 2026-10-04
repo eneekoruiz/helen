@@ -7,6 +7,7 @@
 // Requires the `claude` CLI logged in. Results: evals/results/<skill>.json + docs/SKILLS_QUALITY.md
 
 import { spawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -19,6 +20,8 @@ import {
   pairedDeltaConfidenceInterval,
   parseStreamJsonEvents,
 } from './lib/evalsStats.mjs';
+import { combineProviderMetrics, extractProviderMetrics, providerFailureCause, providerReportedFailure, renderEvidenceReport } from './lib/evalEvidence.mjs';
+import { parseJudgeResult, runAnswerChecks } from './lib/evalChecks.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -27,6 +30,7 @@ const opt = (name, fallback) => {
   const i = args.indexOf(`--${name}`);
   if (i === -1) return fallback;
   const value = args[i + 1];
+  if (value === undefined || value.startsWith('--')) throw new Error(`--${name} requires a value`);
   args.splice(i, 2);
   return value;
 };
@@ -38,36 +42,63 @@ const hasFlag = (name) => {
   return true;
 };
 
-const runsCount = Math.max(1, parseInt(opt('runs', '3'), 10));
-const concurrency = Math.max(1, parseInt(opt('concurrency', '4'), 10));
+const integerOption = (name, value, minimum) => {
+  const parsed = Number(value);
+  if (!/^\d+$/.test(value) || !Number.isSafeInteger(parsed) || parsed < minimum) {
+    throw new Error(`--${name} must be an integer >= ${minimum}`);
+  }
+  return parsed;
+};
+const runsCount = integerOption('runs', opt('runs', '3'), 1);
+const concurrency = integerOption('concurrency', opt('concurrency', '4'), 1);
 const model = opt('model', 'sonnet');
+if (!/^[A-Za-z0-9_.:/-]+$/.test(model)) throw new Error('--model must be a model alias or identifier without shell characters');
 const rawMaxCalls = opt('max-calls', null);
-const maxCalls = rawMaxCalls !== null ? parseInt(rawMaxCalls, 10) : null;
+const maxCalls = rawMaxCalls !== null ? integerOption('max-calls', rawMaxCalls, 0) : null;
 const rawCases = opt('cases', null);
 const casesFilter = rawCases ? rawCases.split(',').map((s) => s.trim()).filter(Boolean) : null;
 const skillFilter = opt('skill', null);
 const dryRun = hasFlag('dry-run');
 const force = hasFlag('force');
+const forceTrigger = hasFlag('force-trigger');
 const reportOnly = hasFlag('report-only');
-const only = args.filter((a) => !a.startsWith('--'));
+const unknownOption = args.find(a => a.startsWith('-'));
+if (unknownOption) throw new Error(`Unknown or repeated option: ${unknownOption}`);
+const only = args;
 if (skillFilter && !only.includes(skillFilter)) {
   only.push(skillFilter);
 }
 
 const evalDir = path.join(root, 'evals');
 const resultDir = path.join(evalDir, 'results');
-fs.mkdirSync(resultDir, { recursive: true });
+
+function fingerprint(spec) {
+  const hash = createHash('sha256').update(JSON.stringify(spec));
+  const skillDir = path.join(root, 'skills', spec.skill);
+  function walk(dir) {
+    for (const item of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+      const file = path.join(dir, item.name);
+      if (item.isDirectory()) walk(file);
+      else if (item.isFile()) hash.update(path.relative(skillDir, file)).update(fs.readFileSync(file));
+    }
+  }
+  walk(skillDir);
+  return hash.digest('hex');
+}
 
 let totalCallsMade = 0;
 let budgetExhausted = false;
+let providerBlocker = null;
+let firstProviderCall = null;
+let providerProbeComplete = false;
 
 function resolveExecutable(cmd) {
   if (process.platform !== 'win32') return { cmd, shell: false };
   if (cmd.endsWith('.exe')) return { cmd, shell: false };
   if (cmd.endsWith('.cmd') || cmd.endsWith('.bat')) return { cmd, shell: true };
   const dirs = (process.env.PATH || '').split(path.delimiter);
-  for (const ext of ['.exe', '.cmd', '.bat']) {
-    for (const dir of dirs) {
+  for (const dir of dirs) {
+    for (const ext of ['.exe', '.cmd', '.bat']) {
       try {
         const full = path.join(dir, cmd + ext);
         if (fs.existsSync(full)) {
@@ -81,20 +112,26 @@ function resolveExecutable(cmd) {
   return { cmd, shell: false };
 }
 
-function runProcess(cmd, cmdArgs, cwd, timeoutMs = 300_000) {
-  if (maxCalls !== null && totalCallsMade >= maxCalls) {
+function runProcess(cmd, cmdArgs, cwd, timeoutMs = 300_000, input = '') {
+  const providerCall = cmd === 'claude' && cmdArgs.includes('-p');
+  if (providerCall && providerBlocker) return Promise.resolve({ code: 1, out: '', err: `Provider blocked: ${providerBlocker}` });
+  // Use the first real baseline request as a readiness probe, then release concurrency.
+  // This avoids an extra paid probe and makes a quota refusal stop after one invocation.
+  if (providerCall && firstProviderCall) return firstProviderCall.then(() => runProcess(cmd, cmdArgs, cwd, timeoutMs, input));
+  if (providerCall && maxCalls !== null && totalCallsMade >= maxCalls) {
     budgetExhausted = true;
     return Promise.resolve({ code: 1, out: '', err: 'Call budget exhausted' });
   }
-  totalCallsMade++;
+  if (providerCall) totalCallsMade++;
 
-  return new Promise((resolve) => {
+  const operation = new Promise((resolve) => {
     const isWin = process.platform === 'win32';
     const resolved = resolveExecutable(cmd);
     const child = spawn(resolved.cmd, cmdArgs, {
       cwd,
-      stdio: ['ignore', 'pipe', 'pipe'],
+      stdio: ['pipe', 'pipe', 'pipe'],
       shell: resolved.shell,
+      windowsHide: true,
     });
     let out = '';
     let err = '';
@@ -115,7 +152,23 @@ function runProcess(cmd, cmdArgs, cwd, timeoutMs = 300_000) {
       clearTimeout(timer);
       resolve({ code: 1, out, err: String(errObj) });
     });
+    child.stdin.on('error', () => { /* Spawn/close handlers report process failures. */ });
+    child.stdin.end(input);
   });
+  if (providerCall && !providerProbeComplete) {
+    firstProviderCall = operation.then(result => {
+      const blocker = providerFailureCause(result.out, result.code, result.err);
+      if (blocker) {
+        providerBlocker = blocker;
+        console.error(`Claude provider blocked (${blocker}); stopping new calls without retries. Resume after resolving the provider limit or authentication.`);
+      }
+      providerProbeComplete = true;
+      firstProviderCall = null;
+      return result;
+    });
+    return firstProviderCall;
+  }
+  return operation;
 }
 
 function makeProject(skill) {
@@ -136,22 +189,30 @@ async function agent(prompt, skill, attempt = 0) {
     const res = await runProcess(
       'claude',
       [
-        '-p', prompt,
+        '-p',
         '--model', model,
         '--setting-sources', 'project',
         '--allowedTools', 'Skill', 'Read', 'Glob', 'Grep',
+        '--tools', 'Skill,Read,Glob,Grep',
         '--output-format', 'stream-json',
         '--verbose',
       ],
-      cwd
+      cwd,
+      300_000,
+      prompt
     );
     const { text, triggered } = parseStreamJsonEvents(res.out);
-    const isRateLimited = /hit your (?:weekly|daily) limit/i.test(text);
-    const ok = res.code === 0 && text.length > 0 && !isRateLimited;
-    if (!ok && attempt < 1 && !budgetExhausted) {
-      return agent(prompt, skill, attempt + 1);
+    const blocker = providerFailureCause(res.out, res.code, res.err);
+    if (blocker && !providerBlocker) {
+      providerBlocker = blocker;
+      console.error(`Claude provider blocked (${blocker}); stopping new calls without retries. Resume after resolving the provider limit or authentication.`);
     }
-    return { text, triggered, ok, rawOut: res.out };
+    const ok = res.code === 0 && text.length > 0 && !providerReportedFailure(res.out);
+    if (!ok && attempt < 1 && !budgetExhausted && !providerBlocker) {
+      const retried = await agent(prompt, skill, attempt + 1);
+      return { ...retried, metrics: combineProviderMetrics([extractProviderMetrics(res.out), retried.metrics]) };
+    }
+    return { text, triggered, ok, failure: blocker ?? (!ok ? 'execution' : null), rawOut: res.out, metrics: extractProviderMetrics(res.out) };
   } finally {
     try {
       fs.rmSync(cwd, { recursive: true, force: true });
@@ -164,7 +225,7 @@ async function agent(prompt, skill, attempt = 0) {
 async function grade(prompt, answer, criteria, attempt = 0) {
   if (!answer) return null;
   const judgePrompt = `You are a strict evaluator. Grade the ANSWER against each CRITERION.
-Return only JSON: {"results":[{"criterion":"...","pass":true|false,"note":"<=15 words"}]}
+Return only JSON: {"results":[{"index":1,"pass":true|false,"note":"<=15 words"}]}. Include each numbered criterion exactly once.
 
 TASK:
 ${prompt}
@@ -176,23 +237,30 @@ CRITERIA:
 ${criteria.map((c, i) => `${i + 1}. ${c}`).join('\n')}`;
 
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'helen-judge-'));
+  let attemptMetrics = null;
   try {
     const res = await runProcess(
       'claude',
-      ['-p', judgePrompt, '--model', model, '--setting-sources', 'project', '--output-format', 'json'],
-      cwd
+      ['-p', '--model', model, '--setting-sources', 'project', '--tools', 'Read', '--output-format', 'json'],
+      cwd,
+      300_000,
+      judgePrompt
     );
+    attemptMetrics = extractProviderMetrics(res.out);
+    const blocker = providerFailureCause(res.out, res.code, res.err);
+    if (blocker) { providerBlocker = blocker; throw new Error(`Provider blocked: ${blocker}`); }
+    if (res.code !== 0 || providerReportedFailure(res.out)) throw new Error('Judge provider call failed');
     const raw = JSON.parse(res.out).result;
-    const json = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
-    if (json.results.length !== criteria.length) throw new Error('criteria count mismatch');
+    const judged = parseJudgeResult(raw, criteria.length);
     return {
-      grades: json.results.map((r) => Boolean(r.pass)),
-      notes: json.results.map((r) => r.note ?? ''),
+      ...judged,
       rawOutput: raw,
+      metrics: extractProviderMetrics(res.out),
     };
   } catch {
-    if (attempt < 1 && !budgetExhausted) {
-      return grade(prompt, answer, criteria, attempt + 1);
+    if (attempt < 1 && !budgetExhausted && !providerBlocker) {
+      const retried = await grade(prompt, answer, criteria, attempt + 1);
+      return retried ? { ...retried, metrics: combineProviderMetrics([attemptMetrics, retried.metrics]) } : null;
     }
     return null;
   } finally {
@@ -213,7 +281,7 @@ async function pool(tasks, size) {
   await Promise.all(
     Array.from({ length: size }, async () => {
       while (next < tasks.length) {
-        if (budgetExhausted) break;
+        if (budgetExhausted || providerBlocker) break;
         const i = next++;
         results[i] = await tasks[i]();
       }
@@ -226,6 +294,17 @@ const specFiles = fs
   .readdirSync(evalDir)
   .filter((f) => f.endsWith('.json') && !f.startsWith('.'))
   .filter((f) => only.length === 0 || only.includes(f.replace(/\.json$/, '')));
+const knownSkills = new Set(specFiles.map(file => file.replace(/\.json$/, '')));
+for (const skill of only) {
+  if (!knownSkills.has(skill)) throw new Error(`Unknown evaluation skill: ${skill}`);
+}
+if (casesFilter) {
+  const knownCases = new Set(specFiles.flatMap(file => JSON.parse(fs.readFileSync(path.join(evalDir, file), 'utf8')).cases.map(c => c.id)));
+  for (const id of casesFilter) {
+    if (!knownCases.has(id)) throw new Error(`Unknown evaluation case: ${id}`);
+  }
+  if (casesFilter.length === 0) throw new Error('--cases must select at least one case');
+}
 
 // Dry-run mode: plan calls, print estimates and exit
 if (dryRun) {
@@ -264,6 +343,17 @@ if (dryRun) {
 }
 
 if (!reportOnly) {
+  if (maxCalls === null) throw new Error('Live evaluations require --max-calls <N>. Use --dry-run to inspect the plan without provider calls.');
+  if (maxCalls === 0) throw new Error('No provider calls permitted by --max-calls 0. Use --dry-run or --report-only.');
+  // Local authentication check: never print account details or start a paid prompt to discover missing credentials.
+  const auth = await runProcess('claude', ['auth', 'status'], root, 15_000);
+  let authenticated = false;
+  try { authenticated = auth.code === 0 && JSON.parse(auth.out).loggedIn === true; } catch { /* missing/unsupported CLI */ }
+  if (!authenticated) {
+    console.error('Evaluation preflight failed: Claude CLI is unavailable, not authenticated, or does not support `claude auth status`. Install/update the CLI and run `claude auth login`; then retry with --max-calls. No evaluation prompts were sent.');
+    process.exit(1);
+  }
+  fs.mkdirSync(resultDir, { recursive: true });
   const tasks = [];
   for (const file of specFiles) {
     const spec = JSON.parse(fs.readFileSync(path.join(evalDir, file), 'utf-8'));
@@ -274,22 +364,22 @@ if (!reportOnly) {
       if (casesFilter && !casesFilter.includes(c.id)) continue;
 
       // Resumability check: if already has sufficient runs and not --force, skip
-      if (!force && existingData?.cases) {
+      if (!force && existingData?.model === model && existingData?.fingerprint === fingerprint(spec) && existingData?.cases) {
         const existingCase = existingData.cases.find((ec) => ec.id === c.id);
-        if (existingCase && existingCase.runs && existingCase.runs.length >= runsCount) {
+        if (existingCase && existingCase.runs?.filter(r => r.baselineOk && r.skillOk).length >= runsCount) {
           console.log(`Skipping already completed case ${spec.skill}/${c.id} (runs: ${existingCase.runs.length})`);
           continue;
         }
       }
 
       tasks.push(async () => {
-        if (budgetExhausted) return null;
+        if (budgetExhausted || providerBlocker) return null;
         console.log(`Evaluating ${spec.skill}/${c.id} (${runsCount} runs)...`);
         const caseRuns = [];
         const pct = (g) => (g ? Math.round((100 * g.filter(Boolean).length) / g.length) : null);
 
         for (let r = 1; r <= runsCount; r++) {
-          if (budgetExhausted) break;
+          if (budgetExhausted || providerBlocker) break;
 
           const [baseline, withSkill] = await Promise.all([
             agent(c.prompt, null),
@@ -298,25 +388,39 @@ if (!reportOnly) {
 
           let forced = null;
           // Only force if skill was expected to trigger and did not trigger on its own
-          if (!withSkill.triggered && c.expectTrigger !== false && !budgetExhausted) {
+          if (forceTrigger && withSkill.ok && !withSkill.triggered && c.expectTrigger !== false && !budgetExhausted) {
             forced = await agent(`Use the ${spec.skill} skill. ${c.prompt}`, spec.skill);
           }
 
           const skillRun = forced ?? withSkill;
           const [baseGrades, skillGrades] = await Promise.all([
-            grade(c.prompt, baseline.text, c.criteria),
-            grade(c.prompt, skillRun.text, c.criteria),
+            baseline.ok ? grade(c.prompt, baseline.text, c.criteria) : Promise.resolve(null),
+            skillRun.ok ? grade(c.prompt, skillRun.text, c.criteria) : Promise.resolve(null),
           ]);
 
-          const basePct = pct(baseGrades?.grades);
-          const skillPct = pct(skillGrades?.grades);
+          const baselineChecks = baseline.ok ? runAnswerChecks(baseline.text, c.checks) : null;
+          const skillChecks = skillRun.ok ? runAnswerChecks(skillRun.text, c.checks) : null;
+          const basePct = baseGrades ? pct([...baseGrades.grades, ...(baselineChecks ?? [])]) : null;
+          const skillPct = skillGrades ? pct([...skillGrades.grades, ...(skillChecks ?? [])]) : null;
 
           caseRuns.push({
             run: r,
             triggered: withSkill.triggered,
             forcedTriggered: forced ? forced.triggered : null,
+            naturalAgentOk: withSkill.ok,
+            failures: { baseline: baseline.failure ?? null, naturalSkill: withSkill.failure ?? null, forcedSkill: forced?.failure ?? null },
+            baselineOk: baseline.ok && Boolean(baseGrades),
+            skillOk: skillRun.ok && Boolean(skillGrades),
+            condition: forced ? 'forced' : 'natural',
+            checks: { baseline: baselineChecks, withSkill: skillChecks },
+            metricsByCondition: {
+              baseline: baseline.metrics, naturalSkill: withSkill.metrics,
+              forcedSkill: forced?.metrics ?? null,
+              judgeBaseline: baseGrades?.metrics ?? null, judgeSkill: skillGrades?.metrics ?? null,
+            },
             baseline: basePct,
             withSkill: skillPct,
+            metrics: combineProviderMetrics([baseline.metrics, withSkill.metrics, ...(forced ? [forced.metrics] : []), baseGrades?.metrics, skillGrades?.metrics]),
             criteria: c.criteria.map((text, idx) => ({
               text,
               baseline: baseGrades?.grades?.[idx] ?? null,
@@ -325,12 +429,13 @@ if (!reportOnly) {
             })),
             errors:
               [baseline, withSkill, forced].filter((res) => res && !res.ok).length +
-              [baseGrades, skillGrades].filter((res) => !res).length,
+              (baseline.ok && !baseGrades ? 1 : 0) + (skillRun.ok && !skillGrades ? 1 : 0),
             answers: {
               baseline: redact(baseline.text),
               withSkill: redact(skillRun.text),
             },
           });
+          console.log(`  ${spec.skill}/${c.id} run ${r}/${runsCount}: baseline=${basePct ?? 'unmeasured'}, skill=${skillPct ?? 'unmeasured'}, naturalTrigger=${withSkill.ok ? withSkill.triggered : 'unmeasured'}`);
         }
 
         if (caseRuns.length === 0) return null;
@@ -339,19 +444,21 @@ if (!reportOnly) {
         const skillScores = caseRuns.map((r) => r.withSkill).filter((n) => typeof n === 'number');
         const trigCount = caseRuns.filter((r) => r.triggered).length;
 
-        const baseStats = confidenceInterval95(baseScores);
-        const skillStats = confidenceInterval95(skillScores);
-        const deltaStats = pairedDeltaConfidenceInterval(baseScores, skillScores);
+        const baseStats = baseScores.length ? confidenceInterval95(baseScores) : null;
+        const skillStats = skillScores.length ? confidenceInterval95(skillScores) : null;
+        const pairedRuns = caseRuns.filter(r => typeof r.baseline === 'number' && typeof r.withSkill === 'number');
+        const deltaStats = pairedRuns.length ? pairedDeltaConfidenceInterval(pairedRuns.map(r => r.baseline), pairedRuns.map(r => r.withSkill)) : null;
 
         const row = {
           skill: spec.skill,
+          fingerprint: fingerprint(spec),
           id: c.id,
           expectTrigger: c.expectTrigger ?? true,
           runsCount: caseRuns.length,
           triggeredCount: trigCount,
           triggerRate: Math.round((trigCount / caseRuns.length) * 100),
-          baseline: baseStats.mean,
-          withSkill: skillStats.mean,
+          baseline: baseStats?.mean ?? null,
+          withSkill: skillStats?.mean ?? null,
           baselineStats: baseStats,
           withSkillStats: skillStats,
           deltaStats,
@@ -360,7 +467,7 @@ if (!reportOnly) {
         };
 
         console.log(
-          `  -> ${spec.skill}/${c.id}: trigger=${trigCount}/${caseRuns.length} base=${row.baseline}% skill=${row.withSkill}% delta=${deltaStats.mean}% (noise=${deltaStats.isNoise})`
+          `  -> ${spec.skill}/${c.id}: trigger=${trigCount}/${caseRuns.length} base=${row.baseline ?? 'unknown'} skill=${row.withSkill ?? 'unknown'} delta=${deltaStats?.mean ?? 'unknown'} (noise=${deltaStats?.isNoise ?? 'unmeasured'})`
         );
         return row;
       });
@@ -376,13 +483,22 @@ if (!reportOnly) {
   const date = new Date().toISOString().slice(0, 10);
   for (const [skill, cases] of Object.entries(bySkill)) {
     const file = path.join(resultDir, `${skill}.json`);
-    const previous = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf-8')).cases : [];
+    const oldData = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf-8')) : null;
+    const currentFingerprint = cases[0].fingerprint;
+    if (oldData && (oldData.fingerprint !== currentFingerprint || oldData.model !== model)) {
+      const archiveDir = path.join(resultDir, 'archive');
+      fs.mkdirSync(archiveDir, { recursive: true });
+      const identity = createHash('sha256').update(JSON.stringify(oldData)).digest('hex').slice(0, 16);
+      const archiveFile = path.join(archiveDir, `${skill}-${identity}.json`);
+      if (!fs.existsSync(archiveFile)) fs.writeFileSync(archiveFile, JSON.stringify(oldData, null, 2) + '\n', 'utf8');
+    }
+    const previous = oldData?.fingerprint === currentFingerprint && oldData?.model === model ? oldData.cases : [];
     for (const old of previous) {
       if (!cases.some((c) => c.id === old.id)) cases.push(old);
     }
     fs.writeFileSync(
       path.join(resultDir, `${skill}.json`),
-      JSON.stringify({ skill, model, date, runsPerCase: runsCount, cases }, null, 2) + '\n',
+      JSON.stringify({ skill, model, date, fingerprint: currentFingerprint, providerBlocker, providerCalls: totalCallsMade, runsPerCase: runsCount, cases }, null, 2) + '\n',
       'utf-8'
     );
   }
@@ -392,110 +508,38 @@ if (!reportOnly) {
   }
 }
 
-// Generate report from stored results
-const summaries = fs
-  .readdirSync(resultDir)
-  .filter((f) => f.endsWith('.json') && !f.startsWith('.'))
-  .map((f) => JSON.parse(fs.readFileSync(path.join(resultDir, f), 'utf-8')))
-  .sort((a, b) => a.skill.localeCompare(b.skill));
-
-const lines = [
-  '# Skill quality',
-  '',
-  'Generated by `npm run evals` (`scripts/run-skill-evals.mjs`). Each case runs the prompt against two conditions in clean',
-  'temporary projects: **baseline** (no skill installed) and **with skill** (skill installed in project).',
-  'Grades are evaluated against explicit case criteria by an LLM judge with multi-run sampling.',
-  '',
-  '### Statistical Methodology (95% Confidence Interval)',
-  '- **Runs per case (N)**: Each case is executed multiple times to isolate signal from model and judge variance.',
-  "- **Confidence Intervals**: Computed using two-tailed Student's t-distribution at 95% confidence level for small sample sizes ($df = N - 1$).",
-  '- **Noise threshold**: When the 95% confidence interval of the delta contains 0 ($CI_{lower} \\le 0 \\le CI_{upper}$), the difference is statistically **not distinguishable from noise**. Such skills are marked as **Noise** and are intentionally not awarded letter grades (A/B/C) to prevent misleading conclusions.',
-  '- **Grades (for real signal only)**: **A** for $\\Delta \\ge +20$ and with-skill $\\ge 85\\%$ · **B** for with-skill $\\ge 75\\%$ · **C** otherwise.',
-  '- **False Positive Rate**: Evaluated on explicit negative test cases (`expectTrigger: false`) where the agent must not load the skill.',
-  '',
-  '| Skill | Cases | Runs | Trigger | False Pos | Baseline (95% CI) | With skill (95% CI) | Delta (95% CI) | Grade | Errors |',
-  '|---|---|---|---|---|---|---|---|---|---|',
-];
-
-for (const s of summaries) {
-  const cases = s.cases || [];
-  const totalRuns = cases.reduce((acc, c) => acc + (c.runsCount || (c.runs ? c.runs.length : 1)), 0);
-  const avgRunsPerCase = cases.length > 0 ? Math.round(totalRuns / cases.length) : (s.runsPerCase || 1);
-
-  // Trigger metrics
-  const positiveCases = cases.filter((c) => c.expectTrigger !== false);
-  const positiveTriggers = positiveCases.reduce(
-    (acc, c) => acc + (c.triggeredCount !== undefined ? c.triggeredCount : c.triggered ? 1 : 0),
-    0
-  );
-  const totalPositivePossible = positiveCases.reduce(
-    (acc, c) => acc + (c.runsCount || (c.runs ? c.runs.length : 1)),
-    0
-  );
-  const trigDisplay = totalPositivePossible > 0 ? `${positiveTriggers}/${totalPositivePossible}` : 'N/A';
-
-  // False positive metrics
-  const fp = falsePositiveRate(
-    cases.flatMap((c) =>
-      c.runs
-        ? c.runs.map((r) => ({ expectTrigger: c.expectTrigger, triggered: r.triggered }))
-        : [{ expectTrigger: c.expectTrigger, triggered: c.triggered }]
-    )
-  );
-  const fpDisplay = fp.totalNegative > 0 ? `${fp.rate}% (${fp.falsePositives}/${fp.totalNegative})` : '0%';
-
-  // Score aggregations
-  const allBase = cases.map((c) => (c.baselineStats ? c.baselineStats.mean : c.baseline)).filter((n) => typeof n === 'number');
-  const allSkill = cases.map((c) => (c.withSkillStats ? c.withSkillStats.mean : c.withSkill)).filter((n) => typeof n === 'number');
-
-  const baseMean = Math.round(mean(allBase));
-  const skillMean = Math.round(mean(allSkill));
-  const deltaCI = pairedDeltaConfidenceInterval(allBase, allSkill);
-  const meanDelta = deltaCI.mean;
-
-  const isNoise = deltaCI.isNoise || (Math.abs(meanDelta) <= 10 && deltaCI.lower <= 0 && deltaCI.upper >= 0);
-  const gradeStr = isNoise ? 'Noise*' : calculateGrade(meanDelta, skillMean, false);
-
-  const deltaStr = `${meanDelta >= 0 ? '+' : ''}${meanDelta}% [${deltaCI.lower}%, ${deltaCI.upper}%]`;
-  const totalErrors = cases.reduce((n, c) => n + (c.errors ?? 0), 0);
-
-  lines.push(
-    `| ${s.skill} | ${cases.length} | ${avgRunsPerCase}x | ${trigDisplay} | ${fpDisplay} | ${baseMean}% | ${skillMean}% | ${deltaStr} | ${gradeStr} | ${totalErrors} |`
-  );
-}
-
-lines.push(
-  '',
-  '* \\*Noise: The 95% confidence interval spans zero, meaning the delta cannot be reliably distinguished from sample variance under current evaluation conditions. No letter grade is assigned.',
-  '',
-  '## Failed criteria with skill',
-  ''
-);
-
-for (const s of summaries) {
-  const cases = s.cases || [];
-  const failed = cases.flatMap((c) => {
-    if (c.criteria) {
-      return c.criteria
-        .filter((k) => k.withSkill === false)
-        .map((k) => `- ${s.skill}/${c.id}: ${k.text}${k.note ? ` (${k.note})` : ''}`);
-    }
-    return [];
-  });
-  if (failed.length) lines.push(...failed);
-}
-
-lines.push(
-  '',
-  '## Known limits & Recommendations',
-  '',
-  '- Differences where the confidence interval crosses 0 are statistical noise. Expanding evaluation cases (e.g. to 10 cases with 3+ runs) narrows the confidence intervals.',
-  '- Trigger rates below 100% on chat-only prompts indicate that skill descriptions require keyword tuning so agents activate them autonomously.'
-);
-
-if (summaries[0]) {
-  lines.push('', `Model: ${summaries[0].model} · last report update: ${summaries.map((s) => s.date).sort().at(-1)}`);
-}
-
-fs.writeFileSync(path.join(root, 'docs', 'SKILLS_QUALITY.md'), lines.join('\n') + '\n', 'utf-8');
+// Generate one row per current skill, reconstructing scores from valid observations.
+const fingerprints = {};
+const summaries = fs.readdirSync(evalDir).filter(file => file.endsWith('.json')).map(file => {
+  const spec = JSON.parse(fs.readFileSync(path.join(evalDir, file), 'utf8'));
+  fingerprints[spec.skill] = fingerprint(spec);
+  const resultFile = path.join(resultDir, file);
+  return fs.existsSync(resultFile)
+    ? JSON.parse(fs.readFileSync(resultFile, 'utf8'))
+    : { skill: spec.skill, cases: [] };
+});
+fs.writeFileSync(path.join(root, 'docs', 'SKILLS_QUALITY.md'), renderEvidenceReport(summaries, fingerprints), 'utf8');
 console.log('Updated docs/SKILLS_QUALITY.md');
+if (!reportOnly) {
+  const issues = [];
+  for (const file of specFiles) {
+    const spec = JSON.parse(fs.readFileSync(path.join(evalDir, file), 'utf8'));
+    const summary = summaries.find(s => s.skill === spec.skill);
+    if (!summary || summary.fingerprint !== fingerprints[spec.skill] || summary.model !== model) {
+      issues.push(`${spec.skill}: missing current observations`);
+      continue;
+    }
+    for (const c of spec.cases.filter(c => !casesFilter || casesFilter.includes(c.id))) {
+      const observed = summary.cases.find(item => item.id === c.id)?.runs ?? [];
+      const valid = observed.filter(r => r.baselineOk && r.skillOk);
+      if (valid.length < runsCount) issues.push(`${spec.skill}/${c.id}: incomplete paired runs (${valid.length}/${runsCount})`);
+      if (valid.some(r => r.withSkill !== 100)) issues.push(`${spec.skill}/${c.id}: acceptance criteria failed`);
+      if (observed.some(r => r.naturalAgentOk && r.triggered !== (c.expectTrigger !== false))) issues.push(`${spec.skill}/${c.id}: natural activation mismatch`);
+    }
+  }
+  if (issues.length) {
+    console.error('Evaluation acceptance not satisfied:\n' + issues.join('\n'));
+    process.exitCode = 1;
+  }
+  console.log(`Provider calls made: ${totalCallsMade}/${maxCalls}`);
+}

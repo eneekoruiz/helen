@@ -8,26 +8,13 @@ version: 2.1.0
 
 High-converting copy is concrete, authentic, and human. Generic AI models generate verbose fluff ("elevate", "streamline", "unleash") that kills trust and conversion. `helen-copy` audits and rewrites copy with sharp positioning and high-velocity clarity.
 
-## Operating Principles
+## Execution contract
 
-### 1. Interactive Scoping Questionnaire
-Before rewriting landing pages or CTAs, clarify brand boundaries:
-- **Brand Voice & ICP**: What is the target customer persona, and what exact vocabulary do they use to describe their problem?
-- **Tone Profile**: Direct & pragmatic, witty & idiosyncratic, or authoritative & enterprise?
-- **Proof & Social Evidence**: Do real metrics/testimonials exist, or should copy rely on transparent technical explanations rather than synthetic claims?
-
-### 2. Autonomous Copy Convergence Loop
-Once voice parameters are locked:
-**Scan AI Tells → Rewrite Headers & CTAs → Audit Form Friction → Verify Clarity & Character → Repeat**
-Iterate autonomously until 100% of generic fluff is replaced with punchy, authentic human prose.
-
-### 3. Specialized Subagents
-- **CRO & Friction Subagent**: Audits form fields, CTA contrast, microcopy, and cognitive load on conversion paths.
-- **Tone & Claim Verification Subagent**: Detects inflated adjectives, buzzwords, and unsubstantiated claims.
-
-### 4. Extreme Token Economy
-Provide before/after copy tables with concrete rationale. Avoid lecturing on marketing theory.
-
+- Preserve intent, exclusions and authorization. Audit-only stays read-only. Reuse context; ask only for essential unknowns.
+- Define observable acceptance, baseline and verification before edits. Verify domain outcomes, compatibility and reproducible CI commands; report unavailable checks and residual risks.
+- Inspect → act → verify → re-audit → discover further evidence-backed improvements → repeat. After initial checks, find more actionable improvements without another user request. Apply when authorized, otherwise report. No arbitrary retry cap. Finish when acceptance passes and fresh discovery finds no further actionable improvement within scope, or disclose an external blocker. Change failing hypotheses; respect cancellation and explicit resource limits.
+- Start with the cheapest available model when selectable; escalate only for verified failure or unresolved reasoning. State unavailable controls.
+- Delegate independent domains to focused specialist agents with exclusive ownership; integrate and verify. Reuse evidence, batch reads, avoid polling and duplicate output. Write concise English instructions; answer in the user's language. Measure tokens/cost; never claim fixed savings or perfection.
 ## Copy Review Checklist
 
 1. **Visible copy:** Headings, CTAs, labels, navigation, footers, forms, error messages, empty states, FAQs, and pricing.

@@ -7,6 +7,7 @@ export interface EvalCase {
   prompt: string;
   criteria: string[];
   expectTrigger?: boolean;
+  checks?: Array<{ type: 'includes' | 'excludes'; value: string } | { type: 'json-equals'; path: string; value: unknown }>;
 }
 
 export interface EvalSpec {
@@ -57,7 +58,15 @@ const T_TABLE_95: Record<number, number> = {
   18: 2.101,
   19: 2.093,
   20: 2.086,
+  21: 2.080,
+  22: 2.074,
+  23: 2.069,
+  24: 2.064,
   25: 2.060,
+  26: 2.056,
+  27: 2.052,
+  28: 2.048,
+  29: 2.045,
   30: 2.042,
 };
 
@@ -69,8 +78,12 @@ export function studentTCriticalValue(df: number): number {
     const closest = keys.reduce((prev, curr) => (Math.abs(curr - df) < Math.abs(prev - df) ? curr : prev));
     return T_TABLE_95[closest]!;
   }
-  if (df <= 30) return 2.042;
-  return 1.960; // Asymptotic standard normal distribution for large N
+  // Large-df quantile expansion; rounded to the same precision as the NIST table.
+  const z = 1.959963984540054;
+  const critical = z + (z ** 3 + z) / (4 * df)
+    + (5 * z ** 5 + 16 * z ** 3 + 3 * z) / (96 * df ** 2)
+    + (3 * z ** 7 + 19 * z ** 5 + 17 * z ** 3 - 15 * z) / (384 * df ** 3);
+  return Math.round(critical * 1000) / 1000;
 }
 
 export function mean(values: number[]): number {
@@ -93,6 +106,7 @@ export function sampleStdDev(values: number[]): number {
  * Calculates mean, sample standard deviation and a 95% confidence interval using Student's t-distribution.
  */
 export function confidenceInterval95(values: number[]): StatSummary {
+  if (!values.length || values.some(value => !Number.isFinite(value))) throw new Error('Confidence summaries require finite observations');
   const avg = mean(values);
   const n = values.length;
   if (n <= 1) {
@@ -122,9 +136,10 @@ export function confidenceInterval95(values: number[]): StatSummary {
  * Calculates paired delta confidence interval (withSkill - baseline) across N runs.
  */
 export function pairedDeltaConfidenceInterval(baselineScores: number[], withSkillScores: number[]): DeltaStatSummary {
+  if (baselineScores.length !== withSkillScores.length) throw new Error('Paired scores must have equal lengths');
   const n = Math.min(baselineScores.length, withSkillScores.length);
   if (n === 0) {
-    return { mean: 0, stdDev: 0, marginOfError: 0, lower: 0, upper: 0, isNoise: true };
+    throw new Error('Paired deltas require observations');
   }
   const diffs: number[] = [];
   for (let i = 0; i < n; i++) {
@@ -132,7 +147,7 @@ export function pairedDeltaConfidenceInterval(baselineScores: number[], withSkil
   }
   const ci = confidenceInterval95(diffs);
   // An interval that contains 0 means the delta is not distinguishable from noise
-  const isNoise = n > 1 ? ci.lower <= 0 && ci.upper >= 0 : ci.mean === 0;
+  const isNoise = n <= 1 || (ci.lower <= 0 && ci.upper >= 0);
   return {
     ...ci,
     isNoise,
@@ -200,7 +215,7 @@ export function parseStreamJsonEvents(stdout: string): { text: string; triggered
   return { text, triggered, toolCalls };
 }
 
-const ALLOWED_CASE_KEYS = new Set(['id', 'prompt', 'criteria', 'expectTrigger']);
+const ALLOWED_CASE_KEYS = new Set(['id', 'prompt', 'criteria', 'expectTrigger', 'checks']);
 
 /**
  * Validates an eval spec JSON against HELEN contract.
@@ -290,6 +305,22 @@ export function validateEvalSpec(spec: unknown, filename: string, skillsRoot: st
     // Check expectTrigger
     if ('expectTrigger' in caseObj && typeof caseObj.expectTrigger !== 'boolean') {
       issues.push(`${caseLabel} (${caseObj.id}): "expectTrigger" must be a boolean`);
+    }
+    if ('checks' in caseObj) {
+      if (!Array.isArray(caseObj.checks) || caseObj.checks.length === 0) {
+        issues.push(`${caseLabel}: checks must be a non-empty array`);
+      } else {
+        caseObj.checks.forEach((check: unknown, checkIndex: number) => {
+          const candidate = check as Record<string, unknown> | null;
+          const type = candidate?.type;
+          const valid = candidate && !Array.isArray(candidate)
+            && (type === 'includes' || type === 'excludes' ? typeof candidate.value === 'string' && candidate.value.length > 0
+              : type === 'json-equals' && typeof candidate.path === 'string' && /^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(candidate.path) && Object.hasOwn(candidate, 'value'));
+          if (!valid || Object.keys(candidate ?? {}).some(key => !['type', 'path', 'value'].includes(key))) {
+            issues.push(`${caseLabel}: invalid deterministic check #${checkIndex + 1}`);
+          }
+        });
+      }
     }
   });
 

@@ -8,7 +8,7 @@
         "Identifies the user's messy prompt",
         "Rewrites the prompt into a structured English prompt",
         "The new prompt includes Context & Goal, Constraints, and Expected Output",
-        "States that it will immediately execute the rewritten prompt"
+        "Executes only the chat-only request; does not claim to modify files or run unavailable checks"
       ]
     },
     {
@@ -18,7 +18,7 @@
         "Recognizes the 'reprompt' trigger",
         "Translates the vague intent into a concrete performance audit and optimization prompt in English",
         "The rewritten prompt is highly structured",
-        "Mentions self-execution"
+        "Preserves the chat-only constraint and identifies which implementation evidence is unavailable"
       ]
     },
     {
@@ -28,6 +28,49 @@
         "Does not mention HELEN Reprompt Engine",
         "Does not rewrite the prompt",
         "Directly answers the question"
+      ],
+      "expectTrigger": false
+    },
+    {
+      "id": "question-remains-question",
+      "prompt": "Use helen-reprompt: 'Do you think our existing prompts are useful? Any more ideas?' Evaluate only. No file edits, no installs, no paid calls. No repository contents are supplied. Answer in chat only. Return one JSON object with action, modifiesFiles, brief, acceptance and limitations. action must describe the original request (evaluate, plan or implement); modifiesFiles must reflect its authorization.",
+      "criteria": [
+        "Rewrites concisely in English while preserving evaluation as evaluation",
+        "Does not convert suggestions into an implementation authorization",
+        "Acknowledges missing repository evidence and avoids inventing files or measurements",
+        "Uses observable evaluation criteria and does not promise perfection or fixed English token savings"
+      ],
+      "checks": [
+        {
+          "type": "json-equals",
+          "path": "action",
+          "value": "evaluate"
+        },
+        {
+          "type": "json-equals",
+          "path": "modifiesFiles",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": "ambiguous-performance-evidence",
+      "prompt": "Use helen-reprompt to clarify 'make it faster'. The only measured baseline is p95 1200 ms for GET /products at 100 requests per second. Keep its public response schema. Implementation is authorized, but this evaluation environment only permits chat. Propose a rewritten brief and next actions; do not pretend to execute tools.",
+      "criteria": [
+        "Preserves p95 1200 ms, GET /products, 100 requests per second and response-schema compatibility",
+        "Defines a measurable before/after performance check without inventing a desired numeric target",
+        "Uses cheapest available model cascade and focused backend/performance specialist context",
+        "Separates proposed actions from executed evidence and honors chat-only tool limitation"
+      ]
+    },
+    {
+      "id": "explicit-exclusion-preserved",
+      "prompt": "Use helen-reprompt: 'fix checkout retry duplication, but do not redesign UI or change payment provider'. Work autonomously and look for more improvements. For this evaluation respond in chat only; do not edit files.",
+      "criteria": [
+        "Preserves both UI-redesign and provider-change exclusions",
+        "Defines duplicate-submission or idempotency acceptance and regression evidence",
+        "Includes a further evidence-backed discovery pass without arbitrary retry limit",
+        "Does not treat autonomous discovery as authority to ignore exclusions"
       ]
     }
   ]

@@ -17,13 +17,17 @@
   },
   "homepage": "https://github.com/eneekoruiz/helen#readme",
   "engines": {
-    "node": ">=18.0.0"
+    "node": "^20.0.0 || >=22.0.0"
   },
   "files": [
     "dist",
     "templates",
     "skills",
-    "docs"
+    "docs",
+    "evals/*.json",
+    "evals/README.md",
+    "scripts/run-skill-evals.mjs",
+    "scripts/lib"
   ],
   "scripts": {
     "dev": "tsx src/cli.ts",
@@ -37,7 +41,7 @@
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
     "clean": "node -e \"const fs=require('fs');fs.rmSync('dist',{recursive:true,force:true});\"",
     "evals": "node scripts/run-skill-evals.mjs --concurrency 8",
-    "prepare": "git config core.hooksPath .githooks || true"
+    "prepare": "node -e \"require('node:child_process').spawnSync('git',['config','core.hooksPath','.githooks'],{stdio:'ignore',windowsHide:true})\""
   },
   "keywords": [
     "cli",

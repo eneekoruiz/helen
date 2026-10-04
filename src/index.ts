@@ -1,13 +1,13 @@
 import { printPromptList, resolvePromptEntry, readPrompt } from './core/prompts.js';
 import { registerPromptsCommands } from './commands/promptsCmd.js';
 import { registerSkillsCommands } from './commands/skillsCmd.js';
-import { Command } from 'commander';
+import { Command, InvalidArgumentError } from 'commander';
 import * as p from '@clack/prompts';
 import path from 'node:path';
 import { logger } from './core/logger.js';
 import { detectProject } from './core/projectDetector.js';
 import { runDoctor, printDoctorResults } from './core/doctor.js';
-import { runModules, printSummary } from './core/moduleRunner.js';
+import { runModules as executeModules, printSummary } from './core/moduleRunner.js';
 import { getAllModuleIds, getModule, getAllModules } from './modules/registry.js';
 import { showMainMenu, showModuleSelector, showExplainSelector, printModuleExplanation, printModuleList } from './menu/mainMenu.js';
 import { generateModuleDocs } from './core/docs.js';
@@ -32,21 +32,25 @@ import { runRollback } from './core/rollback.js';
 import { validateAllEvals } from './core/evals.js';
 import { isJsonMode, setJsonMode, printJsonAndExit, clearJsonBuffers } from './core/jsonOutput.js';
 import { runInitProject } from './core/initProject.js';
+import { runProjectOperation, listOperations, recoverOperation } from './core/operations.js';
+import { withPreview, previewToJSON, renderPreview } from './core/preview.js';
 
 const VERSION = '2.1.0';
 
 interface ModuleRunResult {
+  failed?: boolean;
   moduleId: string;
   created: string[];
   modified: string[];
 }
 
-function buildContext(cwd: string, opts: { dryRun?: boolean; force?: boolean; securityLevel?: string }): HelenContext {
+function buildContext(cwd: string, opts: { dryRun?: boolean; preview?: boolean; force?: boolean; securityLevel?: string }): HelenContext {
   const project = detectProject(cwd);
   return {
     cwd,
     project,
-    dryRun: opts.dryRun ?? false,
+    dryRun: Boolean(opts.dryRun || opts.preview),
+    preview: opts.preview ?? false,
     force: opts.force ?? false,
     verbose: false,
     settings: opts.securityLevel ? { securityLevel: opts.securityLevel } : {},
@@ -55,7 +59,7 @@ function buildContext(cwd: string, opts: { dryRun?: boolean; force?: boolean; se
 
 async function handleAutoInstall(results: ModuleRunResult[], ctx: HelenContext, isInteractive: boolean): Promise<void> {
   if (ctx.dryRun) return;
-  const packageJsonModified = results.some(r => r.modified.includes('package.json'));
+  const packageJsonModified = results.some(r => !r.failed && r.modified.includes('package.json'));
   if (!packageJsonModified) return;
 
   const pm = ctx.project.packageManager;
@@ -79,23 +83,69 @@ async function handleAutoInstall(results: ModuleRunResult[], ctx: HelenContext, 
       spinner.stop(`Dependencies installed successfully via ${pm}!`);
     } catch (err) {
       spinner.stop(`Failed to install dependencies: ${err instanceof Error ? err.message : String(err)}`);
+      throw err;
     }
   } else {
-    logger.blank();
-    logger.info(`Remember to run "${installCmd}" to install newly added dependencies.`);
+    logger.info(`Installing dependencies via ${pm === 'unknown' ? 'npm' : pm}...`);
+    const { execSync } = await import('node:child_process');
+    execSync(installCmd, { cwd: ctx.cwd, stdio: 'ignore' });
+    logger.success('Dependencies installed successfully.');
   }
 }
 
 function persistResults(results: ModuleRunResult[], ctx: HelenContext): void {
-  if (ctx.dryRun || results.length === 0) return;
+  if ((ctx.dryRun && !ctx.preview) || results.length === 0) return;
   const createdFiles = results.flatMap(r => r.created);
+  const existing = readConfig(ctx.cwd, { recoverCorrupt: false });
+  // Legacy installations have no per-module history. Keep their conservative
+  // fallback rather than replacing unknown ownership with an empty update.
+  const trackedResults = results.filter(result => !existing?.installedModules.includes(result.moduleId) || existing.moduleFiles?.[result.moduleId]);
   updateConfig(ctx.cwd, {
     projectName: ctx.project.name,
     framework: ctx.project.framework,
     packageManager: ctx.project.packageManager,
-    installedModules: results.map(r => r.moduleId),
+    installedModules: results.filter(result => !result.failed).map(r => r.moduleId),
     createdFiles: createdFiles,
-  });
+    moduleFiles: Object.fromEntries(trackedResults.map(result => [result.moduleId, { created: result.created, modified: result.modified }])),
+  }, { dryRun: ctx.dryRun });
+}
+
+async function runModules(ids: string[], ctx: HelenContext) {
+  const action = async () => {
+    const results = await executeModules(ids, ctx);
+    persistResults(results, ctx);
+    return results;
+  };
+  let results;
+  if (ctx.dryRun) {
+    const preview = await withPreview(action);
+    results = preview.result;
+    if (ctx.preview) ctx.plannedChanges = preview.changes;
+  } else {
+    const outcome = await runProjectOperation(ctx.cwd, `modules:${ids.join(',')}`, action,
+      result => result.length === ids.length && result.every(module => !module.failed));
+    results = outcome.value;
+    if (outcome.operation) {
+      logger.error(`Partial changes are recorded. Recover before retrying: ${outcome.operation.recoveryCommand}`);
+      for (const result of results.filter(module => module.failed)) {
+        result.operationId = outcome.operation.id;
+        result.diagnostics = [...(result.diagnostics ?? []), { code: 'OPERATION_INCOMPLETE', stage: 'recovery',
+          message: 'Partial changes are recorded for recovery.', recoveryCommand: outcome.operation.recoveryCommand }];
+      }
+    }
+  }
+  if (results.filter(result => !result.failed).length !== ids.length) process.exitCode = 1;
+  return results;
+}
+
+function moduleOutput(results: ModuleRunResult[], ctx: HelenContext) {
+  return { results, ...(ctx.preview ? { changes: previewToJSON(ctx.plannedChanges ?? [], ctx.cwd) } : {}) };
+}
+
+function canRenderAnimation(command: string): boolean {
+  if (!isJsonMode()) return true;
+  printJsonAndExit(command, {}, { ok: false, errors: ['Terminal animations cannot run in --json mode. Run this command without --json.'], exitCode: 1 });
+  return false;
 }
 
 export function runLint(): number {
@@ -140,11 +190,14 @@ export function createProgram(): Command {
     .description('HELEN — AI Agent Operating System & Project Scaffolding CLI')
     .version(VERSION)
     .option('--json', 'Output machine-readable JSON envelope', false)
+    .option('--welcome <identity>', 'Optional interactive startup: helen, signature, off', value => {
+      if (!['helen', 'signature', 'off'].includes(value)) throw new InvalidArgumentError('Choose helen, signature, or off.');
+      return value;
+    })
+    .option('--no-animation', 'Disable optional startup animation')
     .hook('preAction', (thisCommand) => {
       clearJsonBuffers();
-      if (process.argv.includes('--json') || thisCommand.opts().json) {
-        setJsonMode(true);
-      }
+      setJsonMode(Boolean(thisCommand.opts().json));
     });
 
   // Default: interactive menu
@@ -158,6 +211,8 @@ export function createProgram(): Command {
         });
         return;
       }
+      const { runStartupWelcome } = await import('./core/cinematicArt.js');
+      await runStartupWelcome(program.opts());
       logger.banner();
       const cwd = process.cwd();
       const project = detectProject(cwd);
@@ -195,7 +250,6 @@ export function createProgram(): Command {
             if (p.isCancel(dryRunOpt)) break;
             const ctx = buildContext(cwd, { dryRun: dryRunOpt as boolean, securityLevel });
             const results = await runModules(selected as string[], ctx);
-            persistResults(results, ctx);
             printSummary(results, ctx);
             await handleAutoInstall(results, ctx, true);
             break;
@@ -213,7 +267,9 @@ export function createProgram(): Command {
             });
             if (p.isCancel(dryRunOpt)) break;
 
-            const rollbackResult = await runRollback(cwd, { dryRun: dryRunOpt as boolean });
+            const rollbackOptions = { dryRun: Boolean(dryRunOpt) };
+            const rollbackResult = rollbackOptions.dryRun ? await runRollback(cwd, rollbackOptions)
+              : (await runProjectOperation(cwd, 'rollback', () => runRollback(cwd, rollbackOptions), result => result.skipped.length === 0)).value;
             if (rollbackResult.restored.length === 0 && rollbackResult.removed.length === 0) {
               logger.info('No backups or created files found to rollback.');
             } else {
@@ -317,27 +373,26 @@ export function createProgram(): Command {
     .command('init')
     .description('Initialize all modules (or use --dry-run to preview)')
     .option('--dry-run', 'Preview changes without writing files', false)
+    .option('--preview', 'Show file diffs and dependency changes without writing', false)
     .option('--force', 'Overwrite existing files', false)
     .option('--security-level <level>', 'Cybersecurity level (simple or strict)', 'simple')
     .option('--install', 'Automatically install dependencies after changes', false)
-    .action(async (opts: { dryRun: boolean; force: boolean; securityLevel: string; install: boolean }) => {
+    .action(async (opts: { dryRun: boolean; preview: boolean; force: boolean; securityLevel: string; install: boolean }) => {
       const cwd = process.cwd();
       const ctx = buildContext(cwd, opts);
       if (opts.dryRun && !isJsonMode()) {
         logger.warn('DRY-RUN mode: previewing changes without writing files');
       }
       const results = await runModules(getAllModuleIds(), ctx);
-      persistResults(results, ctx);
+      if (opts.install) await handleAutoInstall(results, ctx, false);
       if (isJsonMode()) {
-        printJsonAndExit('init', { results });
+        printJsonAndExit('init', moduleOutput(results, ctx));
         return;
       }
       logger.banner();
       logger.info(`Installing all modules...`);
       printSummary(results, ctx);
-      if (opts.install) {
-        await handleAutoInstall(results, ctx, false);
-      } else {
+      if (!opts.install) {
         const packageJsonModified = results.some(r => r.modified.includes('package.json'));
         if (packageJsonModified && !opts.dryRun) {
           logger.blank();
@@ -375,16 +430,19 @@ export function createProgram(): Command {
     .alias('g')
     .description('Generate project entities (component, hook, page, entity)')
     .option('--dry-run', 'Preview without writing', false)
-    .action(async (type: "component" | "hook" | "page" | "entity", name: string, opts: { dryRun: boolean }) => {
+    .option('--preview', 'Show the generated file diff without writing', false)
+    .action(async (type: "component" | "hook" | "page" | "entity", name: string, opts: { dryRun: boolean; preview: boolean }) => {
       const cwd = process.cwd();
-      await generateEntity({
-        type,
-        name,
-        cwd,
-        dryRun: opts.dryRun,
-      });
+      const dryRun = Boolean(opts.dryRun || opts.preview);
+      const action = () => generateEntity({ type, name, cwd, dryRun });
+      const preview = dryRun ? await withPreview(action) : undefined;
+      const generated = preview ? preview.result : (await runProjectOperation(cwd, `generate:${type}`, action, value => value)).value;
+      const changes = preview?.changes ?? [];
       if (isJsonMode()) {
-        printJsonAndExit('generate', { type, name, dryRun: opts.dryRun });
+        printJsonAndExit('generate', { type, name, dryRun, generated, ...(opts.preview ? { changes: previewToJSON(changes, cwd) } : {}) }, { ok: generated, exitCode: generated ? 0 : 1 });
+      } else {
+        if (!generated) process.exitCode = 1;
+        if (opts.preview) console.log(renderPreview(changes, cwd));
       }
     });
 
@@ -462,17 +520,18 @@ export function createProgram(): Command {
     .command('add <modules...>')
     .description('Add one or more modules to the project')
     .option('--dry-run', 'Preview changes without writing files', false)
+    .option('--preview', 'Show file diffs and dependency changes without writing', false)
     .option('--force', 'Overwrite existing files', false)
     .option('--security-level <level>', 'Cybersecurity level (simple or strict)', 'simple')
     .option('--install', 'Automatically install dependencies after changes', false)
-    .action(async (moduleIds: string[], opts: { dryRun: boolean; force: boolean; securityLevel: string; install: boolean }) => {
+    .action(async (moduleIds: string[], opts: { dryRun: boolean; preview: boolean; force: boolean; securityLevel: string; install: boolean }) => {
       const cwd = process.cwd();
       const ctx = buildContext(cwd, opts);
       const results = await runModules(moduleIds, ctx);
-      persistResults(results, ctx);
+      if (opts.install) await handleAutoInstall(results, ctx, false);
 
       if (isJsonMode()) {
-        printJsonAndExit('add', { results });
+        printJsonAndExit('add', moduleOutput(results, ctx));
         return;
       }
 
@@ -482,9 +541,7 @@ export function createProgram(): Command {
       }
       logger.info(`Installing ${moduleIds.length} module(s)...`);
       printSummary(results, ctx);
-      if (opts.install) {
-        await handleAutoInstall(results, ctx, false);
-      } else {
+      if (!opts.install) {
         const packageJsonModified = results.some(r => r.modified.includes('package.json'));
         if (packageJsonModified && !opts.dryRun) {
           logger.blank();
@@ -498,8 +555,9 @@ export function createProgram(): Command {
     .command('update')
     .description('Update all installed modules to latest templates')
     .option('--dry-run', 'Preview changes without writing files', false)
+    .option('--preview', 'Show file diffs and dependency changes without writing', false)
     .option('--install', 'Automatically install dependencies after changes', false)
-    .action(async (opts: { dryRun: boolean; install: boolean }) => {
+    .action(async (opts: { dryRun: boolean; preview: boolean; install: boolean }) => {
       const cwd = process.cwd();
       const config = readConfig(cwd);
       if (!config || config.installedModules.length === 0) {
@@ -516,18 +574,17 @@ export function createProgram(): Command {
       }
       const ctx = buildContext(cwd, { ...opts, force: true });
       const results = await runModules(config.installedModules, ctx);
+      if (opts.install) await handleAutoInstall(results, ctx, false);
 
       if (isJsonMode()) {
-        printJsonAndExit('update', { results });
+        printJsonAndExit('update', moduleOutput(results, ctx));
         return;
       }
 
       logger.banner();
       logger.info(`Updating ${config.installedModules.length} modules...`);
       printSummary(results, ctx);
-      if (opts.install) {
-        await handleAutoInstall(results, ctx, false);
-      } else {
+      if (!opts.install) {
         const packageJsonModified = results.some(r => r.modified.includes('package.json'));
         if (packageJsonModified && !opts.dryRun) {
           logger.blank();
@@ -544,9 +601,11 @@ export function createProgram(): Command {
     .action(async (moduleId: string, opts: { dryRun: boolean }) => {
       const cwd = process.cwd();
       const ctx = buildContext(cwd, opts);
-      await ejectModule(moduleId, ctx);
+      const ejected = ctx.dryRun ? await ejectModule(moduleId, ctx)
+        : (await runProjectOperation(cwd, `eject:${moduleId}`, () => ejectModule(moduleId, ctx), value => value)).value;
+      if (!ejected) process.exitCode = 1;
       if (isJsonMode()) {
-        printJsonAndExit('eject', { moduleId, dryRun: opts.dryRun });
+        printJsonAndExit('eject', { moduleId, dryRun: opts.dryRun, ejected }, { ok: ejected, exitCode: ejected ? 0 : 1 });
       }
     });
 
@@ -570,7 +629,8 @@ export function createProgram(): Command {
     .option('--dry-run', 'Preview the rollback actions without applying them', false)
     .action(async (opts: { dryRun: boolean }) => {
       const cwd = process.cwd();
-      const rollbackResult = await runRollback(cwd, opts);
+      const rollbackResult = opts.dryRun ? await runRollback(cwd, opts)
+        : (await runProjectOperation(cwd, 'rollback', () => runRollback(cwd, opts), result => result.skipped.length === 0)).value;
       if (isJsonMode()) {
         printJsonAndExit('rollback', rollbackResult);
         return;
@@ -739,6 +799,7 @@ export function createProgram(): Command {
     .command('easter-egg')
     .description("Run Helen's cinematic terminal art sequence")
     .action(async () => {
+      if (!canRenderAnimation('scripts:easter-egg')) return;
       const { runEasterEgg } = await import('./core/easterEgg.js');
       await runEasterEgg();
     });
@@ -747,6 +808,7 @@ export function createProgram(): Command {
     .command('signature')
     .description('Run the ENEKO RUIZ cinematic signature sequence')
     .action(async () => {
+      if (!canRenderAnimation('scripts:signature')) return;
       const { runEnekoRuizArt } = await import('./core/cinematicArt.js');
       await runEnekoRuizArt();
     });
@@ -756,6 +818,7 @@ export function createProgram(): Command {
     .command('easter-egg')
     .description("Run Helen's cinematic terminal art sequence")
     .action(async () => {
+      if (!canRenderAnimation('easter-egg')) return;
       const { runEasterEgg } = await import('./core/easterEgg.js');
       await runEasterEgg();
     });
@@ -765,6 +828,7 @@ export function createProgram(): Command {
     .command('signature')
     .description('Run the ENEKO RUIZ cinematic signature sequence')
     .action(async () => {
+      if (!canRenderAnimation('signature')) return;
       const { runEnekoRuizArt } = await import('./core/cinematicArt.js');
       await runEnekoRuizArt();
     });
@@ -800,10 +864,12 @@ export function createProgram(): Command {
     .action(async (target?: string) => {
       const { computeTokenBudget, printTokenBudget } = await import('./core/tokenBudget.js');
       const summary = computeTokenBudget(target);
+      const warnings = summary.totalPrompts === 0 ? [`No prompts match "${target ?? 'all'}". Run: helen prompts list`] : [];
       if (isJsonMode()) {
-        printJsonAndExit('token-budget', summary);
+        printJsonAndExit('token-budget', summary, { warnings });
         return;
       }
+      for (const warning of warnings) logger.warn(warning);
       printTokenBudget(summary);
     });
 
@@ -856,6 +922,7 @@ export function createProgram(): Command {
     .command('completion [shell]')
     .description('Generate shell autocompletion script (bash, zsh, fish, powershell)')
     .action((shell = 'bash') => {
+      if (!['bash', 'zsh', 'fish', 'powershell'].includes(shell)) throw new Error(`Unknown shell "${shell}". Supported shells: bash, zsh, fish, powershell`);
       const cmds = program.commands.map(c => c.name()).join(' ');
       const goals = Object.keys(readPlaybooks().goals).join(' ');
       let script = '';
@@ -890,5 +957,21 @@ export function createProgram(): Command {
       logger.success(`Removed skills: ${res.removedSkills.length}`);
     });
 
+  program.command('recover [id]')
+    .description('List unfinished operations or undo one safely using its recorded files')
+    .option('--dry-run', 'Validate recovery and list files without changing them', false)
+    .action((id: string | undefined, opts: { dryRun: boolean }) => {
+      const cwd = process.cwd();
+      if (id) {
+        const operation = recoverOperation(cwd, id, opts.dryRun);
+        if (isJsonMode()) printJsonAndExit('recover', { operation, dryRun: opts.dryRun });
+        else logger.success(`${opts.dryRun ? 'Recovery validated' : 'Recovered'} ${id}: ${operation.files.length} file(s).`);
+      } else {
+        const operations = listOperations(cwd);
+        if (isJsonMode()) printJsonAndExit('recover', { operations });
+        else if (!operations.length) logger.info('No unfinished operations.');
+        else for (const operation of operations) logger.warn(`${operation.kind}: ${operation.files.length} file(s). Run: ${operation.recoveryCommand}`);
+      }
+    });
   return program;
 }

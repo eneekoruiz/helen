@@ -3,13 +3,51 @@ import path from 'node:path';
 import os from 'node:os';
 import { logger } from './logger.js';
 import Handlebars from 'handlebars';
+import { isDeepStrictEqual } from 'node:util';
+import { writeAtomicFile } from './operations.js';
+import { recordPlannedWrite, getPlannedContent } from './preview.js';
+
+/** Check directory boundaries and existing links before touching a project path. */
+export function isPathInside(root: string, candidate: string): boolean {
+  const relative = path.relative(path.resolve(root), path.resolve(candidate));
+  return relative === '' || (!path.isAbsolute(relative) && relative !== '..' && !relative.startsWith(`..${path.sep}`));
+}
+
+export function isSafeProjectPath(root: string, candidate: string): boolean {
+  const resolvedRoot = path.resolve(root);
+  const resolvedCandidate = path.resolve(candidate);
+  if (!isPathInside(resolvedRoot, resolvedCandidate)) return false;
+  let current = resolvedCandidate;
+  while (current !== resolvedRoot) {
+    try {
+      if (fs.lstatSync(current).isSymbolicLink()) return false;
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') return false;
+    }
+    current = path.dirname(current);
+  }
+  return true;
+}
+
+function isSafeFileDestination(filePath: string, root?: string): boolean {
+  const absolute = path.resolve(filePath);
+  const allowed = (candidate: string): boolean => isSafeProjectPath(root ?? process.cwd(), candidate) ||
+    (root === undefined && isSafeProjectPath(os.tmpdir(), candidate));
+  return allowed(absolute) && allowed(`${absolute}.helen-backup`) &&
+    (!fs.existsSync(absolute) || fs.lstatSync(absolute).isFile()) &&
+    (!fs.existsSync(`${absolute}.helen-backup`) || fs.lstatSync(`${absolute}.helen-backup`).isFile());
+}
 
 
 /**
  * Check if a file exists at the given path.
  */
 export function fileExists(filePath: string): boolean {
-  return fs.existsSync(filePath);
+  return getPlannedContent(filePath) !== undefined || fs.existsSync(filePath);
+}
+
+function readText(file: string): string {
+  return getPlannedContent(file) ?? fs.readFileSync(file, 'utf8');
 }
 
 /**
@@ -29,16 +67,13 @@ export function ensureDir(dirPath: string): void {
 export function writeFileSafe(
   filePath: string,
   content: string,
-  options: { dryRun?: boolean; force?: boolean; vars?: Record<string, any> } = {},
+  options: { dryRun?: boolean; force?: boolean; vars?: Record<string, any>; root?: string } = {},
 ): 'created' | 'skipped' | 'overwritten' {
   try {
     const absolutePath = path.isAbsolute(filePath) ? filePath : path.resolve(process.cwd(), filePath);
     
     // Safety check: Don't write outside the current working directory or temp dir (for tests)
-    const isUnderCwd = absolutePath.startsWith(process.cwd());
-    const isUnderTmp = absolutePath.startsWith(os.tmpdir());
-    
-    if (!isUnderCwd && !isUnderTmp) {
+    if (!isSafeFileDestination(absolutePath, options.root)) {
       logger.error(`Path safety violation: Attempted to write outside project root: ${filePath}`);
       return 'skipped';
     }
@@ -63,6 +98,7 @@ export function writeFileSafe(
         return 'skipped';
       }
       logger.step(`[DRY-RUN] Would ${exists ? 'overwrite' : 'create'}: ${filePath}`);
+      recordPlannedWrite(absolutePath, exists ? readText(absolutePath) : null, finalContent, { backup: exists });
       return exists ? 'overwritten' : 'created';
     }
 
@@ -71,11 +107,11 @@ export function writeFileSafe(
         logger.warn(`File exists, skipping: ${filePath}`);
         return 'skipped';
       }
-      backupFile(absolutePath);
+      backupFile(absolutePath, { root: options.root });
     }
 
     ensureDir(path.dirname(absolutePath));
-    fs.writeFileSync(absolutePath, finalContent, 'utf-8');
+    writeAtomicFile(absolutePath, finalContent);
     logger.step(`${exists ? 'Overwritten' : 'Created'}: ${filePath}`);
     return exists ? 'overwritten' : 'created';
   } catch (err) {
@@ -109,7 +145,7 @@ export function copyTemplate(
  */
 export function readJson<T = Record<string, unknown>>(filePath: string): T | null {
   try {
-    return fs.readJsonSync(filePath) as T;
+    return JSON.parse(readText(filePath)) as T;
   } catch {
     return null;
   }
@@ -122,24 +158,35 @@ export function readJson<T = Record<string, unknown>>(filePath: string): T | nul
 export function patchJson(
   filePath: string,
   patches: Record<string, unknown>,
-  options: { dryRun?: boolean } = {},
+  options: { dryRun?: boolean; root?: string } = {},
 ): 'created' | 'modified' | 'skipped' {
-  if (options.dryRun) {
-    logger.step(`[DRY-RUN] Would patch: ${filePath}`);
-    return fileExists(filePath) ? 'modified' : 'created';
+  try {
+    if (!isSafeFileDestination(filePath, options.root)) {
+      logger.error(`Unsafe JSON destination: ${filePath}`);
+      return 'skipped';
+    }
+    const exists = fileExists(filePath);
+    const existing = exists ? JSON.parse(readText(filePath)) as unknown : {};
+    if (!existing || typeof existing !== 'object' || Array.isArray(existing)) {
+      logger.error(`JSON destination must contain an object: ${filePath}`);
+      return 'skipped';
+    }
+    const merged = deepMerge(existing as Record<string, unknown>, patches);
+    if (exists && isDeepStrictEqual(existing, merged)) return 'skipped';
+    if (options.dryRun) {
+      logger.step(`[DRY-RUN] Would patch: ${filePath}`);
+      recordPlannedWrite(filePath, exists ? readText(filePath) : null, `${JSON.stringify(merged, null, 2)}\n`, { backup: exists });
+      return exists ? 'modified' : 'created';
+    }
+    if (exists) backupFile(filePath, { root: options.root });
+    ensureDir(path.dirname(filePath));
+    writeAtomicFile(filePath, `${JSON.stringify(merged, null, 2)}\n`);
+    logger.step(`Patched: ${filePath}`);
+    return exists ? 'modified' : 'created';
+  } catch (err) {
+    logger.error(`Failed to patch ${filePath}: ${err instanceof Error ? err.message : String(err)}`);
+    return 'skipped';
   }
-
-  const exists = fileExists(filePath);
-  if (exists) {
-    backupFile(filePath);
-  }
-
-  const existing = readJson(filePath) ?? {};
-  const merged = deepMerge(existing as Record<string, unknown>, patches);
-  ensureDir(path.dirname(filePath));
-  fs.writeJsonSync(filePath, merged, { spaces: 2 });
-  logger.step(`Patched: ${filePath}`);
-  return exists ? 'modified' : 'created';
 }
 
 /**
@@ -150,18 +197,19 @@ export function patchPackageJson(
   patches: Record<string, unknown>,
   options: { dryRun?: boolean } = {},
 ): 'created' | 'modified' | 'skipped' {
-  return patchJson(path.join(cwd, 'package.json'), patches, options);
+  return patchJson(path.join(cwd, 'package.json'), patches, { ...options, root: cwd });
 }
 
 /**
  * Create a backup of a file before modifying it.
  * Preserves the initial file state by avoiding overwrites if a backup already exists.
  */
-export function backupFile(filePath: string): string | null {
+export function backupFile(filePath: string, options: { root?: string } = {}): string | null {
+  if (!isSafeFileDestination(filePath, options.root)) return null;
   if (!fileExists(filePath)) return null;
   const backupPath = `${filePath}.helen-backup`;
   if (fileExists(backupPath)) return backupPath;
-  fs.copySync(filePath, backupPath);
+  writeAtomicFile(backupPath, fs.readFileSync(filePath), { mode: fs.statSync(filePath).mode & 0o777 });
   logger.step(`Backup created: ${backupPath}`);
   return backupPath;
 }
@@ -173,16 +221,24 @@ export function appendOnce(
   filePath: string,
   marker: string,
   content: string,
-  options: { dryRun?: boolean } = {},
+  options: { dryRun?: boolean; root?: string } = {},
 ): 'created' | 'modified' | 'skipped' {
+  if (!isSafeFileDestination(filePath, options.root)) {
+    logger.error(`Unsafe append destination: ${filePath}`);
+    return 'skipped';
+  }
+  const exists = fileExists(filePath);
+  if (exists && readText(filePath).includes(marker)) return 'skipped';
   if (options.dryRun) {
     logger.step(`[DRY-RUN] Would append to: ${filePath}`);
+    const before = exists ? readText(filePath) : null;
+    recordPlannedWrite(filePath, before, before === null ? content : `${before}\n${content}`, { backup: exists });
     return fileExists(filePath) ? 'modified' : 'created';
   }
 
   if (!fileExists(filePath)) {
     ensureDir(path.dirname(filePath));
-    fs.writeFileSync(filePath, content, 'utf-8');
+    writeAtomicFile(filePath, content);
     return 'created';
   }
 
@@ -192,8 +248,8 @@ export function appendOnce(
     return 'skipped';
   }
 
-  backupFile(filePath);
-  fs.appendFileSync(filePath, `\n${content}`, 'utf-8');
+  backupFile(filePath, { root: options.root });
+  writeAtomicFile(filePath, `${existing}\n${content}`);
   logger.step(`Appended to: ${filePath}`);
   return 'modified';
 }
