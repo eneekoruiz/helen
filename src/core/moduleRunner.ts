@@ -289,8 +289,8 @@ function getDependencyVersion(dep: string): string {
     'eslint-config-prettier': '^9.1.0',
     
     // Testing
-    'vitest': '^4.1.11',
-    '@vitest/coverage-v8': '^4.1.11',
+    'vitest': '^3.0.0',
+    '@vitest/coverage-v8': '^3.0.0',
     '@testing-library/react': '^16.0.1',
     '@testing-library/jest-dom': '^6.5.0',
     '@testing-library/user-event': '^14.5.2',
