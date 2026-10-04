@@ -56,7 +56,7 @@ describe('guardrails module', () => {
     expect(commit().status).not.toBe(0);
   });
 
-  it('inspects staged blobs for filenames with spaces even after working files are deleted', async () => {
+  it.each(['generated', 'repository'])('inspects staged blobs with the %s hook after working files are deleted', async sourceKind => {
     await run();
     const git = (...args: string[]) => execFileSync('git', args, { cwd: tmp });
     git('init', '-q');
@@ -65,7 +65,7 @@ describe('guardrails module', () => {
     fs.writeFileSync(path.join(tmp, name), `export const token = '${secret}';\n`);
     git('add', name);
     fs.unlinkSync(path.join(tmp, name));
-    const hook = fs.readFileSync(path.join(tmp, '.githooks/pre-commit'), 'utf-8');
+    const hook = fs.readFileSync(sourceKind === 'repository' ? path.resolve('.githooks/pre-commit') : path.join(tmp, '.githooks/pre-commit'), 'utf-8').replaceAll('\r\n', '\n');
     const source = hook.split("<<'HELEN_NODE'\n")[1].split('\nHELEN_NODE')[0];
     const result = spawnSync(process.execPath, ['--input-type=commonjs', '-e', source], { cwd: tmp, encoding: 'utf-8', timeout: 10000 });
     expect(result.status).toBe(1);

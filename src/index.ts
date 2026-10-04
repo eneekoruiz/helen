@@ -953,7 +953,7 @@ export function createProgram(): Command {
   // helen uninstall
   program
     .command('uninstall')
-    .description('Cleanly remove installed HELEN skills, instructions, and configuration')
+    .description('Remove verified HELEN files and managed blocks, preserving custom skills and MCP settings')
     .option('--dry-run', 'Preview changes without modifying filesystem', false)
     .action(async (opts: { dryRun: boolean }) => {
       const res = uninstallProject({ cwd: process.cwd(), dryRun: opts.dryRun });
@@ -963,6 +963,7 @@ export function createProgram(): Command {
       }
       logger.success(`Removed instructions from: ${res.cleanedInstructions.join(', ') || 'none'}`);
       logger.success(`Removed skills: ${res.removedSkills.length}`);
+      if (res.preservedSkills?.length) logger.info(`Preserved custom or edited skills: ${res.preservedSkills.join(', ')}`);
     });
 
   program.command('recover [id]')

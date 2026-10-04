@@ -3,7 +3,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BLOCK_END, BLOCK_START, helenBlock, setupProject, upsertBlock, uninstallProject } from '../src/core/setup.js';
-import { SKILL_TARGETS } from '../src/core/skills.js';
+import { SKILL_TARGETS, listSkills, skillFiles } from '../src/core/skills.js';
+import { listPresetSkills } from '../src/core/agentPresets.js';
 
 describe('helen setup', () => {
   let tmp: string;
@@ -53,6 +54,16 @@ describe('helen setup', () => {
     fs.writeFileSync(path.join(tmp, 'AGENTS.md'), 'User instructions\n');
     expect(uninstallProject({ cwd: tmp }).cleanedInstructions).toEqual([]);
     expect(fs.readFileSync(path.join(tmp, 'AGENTS.md'), 'utf8')).toBe('User instructions\n');
+  });
+
+  it('uninstall replaces managed instruction files without changing hard-linked personal copies', () => {
+    const original = `Personal rules\n${BLOCK_START}\nmanaged\n${BLOCK_END}\n`;
+    const personal = path.join(tmp, 'personal.md');
+    fs.writeFileSync(personal, original);
+    fs.linkSync(personal, path.join(tmp, 'AGENTS.md'));
+    uninstallProject({ cwd: tmp });
+    expect(fs.readFileSync(personal, 'utf8')).toBe(original);
+    expect(fs.readFileSync(path.join(tmp, 'AGENTS.md'), 'utf8')).toBe('Personal rules\n');
   });
 
   it('uninstall never follows a skill directory junction outside the project', () => {
@@ -155,5 +166,90 @@ describe('helen setup', () => {
     expect(uninst.cleanedRules).toContain('.agents/rules/quality.md');
     expect(fs.existsSync(path.join(rulesDir, 'security.md'))).toBe(false);
     expect(fs.readFileSync(path.join(rulesDir, 'quality.md'), 'utf8')).toContain('custom');
+  });
+
+  it('migrates exact generated legacy design rules but preserves custom additions', () => {
+    setupProject({ cwd: tmp, agents: ['codex'] });
+    const file = path.join(tmp, '.agents/rules/design.md');
+    const modern = fs.readFileSync(file, 'utf8');
+    const body = modern.slice(modern.indexOf('\n') + 1, modern.lastIndexOf(BLOCK_END));
+    const old = body.replace(/- Model routing:[^\n]+/, '- Senior Model Cascade: Scaffolding and styling begin with eco-tier models, escalating only if visual/layout tests fail.');
+    fs.writeFileSync(file, old + 'User addition\n');
+    setupProject({ cwd: tmp, agents: ['codex'] });
+    expect(fs.readFileSync(file, 'utf8')).toBe(old + 'User addition\n');
+    fs.writeFileSync(file, old);
+    setupProject({ cwd: tmp, agents: ['codex'] });
+    expect(fs.readFileSync(file, 'utf8')).toContain('handoff overhead');
+    expect(fs.readFileSync(file, 'utf8')).not.toContain('eco-tier');
+    expect(fs.existsSync(`${file}.helen-backup`)).toBe(true);
+  });
+
+  it('uninstalls owned files while preserving edited and unowned skill contents', () => {
+    setupProject({ cwd: tmp, agents: ['codex'], preset: 'efficient' });
+    const custom = path.join(tmp, '.agents/skills/helen-personal');
+    fs.mkdirSync(custom);
+    fs.writeFileSync(path.join(custom, 'SKILL.md'), 'Personal instructions');
+    const emptyPersonal = path.join(tmp, '.agents/skills/helen-personal-empty');
+    fs.mkdirSync(emptyPersonal);
+    const edited = path.join(tmp, '.agents/skills/helen-resume/SKILL.md');
+    fs.appendFileSync(edited, '\nMy customization');
+    const extra = path.join(tmp, '.agents/skills/helen-apply/notes.txt');
+    fs.writeFileSync(extra, 'Personal notes');
+    const result = uninstallProject({ cwd: tmp });
+    expect(fs.readFileSync(path.join(custom, 'SKILL.md'), 'utf8')).toBe('Personal instructions');
+    expect(fs.existsSync(emptyPersonal)).toBe(true);
+    expect(fs.readFileSync(edited, 'utf8')).toContain('My customization');
+    expect(fs.readFileSync(extra, 'utf8')).toBe('Personal notes');
+    expect(fs.existsSync(path.join(tmp, '.agents/skills/helen-status'))).toBe(false);
+    expect(result.preservedSkills).toContain(path.join('.agents/skills/helen-personal'));
+    expect(fs.existsSync(path.join(tmp, '.codex/config.toml'))).toBe(true);
+  });
+
+  it('uninstalls exact legacy preset helper skills without a manifest', () => {
+    const helper = listPresetSkills().find(skill => skill.name === 'helen-status')!;
+    const file = path.join(tmp, '.agents', 'skills', helper.name, 'SKILL.md');
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, helper.files['SKILL.md']);
+
+    const result = uninstallProject({ cwd: tmp });
+    expect(fs.existsSync(file)).toBe(false);
+    expect(fs.existsSync(path.dirname(file))).toBe(false);
+    expect(result.removedSkills).toContain(path.join('.agents', 'skills', helper.name));
+    expect(result.preservedSkills).not.toContain(path.join('.agents', 'skills', helper.name));
+  });
+
+  it('prunes empty legacy skill directories, preserves nested notes, and simulates the same result in dry-run', () => {
+    const design = listSkills().find(skill => skill.name === 'helen-design')!;
+    const skillDir = path.join(tmp, '.agents', 'skills', design.name);
+    const cleanSkillDir = path.join(tmp, '.claude', 'skills', design.name);
+    const generatedFiles = Object.entries(skillFiles(design)).map(([relative, content]) => {
+      const file = path.join(skillDir, relative);
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, content);
+      const cleanFile = path.join(cleanSkillDir, relative);
+      fs.mkdirSync(path.dirname(cleanFile), { recursive: true });
+      fs.writeFileSync(cleanFile, content);
+      return file;
+    });
+    const note = path.join(skillDir, 'references', 'notes.md');
+    fs.writeFileSync(note, 'Keep this personal note');
+    const relativeSkillDir = path.join('.agents', 'skills', design.name);
+
+    const preview = uninstallProject({ cwd: tmp, dryRun: true });
+    expect(preview.removedSkills).toContain(path.join('.claude', 'skills', design.name));
+    expect(preview.preservedSkills).not.toContain(path.join('.claude', 'skills', design.name));
+    expect(fs.existsSync(cleanSkillDir)).toBe(true);
+    expect(preview.removedSkills).not.toContain(relativeSkillDir);
+    expect(preview.preservedSkills).toContain(relativeSkillDir);
+    for (const file of generatedFiles) expect(fs.existsSync(file)).toBe(true);
+    expect(fs.existsSync(note)).toBe(true);
+
+    const result = uninstallProject({ cwd: tmp });
+    expect(fs.existsSync(cleanSkillDir)).toBe(false);
+    for (const file of generatedFiles) expect(fs.existsSync(file)).toBe(false);
+    expect(fs.readFileSync(note, 'utf8')).toBe('Keep this personal note');
+    expect(fs.existsSync(skillDir)).toBe(true);
+    expect(result.removedSkills).not.toContain(relativeSkillDir);
+    expect(result.preservedSkills).toContain(relativeSkillDir);
   });
 });

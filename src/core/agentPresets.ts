@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isSafeProjectPath, writeFileSafe } from './fs.js';
+import { recordOwnedSkillFiles, validateSkillOwnership } from './skillOwnership.js';
 
 export type AgentPreset = 'codex' | 'claude' | 'antigravity';
 
@@ -62,6 +63,11 @@ function skillContent(name: (typeof HELPER_NAMES)[number]): string {
           name === 'helen-done' ? '`helen_done`' : 'no MCP tool is available for this action';
   const toolInstruction = name === 'helen-check' ? 'This action requires terminal access; HELEN does not expose an MCP check tool.' : `When using HELEN MCP, pass the project directory explicitly as cwd to ${mcpTool}.`;
   return `---\nname: ${name}\ndescription: ${JSON.stringify(description)}\n---\n\n${instruction}\n\n${toolInstruction} For CLI execution, use a process argument array (never a shell command): [${JSON.stringify(process.execPath)}, ${JSON.stringify(CLI_PATH)}, ...${fallbackArgs}]. Keep each absolute path as its own argument even when it contains spaces, and set the process working directory to the same project directory. Do not claim a command ran unless its result is available. Keep the user’s stated scope and acceptance criteria intact.\n`;
+}
+
+/** Opt-in continuity skills, also used by inventory and explicit updates. */
+export function listPresetSkills(): Array<{ name: string; files: Record<string, string> }> {
+  return HELPER_NAMES.map(name => ({ name, files: { 'SKILL.md': skillContent(name) } }));
 }
 
 function relative(cwd: string, absolute: string): string {
@@ -133,6 +139,7 @@ function tomlConfigPlan(cwd: string, filePath: string, result: InstallAgentPrese
 export function installAgentPreset(options: InstallAgentPresetOptions): InstallAgentPresetResult {
   const cwd = path.resolve(options.cwd);
   if (!fs.existsSync(cwd) || !fs.statSync(cwd).isDirectory()) throw new Error(`Project directory does not exist: ${cwd}`);
+  validateSkillOwnership(cwd);
   const result: InstallAgentPresetResult = { created: [], skipped: [], notices: [] };
   const agents = [...new Set(options.agents)];
   const skillRoots = new Set<string>();
@@ -159,11 +166,14 @@ export function installAgentPreset(options: InstallAgentPresetOptions): InstallA
     planned.push({ ...config, config: true });
   }
 
+  const ownedFiles: Record<string, string> = {};
   for (const item of planned) {
     const status = writeFileSafe(item.path, item.content, { dryRun: options.dryRun, force: item.config, root: cwd });
     const target = relative(cwd, item.path);
     if (status === 'created' || status === 'overwritten') result.created.push(target);
     else if (status === 'skipped') result.skipped.push(target);
+    if (!item.config && status !== 'skipped') ownedFiles[target] = item.content;
   }
+  recordOwnedSkillFiles(cwd, ownedFiles, options.dryRun);
   return result;
 }

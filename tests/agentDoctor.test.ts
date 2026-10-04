@@ -56,7 +56,8 @@ describe('HELEN doctor and update', () => {
     expect(findInlineSecrets('{"env": {"GITHUB_PERSONAL_ACCESS_TOKEN": "${input:github_token}"}}')).toEqual([]);
     expect(findInlineSecrets('{"url": "https://mcp.vercel.com/some/long/path"}')).toEqual([]);
 
-    fs.writeFileSync(path.join(tmp, '.mcp.json'), '{"mcpServers":{"x":{"env":{"API_KEY":"sk-live-1234567890abcdef"}}}}');
+    const fixtureKey = 'sk-live-' + '1234567890abcdef';
+    fs.writeFileSync(path.join(tmp, '.mcp.json'), JSON.stringify({ mcpServers: { x: { env: { API_KEY: fixtureKey } } } }));
     expect(labels(runAgentDoctor(tmp))).toContain('error MCP config .mcp.json');
   });
 
@@ -66,6 +67,25 @@ describe('HELEN doctor and update', () => {
     const checks = labels(runAgentDoctor(tmp));
     expect(checks).toContain('ok Tracked plan');
     expect(checks).toContain('warn .gitignore');
+  });
+
+  it('scans the Antigravity preset configuration without exposing credential values', () => {
+    fs.mkdirSync(path.join(tmp, '.agents'));
+    const fakeValue = 'FAKE_ONLY_NOT_A_REAL_CREDENTIAL';
+    fs.writeFileSync(path.join(tmp, '.agents/mcp_config.json'), JSON.stringify({ mcpServers: { x: { env: { API_KEY: fakeValue } } } }));
+    const checks = runAgentDoctor(tmp);
+    expect(labels(checks)).toContain('error MCP config .agents/mcp_config.json');
+    expect(JSON.stringify(checks)).not.toContain(fakeValue);
+  });
+
+  it('includes continuity helpers in installed inventory and explicit updates', () => {
+    setupProject({ cwd: tmp, agents: ['codex'], preset: 'efficient' });
+    const file = path.join(tmp, '.agents/skills/helen-resume/SKILL.md');
+    expect(installedHelenSkills(tmp).some(skill => skill.name === 'helen-resume')).toBe(true);
+    fs.appendFileSync(file, '\nfixture edit');
+    expect(installedHelenSkills(tmp).find(skill => skill.name === 'helen-resume')?.outdated).toBe(true);
+    updateAgentSetup(tmp);
+    expect(installedHelenSkills(tmp).find(skill => skill.name === 'helen-resume')?.outdated).toBe(false);
   });
 
   it('reports corrupt tracking without overwriting it or losing other diagnostics', () => {

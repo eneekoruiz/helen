@@ -5,9 +5,11 @@ import type { DoctorCheck } from './doctor.js';
 import { readProgress, currentIndex } from './progress.js';
 import { BLOCK_END, BLOCK_START, helenBlock, upsertBlock } from './setup.js';
 import { SKILL_TARGETS, listFlowSkills, listSkills, type SkillInfo } from './skills.js';
+import { listPresetSkills } from './agentPresets.js';
+import { recordOwnedSkillFiles, validateSkillOwnership } from './skillOwnership.js';
 
 /** Project-level MCP configuration files of common agents. */
-export const MCP_CONFIG_FILES = ['.mcp.json', '.cursor/mcp.json', '.vscode/mcp.json', '.codex/config.toml', '.gemini/settings.json', '.agent/mcp_config.json'];
+export const MCP_CONFIG_FILES = ['.mcp.json', '.cursor/mcp.json', '.vscode/mcp.json', '.codex/config.toml', '.gemini/settings.json', '.agents/mcp_config.json', '.agent/mcp_config.json'];
 
 const SECRET_KEY = /(token|secret|password|api[_-]?key|authorization)/i;
 
@@ -30,7 +32,7 @@ export interface InstalledSkill {
 
 /** HELEN skills (bundled and flow skills) installed in the project, and whether they differ from this HELEN version. */
 export function installedHelenSkills(cwd: string): InstalledSkill[] {
-  const bundled = new Map([...listSkills(), ...listFlowSkills()].map(skill => [skill.name, skill]));
+  const bundled = new Map([...listSkills(), ...listFlowSkills(), ...listPresetSkills()].map(skill => [skill.name, skill]));
   const found: InstalledSkill[] = [];
   for (const dir of skillDirs(cwd)) {
     for (const entry of fs.readdirSync(path.join(cwd, dir), { withFileTypes: true })) {
@@ -132,16 +134,23 @@ export interface UpdateResult {
 
 /** Refresh installed HELEN skills and managed instruction blocks to this HELEN version. Files are backed up before overwrite. */
 export function updateAgentSetup(cwd: string, dryRun = false): UpdateResult {
-  const bundled = new Map([...listSkills(), ...listFlowSkills()].map(skill => [skill.name, skill]));
+  validateSkillOwnership(cwd);
+  const bundled = new Map([...listSkills(), ...listFlowSkills(), ...listPresetSkills()].map(skill => [skill.name, skill]));
   const result: UpdateResult = { skills: [], instructionFiles: [] };
+  const owned: Record<string, string> = {};
 
   for (const skill of installedHelenSkills(cwd).filter(item => item.outdated)) {
+    let updated = false;
     for (const [rel, content] of Object.entries(bundledFiles(bundled.get(skill.name)!))) {
       const target = path.join(cwd, skill.dir, skill.name, rel);
       if (fs.existsSync(target) && fs.readFileSync(target, 'utf-8') === content) continue;
-      writeFileSafe(target, content, { dryRun, force: true });
+      const status = writeFileSafe(target, content, { dryRun, force: true, root: cwd });
+      if (status !== 'skipped') {
+        owned[path.relative(cwd, target).split(path.sep).join('/')] = content;
+        updated = true;
+      }
     }
-    result.skills.push(`${skill.dir}/${skill.name}`);
+    if (updated) result.skills.push(`${skill.dir}/${skill.name}`);
   }
 
   for (const file of ['AGENTS.md', 'CLAUDE.md']) {
@@ -149,8 +158,8 @@ export function updateAgentSetup(cwd: string, dryRun = false): UpdateResult {
     if (!fs.existsSync(target)) continue;
     const content = fs.readFileSync(target, 'utf-8');
     if (!content.includes(BLOCK_START) || !content.includes(BLOCK_END) || content.includes(helenBlock())) continue;
-    writeFileSafe(target, upsertBlock(content, helenBlock()), { dryRun, force: true });
-    result.instructionFiles.push(file);
+    if (writeFileSafe(target, upsertBlock(content, helenBlock()), { dryRun, force: true, root: cwd }) !== 'skipped') result.instructionFiles.push(file);
   }
+  recordOwnedSkillFiles(cwd, owned, dryRun);
   return result;
 }

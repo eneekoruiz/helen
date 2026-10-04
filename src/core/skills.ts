@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { writeFileSafe } from './fs.js';
 import { listPromptEntries, readPromptEntry } from './prompts.js';
 import { parseFrontmatter } from './frontmatter.js';
+import { recordOwnedSkillFiles, validateSkillOwnership } from './skillOwnership.js';
 
 /**
  * Skills are folders containing a SKILL.md. Known targets map an agent to the
@@ -99,7 +100,7 @@ function walkFiles(dir: string): string[] {
   });
 }
 
-function skillFiles(skill: SkillInfo): Record<string, string> {
+export function skillFiles(skill: SkillInfo): Record<string, string> {
   if (skill.files) return skill.files;
   const dir = skill.dir!;
   return Object.fromEntries(walkFiles(dir).map(file => [path.relative(dir, file), fs.readFileSync(file, 'utf-8')]));
@@ -118,6 +119,7 @@ export function resolveTargetDir(target: SkillTarget, customDir?: string): strin
 }
 
 export function installSkills(options: InstallSkillsOptions, root: string = SKILLS_ROOT): InstallSkillsResult {
+  validateSkillOwnership(options.cwd);
   const available = [...listSkills(root), ...(options.flows ? listFlowSkills() : [])];
   const selected = options.skills?.length
     ? options.skills.map(name => {
@@ -128,6 +130,7 @@ export function installSkills(options: InstallSkillsOptions, root: string = SKIL
     : available;
 
   const result: InstallSkillsResult = { created: [], overwritten: [], skipped: [] };
+  const ownedFiles: Record<string, string> = {};
 
   // Several agents can share a folder (codex and antigravity): write each folder once.
   const targetDirs = new Set(options.targets.map(target => resolveTargetDir(target, options.customDir)));
@@ -138,9 +141,12 @@ export function installSkills(options: InstallSkillsOptions, root: string = SKIL
         const destination = path.join(options.cwd, targetDir, skill.name, relative);
         const outcome = writeFileSafe(destination, content, { dryRun: options.dryRun, force: options.force, root: options.cwd });
         result[outcome].push(path.relative(options.cwd, destination));
+        if (outcome !== 'skipped') ownedFiles[path.relative(options.cwd, destination).split(path.sep).join('/')] = content;
       }
     }
   }
+
+  recordOwnedSkillFiles(options.cwd, ownedFiles, options.dryRun);
 
   return result;
 }

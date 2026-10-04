@@ -70,7 +70,9 @@ Cases may optionally define `checks`: literal `includes`/`excludes` assertions w
 
 Live runs require an explicit `--max-calls` budget and an authenticated Claude CLI supporting `claude auth status`. Local preflight prevents repeated missing-provider failures. The first baseline call gates concurrency so an initial quota refusal stops after one invocation. Authenticated status alone does not establish available quota.
 
-`--force` reruns cached cases; model and content fingerprints prevent stale reuse. `--force-trigger` opts into a separately reported forced-skill condition; default runs avoid that extra invocation. Previous result versions are archived before replacement. Quota/authentication blockers stop retries and new calls.
+Compatible model and content fingerprints let interrupted cases resume with all prior observations retained. `--runs N` targets N valid pairs: only missing pairs are attempted, and failed attempts remain visible. `--force` reruns selected cached cases and archives displaced evidence even when the fingerprints match. `--force-trigger` opts into a separately reported forced-skill condition; default runs avoid that extra invocation. Quota/authentication blockers stop retries and new calls.
+
+One live runner owns the result directory at a time. Overlapping live invocations fail before authentication or provider calls, preventing duplicate spend and result replacement. Dry-run and report-only remain available. After an unexpected process termination, confirm that the PID reported by the lock is no longer running before removing `evals/results/.run-skill-evals.lock` and resuming.
 
 The 2026-10-04 pilot encountered a provider weekly-limit refusal: zero valid pairs. Effectiveness and confusion rates remain unmeasured; do not retry until provider access changes.
 

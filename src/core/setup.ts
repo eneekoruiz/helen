@@ -1,10 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { writeFileSafe, isSafeProjectPath } from './fs.js';
-import { installSkills, type InstallSkillsResult, type SkillTarget } from './skills.js';
+import { installSkills, listSkills, listFlowSkills, skillFiles, type InstallSkillsResult, type SkillTarget } from './skills.js';
 import { EXECUTION_CONTRACT } from './executionProtocol.js';
 import { createHash } from 'node:crypto';
-import { installAgentPreset, type InstallAgentPresetResult } from './agentPresets.js';
+import { installAgentPreset, listPresetSkills, type InstallAgentPresetResult } from './agentPresets.js';
+import { removeOwnedSkillFiles, validateSkillOwnership } from './skillOwnership.js';
+import { writeAtomicFile } from './operations.js';
 
 export const BLOCK_START = '<!-- HELEN:START (managed by helen setup, edit outside this block) -->';
 export const BLOCK_END = '<!-- HELEN:END -->';
@@ -82,9 +84,14 @@ export function installAntigravityRules(cwd: string, dryRun = false): string[] {
     // Migrate only the exact previously generated quality file; preserve custom text.
     const legacyQuality = file === 'quality.md' && existing !== null
       && createHash('sha256').update(existing.replaceAll('\r\n', '\n')).digest('hex') === '1d5265b6bc64cc6173c2072ea7fb95b815555b3033bd458d521dc554d2420ce5';
-    if (existing === null || existing.includes(BLOCK_START) || legacyQuality) {
+    const legacyDesignContent = file === 'design.md' ? content.replace(
+      '- Model routing: choose the cheapest available capable model when supported; keep the current agent when handoff overhead outweighs its benefit. Escalate on evidenced failure or capability limits; never lower reasoning effort automatically.',
+      '- Senior Model Cascade: Scaffolding and styling begin with eco-tier models, escalating only if visual/layout tests fail.',
+    ) : null;
+    const legacyDesign = legacyDesignContent !== null && existing?.replaceAll('\r\n', '\n') === legacyDesignContent;
+    if (existing === null || existing.includes(BLOCK_START) || legacyQuality || legacyDesign) {
       const block = `${BLOCK_START}\n${content.trimEnd()}\n${BLOCK_END}`;
-      const updated = upsertBlock(legacyQuality ? null : existing, block);
+      const updated = upsertBlock(legacyQuality || legacyDesign ? null : existing, block);
       if (updated !== existing && writeFileSafe(target, updated, { dryRun, force: true, root: cwd }) !== 'skipped') {
         created.push(`.agents/rules/${file}`);
       }
@@ -130,12 +137,27 @@ export interface UninstallResult {
   cleanedInstructions: string[];
   removedSkills: string[];
   cleanedRules?: string[];
+  preservedSkills?: string[];
 }
 
 export function uninstallProject(options: { cwd: string; dryRun?: boolean }): UninstallResult {
+  validateSkillOwnership(options.cwd);
+  const owned = removeOwnedSkillFiles(options.cwd, options.dryRun);
   const cleanedInstructions: string[] = [];
   const removedSkills: string[] = [];
   const cleanedRules: string[] = [];
+  const preservedSkills = new Set<string>();
+  const candidateDirectories = new Set<string>();
+  const skillDirectory = (file: string): string => {
+    const parts = path.normalize(file).split(path.sep);
+    let index = -1;
+    for (let i = 0; i < parts.length - 1; i++) if (parts[i].startsWith('helen-')) index = i;
+    return parts.slice(0, index + 1).join(path.sep);
+  };
+  for (const file of owned.removed) candidateDirectories.add(skillDirectory(file));
+  for (const file of owned.preserved) preservedSkills.add(skillDirectory(file));
+  const preservedOwnedFiles = new Set(owned.preserved.map(file => path.normalize(file)));
+  const plannedRemovedFiles = new Set(owned.removed.map(file => path.normalize(file)));
 
   for (const file of ['AGENTS.md', 'CLAUDE.md']) {
     const full = path.join(options.cwd, file);
@@ -147,7 +169,7 @@ export function uninstallProject(options: { cwd: string; dryRun?: boolean }): Un
         if (!updated.trim()) {
           fs.unlinkSync(full);
         } else {
-          fs.writeFileSync(full, updated, 'utf-8');
+          writeAtomicFile(full, updated);
         }
       }
       cleanedInstructions.push(file);
@@ -166,7 +188,7 @@ export function uninstallProject(options: { cwd: string; dryRun?: boolean }): Un
           if (!updated.trim()) {
             fs.unlinkSync(full);
           } else {
-            fs.writeFileSync(full, updated, 'utf-8');
+            writeAtomicFile(full, updated);
           }
         }
         cleanedRules.push(`.agents/rules/${file}`);
@@ -184,24 +206,84 @@ export function uninstallProject(options: { cwd: string; dryRun?: boolean }): Un
     path.join(options.cwd, '.agents', 'skills'),
   ];
 
+  const knownSkills = [...listSkills(), ...listFlowSkills(), ...listPresetSkills()];
   for (const dir of skillDirs) {
     if (fs.existsSync(dir) && isSafeProjectPath(options.cwd, dir)) {
       for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
         if (entry.isDirectory() && entry.name.startsWith('helen-')) {
           const skillPath = path.join(dir, entry.name);
-          if (!options.dryRun) {
-            fs.rmSync(skillPath, { recursive: true, force: true });
+          if (!isSafeProjectPath(options.cwd, skillPath)) continue;
+          // Older installations have no manifest: recognize exact bundled bytes,
+          // never infer ownership from a folder name or delete a whole directory.
+          const known = knownSkills.find(skill => skill.name === entry.name);
+          let removed = false;
+          if (known) for (const [relative, content] of Object.entries(skillFiles(known))) {
+            const full = path.join(skillPath, relative);
+            const projectRelative = path.relative(options.cwd, full);
+            if (preservedOwnedFiles.has(projectRelative) || !isSafeProjectPath(options.cwd, full) || !fs.existsSync(full) || !fs.lstatSync(full).isFile()) continue;
+            if (fs.readFileSync(full, 'utf8') !== content) continue;
+            if (!options.dryRun) fs.unlinkSync(full);
+            plannedRemovedFiles.add(path.normalize(projectRelative));
+            removed = true;
           }
-          removedSkills.push(path.relative(options.cwd, skillPath));
+          const relativeSkillPath = path.relative(options.cwd, skillPath);
+          if (!removed && !candidateDirectories.has(relativeSkillPath)) {
+            preservedSkills.add(relativeSkillPath);
+            continue;
+          }
+          if (removed) candidateDirectories.add(relativeSkillPath);
+          const inspection = inspectSkillTree(options.cwd, skillPath, plannedRemovedFiles);
+          if (!options.dryRun) removeEmptyDirectories(options.cwd, inspection.emptyDirectories);
+          if (!inspection.hasRemaining) candidateDirectories.add(relativeSkillPath);
+          else preservedSkills.add(relativeSkillPath);
         }
       }
     }
   }
 
-  return { cleanedInstructions, removedSkills, cleanedRules };
+  for (const relative of candidateDirectories) {
+    const full = path.join(options.cwd, relative);
+    if (!fs.existsSync(full) || !inspectSkillTree(options.cwd, full, plannedRemovedFiles).hasRemaining) removedSkills.push(relative);
+  }
+  return { cleanedInstructions, removedSkills, cleanedRules, preservedSkills: [...preservedSkills] };
+}
+
+function inspectSkillTree(cwd: string, directory: string, plannedRemovedFiles: Set<string>): { hasRemaining: boolean; emptyDirectories: string[] } {
+  const emptyDirectories: string[] = [];
+  const inspect = (current: string): boolean => {
+    let stat: fs.Stats;
+    try { stat = fs.lstatSync(current); } catch { return true; }
+    if (stat.isSymbolicLink() || !stat.isDirectory() || !isSafeProjectPath(cwd, current)) return true;
+    let remaining = false;
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const child = path.join(current, entry.name);
+      let childStat: fs.Stats;
+      try { childStat = fs.lstatSync(child); } catch { remaining = true; continue; }
+      if (childStat.isSymbolicLink()) { remaining = true; continue; }
+      if (childStat.isDirectory()) {
+        if (inspect(child)) remaining = true;
+      } else if (!plannedRemovedFiles.has(path.normalize(path.relative(cwd, child)))) {
+        remaining = true;
+      }
+    }
+    if (!remaining) emptyDirectories.push(current);
+    return remaining;
+  };
+  return { hasRemaining: inspect(directory), emptyDirectories };
+}
+
+function removeEmptyDirectories(cwd: string, directories: string[]): void {
+  for (const directory of directories.sort((a, b) => b.length - a.length)) {
+    try {
+      const stat = fs.lstatSync(directory);
+      if (!stat.isDirectory() || stat.isSymbolicLink() || !isSafeProjectPath(cwd, directory) || fs.readdirSync(directory).length !== 0) continue;
+      fs.rmdirSync(directory);
+    } catch { /* preserve directories that changed or cannot be removed safely */ }
+  }
 }
 
 export function setupProject(options: SetupOptions & { global?: boolean }): SetupResult {
+  validateSkillOwnership(options.cwd);
   if (options.preset && options.preset !== 'efficient') throw new Error('Unknown preset. Valid: efficient');
   if (options.preset && options.global) throw new Error('The efficient preset is project-only; omit --global.');
   const preset = options.preset ? installAgentPreset({ cwd: options.cwd, agents: options.agents, dryRun: options.dryRun }) : undefined;

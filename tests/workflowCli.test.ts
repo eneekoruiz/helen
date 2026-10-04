@@ -32,6 +32,28 @@ describe('Workflow CLI acceptance', () => {
   });
   afterEach(() => { fs.rmSync(cwd, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }); });
 
+  it('fails safely on malformed ownership and preserves personal skills on uninstall', () => {
+    expect(run(cwd, ['setup', '--agents', 'codex', '--preset', 'efficient']).status).toBe(0);
+    const personal = path.join(cwd, '.agents/skills/helen-personal/SKILL.md');
+    fs.mkdirSync(path.dirname(personal), { recursive: true });
+    fs.writeFileSync(personal, 'My personal skill');
+    const manifest = path.join(cwd, '.helen/skill-files.json');
+    const validManifest = fs.readFileSync(manifest, 'utf8');
+    const instructions = fs.readFileSync(path.join(cwd, 'AGENTS.md'), 'utf8');
+    fs.writeFileSync(manifest, '{bad');
+    expect(run(cwd, ['uninstall']).status).toBe(1);
+    expect(fs.readFileSync(path.join(cwd, 'AGENTS.md'), 'utf8')).toBe(instructions);
+    fs.writeFileSync(manifest, validManifest);
+    expect(run(cwd, ['uninstall', '--dry-run']).status).toBe(0);
+    expect(fs.readFileSync(manifest, 'utf8')).toBe(validManifest);
+    expect(fs.existsSync(path.join(cwd, '.agents/skills/helen-status/SKILL.md'))).toBe(true);
+    const removed = run(cwd, ['uninstall']);
+    expect(removed.status).toBe(0);
+    expect(removed.body.data.preservedSkills).toContain(path.join('.agents', 'skills', 'helen-personal'));
+    expect(fs.readFileSync(personal, 'utf8')).toBe('My personal skill');
+    expect(fs.existsSync(path.join(cwd, '.agents/skills/helen-status/SKILL.md'))).toBe(false);
+  }, 120000);
+
   it('resumes durable decisions and exposes stale evidence after source changes', () => {
     const apply = run(cwd, ['apply', 'quality', '--track', '--brief', '--profile', 'quick']);
     expect(apply.status).toBe(0);

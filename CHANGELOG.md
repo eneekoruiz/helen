@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Preserve personal and modified skills during uninstall using per-file ownership hashes and conservative legacy cleanup.
+- Resume evaluation cases without discarding completed observations; archive evidence before explicit replacement.
+- Generate self-contained React testing configuration, including automatic JSX for Next-style TypeScript projects.
+- Diagnose current Antigravity MCP configuration, include continuity helpers in skill updates, and migrate only exact legacy design rules.
+- Add regressions for these workflows and atomic uninstall updates that preserve hardlinked personal files.
+- Recognize exact legacy continuity helpers, prune verified empty skill directories, and retain unowned empty directories and nested personal notes.
+- Prevent overlapping live evaluation runs from duplicating provider calls or overwriting evidence; align this repository's commit hook with staged-blob protection.
 - Add the optional project `setup --preset efficient` with additive MCP configuration and six native tracking skills for Codex, Claude Code and Antigravity.
 - Align setup and documentation with optional cost-aware delegation, verifiable acceptance and latency-conscious execution.
 - Clarify catalog versus installed skills, native question-based reprompting and partial versus full verification gates.
