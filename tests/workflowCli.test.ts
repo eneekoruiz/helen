@@ -60,4 +60,30 @@ describe('Workflow CLI acceptance', () => {
     expect(invalid.status).toBe(1);
     expect(invalid.body.errors.join(' ')).toContain('Choose helen, signature, or off');
   });
+
+  it('rejects ambiguous custom prompt names and accepts an explicit mixed-case id', () => {
+    for (const folder of ['first', 'second']) {
+      const dir = path.join(cwd, '.helen', 'prompts', folder);
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, 'APPLY-Shared.md'), '# Custom prompt\n');
+    }
+    const ambiguous = run(cwd, ['prompts', 'show', 'apply-shared']);
+    expect(ambiguous.status).toBe(1);
+    expect(ambiguous.body.errors.join(' ')).toMatch(/ambiguous.*full id/i);
+    const explicit = run(cwd, ['prompts', 'show', 'USER/SECOND/APPLY-SHARED']);
+    expect(explicit.status).toBe(0);
+    expect(explicit.body.data.content).toContain('# Custom prompt');
+  });
+
+  it('uses the safe report writer through status --html', () => {
+    const original = path.join(cwd, 'original.html');
+    fs.writeFileSync(original, 'preserve original');
+    fs.mkdirSync(path.join(cwd, '.helen'));
+    fs.linkSync(original, path.join(cwd, '.helen', 'report.html'));
+    const result = run(cwd, ['status', '--html']);
+    expect(result.status).toBe(0);
+    expect(result.body.data.reportPath).toBe(path.join(cwd, '.helen', 'report.html'));
+    expect(fs.readFileSync(original, 'utf8')).toBe('preserve original');
+    expect(fs.readFileSync(result.body.data.reportPath, 'utf8')).toContain('HELEN Project Dashboard');
+  });
 });

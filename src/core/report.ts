@@ -7,6 +7,7 @@ import { detectPhase } from './apply.js';
 import { runDoctor } from './doctor.js';
 import { runAgentDoctor, installedHelenSkills } from './agentDoctor.js';
 import { isSafeProjectPath } from './fs.js';
+import { writeAtomicFile } from './operations.js';
 
 export interface HelenReportData {
   generatedAt: string;
@@ -86,7 +87,7 @@ export function generateReportData(cwd: string = process.cwd()): HelenReportData
       hasTypeScript: project.hasTypeScript,
     },
     phase: {
-      current: progress ? progress.goal : detected.phase,
+      current: progress ? progress.phase : detected.phase,
       evidence: detected.evidence,
       progressPercentage,
       goal: progress?.goal,
@@ -258,14 +259,16 @@ export function renderReportHtml(data: HelenReportData): string {
 
 export function writeReport(cwd: string = process.cwd()): { data: HelenReportData; filePath: string } {
   const filePath = path.join(cwd, '.helen', 'report.html');
-  if (!isSafeProjectPath(cwd, filePath)) throw new Error('Report file must remain inside the project directory');
+  if (!isSafeProjectPath(cwd, filePath) || (fs.existsSync(filePath) && !fs.lstatSync(filePath).isFile())) {
+    throw new Error('Report file must be a regular file inside the project directory');
+  }
   const data = generateReportData(cwd);
   const html = renderReportHtml(data);
   const helenDir = path.join(cwd, '.helen');
   if (!fs.existsSync(helenDir)) {
     fs.mkdirSync(helenDir, { recursive: true });
   }
-  fs.writeFileSync(filePath, html, 'utf-8');
+  writeAtomicFile(filePath, html);
   return { data, filePath };
 }
 

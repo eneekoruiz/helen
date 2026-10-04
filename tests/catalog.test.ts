@@ -59,4 +59,15 @@ describe('External skills catalog', () => {
       fs.rmSync(root, { recursive: true, force: true });
     }
   });
+
+  it('preserves the Apple HIG and Marketing Skills entries with focused install commands', () => {
+    const expected = ['apple-hig', 'marketingskills', 'seo-audit', 'schema-markup', 'site-architecture', 'social-content', 'sales-enablement'];
+    for (const id of expected) expect(getCatalogItem(id).id).toBe(id);
+
+    expect(getCatalogItem('apple-hig').source).toBe('https://github.com/Sunwood-ai-labs/design-with-apple-hig');
+    expect(getCatalogItem('schema-markup').install[0]).toContain('--skill schema');
+    expect(getCatalogItem('social-content').install[0]).toContain('--skill social');
+    expect(getCatalogItem('marketingskills').install[0]).toContain('--list');
+    expect(getCatalogItem('marketingskills').install[0]).not.toBe('npx skills add coreyhaines31/marketingskills');
+  });
 });

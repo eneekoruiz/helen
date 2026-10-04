@@ -30,7 +30,7 @@ Find useful improvements across repository functionality, visual interaction, co
    - Performance: measurable bottlenecks, queries, bundles, caching and resource cost.
    - Verification: invariant assertions, adversarial inputs, interruptions and supported OS behavior.
    - Developer experience: setup, context handoff, diagnostics, CLI streams and documentation accuracy.
-3. Delegate independent domain sweeps to focused specialists with relevant context and ownership; integrate their evidence. Preserve cheapest model cascade.
+3. Choose primary-agent domain sweeps or focused specialists according to expected expertise and total delegation overhead; when justified, provide compact context and ownership, then integrate evidence. Preserve cost-aware model routing.
 4. Run locally reproducible project and CI checks. For affected UI, obtain Playwright Chromium evidence at 375, 768 and 1440 px; mark unavailable checks unverified.
 5. After initial findings or completed fixes, explicitly ask what additional evidence-backed improvement would materially improve the authorized outcome. Inspect adjacent consumers and overlooked failure paths. Repeat discovery without an arbitrary iteration cap.
 6. Apply actionable findings when remediation is authorized, then verify and rediscover. Otherwise stay read-only and report findings. Finish after acceptance is met and fresh discovery finds no further actionable improvement within scope, or disclose a concrete blocker.

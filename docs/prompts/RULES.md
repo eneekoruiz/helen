@@ -31,20 +31,26 @@ Apply actionable improvements within original authorization, then re-verify thei
 
 ## Verification and evidence
 
-- Run repository build, typecheck, lint, tests and locally reproducible CI commands. Report each as passed, failed, not run or not applicable with command and result. Local checks do not prove a hosted OS matrix passed.
-- For affected UI, run Playwright with Chromium at 375, 768 and 1440 px; check interactions, responsive layout, reduced motion and browser errors. If unavailable, state the blocker and leave those criteria unverified.
+- During fixes, run focused regressions and reuse unchanged passing evidence; before completion run repository build, typecheck, lint, tests and locally reproducible CI commands. Report each as passed, failed, not run or not applicable with command and result. Local checks do not prove a hosted OS matrix passed.
+- For affected UI, run Chromium via Playwright or an available direct browser MCP at 375, 768 and 1440 px; check interactions, responsive layout, reduced motion and browser errors. If unavailable, state the blocker and leave those criteria unverified.
 - Never delete or weaken checks to manufacture success. Add regression coverage for meaningful defects and invariants, not assertions that merely mirror implementation.
 - Report observable outcomes and residual risks. No perfection scores, guaranteed zero defects or certification from incomplete evidence.
 
 ## Cheapest model cascade
 
-Start with the cheapest available model when the environment supports selection. Verify against acceptance criteria and deterministic checks; escalate to the next available tier only when verified failure or unresolved reasoning prevents progress. Passing old tests alone is insufficient if acceptance criteria remain unmet. If model selection is unavailable, keep the current model and state the limitation; do not pretend to switch. Do not change the user's cost preference or claim fixed savings.
+Choose the cheapest available model capable of the task when the environment supports selection. Verify against acceptance criteria and deterministic checks; escalate only when evidenced failure or a demonstrated capability limit warrants it. Passing old tests alone is insufficient if acceptance criteria remain unmet. If the primary model cannot be changed, keep it when finishing in its existing context is expected to cost less than handing off. A cheaper worker is an option only when its total cost justifies the transfer. Do not pretend to switch unavailable models or claim fixed savings.
 
 ## Specialized agents and token economy
 
-Delegate independent domain work to focused specialists when available: contracts/backend, UI/accessibility, security, QA/recovery or documentation. Give each only relevant files, acceptance criteria, constraints and an explicit ownership boundary. Reuse artifacts and compact summaries instead of cloning the whole conversation. Parallelize independent work; integrate and verify combined changes. If agents are unavailable, execute the same focused passes sequentially.
+Use one agent for small cohesive tasks. Delegate only when specialist expertise, smaller context, independent work or separate validation is expected to improve acceptance or reduce total cost after context transfer, duplicated inputs, coordination, integration, verification and retries. When justified, give each only relevant files, acceptance criteria, constraints and exclusive ownership. Reuse artifacts and compact summaries instead of cloning the conversation. Parallelize independent work only when useful; integrate and verify combined changes. If agents are unavailable or their overhead adds no value, execute focused passes in the primary agent.
 
 Write technical instructions in concise English and answer in the user's language. English is a convention, not a guaranteed token saving. Measure input/output tokens, latency, retries and cost with the actual provider before claiming savings. Read shared rules once, reuse context, batch independent reads, avoid polling and redundant output, and rerun broad checks only when changes or unresolved risks justify it.
+
+## Fast verified execution
+
+Minimize time to a verified result while preserving acceptance and required checks. Answer directly when supplied facts suffice; otherwise retrieve only missing evidence. Batch independent reads and checks, preserving dependencies and exclusive file ownership. Avoid repeated planning, polling, exhaustive irrelevant exploration and unchanged work. Keep updates useful and the final answer concise. Do not automatically lower reasoning effort or invent facts to finish sooner.
+
+Required verification and autonomous discovery remain binding. Reuse valid evidence only while its inputs and relevant assumptions remain unchanged. A fresh discovery pass inspects remaining evidence-backed gaps; it does not restart the entire audit without a reason.
 
 ## Prompt evaluation
 
@@ -53,3 +59,7 @@ Before tuning instructions, define task-specific success criteria, representativ
 ## Memory and tools
 
 Record consequential decisions, verification evidence and residual risks in existing project memory when authorized. Never print secrets. Third-party installations, account connections, paid calls and external publication require authorization when it is not already present; catalog references do not constitute that authorization.
+
+## Runtime-aware efficiency
+
+Use one agent for small cohesive tasks. Choose the cheapest available capable model when routing is supported; keep the current agent when finishing is cheaper than transferring context. Delegate only when expected expertise or context savings outweigh transfer, coordination, integration, verification and retries. Flash is optional when available and suitable. Keep shared instructions as a stable prefix and task facts after it; provider caching requires runtime support and measured cache hits. Prefer an available direct browser MCP. Use focused regressions during fixes and the full repository gate before completion. Never invent savings.

@@ -107,6 +107,15 @@ describe('HELEN MCP Server & Tools', () => {
     expect((await handleToolCall('helen_prompt_get', { limit: -1 })).isError).toBe(true);
   });
 
+  it('exports cache-ready instructions consistently and validates the option', async () => {
+    const result = await handleToolCall('helen_prompt_get', { promptId: 'audit-code-quality', cacheReady: true });
+    expect(result.isError).not.toBe(true);
+    expect(result.content[0].text.startsWith('**HELEN execution contract**')).toBe(true);
+    const compact = await handleToolCall('helen_prompt_get', { promptId: 'audit-code-quality', cacheReady: true, protocol: false });
+    expect(compact.content[0].text).not.toContain('HELEN execution contract');
+    expect((await handleToolCall('helen_prompt_get', { promptId: 'audit-code-quality', cacheReady: 'true' })).isError).toBe(true);
+  });
+
   it('preserves an active tracked plan when applying another goal', async () => {
     const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'helen-mcp-'));
     try {
@@ -179,5 +188,10 @@ describe('HELEN MCP Server & Tools', () => {
     expect(responses.length).toBe(3);
     expect(responses[2].id).toBe(3);
     expect(responses[2].result.content).toBeDefined();
+  });
+  it('tolerates explicit undefined optional arguments without failing schema validation', async () => {
+    const result = await handleToolCall('helen_status', { cwd: undefined });
+    expect(result.isError).toBeUndefined();
+    expect(result.content[0].text).toContain('tracked');
   });
 });

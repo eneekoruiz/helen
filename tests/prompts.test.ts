@@ -4,7 +4,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parseFrontmatter } from '../src/core/frontmatter.js';
 import { INDEX_END, INDEX_START, renderPhaseIndex, updatePhaseIndexes } from '../src/core/promptIndex.js';
-import { idFromRelativePath, listPromptEntries, readPrompt, resolvePromptEntry, searchPrompts } from '../src/core/prompts.js';
+import { idFromRelativePath, listPromptEntries, readPrompt, readPromptEntry, resolvePromptEntry, searchPrompts } from '../src/core/prompts.js';
 
 describe('Prompt library', () => {
   const entries = listPromptEntries();
@@ -75,6 +75,36 @@ describe('Prompt library', () => {
   it('derives ids from file names', () => {
     expect(idFromRelativePath('02-building/clean-code/APPLY-clean-code-pass-flow.md')).toBe('02-building/clean-code/apply-clean-code-pass-flow');
     expect(idFromRelativePath('x/README.md')).toBe('x/README');
+  });
+
+  it('requires a full id for ambiguous short names and aliases', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'helen-ambiguous-'));
+    try {
+      for (const phase of ['01-first', '02-second']) {
+        fs.mkdirSync(path.join(root, phase));
+        fs.writeFileSync(path.join(root, phase, 'APPLY-shared.md'), '---\naliases: [legacy-shared]\n---\n# Shared');
+      }
+      const candidates = listPromptEntries(root);
+      expect(() => resolvePromptEntry('apply-shared', root, candidates)).toThrow(/ambiguous.*full id/i);
+      expect(() => resolvePromptEntry('legacy-shared', root, candidates)).toThrow(/ambiguous.*full id/i);
+      expect(resolvePromptEntry('02-second/apply-shared', root, candidates).id).toBe('02-second/apply-shared');
+    } finally { fs.rmSync(root, { recursive: true, force: true }); }
+  });
+
+  it('resolves mixed-case custom full ids and prioritizes explicit ids over relative paths', () => {
+    const base = resolvePromptEntry('rules');
+    const custom = { ...base, id: 'user/Apply-MixedCase', relativePath: 'APPLY-MixedCase.md' };
+    expect(resolvePromptEntry('USER/APPLY-MIXEDCASE', undefined, [custom])).toBe(custom);
+    const shadow = { ...base, id: 'user/rules', relativePath: 'RULES.md' };
+    expect(resolvePromptEntry('rules', undefined, [shadow, base])).toBe(base);
+  });
+
+  it('keeps guides and master documents free of execution instructions in cache-ready exports', () => {
+    for (const id of ['rules', 'master', 'contract']) {
+      const entry = resolvePromptEntry(id);
+      const exported = readPromptEntry(entry, { cacheReady: true });
+      expect(exported).toBe(parseFrontmatter(readPromptEntry(entry, { protocol: false })).body);
+    }
   });
 
   it('fills placeholders with literal keys and values', () => {

@@ -103,6 +103,7 @@ export const HELEN_MCP_TOOLS: McpTool[] = [
         search: { type: 'string', description: 'Keywords to search prompts across title, tags, and description' },
         limit: { type: 'number', description: 'Maximum search results to return (default 5)' },
         protocol: { type: 'boolean', description: 'Include shared execution rules (default true); omit only if already loaded' },
+        cacheReady: { type: 'boolean', description: 'Put stable shared rules before task content; provider caching must be configured externally' },
       },
     },
   },
@@ -144,6 +145,7 @@ async function executeToolCall(name: string, args: Record<string, unknown>): Pro
         if (!(key in args)) throw new Error(`Missing required argument: ${key}`);
       }
       for (const [key, value] of Object.entries(args)) {
+        if (value === undefined) continue;
         const property = tool.inputSchema.properties[key];
         if (property && typeof value !== property.type) throw new Error(`Invalid argument ${key}: expected ${property.type}`);
       }
@@ -345,7 +347,7 @@ async function executeToolCall(name: string, args: Record<string, unknown>): Pro
 
       case 'helen_prompt_get': {
         if (args.promptId) {
-          const content = readPrompt(args.promptId as string, undefined, { protocol: args.protocol !== false });
+          const content = readPrompt(args.promptId as string, undefined, { protocol: args.protocol !== false, cacheReady: args.cacheReady === true });
           if (!content) {
             return {
               isError: true,

@@ -69,6 +69,10 @@ describe('helen apply', () => {
     const brief = formatBrief(plan);
     expect(brief).toContain('Use the HELEN repository');
     expect(brief).toContain('Do not install any external tool');
+    expect(brief.startsWith('**HELEN execution contract**')).toBe(true);
+    expect(brief).toContain('--no-protocol');
+    expect(brief).toContain('new specialist the shared contract');
+    expect(formatPlan(plan)).not.toContain('--no-protocol');
   });
 
   it('rejects an unknown goal with the list of valid ones', () => {

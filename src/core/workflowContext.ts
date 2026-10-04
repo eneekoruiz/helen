@@ -99,7 +99,7 @@ export function repositoryContext(cwd: string, profile: WorkProfile = 'standard'
 
 export function profileInstructions(profile: WorkProfile): string {
   const scope = profile === 'quick' ? 'Use concise findings and only task-relevant context.' : profile === 'exhaustive' ? 'Inspect all affected functionality, edge cases and integration boundaries; independently review the final change.' : 'Inspect the affected functionality and its integration boundaries; report concise evidence.';
-  return `Explicit profile: ${profile}. ${scope} Start with the cheapest available model; escalate only after concrete failed verification or a demonstrated capability limit. Delegate independent specialist tasks with bounded briefs; do not duplicate the full repository context. All profiles require the same task acceptance criteria and applicable verification gates. Never change profiles automatically.`;
+  return `Explicit profile: ${profile}. ${scope} Choose the cheapest available capable model when routing is supported; escalate only after concrete failed verification or a demonstrated capability limit. Use one agent unless specialist expertise or smaller independent contexts justify transfer, coordination and verification costs; keep briefs bounded. All profiles require the same task acceptance criteria and applicable verification gates. Never change profiles automatically.`;
 }
 
 export function formatRepositoryContext(context: RepositoryContext): string {

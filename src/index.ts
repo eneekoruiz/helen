@@ -836,7 +836,7 @@ export function createProgram(): Command {
   // helen report
   program
     .command('report')
-    .description('Generate an interactive HTML dashboard and project health report')
+    .description('Generate a local HTML dashboard with project health and progress')
     .option('--open', 'Open the generated report in your default browser', false)
     .action(async (opts: { open?: boolean }) => {
       const cwd = process.cwd();

@@ -11,6 +11,8 @@ export interface ReadPromptOptions {
   fill?: Record<string, string>;
   replyLang?: string;
   protocol?: boolean;
+  /** Stable shared prefix followed by prompt body; provider caching remains external. */
+  cacheReady?: boolean;
   /** Legacy option retained for callers; prefer protocol. */
   level100?: boolean;
 }
@@ -126,12 +128,20 @@ export function listPromptEntries(root: string = PROMPTS_ROOT): PromptEntry[] {
 /** Resolve by full id, short id (file name), relative path, or a legacy alias. */
 export function resolvePromptEntry(query: string, root: string = PROMPTS_ROOT, entries: readonly PromptEntry[] = listPromptEntries(root)): PromptEntry {
   const normalized = query.replaceAll('\\', '/').replace(/^docs\/prompts\//, '').replace(/\.md$/i, '').toLowerCase();
-  const short = (entry: PromptEntry) => entry.id.split('/').at(-1)!;
+  const short = (entry: PromptEntry) => entry.id.split('/').at(-1)!.toLowerCase();
+  const unique = (matches: PromptEntry[]): PromptEntry | undefined => {
+    if (matches.length > 1) {
+      throw new Error(`Prompt "${query}" is ambiguous. Use a full id: ${matches.slice(0, 10).map(entry => entry.id).join(', ')}${matches.length > 10 ? ', …' : ''}`);
+    }
+    return matches[0];
+  };
 
+  // An explicit identity wins over paths and aliases; never choose by listing order.
   const found =
-    entries.find(entry => entry.id === normalized || entry.relativePath.replace(/\.md$/i, '').toLowerCase() === normalized) ??
-    entries.find(entry => short(entry) === normalized) ??
-    entries.find(entry => entry.aliases.map(alias => alias.toLowerCase()).includes(normalized));
+    unique(entries.filter(entry => entry.id.toLowerCase() === normalized)) ??
+    unique(entries.filter(entry => entry.relativePath.replace(/\.md$/i, '').toLowerCase() === normalized)) ??
+    unique(entries.filter(entry => short(entry) === normalized)) ??
+    unique(entries.filter(entry => entry.aliases.some(alias => alias.toLowerCase() === normalized)));
 
   if (!found) {
     const suggestions = searchPrompts(query, root).slice(0, 3).map(entry => short(entry));
@@ -155,13 +165,17 @@ export function readPromptEntry(
   options?: ReadPromptOptions,
 ): string {
   let content = fs.readFileSync(entry.absolutePath, 'utf-8');
+  const includeProtocol = (options?.protocol ?? options?.level100 ?? true) && entry.kind !== 'master' && entry.kind !== 'guide';
   if (options?.fill) {
     for (const [key, val] of Object.entries(options.fill)) {
       const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       content = content.replace(new RegExp(`{{\\s*${escapedKey}\\s*}}`, 'g'), () => val);
     }
   }
-  if ((options?.protocol ?? options?.level100 ?? true) && entry.kind !== 'master' && entry.kind !== 'guide') {
+  if (options?.cacheReady) {
+    content = parseFrontmatter(content).body;
+    if (includeProtocol) content = `${EXECUTION_CONTRACT}\n\n---\n${content}`;
+  } else if (includeProtocol) {
     content += `\n\n---\n${EXECUTION_CONTRACT}\n`;
   }
   if (options?.replyLang) {

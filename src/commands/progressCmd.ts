@@ -1,8 +1,6 @@
 import { Command } from 'commander';
 import { isJsonMode, printJsonAndExit } from '../core/jsonOutput.js';
-import { readProgress, formatStatus, runChecks, currentIndex, formatNext, markDone, skipStep, resumeProgress } from '../core/progress.js';
-import path from 'node:path';
-import fs from 'node:fs';
+import { readProgress, formatStatus, runChecks, runFocusedChecks, currentIndex, formatNext, markDone, skipStep, resumeProgress } from '../core/progress.js';
 import { logger } from '../core/logger.js';
 import { repositoryFingerprint } from '../core/workflowContext.js';
 
@@ -134,12 +132,8 @@ export function registerProgressCommands(program: Command) {
     .action(async (opts: { html: boolean }) => {
       const progress = readProgress(process.cwd());
       if (opts.html) {
-        const { generateReportData, renderReportHtml } = await import('../core/report.js');
-        const data = generateReportData(process.cwd());
-        const html = renderReportHtml(data);
-        const reportPath = path.join(process.cwd(), '.helen', 'report.html');
-        fs.mkdirSync(path.dirname(reportPath), { recursive: true });
-        fs.writeFileSync(reportPath, html, 'utf-8');
+        const { writeReport } = await import('../core/report.js');
+        const { filePath: reportPath } = writeReport(process.cwd());
         if (isJsonMode()) {
           printJsonAndExit('status', { tracking: progress !== null, progress, reportPath });
           return;
@@ -160,8 +154,37 @@ export function registerProgressCommands(program: Command) {
 
   program
     .command('check')
-    .description("Run the project's own typecheck, lint, test and build scripts as a gate")
-    .action(() => {
+    .description("Run the project's typecheck, lint, test and build scripts as a gate; --focus/--scripts run partial checks only")
+    .option('--focus <test-files...>', 'Run selected test files with a Vitest test script')
+    .option('--scripts <names...>', 'Run only selected check scripts (typecheck, lint, test, build)')
+    .action((opts: { focus?: string[]; scripts?: string[] }) => {
+      if (opts.focus?.length && opts.scripts?.length) {
+        const message = 'Use either --focus or --scripts, not both';
+        if (isJsonMode()) printJsonAndExit('check', { scope: 'focused', checkpointEligible: false }, { ok: false, errors: [message], exitCode: 1 });
+        else { logger.error(message); process.exitCode = 1; }
+        return;
+      }
+      if (opts.focus?.length || opts.scripts?.length) {
+        try {
+          const run = runFocusedChecks(process.cwd(), opts.focus?.length ? { files: opts.focus } : { scripts: opts.scripts! });
+          if (isJsonMode()) {
+            printJsonAndExit('check', run, { ok: run.ok, exitCode: run.ok ? 0 : 1 });
+            return;
+          }
+          const selected = run.scope.kind === 'tests' ? run.scope.files.join(', ') : run.scope.scripts.join(', ');
+          console.log(`Focused checks (${run.scope.kind}): ${selected}`);
+          console.log('Partial checks do not satisfy checkpoints; run `helen check` for the full gate.');
+          if (run.ok) logger.success('Focused checks passed.');
+          else logger.error('Focused checks failed.');
+          process.exitCode = run.ok ? 0 : 1;
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          if (isJsonMode()) printJsonAndExit('check', { scope: 'focused', checkpointEligible: false }, { ok: false, errors: [message], exitCode: 1 });
+          else { logger.error(message); process.exitCode = 1; }
+        }
+        return;
+      }
+
       const run = runChecks(process.cwd());
       if (isJsonMode()) {
         printJsonAndExit('check', {

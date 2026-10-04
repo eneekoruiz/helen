@@ -30,16 +30,28 @@ The MCP tools expose the same workflow through `helen_apply` (`brief`, `profile`
 
 ## Spend fewer tokens without inventing savings
 
-Technical prompts use concise English, focused specialist contexts, shared rules and measured evidence. English is a convention; savings depend on the provider and tokenizer. Preserve the cheapest available model cascade; escalate only after evidenced failure or an unresolved capability limit.
+Technical prompts use concise English, shared rules and measured evidence. English is a convention; savings depend on the provider and tokenizer. Use the cheapest available capable model when routing is supported, and delegate only when the expected benefit outweighs context transfer, coordination, integration and verification. Small tasks may stay with the current agent. See [Adaptive execution cost policy](EXECUTION-COST-POLICY.md).
 
 ```sh
 # Only after the shared execution contract is already loaded in this session:
 helen prompts show audit-code-quality --no-protocol
-helen prompts flow autonomous-implementation --no-protocol
+helen prompts flow apply-autonomous-implementation-flow --no-protocol
 helen token-budget quality --json
+helen prompts show audit-code-quality --cache-ready
+helen prompts flow apply-autonomous-implementation-flow --cache-ready
 ```
 
 `--no-protocol` avoids resending the common contract. Default exports and generated flow skills retain it. Token budgets explicitly label character-based input estimates and historical reference rates; they do not measure output, reasoning, retries, billing or language savings.
+
+`--cache-ready` places identical shared instructions first and variable task details afterwards. It prepares text for a cache-capable provider; it does not configure a provider or guarantee a hit. Flash routing likewise depends on the invoking runtime exposing that model. Specialist owners run independent work concurrently, with compact contexts. Prefer an available direct browser MCP for interaction evidence, retaining Chromium responsive verification.
+
+Generated flow skills now place their shared instructions before the flow body. MCP `helen_prompt_get` accepts `cacheReady: true` for the same ordering, and `protocol: false` only when shared instructions are already loaded. Concurrency and Flash are optional routing choices according to total expected cost and task acceptance.
+
+Briefs and generated flow skills include the common contract once and use `--no-protocol` in their step commands. Give new specialists that contract, or use default exports until their own sessions have loaded it; an existing primary session is not proof that its workers share the same instructions.
+
+For iterative regressions, use `helen check --focus tests/affected.test.ts` on Vitest projects. Focused evidence cannot complete a full checkpoint; run `helen check` before completion. Choose known script subsets with `--scripts typecheck lint` when useful.
+
+Use `helen-reprompt` in your agent to clarify missing task details through its native question form. [Native reprompt questions](REPROMPT.md) preserve the original request, exclusions and existing authorization; questions are generated from the current conversation rather than a fixed form.
 
 ## Autonomous improvement discovery
 
@@ -68,3 +80,5 @@ npm run evals -- --skill helen-reprompt --model haiku --runs 3 --max-calls 100
 ```
 
 Reports separate activation reliability, valid paired outcomes, historical evidence, insufficient samples, and unavailable data. Failed runs never become zero-quality observations. Static prompt lint and software tests prove structural/functional properties; live comparisons provide evidence only for the tested tasks, model and settings. Current chat-only scenarios do not establish real coding-task completion. See [Skill quality](SKILLS_QUALITY.md) for current evidence.
+
+[Native calibration observations](QUALITY-IMPLEMENTATION-2026-10-04.md) record three scenarios tested with this agent after Claude quota exhaustion, including the limits of that comparison.

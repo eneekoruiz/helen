@@ -1,6 +1,6 @@
 ---
 name: helen-audit
-description: Audit correctness, user workflows, security, performance and verification depth with specialist agents, evidence-backed findings and autonomous discovery; remediate when authorized.
+description: Audit correctness, workflows, security, performance and verification with evidence, cost-aware routing and optional specialists; discover further improvements and remediate when authorized.
 version: 2.1.0
 ---
 
@@ -35,10 +35,16 @@ Inspect CI and run locally reproducible build, typecheck, lint, tests and workfl
 
 ## Cheapest model cascade and specialists
 
-Start with the cheapest available model when selection is supported; escalate only for verified failure or unresolved reasoning. Passing existing tests does not replace acceptance. State when selection is unavailable.
+Choose the cheapest available capable model when selection is supported; escalate only on evidenced failure or capability limits. Keep the current agent when a handoff would cost more. Passing existing tests does not replace acceptance; do not pretend unavailable model controls exist.
 
-Delegate independent domain sweeps to specialist contracts/backend, security, QA/recovery, visual/accessibility and claims/documentation agents. Provide relevant files, acceptance criteria and read-only or exclusive-write boundaries. Reuse compact evidence and integrate findings; run sequentially if agents are unavailable. Use concise English technical instructions and answer in the user's language. Measure tokens and cost before claiming savings.
+Decide whether specialist contracts/backend, security, QA/recovery, visual/accessibility or claims sweeps improve acceptance enough to justify delegation overhead; otherwise perform focused passes in the primary agent. Provide relevant files, acceptance criteria and read-only or exclusive-write boundaries. Reuse compact evidence and integrate findings; run sequentially if agents are unavailable. Use concise English technical instructions and answer in the user's language. Measure tokens and cost before claiming savings.
 
 ## Output
 
 Report scope and criteria; prioritized findings with files, evidence, impact, fix and effort; changes applied when authorized; check results marked passed, failed, unavailable or not applicable; additional opportunities discovered; residual risks and blockers. No perfection score or guaranteed zero defects.
+
+## Runtime-aware efficiency
+
+Use one agent for small cohesive tasks. Choose the cheapest available capable model when routing is supported; keep the current agent when finishing is cheaper than transferring context. Delegate only when expected expertise or context savings outweigh transfer, coordination, integration, verification and retries. Flash is optional when available and suitable. Keep shared instructions as a stable prefix and task facts after it; provider caching requires runtime support and measured cache hits. Prefer an available direct browser MCP. Use focused regressions during fixes and the full repository gate before completion. Never invent savings.
+
+Minimize time to a verified result: retrieve only missing evidence, batch independent reads and checks, preserve dependencies, avoid repeated planning and polling, and answer concisely. Never trade acceptance or required checks for speed, guess missing facts, or lower reasoning effort automatically.

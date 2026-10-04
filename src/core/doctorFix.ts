@@ -48,7 +48,33 @@ export function repairDoctorIssues(cwd: string = process.cwd(), opts: { dryRun?:
       // Pre-commit hook
       const preCommitPath = path.join(githooksDir, 'pre-commit');
       if (!fs.existsSync(preCommitPath)) {
-        const hookContent = `#!/bin/sh\n# HELEN guardrail hook\nnode -e "try { const { execSync } = require('child_process'); execSync('node dist/cli.js lint', { stdio: 'inherit' }); } catch { process.exit(0); }"\n`;
+        const hookContent = `#!/bin/sh
+# HELEN pre-commit: fast checks on staged files only, no dependencies.
+# Skip once with: git commit --no-verify
+node --input-type=commonjs <<'HELEN_NODE'
+const { execFileSync } = require('node:child_process');
+const path = require('node:path');
+const git = (...args) => execFileSync('git', args, { maxBuffer: 32 * 1024 * 1024 });
+let failed = false;
+try {
+  const files = git('diff', '--cached', '--name-only', '-z', '--diff-filter=ACMR').toString().split('\\0').filter(Boolean);
+  for (const file of files) {
+    const fail = (reason) => { console.error('✖ ' + JSON.stringify(file) + ': ' + reason); failed = true; };
+    const name = path.posix.basename(file);
+    if ((name === '.env' || name.startsWith('.env.') || name.endsWith('.env')) && !/\\.(example|sample|template)$/.test(name)) fail('environment files must not be committed');
+    const blob = git('show', ':' + file);
+    if (blob.length > 5242880) fail('larger than 5 MB (use Git LFS or external storage)');
+    const content = blob.toString();
+    if (/^(<<<<<<<|>>>>>>>) /m.test(content)) fail('merge conflict markers');
+    if (/-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{36}|sk-(live|proj)-[A-Za-z0-9_-]{16,}|xox[baprs]-[A-Za-z0-9-]{10,}/.test(content)) fail('looks like it contains a secret (value not shown)');
+  }
+} catch {
+  console.error('Unable to inspect staged files; commit blocked.');
+  failed = true;
+}
+if (failed) { console.error('Commit blocked by .githooks/pre-commit'); process.exit(1); }
+HELEN_NODE
+`;
         writeFileSafe(preCommitPath, hookContent, { dryRun: opts.dryRun });
         report.fixed.push('Installed .githooks/pre-commit');
       }

@@ -98,7 +98,8 @@ export function registerPromptsCommands(program: Command) {
     .option('--fill <pairs...>', 'Fill variables in format key=value')
     .option('--reply-lang <lang>', 'Target language for the AI response (e.g. es, en, fr)')
     .option('--no-protocol', 'Omit shared rules only when already loaded in the agent session')
-    .action((promptName: string, opts: { fill?: string[]; replyLang?: string; protocol: boolean }) => {
+    .option('--cache-ready', 'Put stable shared rules first, followed by prompt body; caching depends on your provider')
+    .action((promptName: string, opts: { fill?: string[]; replyLang?: string; protocol: boolean; cacheReady?: boolean }) => {
       try {
         const entry = resolvePromptEntry(promptName);
         const fillDict: Record<string, string> = {};
@@ -108,7 +109,7 @@ export function registerPromptsCommands(program: Command) {
             if (k && rest.length > 0) fillDict[k] = rest.join('=');
           }
         }
-        const content = readPrompt(promptName, undefined, { fill: Object.keys(fillDict).length ? fillDict : undefined, replyLang: opts.replyLang, protocol: opts.protocol });
+        const content = readPrompt(promptName, undefined, { fill: Object.keys(fillDict).length ? fillDict : undefined, replyLang: opts.replyLang, protocol: opts.protocol, cacheReady: opts.cacheReady });
         if (isJsonMode()) {
           printJsonAndExit('prompts:show', {
             id: shortId(entry),
@@ -200,10 +201,11 @@ export function registerPromptsCommands(program: Command) {
     .command('flow <flow>')
     .description('Print an executable flow such as full-polish, release-candidate, or client-delivery')
     .option('--no-protocol', 'Omit shared rules only when already loaded in the agent session')
-    .action((flow: string, opts: { protocol: boolean }) => {
+    .option('--cache-ready', 'Put stable shared rules first, followed by flow body; caching depends on your provider')
+    .action((flow: string, opts: { protocol: boolean; cacheReady?: boolean }) => {
       try {
         const entry = resolvePromptEntry(flow);
-        const content = readPrompt(flow, undefined, { protocol: opts.protocol });
+        const content = readPrompt(flow, undefined, { protocol: opts.protocol, cacheReady: opts.cacheReady });
         if (isJsonMode()) {
           printJsonAndExit('prompts:flow', {
             id: shortId(entry),

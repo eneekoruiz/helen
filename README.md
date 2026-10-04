@@ -2,12 +2,14 @@
 
 Repository-aware briefs, durable session continuity, explicit context profiles, optional startup branding, and evidence-first prompt evaluation are documented in [Workflow and quality](docs/WORKFLOW-QUALITY.md).
 
+Use your agent's native question form through `helen-reprompt` to clarify missing task details; see [Native reprompt questions](docs/REPROMPT.md). Export reusable shared instructions first with `helen prompts show <prompt> --cache-ready`.
+
 HELEN is a workflow kit for building projects with AI agents (Claude Code, Codex, Antigravity or any agent that reads `SKILL.md` folders):
 
-- **Prompts** (`docs/prompts`): 94 English, lint-checked task prompts and flows, organized by project phase.
+- **Prompts** (`docs/prompts`): 98 English, lint-checked task prompts and flows (105 total library documents), organized by project phase.
 - **Skills** (`skills/`): 12 bundled agent skills that load the right prompts automatically.
 - **Playbooks** (`helen apply`): detect the project phase and plan which prompts, skills and tools to use for a goal.
-- **Catalog** (`helen skills catalog`): vetted third-party skills, CLIs, MCP servers and references, with install commands HELEN prints but never runs.
+- **Catalog** (`helen skills catalog`): 41 vetted third-party skills, CLIs, MCP servers and references, with install commands HELEN prints but never runs.
 - **Scaffolding**: optional modules for React + Vite + TypeScript projects (`helen init`, `helen add`).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg?style=flat-square)](LICENSE)
@@ -16,7 +18,7 @@ HELEN is a workflow kit for building projects with AI agents (Claude Code, Codex
 
 ## Install
 
-Requires Node.js 20 or Node.js 22 and newer. CI covers Node 20/22/24 on Linux and Node 22 on Windows/macOS.
+Requires Node.js 20 or Node.js 22 and newer. Hosted CI uses Node 22 on Linux; other operating systems and Node versions need separate verification.
 
 ```bash
 npm install -g helen-cli
@@ -112,7 +114,7 @@ remove their snapshots. Empty scaffolding directories can remain after recovery.
 External scaffolders, dependency-manager installs, `init-project`, setup/skill installation and
 third-party service actions are outside this file journal's scope.
 
-Prompt ids accept the full id, the short id (without the action prefix), a path, or a legacy alias.
+Prompt ids accept the full id, a unique short id (including the action prefix, such as `audit-code-quality`), a path, or a legacy alias. Matching is case-insensitive. If custom prompts share a short name or alias, use a full id; HELEN reports ambiguity instead of choosing a task by listing order. Cache-ready exports keep guides free of executable-task instructions.
 
 ## Prompts
 
@@ -128,6 +130,8 @@ Phases: [01 start](docs/prompts/01-start-project/README.md) · [02 building](doc
 Each phase README has quick decisions, an exit checklist and a generated index.
 
 ## Skills
+
+See the [inventory guide](docs/SKILLS-CATALOG.md) for bundled skills, project installations, global Codex skills and the external catalog.
 
 Bundled: `helen-apply` (entry point), `helen-router`, `helen-audit`, `helen-backend`, `helen-copy`, `helen-design`, `helen-security`, `helen-release`, `helen-strategy`, `helen-knowledge`, `helen-implementa`, `helen-reprompt`.
 

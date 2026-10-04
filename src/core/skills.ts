@@ -75,19 +75,19 @@ export function listFlowSkills(): SkillInfo[] {
   return listPromptEntries()
     .filter(entry => entry.kind === 'flow')
     .map((entry): SkillInfo => {
-      const raw = readPromptEntry(entry);
+      const raw = readPromptEntry(entry, { cacheReady: true });
       const body = raw
         .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n+/, '')
         .replace(/\[([^\]]+)\]\(([^)]+\.md)\)/g, (_match, label: string, target: string) => {
           const stem = decodeURIComponent(target).split('/').at(-1)!.replace(/\.md$/i, '').toLowerCase();
-          return `${label} (\`helen prompts show ${stem}\`)`;
+          return `${label} (\`helen prompts show ${stem} --no-protocol\`)`;
         });
       const objective = entry.summary || firstMatch(body, /## Goal\s+([^\n]+(?:\n(?!#)[^\n]+)*)/) || entry.title;
       const slug = entry.id.split('/').at(-1)!.replace(/^(apply|audit|generate|plan|research|init|enhance)-/, '').replace(/-flow$/, '');
       const name = `helen-flow-${slug}`;
       const description = `Use to run the HELEN "${slug}" flow. ${objective}`.replace(/\s+/g, ' ').slice(0, 500);
       const skill = `---\nname: ${name}\ndescription: ${JSON.stringify(description)}\n---\n\n` +
-        `> Steps referenced below are prompts in the HELEN library. Print any of them with \`helen prompts show <id>\` (list ids with \`helen prompts list\`).\n\n${body}`;
+        `> Steps below omit the shared rules embedded here. Print them with \`helen prompts show <id> --no-protocol\` (list ids with \`helen prompts list\`). A new specialist must receive the shared contract or use default exports until it has loaded it.\n\n${body}`;
       return { name, files: { 'SKILL.md': skill } };
     });
 }

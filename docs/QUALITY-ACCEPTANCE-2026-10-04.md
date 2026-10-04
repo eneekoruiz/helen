@@ -2,6 +2,8 @@
 
 Defined before implementation on 2026-10-04. This plan separates software correctness, instruction consistency, and measured agent effectiveness.
 
+Later user clarification supersedes mandatory delegation: use specialists only when expected expertise or total cost benefits justify their overhead. [Adaptive execution cost acceptance](EXECUTION-COST-POLICY.md) defines the revised routing criteria; task scope and verification gates remain binding.
+
 ## Acceptance
 
 - Every exported executable prompt defines acceptance before edits, preserves user intent, delegates independent specialist work, and retains the cheapest-available-model cascade with evidence-based escalation.

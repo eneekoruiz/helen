@@ -3,6 +3,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { generateReportData, renderReportHtml, writeReport } from '../src/core/report.js';
+import { buildPlan } from '../src/core/apply.js';
+import { startProgress } from '../src/core/progress.js';
 
 describe('helen report', () => {
   let tmp: string;
@@ -39,6 +41,25 @@ describe('helen report', () => {
     expect(filePath).toContain('.helen');
     const content = fs.readFileSync(filePath, 'utf-8');
     expect(content).toContain('HELEN Project Dashboard');
+  });
+
+  it('keeps the tracked project phase separate from its goal', () => {
+    const plan = buildPlan(tmp, 'quality');
+    startProgress(tmp, plan);
+    const data = generateReportData(tmp);
+    expect(data.phase.goal).toBe('quality');
+    expect(data.phase.current).toBe(plan.detection.phase);
+  });
+
+  it('replaces a hard-linked report without changing the external file', () => {
+    const external = path.join(tmp, 'external-original.html');
+    fs.writeFileSync(external, 'preserve original content');
+    fs.mkdirSync(path.join(tmp, '.helen'));
+    const destination = path.join(tmp, '.helen', 'report.html');
+    fs.linkSync(external, destination);
+    writeReport(tmp);
+    expect(fs.readFileSync(external, 'utf8')).toBe('preserve original content');
+    expect(fs.readFileSync(destination, 'utf8')).toContain('HELEN Project Dashboard');
   });
 
   it('rejects a report directory linked outside the project', () => {

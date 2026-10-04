@@ -16,7 +16,7 @@ export function registerApplyCommand(program: Command) {
     .option('--auto', 'Verify checkpoints automatically, then pause at instructions for an agent or person', false)
     .option('--force', 'With --track or --auto: restart even if another plan is in progress', false)
     .option('--install', 'Install the bundled skills the goal needs into --target', false)
-    .option('--target <targets...>', 'Where to install skills: claude, codex, custom', ['claude'])
+    .option('--target <targets...>', 'Where to install skills: claude, codex, antigravity, custom', ['claude'])
     .option('--dir <path>', 'Project-relative directory for the "custom" target')
     .action(async (goalWords: string[], opts: { brief: boolean; profile: string; track: boolean; auto: boolean; force: boolean; install: boolean; target: string[]; dir?: string }) => {
       try {

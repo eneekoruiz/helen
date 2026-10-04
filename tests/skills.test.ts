@@ -3,6 +3,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { installSkills, listFlowSkills, listSkills, resolveTargetDir, validateSkills } from '../src/core/skills.js';
+import { parseFrontmatter } from '../src/core/frontmatter.js';
+import { EXECUTION_CONTRACT } from '../src/core/executionProtocol.js';
 
 describe('Skills installer', () => {
   let tmp: string;
@@ -110,5 +112,15 @@ describe('Skills installer', () => {
 
     installSkills({ cwd: tmp, targets: ['claude'], flows: true, skills: ['helen-flow-full-polish'] });
     expect(fs.existsSync(path.join(tmp, '.claude/skills/helen-flow-full-polish/SKILL.md'))).toBe(true);
+  });
+
+  it('places identical shared instructions before each generated flow body', () => {
+    const bodies = listFlowSkills().map(flow => parseFrontmatter(flow.files!['SKILL.md']!).body);
+    const prefix = bodies[0].split('\n\n---\n')[0];
+    expect(prefix).toContain(EXECUTION_CONTRACT);
+    for (const body of bodies) {
+      expect(body.startsWith(`${prefix}\n\n---\n`)).toBe(true);
+      expect(body.match(/HELEN execution contract/g)).toHaveLength(1);
+    }
   });
 });

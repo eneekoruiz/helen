@@ -1,6 +1,6 @@
 ---
 name: helen-implementa
-description: Execute authorized plans, features and improvement sets end to end with measurable acceptance, cheapest model cascade, specialist agents and autonomous improvement discovery.
+description: Execute authorized plans, features and improvements end to end with measurable acceptance, cost-aware model routing, optional specialists and autonomous discovery.
 version: 2.1.0
 ---
 
@@ -14,7 +14,7 @@ Inspect repository evidence and existing instructions. Define observable accepta
 
 ## Autonomous implementation and discovery
 
-1. Order tasks by dependencies and give independent domain work to specialized backend/contracts, UI/accessibility, security, QA/recovery or documentation agents with exclusive file ownership and small contexts.
+1. Order tasks by dependencies. Use one agent for small cohesive work; assign independent domain work to specialists only when expertise or smaller contexts justify total handoff cost, with exclusive ownership and compact briefs.
 2. Implement, verify acceptance and diagnose failures from evidence. Never weaken checks or fabricate successful results.
 3. Re-audit affected workflows, edge cases, consumers and documentation. After the original checklist passes, explicitly ask what further evidence-backed improvement would materially improve the authorized outcome.
 4. Apply actionable improvements and repeat verification and discovery without an arbitrary retry or iteration cap. Do not wait for the user to ask for more ideas.
@@ -26,10 +26,16 @@ Run build, typecheck, lint, relevant tests and locally reproducible CI commands.
 
 ## Cheapest model cascade and token economy
 
-Start with the cheapest available model when selection is supported. Escalate only after verified failure or unresolved reasoning prevents progress. Acceptance criteria must be satisfied in addition to existing tests. Keep the current model when selection is unavailable and state the limitation.
+Choose the cheapest available capable model when selection is supported; keep the current agent when a handoff would cost more. Escalate only after verified failure or unresolved reasoning prevents progress. Acceptance criteria must be satisfied in addition to existing tests. Keep the current model when selection is unavailable and state the limitation.
 
 Use concise English technical instructions, focused specialist contexts, reused evidence and dense summaries. Batch independent reads; react to agent completion instead of polling. Rerun broad checks when new changes or unresolved risks justify them. Answer in the user's language. Measure actual input/output tokens, retries and cost; never claim fixed savings from English or model tiers.
 
 ## Output
 
 Report implemented changes and discovered improvements, acceptance/check evidence, convergence rounds, blocked or unverified items and residual risks. Use verified outcomes instead of perfection scores or guaranteed zero defects.
+
+## Runtime-aware efficiency
+
+Use one agent for small cohesive tasks. Choose the cheapest available capable model when routing is supported; keep the current agent when finishing is cheaper than transferring context. Delegate only when expected expertise or context savings outweigh transfer, coordination, integration, verification and retries. Flash is optional when available and suitable. Keep shared instructions as a stable prefix and task facts after it; provider caching requires runtime support and measured cache hits. Prefer an available direct browser MCP. Use focused regressions during fixes and the full repository gate before completion. Never invent savings.
+
+Minimize time to a verified result: retrieve only missing evidence, batch independent reads and checks, preserve dependencies, avoid repeated planning and polling, and answer concisely. Never trade acceptance or required checks for speed, guess missing facts, or lower reasoning effort automatically.

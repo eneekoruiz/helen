@@ -655,21 +655,21 @@
     },
     {
       "id": "apple-hig",
-      "name": "Apple Human Interface Guidelines (HIG)",
+      "name": "Apple HIG Design Skill",
       "category": "design",
       "kind": "skill",
       "status": "active",
-      "source": "https://developer.apple.com/design/human-interface-guidelines",
-      "summary": "Authoritative Apple Human Interface Guidelines for iOS, macOS, iPadOS, and visionOS: clarity, deference, depth, touch targets, SF Symbols, tactile physics, and system ergonomics.",
+      "source": "https://github.com/Sunwood-ai-labs/design-with-apple-hig",
+      "summary": "Evidence-first agent skill for designing, implementing, reviewing, and auditing Apple platform interfaces using current Apple guidance, with platform-specific routing and source checks.",
       "install": [
-        "npx skills add https://github.com/agent-skills/apple-design --skill apple-hig"
+        "npx skills add Sunwood-ai-labs/design-with-apple-hig --skill design-with-apple-hig"
       ],
       "license": "MIT",
       "phases": [
         "03-finish-features",
         "05-final-audit"
       ],
-      "notes": "Enforces Apple-grade visual ergonomics, accessibility contrast, safe areas, dynamic typography rhythm, and native sensory feedback.",
+      "notes": "Third-party skill; Apple Developer HIG remains the primary source. It directs agents to preserve platform scope and distinguish Apple guidance from implementation facts and heuristics.",
       "verified": "2026-10-04"
     },
     {
@@ -679,16 +679,16 @@
       "kind": "skill",
       "status": "active",
       "source": "https://github.com/coreyhaines31/marketingskills",
-      "summary": "Curated library of 40+ specialized marketing and growth skills for coding agents: positioning, copywriting, conversion audits, and go-to-market execution.",
+      "summary": "MIT-licensed collection of specialized marketing skills for coding agents, including copywriting, conversion optimization, SEO, analytics, and growth.",
       "install": [
-        "npx skills add coreyhaines31/marketingskills"
+        "npx skills add coreyhaines31/marketingskills --list"
       ],
       "license": "MIT",
       "phases": [
         "03-finish-features",
         "07-client-handoff"
       ],
-      "notes": "Umbrella repository by Corey Haines. Bundles specialized skills for landing pages, user acquisition, email marketing, and value proposition design.",
+      "notes": "Collection index only. A bare install command installs every skill; use the focused entries below or choose a specific skill with `--skill <name>`.",
       "verified": "2026-10-04"
     },
     {
@@ -698,7 +698,7 @@
       "kind": "skill",
       "status": "active",
       "source": "https://github.com/coreyhaines31/marketingskills",
-      "summary": "Structured diagnostic skill for technical and on-page SEO: crawlability, Core Web Vitals, indexation traps, metadata integrity, and competitive SERP ranking factors.",
+      "summary": "Audits technical and on-page SEO, including crawlability, indexation, performance, metadata, content quality, and internal linking, then prioritizes findings with evidence and fixes.",
       "install": [
         "npx skills add coreyhaines31/marketingskills --skill seo-audit"
       ],
@@ -717,16 +717,16 @@
       "kind": "skill",
       "status": "active",
       "source": "https://github.com/coreyhaines31/marketingskills",
-      "summary": "Implements and validates JSON-LD Schema.org structured data (Organization, SoftwareApplication, Product, FAQPage, Article) for rich snippets and AI search discoverability (GEO/LLMO).",
+      "summary": "Guides implementation and validation of JSON-LD Schema.org structured data for common page types, following search engine eligibility rules and matching markup to visible content.",
       "install": [
-        "npx skills add coreyhaines31/marketingskills --skill schema-markup"
+        "npx skills add coreyhaines31/marketingskills --skill schema"
       ],
       "license": "MIT",
       "phases": [
         "03-finish-features",
         "04-before-production"
       ],
-      "notes": "Generates valid JSON-LD structured tags to maximize Google Rich Results and LLM search discoverability.",
+      "notes": "The repository renamed `schema-markup` to `schema` in v2.0; structured data does not guarantee rich results or higher rankings.",
       "verified": "2026-10-04"
     },
     {
@@ -736,7 +736,7 @@
       "kind": "skill",
       "status": "active",
       "source": "https://github.com/coreyhaines31/marketingskills",
-      "summary": "Designs semantic URL hierarchies, hub-and-spoke topic clusters, canonical paths, and internal link equity distribution to optimize search crawler indexation.",
+      "summary": "Helps plan page hierarchy, navigation, URL patterns, breadcrumbs, and internal linking for usability and search discoverability.",
       "install": [
         "npx skills add coreyhaines31/marketingskills --skill site-architecture"
       ],
@@ -755,16 +755,16 @@
       "kind": "skill",
       "status": "active",
       "source": "https://github.com/coreyhaines31/marketingskills",
-      "summary": "Platform-specific frameworks for crafting high-engagement technical social content (X/Twitter threads, LinkedIn posts, GitHub releases) with reverse-engineered hook patterns.",
+      "summary": "Guidance for creating, scheduling, and optimizing social content across major platforms, including repurposing content and social listening.",
       "install": [
-        "npx skills add coreyhaines31/marketingskills --skill social-content"
+        "npx skills add coreyhaines31/marketingskills --skill social"
       ],
       "license": "MIT",
       "phases": [
         "06-release",
         "07-client-handoff"
       ],
-      "notes": "Designed to turn product launches and technical features into compelling developer-focused social posts.",
+      "notes": "The repository renamed `social-content` to `social` in v2.0; use it for platform-aware content and listening, not as a guarantee of virality.",
       "verified": "2026-10-04"
     },
     {
@@ -774,7 +774,7 @@
       "kind": "skill",
       "status": "active",
       "source": "https://github.com/coreyhaines31/marketingskills",
-      "summary": "Creates high-impact B2B sales collateral: one-pagers, feature comparison matrices against competitors, buyer objection playbooks, and ROI demonstration scripts.",
+      "summary": "Helps create sales collateral such as one-pagers, sales decks, objection handling documents, and demo scripts.",
       "install": [
         "npx skills add coreyhaines31/marketingskills --skill sales-enablement"
       ],
@@ -783,7 +783,7 @@
         "07-client-handoff",
         "08-maintenance"
       ],
-      "notes": "Bridges technical software capabilities with commercial sales conversations.",
+      "notes": "Ground claims and comparisons in verified product capabilities and evidence.",
       "verified": "2026-10-04"
     }
   ]

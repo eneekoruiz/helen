@@ -28,7 +28,7 @@ Find reproducible correctness, recovery, verification and ergonomics gaps with f
 5. Check machine-output streams, error recovery commands, encoding and supported OS behavior. Do not infer platform failures solely from slash syntax.
 6. Compare README, CLI help and claims with actual behavior.
 7. Inspect CI and run locally reproducible commands. Record passed, failed, unavailable and not applicable checks; local execution does not prove a hosted OS matrix.
-8. Delegate independent QA/recovery, contracts and claims sweeps to focused specialists when available. Use the cheapest model cascade from shared rules.
+8. Use independent QA/recovery, contracts and claims specialists only when their expected benefit justifies overhead; otherwise perform focused primary-agent passes. Follow cost-aware model routing from shared rules.
 9. After initial inspection, independently discover further evidence-backed improvements in adjacent workflows, error paths and verification. Repeat investigation without an arbitrary retry cap; apply fixes only when remediation is authorized, then verify and re-audit.
 
 ## Limits

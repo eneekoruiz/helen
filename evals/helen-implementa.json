@@ -2,6 +2,17 @@
   "skill": "helen-implementa",
   "cases": [
     {
+      "id": "fast-verified-execution",
+      "prompt": "Use helen-implementa. We need a fast fix for a failing API retry. The acceptance criterion is one payment per idempotency key under concurrent retries; preserve response schema. Typecheck and lint are independent, but CLI integration tests require the new build first. Do not lower reasoning effort. Tools are unavailable: give a short chat-only execution brief, with no claims of edits or successful checks.",
+      "criteria": [
+        "Preserves concurrent idempotency acceptance and response schema despite the speed request",
+        "Batches independent checks but orders the new build before CLI integration tests",
+        "Uses focused regressions for iteration and retains the required final repository gate",
+        "Avoids redundant planning and context transfer; does not force specialists or lower reasoning effort",
+        "Labels proposed checks as unexecuted and gives a concise brief without claiming a measured speedup"
+      ]
+    },
+    {
       "id": "implement-plan-autonomously",
       "prompt": "Here's a plan with 5 improvements for the codebase: fix type safety issues, add error handling to API routes, update stale documentation, add missing edge case tests, and clean up dead imports. Implement all of them autonomously. Answer in chat only; do not modify or create files.",
       "criteria": [
@@ -53,11 +64,11 @@
     },
     {
       "id": "acceptance-before-improvement",
-      "prompt": "Use helen-implementa to fix interrupted local writes and make recovery retry-safe. Keep existing public CLI flags. Start with the cheapest available model and focused specialist agents. Continue discovering useful improvements after initial tests pass. This evaluation is chat-only with no tool access.",
+      "prompt": "Use helen-implementa to fix interrupted local writes and make recovery retry-safe. Keep existing public CLI flags. Choose the cheapest available capable model and decide whether specialists justify handoff overhead. Continue discovering useful improvements after initial tests pass. This evaluation is chat-only with no tool access.",
       "criteria": [
         "Defines interruption and repeated recovery acceptance before proposed edits",
         "Preserves flags and cheapest-model preference",
-        "Delegates focused recovery and adversarial QA ownership with compact context",
+        "Explains whether focused recovery and adversarial QA specialists justify overhead; supports primary-agent passes when they do not",
         "Includes an autonomous fresh discovery pass after original acceptance without arbitrary cap",
         "Reports tool-unavailable checks honestly and does not claim changes were executed"
       ]

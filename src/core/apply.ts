@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { EXECUTION_CONTRACT } from './executionProtocol.js';
 import { fileURLToPath } from 'node:url';
 import { getCatalogItem } from './catalog.js';
 import { resolvePromptEntry, listPromptEntries, getPromptsRoot } from './prompts.js';
@@ -158,10 +159,10 @@ export function suggestedGoals(phase: string, playbooks: Playbooks = readPlayboo
   return playbooks.phaseGoals[phase] ?? [];
 }
 
-function command(step: PlaybookStep): string {
+function command(step: PlaybookStep, protocolAlreadyLoaded = false): string {
   if (step.kind === 'external') return `helen skills external ${step.ref}`;
   if (step.kind === 'skill') return `skill: ${step.ref}`;
-  return `helen prompts show ${step.ref}`;
+  return `helen prompts show ${step.ref}${protocolAlreadyLoaded ? ' --no-protocol' : ''}`;
 }
 
 export function formatPlan(plan: ApplyPlan): string {
@@ -190,10 +191,13 @@ export function formatPlan(plan: ApplyPlan): string {
 /** A paste-ready brief for any AI agent that has access to the HELEN repository or CLI. */
 export function formatBrief(plan: ApplyPlan, cwd?: string, profile: WorkProfile = 'standard'): string {
   const steps = plan.goal.steps
-    .map((step, index) => `${index + 1}. [${step.kind}] ${step.ref}: ${step.why}. Use: ${command(step)}`)
+    .map((step, index) => `${index + 1}. [${step.kind}] ${step.ref}: ${step.why}. Use: ${command(step, true)}`)
     .join('\n');
   return [
+    EXECUTION_CONTRACT,
+    '',
     'Use the HELEN repository (prompts, skills and catalog) to work on this project.',
+    'The commands below omit rules already included here. Give a new specialist the shared contract or use default prompt exports until its session has loaded it.',
     `Estimated phase: ${plan.detection.phase}. Confirm it from the repository before acting.`,
     `Goal: ${plan.goal.title}. ${plan.goal.description}`,
     profileInstructions(profile),

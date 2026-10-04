@@ -1,0 +1,14 @@
+{
+  "kind": "native-agent-routing-calibration",
+  "date": "2026-10-04",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "low",
+  "method": "One fresh context read helen-implementa and proposed routes for four cases defined in EXECUTION-COST-POLICY before revision. No execution, delegation or model switch occurred in that context.",
+  "limitations": ["Instruction interpretation only; no coding outcomes or measured savings.", "One context, no independent repeated trials or confidence interval.", "Model-control fields concern hypothetical supplied capabilities, not executed switches.", "Provider token usage and billed cost were unavailable."],
+  "cases": [
+    {"id":"A","route":"Keep work on the current agent","reason":"The correction is small and all context is already present; transferring context and reviewing a worker’s output would likely cost more than any model savings.","modelControlClaimed":false,"savingsClaimed":false},
+    {"id":"B","route":"Delegate the three investigations to specialists with exclusive file ownership","reason":"They are independent, specialist expertise is expected to materially improve acceptance, and the handoff overhead is acceptable. Verify each investigation against acceptance criteria and account for coordination, integration, and retries.","modelControlClaimed":false,"savingsClaimed":false},
+    {"id":"C","route":"Keep work on the current agent","reason":"The runtime has no model-selection or agent-call capability, and the defect is narrow and cohesive.","modelControlClaimed":false,"savingsClaimed":false},
+    {"id":"D","route":"Escalate to the available stronger model","reason":"The cheaper worker failed a reproducible acceptance check, and diagnosis indicates a capability limit. Recheck acceptance after escalation; measure actual tokens and cost before making savings claims.","modelControlClaimed":true,"savingsClaimed":false}
+  ]
+}
