@@ -42,6 +42,7 @@ helen init-project my-app       # adopts folder, runs setup, installs safety gua
 # or step by step:
 cd your-project
 helen setup                     # install skills for Claude, Codex and Antigravity + AGENTS.md instructions
+helen setup --preset efficient  # optional project MCP connection and chat tracking helpers
 helen apply                     # detect the project phase and suggest goals
 helen apply design --track      # plan a goal and track it step by step
 helen next                      # current step, with its prompt
@@ -132,6 +133,8 @@ Each phase README has quick decisions, an exit checklist and a generated index.
 ## Skills
 
 See the [inventory guide](docs/SKILLS-CATALOG.md) for bundled skills, project installations, global Codex skills and the external catalog.
+
+The [reusable agent preset](docs/AGENT-PRESETS.md) connects HELEN to Codex, Claude Code and Antigravity while preserving existing configuration, and provides tracking helpers such as `$helen-resume` in Codex and `/helen-resume` in Claude Code.
 
 Bundled: `helen-apply` (entry point), `helen-router`, `helen-audit`, `helen-backend`, `helen-copy`, `helen-design`, `helen-security`, `helen-release`, `helen-strategy`, `helen-knowledge`, `helen-implementa`, `helen-reprompt`.
 

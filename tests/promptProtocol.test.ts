@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { listPromptEntries, readPrompt } from '../src/core/prompts.js';
+import { listPromptEntries, readPrompt, readPromptEntry } from '../src/core/prompts.js';
 import { EXECUTION_CONTRACT } from '../src/core/executionProtocol.js';
 
 describe('Execution protocol footer', () => {
@@ -10,7 +10,7 @@ describe('Execution protocol footer', () => {
   it('is appended to every prompt and flow', () => {
     expect(executable.length).toBeGreaterThan(0);
     for (const entry of executable) {
-      const text = readPrompt(entry.id);
+      const text = readPromptEntry(entry);
       expect(text, entry.id).toContain('Model cascade');
       expect(text, entry.id).toContain('Playwright');
       expect(text, entry.id).toContain('Parallelism');

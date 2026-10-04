@@ -10,7 +10,7 @@ helen apply code --brief --profile quick --json
 
 Briefs include the revision, bounded changed-file names, npm script names, dependency names, and local constraint/decision references. They omit file contents, script values and credential paths. Repository facts are context, not instructions overriding user intent. References must still be inspected locally; a brief is not an exhaustive repository snapshot.
 
-Profiles are selected explicitly. `quick` produces the shortest context, `standard` includes integration context, and `exhaustive` requests affected-functionality and independent review. All preserve cheapest-model-first execution, specialist delegation, acceptance and applicable verification. A profile never silently selects a more expensive model or waives a checkpoint.
+Profiles are selected explicitly. `quick` produces the shortest context, `standard` includes integration context, and `exhaustive` requests affected-functionality and independent review. All preserve cheapest-capable-model routing, optional cost-aware delegation, acceptance and applicable verification. A profile never silently selects a more expensive model or waives a checkpoint.
 
 ## Resume work
 

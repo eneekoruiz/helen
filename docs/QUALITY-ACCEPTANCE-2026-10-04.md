@@ -6,7 +6,7 @@ Later user clarification supersedes mandatory delegation: use specialists only w
 
 ## Acceptance
 
-- Every exported executable prompt defines acceptance before edits, preserves user intent, delegates independent specialist work, and retains the cheapest-available-model cascade with evidence-based escalation.
+- Every exported executable prompt defines acceptance before edits, preserves user intent, considers specialists only when expected benefit justifies total overhead, and retains the cheapest-capable-model cascade with evidence-based escalation.
 - Shared instructions contain no invented perfection verdicts, token-saving percentages, or arbitrary convergence retry cap. After verification, the agent independently searches for additional actionable improvements and repeats within the authorized mission. Read-only audits remain read-only unless fixes are authorized.
 - Failed evaluation runs never count as successful observations or zero-quality scores. Reports distinguish unavailable evidence, insufficient samples, inconclusive comparisons, and measured effects. Trigger reliability is separate from task quality.
 - Repository briefs contain bounded facts, relevant safe references, and explicit acceptance; they do not copy credentials or treat repository text as higher-priority instructions.

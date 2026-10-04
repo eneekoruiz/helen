@@ -30,6 +30,25 @@ describe('helen setup', () => {
     expect(result.skills.created).toContain(globalFlow);
   });
 
+  it('installs the optional preset alongside bundled skills and instructions', () => {
+    const result = setupProject({ cwd: tmp, agents: ['claude', 'codex', 'antigravity'], preset: 'efficient' });
+    expect(result.preset?.created).toContain('.mcp.json');
+    expect(result.instructionFiles).toContain('AGENTS.md');
+    expect(fs.existsSync(path.join(tmp, '.agents/skills/helen-resume/SKILL.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tmp, '.claude/skills/helen-audit/SKILL.md'))).toBe(true);
+  });
+
+  it('rejects global preset installation before any writes', () => {
+    expect(() => setupProject({ cwd: tmp, agents: ['codex'], preset: 'efficient', global: true })).toThrow('project-only');
+    expect(fs.readdirSync(tmp)).toEqual([]);
+  });
+
+  it('fails malformed preset configuration before bundled installation', () => {
+    fs.writeFileSync(path.join(tmp, '.mcp.json'), '{broken');
+    expect(() => setupProject({ cwd: tmp, agents: ['claude'], preset: 'efficient' })).toThrow('Malformed JSON');
+    expect(fs.readdirSync(tmp)).toEqual(['.mcp.json']);
+  });
+
   it('uninstall leaves unrelated instructions untouched and unreported', () => {
     fs.writeFileSync(path.join(tmp, 'AGENTS.md'), 'User instructions\n');
     expect(uninstallProject({ cwd: tmp }).cleanedInstructions).toEqual([]);

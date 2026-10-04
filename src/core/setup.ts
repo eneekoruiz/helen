@@ -4,6 +4,7 @@ import { writeFileSafe, isSafeProjectPath } from './fs.js';
 import { installSkills, type InstallSkillsResult, type SkillTarget } from './skills.js';
 import { EXECUTION_CONTRACT } from './executionProtocol.js';
 import { createHash } from 'node:crypto';
+import { installAgentPreset, type InstallAgentPresetResult } from './agentPresets.js';
 
 export const BLOCK_START = '<!-- HELEN:START (managed by helen setup, edit outside this block) -->';
 export const BLOCK_END = '<!-- HELEN:END -->';
@@ -16,11 +17,13 @@ export interface SetupOptions {
   flows?: boolean;
   dryRun?: boolean;
   force?: boolean;
+  preset?: 'efficient';
 }
 
 export interface SetupResult {
   skills: InstallSkillsResult;
   instructionFiles: string[];
+  preset?: InstallAgentPresetResult;
 }
 
 /** Instructions any agent reads from AGENTS.md / CLAUDE.md. Kept short: it is loaded every session. */
@@ -68,7 +71,7 @@ export function installAntigravityRules(cwd: string, dryRun = false): string[] {
     },
     {
       file: 'design.md',
-      content: `# HELEN Design System Rules\n- Playwright + Chromium Testing Gate: Every visual component or design change must pass headless Chromium verification across 3 viewports (375px mobile, 768px tablet, 1440px desktop) with zero console errors.\n- Senior Model Cascade: Scaffolding and styling begin with eco-tier models, escalating only if visual/layout tests fail.\n- Maintain accessible contrast (WCAG AA/AAA) across all color themes.\n- Ensure responsive layouts across mobile, tablet, and desktop breakpoints without horizontal overflow.\n- Respect prefers-reduced-motion for all UI transitions and animations.\n`,
+      content: `# HELEN Design System Rules\n- Playwright + Chromium Testing Gate: Every visual component or design change must pass headless Chromium verification across 3 viewports (375px mobile, 768px tablet, 1440px desktop) with zero console errors.\n- Model routing: choose the cheapest available capable model when supported; keep the current agent when handoff overhead outweighs its benefit. Escalate on evidenced failure or capability limits; never lower reasoning effort automatically.\n- Maintain accessible contrast (WCAG AA/AAA) across all color themes.\n- Ensure responsive layouts across mobile, tablet, and desktop breakpoints without horizontal overflow.\n- Respect prefers-reduced-motion for all UI transitions and animations.\n`,
     },
   ];
 
@@ -199,6 +202,9 @@ export function uninstallProject(options: { cwd: string; dryRun?: boolean }): Un
 }
 
 export function setupProject(options: SetupOptions & { global?: boolean }): SetupResult {
+  if (options.preset && options.preset !== 'efficient') throw new Error('Unknown preset. Valid: efficient');
+  if (options.preset && options.global) throw new Error('The efficient preset is project-only; omit --global.');
+  const preset = options.preset ? installAgentPreset({ cwd: options.cwd, agents: options.agents, dryRun: options.dryRun }) : undefined;
   const targets = options.agents as SkillTarget[];
   const skills = installSkills({
     cwd: options.cwd,
@@ -238,5 +244,5 @@ export function setupProject(options: SetupOptions & { global?: boolean }): Setu
     installAntigravityRules(options.cwd, options.dryRun);
   }
 
-  return { skills, instructionFiles };
+  return { skills, instructionFiles, ...(preset ? { preset } : {}) };
 }

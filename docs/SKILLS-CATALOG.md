@@ -22,7 +22,7 @@ Add `--json` for structured output. From a source checkout, use `node dist/cli.j
 `helen skills installed` does not scan global agent folders or skills supplied by plugins. For this Windows Codex installation, inspect the personal skill directories with:
 
 ```powershell
-Get-ChildItem -LiteralPath 'C:\Users\User\.codex\skills' -Directory
+Get-ChildItem -LiteralPath (Join-Path $env:USERPROFILE '.codex\skills') -Directory
 ```
 
 The `.system` directory contains system skills. Plugin skills can be supplied from separate plugin directories, so this folder is not a complete inventory of everything exposed by the running agent. Use that agent's available-skills list and plugin management surface for those sources.

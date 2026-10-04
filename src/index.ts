@@ -724,13 +724,15 @@ export function createProgram(): Command {
     .option('--agents <agents...>', 'claude, codex, antigravity (auto-detected if omitted)')
     .option('--global', 'Install skills globally to user agent directories (~/.claude, ~/.gemini)', false)
     .option('--flows', 'Also install every executable flow as a skill', false)
+    .option('--preset <preset>', 'Optional project MCP and tracking helpers: efficient')
     .option('--dry-run', 'Preview without writing files', false)
     .option('--force', 'Overwrite existing skill files', false)
-    .action((opts: { agents?: string[]; flows: boolean; dryRun: boolean; force: boolean; global: boolean }) => {
+    .action((opts: { agents?: string[]; flows: boolean; dryRun: boolean; force: boolean; global: boolean; preset?: string }) => {
       try {
         const targetAgents = opts.agents && opts.agents.length > 0 ? opts.agents : detectInstalledAgents();
         const invalid = targetAgents.filter(agent => !['claude', 'codex', 'antigravity'].includes(agent));
         if (invalid.length > 0) throw new Error(`Unknown agent(s): ${invalid.join(', ')}. Valid: claude, codex, antigravity`);
+        if (opts.preset && opts.preset !== 'efficient') throw new Error('Unknown preset. Valid: efficient');
         const result = setupProject({
           cwd: process.cwd(),
           agents: targetAgents as SetupAgent[],
@@ -738,6 +740,7 @@ export function createProgram(): Command {
           dryRun: opts.dryRun,
           force: opts.force,
           global: opts.global,
+          preset: opts.preset as 'efficient' | undefined,
         });
         if (isJsonMode()) {
           printJsonAndExit('setup', {
@@ -747,10 +750,15 @@ export function createProgram(): Command {
             skillsCreated: result.skills.created,
             skillsSkipped: result.skills.skipped,
             instructions: result.instructionFiles,
+            ...(result.preset ? { preset: result.preset } : {}),
           });
           return;
         }
         logger.success(`Skills: ${result.skills.created.length} created, ${result.skills.skipped.length} already there. Instructions: ${result.instructionFiles.join(', ')}.`);
+        if (result.preset) {
+          console.log(`Preset: ${result.preset.created.length} created or updated, ${result.preset.skipped.length} preserved.`);
+          for (const notice of result.preset.notices) logger.warn(notice);
+        }
         console.log('\nNext: tell your AI "Use HELEN: analyze where the project is and what to apply", or run: helen apply');
       } catch (err) {
         if (isJsonMode()) {

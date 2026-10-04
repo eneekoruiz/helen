@@ -51,6 +51,19 @@ describe('Workflow CLI acceptance', () => {
     expect(resume.body.errors.join(' ')).toContain('Nothing is being tracked');
   });
 
+  it('previews and installs the efficient preset through the public CLI', () => {
+    const args = ['setup', '--agents', 'codex', 'claude', 'antigravity', '--preset', 'efficient'];
+    expect(run(cwd, [...args, '--dry-run']).status).toBe(0);
+    expect(fs.readdirSync(cwd)).toEqual(['package.json']);
+    const installed = run(cwd, args);
+    expect(installed.status).toBe(0);
+    expect(installed.body.data.preset.created).toContain('.codex/config.toml');
+    expect(fs.existsSync(path.join(cwd, '.claude/skills/helen-resume/SKILL.md'))).toBe(true);
+    expect(run(cwd, args).body.data.preset.created).toEqual([]);
+    expect(run(cwd, [...args, '--global']).status).toBe(1);
+    expect(run(cwd, ['setup', '--preset', 'unknown']).status).toBe(1);
+  }, 120000);
+
   it('omits already-loaded rules only on explicit request and labels budget estimates', () => {
     const full = run(cwd, ['prompts', 'show', 'audit-code-quality']);
     const compact = run(cwd, ['prompts', 'show', 'audit-code-quality', '--no-protocol']);
