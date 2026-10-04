@@ -33,6 +33,7 @@
     "dev": "tsx src/cli.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
+    "pretest": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:json": "vitest run --reporter=json --outputFile=test-results.json",

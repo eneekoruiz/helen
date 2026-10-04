@@ -8,7 +8,15 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cli = path.join(root, 'dist', 'cli.js');
 function run(cwd: string, args: string[]) {
-  const result = spawnSync(process.execPath, [cli, ...args, '--json'], {
+  let execArgs: string[];
+  if (fs.existsSync(cli)) {
+    execArgs = [cli, ...args, '--json'];
+  } else {
+    const tsxBin = path.join(root, 'node_modules', 'tsx', 'dist', 'cli.mjs');
+    const srcCli = path.join(root, 'src', 'cli.ts');
+    execArgs = [tsxBin, srcCli, ...args, '--json'];
+  }
+  const result = spawnSync(process.execPath, execArgs, {
     cwd, encoding: 'utf8', timeout: 45000,
     env: { ...process.env, HELEN_WELCOME: 'signature' },
   });
