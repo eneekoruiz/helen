@@ -6,6 +6,8 @@ export default defineConfig({
     environment: 'node',
     include: ['tests/**/*.test.ts'],
     testTimeout: 45000,
+    // Bound filesystem/process contention across local and CI subprocess tests.
+    maxWorkers: 4,
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],

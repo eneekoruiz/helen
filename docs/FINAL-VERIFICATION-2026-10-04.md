@@ -37,6 +37,8 @@ Windows, Node 24.19.0, package version unchanged at 2.1.0:
 
 Earlier intermediate runs are not used as evidence of completion: one overlapped the final Claude compatibility fix, and the repeated catalog scan exceeded its test timeout. The definitive run above passed without increasing timeouts or reducing assertions.
 
+The subsequent publication hook exposed subprocess startup timeouts under `CI=1`. Test workers are now bounded at four, and the real-crash recovery fixture launches compiled production JavaScript directly instead of adding a `tsx` process. Its recovery assertions are unchanged, with an additional assertion that process startup produced no error. All 18 process/preset regressions passed under `CI=1` after this correction. The full publication gate must pass again before upload; the hosted gate must then pass for the published revision.
+
 ## Publication gate and limitations
 
 Publish by normal non-forced push after the repository's mandatory pre-push gates. Inspect both CI and Smoke Test for the exact pushed revision; their immutable hosted run records are the publication evidence in [GitHub Actions](https://github.com/eneekoruiz/helen/actions). The reviewed base already passed both workflows; that result does not substitute for checking the new revision.

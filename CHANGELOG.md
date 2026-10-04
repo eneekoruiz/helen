@@ -5,6 +5,7 @@
 - Add the optional project `setup --preset efficient` with additive MCP configuration and six native tracking skills for Codex, Claude Code and Antigravity.
 - Align setup and documentation with optional cost-aware delegation, verifiable acceptance and latency-conscious execution.
 - Clarify catalog versus installed skills, native question-based reprompting and partial versus full verification gates.
+- Bound test workers and exercise crash recovery through compiled JavaScript to avoid unnecessary loader processes in CI verification.
 
 
 ## 2.1.0 — 2026-09-30

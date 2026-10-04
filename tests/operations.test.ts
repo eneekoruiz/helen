@@ -113,8 +113,8 @@ describe('Durable project operations', () => {
 
   it('recovers a real terminated process and its leftover temporary files', () => {
     const file = path.join(cwd, 'target.txt'); fs.writeFileSync(file, 'original');
-    const script = path.join(cwd, 'crash.mts');
-    const source = pathToFileURL(path.resolve('src/core/operations.ts')).href;
+    const script = path.join(cwd, 'crash.mjs');
+    const source = pathToFileURL(path.resolve('dist/core/operations.js')).href;
     fs.writeFileSync(script, `import fs from 'node:fs'; import path from 'node:path';
       import {runProjectOperation,writeAtomicFile,listOperations} from ${JSON.stringify(source)};
       await runProjectOperation(process.cwd(),'crash',async()=>{
@@ -123,7 +123,8 @@ describe('Durable project operations', () => {
         const journal=JSON.parse(fs.readFileSync(path.join('.helen/operations',op.id+'.json'),'utf8'));
         fs.writeFileSync(journal.temporaries[0],'partial'); process.exit(17);
       });`);
-    const child = spawnSync(process.execPath, [path.resolve('node_modules/tsx/dist/cli.mjs'), script], { cwd, encoding: 'utf8', timeout: 30_000, windowsHide: true });
+    const child = spawnSync(process.execPath, [script], { cwd, encoding: 'utf8', timeout: 30_000, windowsHide: true });
+    expect(child.error).toBeUndefined();
     expect(child.status, child.stderr).toBe(17);
     const pending = listOperations(cwd)[0]!;
     expect(pending.status).toBe('active');
