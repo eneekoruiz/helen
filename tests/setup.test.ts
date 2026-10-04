@@ -126,4 +126,15 @@ describe('helen setup', () => {
     expect(fs.existsSync(path.join(tmp, 'AGENTS.md'))).toBe(false);
     expect(fs.existsSync(path.join(tmp, '.claude'))).toBe(false);
   });
+  it('uninstall cleans up managed rules in .agents/rules', () => {
+    const rulesDir = path.join(tmp, '.agents', 'rules');
+    fs.mkdirSync(rulesDir, { recursive: true });
+    fs.writeFileSync(path.join(rulesDir, 'security.md'), `${BLOCK_START}\nmanaged\n${BLOCK_END}\n`);
+    fs.writeFileSync(path.join(rulesDir, 'quality.md'), `custom\n${BLOCK_START}\nmanaged\n${BLOCK_END}\n`);
+    const uninst = uninstallProject({ cwd: tmp });
+    expect(uninst.cleanedRules).toContain('.agents/rules/security.md');
+    expect(uninst.cleanedRules).toContain('.agents/rules/quality.md');
+    expect(fs.existsSync(path.join(rulesDir, 'security.md'))).toBe(false);
+    expect(fs.readFileSync(path.join(rulesDir, 'quality.md'), 'utf8')).toContain('custom');
+  });
 });

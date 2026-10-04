@@ -78,8 +78,13 @@ export async function runModule(
         depsPatch.devDependencies = {};
         for (const dep of mod.meta.devDependencies) {
           if (!existing[dep]) {
-            depsPatch.devDependencies[dep] = dep === '@vitest/coverage-v8' && existing.vitest
-              ? existing.vitest : getDependencyVersion(dep);
+            if (dep === '@vitest/coverage-v8' && existing.vitest) {
+              depsPatch.devDependencies[dep] = existing.vitest;
+            } else if (dep === 'vitest' && existing['@vitest/coverage-v8']) {
+              depsPatch.devDependencies[dep] = existing['@vitest/coverage-v8'];
+            } else {
+              depsPatch.devDependencies[dep] = getDependencyVersion(dep);
+            }
           }
         }
       }

@@ -126,11 +126,13 @@ export function detectInstalledAgents(): SetupAgent[] {
 export interface UninstallResult {
   cleanedInstructions: string[];
   removedSkills: string[];
+  cleanedRules?: string[];
 }
 
 export function uninstallProject(options: { cwd: string; dryRun?: boolean }): UninstallResult {
   const cleanedInstructions: string[] = [];
   const removedSkills: string[] = [];
+  const cleanedRules: string[] = [];
 
   for (const file of ['AGENTS.md', 'CLAUDE.md']) {
     const full = path.join(options.cwd, file);
@@ -146,6 +148,31 @@ export function uninstallProject(options: { cwd: string; dryRun?: boolean }): Un
         }
       }
       cleanedInstructions.push(file);
+    }
+  }
+
+  const rulesDir = path.join(options.cwd, '.agents', 'rules');
+  if (fs.existsSync(rulesDir) && isSafeProjectPath(options.cwd, rulesDir)) {
+    for (const file of ['security.md', 'quality.md', 'design.md']) {
+      const full = path.join(rulesDir, file);
+      if (fs.existsSync(full) && isSafeProjectPath(options.cwd, full) && fs.lstatSync(full).isFile()) {
+        const content = fs.readFileSync(full, 'utf-8');
+        const updated = removeBlock(content);
+        if (updated === content) continue;
+        if (!options.dryRun) {
+          if (!updated.trim()) {
+            fs.unlinkSync(full);
+          } else {
+            fs.writeFileSync(full, updated, 'utf-8');
+          }
+        }
+        cleanedRules.push(`.agents/rules/${file}`);
+      }
+    }
+    if (!options.dryRun) {
+      try {
+        if (fs.readdirSync(rulesDir).length === 0) fs.rmdirSync(rulesDir);
+      } catch { /* ignore */ }
     }
   }
 
@@ -168,7 +195,7 @@ export function uninstallProject(options: { cwd: string; dryRun?: boolean }): Un
     }
   }
 
-  return { cleanedInstructions, removedSkills };
+  return { cleanedInstructions, removedSkills, cleanedRules };
 }
 
 export function setupProject(options: SetupOptions & { global?: boolean }): SetupResult {

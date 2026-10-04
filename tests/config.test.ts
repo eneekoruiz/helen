@@ -85,4 +85,14 @@ describe('Config System (.helenrc)', () => {
     
     fs.removeSync(tmpDir);
   });
+  it('handles partial moduleFiles entries without throwing iterable errors', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'helen-config-'));
+    try {
+      updateConfig(tmpDir, { moduleFiles: { testMod: { created: ['test.ts'] } as any } });
+      const config = readConfig(tmpDir);
+      expect(config?.moduleFiles?.testMod).toEqual({ created: ['test.ts'], modified: [] });
+    } finally {
+      fs.removeSync(tmpDir);
+    }
+  });
 });

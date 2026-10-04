@@ -405,7 +405,8 @@ async function executeToolCall(name: string, args: Record<string, unknown>): Pro
               type: 'text',
               text: JSON.stringify(
                 skills.map(s => {
-                  const document = s.files?.['SKILL.md'] ?? (s.dir ? fs.readFileSync(path.join(s.dir, 'SKILL.md'), 'utf-8') : '');
+                  const skillMdPath = s.dir ? path.join(s.dir, 'SKILL.md') : '';
+                  const document = s.files?.['SKILL.md'] ?? (skillMdPath && fs.existsSync(skillMdPath) ? fs.readFileSync(skillMdPath, 'utf-8') : '');
                   const description = parseFrontmatter(document).data.description;
                   return {
                     name: s.name,

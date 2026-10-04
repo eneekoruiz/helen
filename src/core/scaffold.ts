@@ -37,13 +37,13 @@ export async function scaffoldProject(options: ScaffoldOptions): Promise<boolean
   try {
     if (type === 'vite-react-ts') {
       // Use npm create vite@latest <name> -- --template react-ts
-      execSync(`npm create vite@latest ${name} -- --template react-ts`, {
+      execSync(`npm create vite@latest ${name} --yes -- --template react-ts`, {
         cwd,
         stdio: 'ignore',
       });
     } else if (type === 'next-ts') {
       // Use npx create-next-app@latest <name> --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
-      execSync(`npx create-next-app@latest ${name} --typescript --tailwind --eslint --app --src-dir --import-alias "@/*" --use-npm`, {
+      execSync(`npx --yes create-next-app@latest ${name} --typescript --tailwind --eslint --app --src-dir --import-alias "@/*" --use-npm`, {
         cwd,
         stdio: 'ignore',
       });

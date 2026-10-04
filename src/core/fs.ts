@@ -127,7 +127,7 @@ export function writeFileSafe(
 export function copyTemplate(
   templatePath: string,
   destPath: string,
-  options: { dryRun?: boolean; force?: boolean; vars?: Record<string, any> } = {},
+  options: { dryRun?: boolean; force?: boolean; vars?: Record<string, any>; root?: string } = {},
 ): 'created' | 'skipped' | 'overwritten' {
   if (!fileExists(templatePath)) {
     logger.error(`Template not found: ${templatePath}`);

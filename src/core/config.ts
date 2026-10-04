@@ -128,10 +128,14 @@ export function updateConfig(cwd: string, updates: Partial<HelenConfig>, options
       ...(existing.settings || {}),
       ...(updates.settings || {}),
     },
-    moduleFiles: Object.fromEntries(Object.entries({ ...existing.moduleFiles, ...updates.moduleFiles }).map(([id, files]) => [id, {
-      created: [...new Set([...(existing.moduleFiles?.[id]?.created ?? []), ...files.created])],
-      modified: [...new Set([...(existing.moduleFiles?.[id]?.modified ?? []), ...files.modified])],
-    }])),
+    moduleFiles: Object.fromEntries(
+      Object.entries({ ...existing.moduleFiles, ...updates.moduleFiles })
+        .filter(([, files]) => Boolean(files))
+        .map(([id, files]) => [id, {
+          created: [...new Set([...(existing.moduleFiles?.[id]?.created ?? []), ...(files?.created ?? [])])],
+          modified: [...new Set([...(existing.moduleFiles?.[id]?.modified ?? []), ...(files?.modified ?? [])])],
+        }])
+    ),
   };
 
   ConfigSchema.parse(newConfig);
