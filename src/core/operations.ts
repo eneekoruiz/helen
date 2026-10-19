@@ -109,7 +109,28 @@ function atomicWrite(
     fs.fsyncSync(descriptor);
     fs.closeSync(descriptor);
     descriptor = undefined;
-    fs.renameSync(temporary, file);
+    let lastError: unknown;
+    for (let attempt = 0; attempt < 8; attempt++) {
+      try {
+        fs.renameSync(temporary, file);
+        lastError = undefined;
+        break;
+      } catch (error) {
+        lastError = error;
+        const code = (error as NodeJS.ErrnoException).code;
+        if (
+          process.platform === "win32" &&
+          (code === "EPERM" || code === "EBUSY" || code === "EACCES") &&
+          attempt < 7
+        ) {
+          const end = Date.now() + (attempt + 1) * 15;
+          while (Date.now() < end) {}
+          continue;
+        }
+        throw error;
+      }
+    }
+    if (lastError) throw lastError;
   } finally {
     if (descriptor !== undefined) fs.closeSync(descriptor);
     if (fs.existsSync(temporary)) fs.unlinkSync(temporary);
