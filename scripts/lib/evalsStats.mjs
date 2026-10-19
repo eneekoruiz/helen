@@ -129,10 +129,11 @@ export function falsePositiveRate(cases) {
   };
 }
 
-export function parseStreamJsonEvents(stdout) {
+export function parseStreamJsonEvents(stdout, expectedSkill) {
   let text = '';
   let triggered = false;
   const toolCalls = [];
+  const skillCalls = new Map();
 
   for (const line of (stdout || '').split('\n')) {
     const trimmed = line.trim();
@@ -143,11 +144,14 @@ export function parseStreamJsonEvents(stdout) {
         for (const block of event.message?.content ?? []) {
           if (block.type === 'tool_use') {
             toolCalls.push(block.name);
-            if (block.name === 'Skill') {
-              triggered = true;
-            }
+            if (block.name === 'Skill' && typeof block.id === 'string' &&
+                typeof block.input?.skill === 'string' &&
+                (!expectedSkill || block.input.skill === expectedSkill)) skillCalls.set(block.id, true);
           }
         }
+      }
+      for (const block of event.message?.content ?? []) {
+        if (block.type === 'tool_result' && block.is_error !== true && skillCalls.has(block.tool_use_id)) triggered = true;
       }
       if (event.type === 'result' && typeof event.result === 'string') {
         text = event.result;

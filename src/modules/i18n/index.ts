@@ -1,36 +1,43 @@
-import { recordFileResult, addMissingDependencies } from '../results.js';
-import type { HelenModule } from '../types.js';
-import type { HelenContext, ModuleResult } from '../../core/context.js';
-import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe } from '../../core/fs.js';
-import path from 'node:path';
+import { recordFileResult, addMissingDependencies } from "../results.js";
+import type { HelenModule } from "../types.js";
+import type { HelenContext, ModuleResult } from "../../core/context.js";
+import { createEmptyResult } from "../../core/context.js";
+import { writeFileSafe } from "../../core/fs.js";
+import path from "node:path";
 
-const meta: HelenModule['meta'] = {
-  id: 'i18n',
-  name: 'Internationalization',
-  category: 'i18n',
-  summary: 'react-i18next setup + translation structure',
-  description: 'Sets up i18next for multi-language support, including language detection, folder structure for JSON translations, and a sample language switcher hook.',
-  problemItSolves: 'Adding multi-language support later in a project is painful. Doing it from day one ensures all strings are translatable.',
-  whenToUse: 'Any project that needs to support more than one language.',
-  whenNotToUse: 'One-off landing pages or internal tools for a single-language team.',
+const meta: HelenModule["meta"] = {
+  id: "i18n",
+  name: "Internationalization",
+  category: "i18n",
+  summary: "react-i18next setup + translation structure",
+  description:
+    "Sets up i18next for multi-language support, including language detection, folder structure for JSON translations, and a sample language switcher hook.",
+  problemItSolves:
+    "Adding multi-language support later in a project is painful. Doing it from day one ensures all strings are translatable.",
+  whenToUse: "Any project that needs to support more than one language.",
+  whenNotToUse:
+    "One-off landing pages or internal tools for a single-language team.",
   filesCreated: [
-    'src/i18n/config.ts',
-    'src/i18n/locales/en.json',
-    'src/i18n/locales/es.json'
+    "src/i18n/config.ts",
+    "src/i18n/locales/en.json",
+    "src/i18n/locales/es.json",
   ],
-  filesModified: ['src/main.tsx', 'package.json'],
-  runtimeDependencies: ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
+  filesModified: ["src/main.tsx", "package.json"],
+  runtimeDependencies: [
+    "i18next",
+    "react-i18next",
+    "i18next-browser-languagedetector",
+  ],
   devDependencies: [],
-  requirements: ['React 18+'],
+  requirements: ["React 18+"],
   risks: [],
   nextSteps: [
-    'Import src/i18n/config.ts in your main.tsx',
-    'Start using the useTranslation hook in your components'
+    "Import src/i18n/config.ts in your main.tsx",
+    "Start using the useTranslation hook in your components",
   ],
-  riskLevel: 'low',
-  recommendedLevel: 'beginner',
-  status: 'experimental',
+  riskLevel: "low",
+  recommendedLevel: "beginner",
+  status: "experimental",
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {
@@ -60,37 +67,53 @@ i18n
 export default i18n;
 `;
 
-  const enJson = JSON.stringify({
-    common: {
-      welcome: "Welcome to HELEN",
-      description: "Fast, secure, production-ready setup"
-    }
-  }, null, 2);
+  const enJson = JSON.stringify(
+    {
+      common: {
+        welcome: "Welcome to HELEN",
+        description: "Fast, secure, production-ready setup",
+      },
+    },
+    null,
+    2,
+  );
 
-  const esJson = JSON.stringify({
-    common: {
-      welcome: "Bienvenido a HELEN",
-      description: "Setup rápido, seguro y listo para producción"
-    }
-  }, null, 2);
+  const esJson = JSON.stringify(
+    {
+      common: {
+        welcome: "Bienvenido a HELEN",
+        description: "Setup rápido, seguro y listo para producción",
+      },
+    },
+    null,
+    2,
+  );
 
   for (const [file, content] of [
     ["src/i18n/config.ts", i18nConfig],
     ["src/i18n/locales/en.json", enJson],
     ["src/i18n/locales/es.json", esJson],
   ]) {
-    const status = writeFileSafe(path.join(cwd, file), content, { dryRun, force, root: cwd });
+    const status = writeFileSafe(path.join(cwd, file), content, {
+      dryRun,
+      force,
+      root: cwd,
+    });
     recordFileResult(result, file, status);
   }
 
-  const packageStatus = addMissingDependencies(cwd, {
-    dependencies: {
-      'i18next': '^23.0.0',
-      'react-i18next': '^13.0.0',
-      'i18next-browser-languagedetector': '^7.0.0'
-    }
-  }, { dryRun });
-  recordFileResult(result, 'package.json', packageStatus);
+  const packageStatus = addMissingDependencies(
+    cwd,
+    {
+      dependencies: {
+        i18next: "^23.0.0",
+        "react-i18next": "^13.0.0",
+        "i18next-browser-languagedetector": "^7.0.0",
+      },
+    },
+    { dryRun },
+  );
+  recordFileResult(result, "package.json", packageStatus);
   result.nextSteps.push(...meta.nextSteps);
 
   return result;

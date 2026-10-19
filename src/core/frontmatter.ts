@@ -7,22 +7,22 @@ export interface ParsedDocument {
 }
 
 function scalar(raw: string): string | boolean {
-  let quote = '';
+  let quote = "";
   let end = raw.length;
   for (let i = 0; i < raw.length; i++) {
     const char = raw[i]!;
     if (quote) {
-      if (char === quote && raw[i - 1] !== '\\') quote = '';
+      if (char === quote && raw[i - 1] !== "\\") quote = "";
     } else if (char === '"' || char === "'") {
       quote = char;
-    } else if (char === '#' && (i === 0 || /\s/.test(raw[i - 1]!))) {
+    } else if (char === "#" && (i === 0 || /\s/.test(raw[i - 1]!))) {
       end = i;
       break;
     }
   }
   const value = raw.slice(0, end).trim();
-  if (value === 'true') return true;
-  if (value === 'false') return false;
+  if (value === "true") return true;
+  if (value === "false") return false;
   if (/^(["']).*\1$/.test(value)) return value.slice(1, -1);
   return value;
 }
@@ -47,11 +47,16 @@ export function parseFrontmatter(content: string): ParsedDocument {
     const pair = /^([A-Za-z_][\w-]*):\s*(.*)$/.exec(line);
     if (!pair) continue;
     const [, key, raw] = pair as unknown as [string, string, string];
-    if (raw.trim() === '') {
+    if (raw.trim() === "") {
       data[key] = [];
       listKey = key;
     } else if (/^\[.*\]$/.test(raw.trim())) {
-      data[key] = raw.trim().slice(1, -1).split(',').map(part => String(scalar(part))).filter(Boolean);
+      data[key] = raw
+        .trim()
+        .slice(1, -1)
+        .split(",")
+        .map((part) => String(scalar(part)))
+        .filter(Boolean);
       listKey = null;
     } else {
       data[key] = scalar(raw);

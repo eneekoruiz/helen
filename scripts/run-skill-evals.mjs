@@ -22,6 +22,7 @@ import {
 } from './lib/evalsStats.mjs';
 import { combineProviderMetrics, extractProviderMetrics, providerFailureCause, providerReportedFailure, renderEvidenceReport } from './lib/evalEvidence.mjs';
 import { parseJudgeResult, runAnswerChecks } from './lib/evalChecks.mjs';
+import { requireIncludedBilling, subscriptionEnvironment } from './lib/evalSubscription.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -62,6 +63,8 @@ const dryRun = hasFlag('dry-run');
 const force = hasFlag('force');
 const forceTrigger = hasFlag('force-trigger');
 const reportOnly = hasFlag('report-only');
+const subscriptionOnly = hasFlag('subscription-only');
+const claudeExtraUsageDisabled = hasFlag('claude-extra-usage-disabled');
 const unknownOption = args.find(a => a.startsWith('-'));
 if (unknownOption) throw new Error(`Unknown or repeated option: ${unknownOption}`);
 const only = args;
@@ -109,6 +112,10 @@ function acquireLiveLock() {
 
 function fingerprint(spec) {
   const hash = createHash('sha256').update(JSON.stringify(spec));
+  // A changed evaluator invalidates previous observations just like changed instructions.
+  for (const file of ['scripts/run-skill-evals.mjs', 'scripts/lib/evalsStats.mjs', 'scripts/lib/evalChecks.mjs', 'scripts/lib/evalEvidence.mjs', 'scripts/lib/evalSubscription.mjs']) {
+    hash.update(file).update(fs.readFileSync(path.join(root, file)));
+  }
   const skillDir = path.join(root, 'skills', spec.skill);
   function walk(dir) {
     for (const item of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
@@ -164,6 +171,7 @@ function runProcess(cmd, cmdArgs, cwd, timeoutMs = 300_000, input = '') {
     const resolved = resolveExecutable(cmd);
     const child = spawn(resolved.cmd, cmdArgs, {
       cwd,
+      env: cmd === 'claude' ? subscriptionEnvironment() : process.env,
       stdio: ['pipe', 'pipe', 'pipe'],
       shell: resolved.shell,
       windowsHide: true,
@@ -225,6 +233,7 @@ async function agent(prompt, skill, attempt = 0) {
       'claude',
       [
         '-p',
+        '--settings', JSON.stringify({ forceLoginMethod: 'claudeai' }),
         '--model', model,
         '--setting-sources', 'project',
         '--allowedTools', 'Skill', 'Read', 'Glob', 'Grep',
@@ -236,7 +245,7 @@ async function agent(prompt, skill, attempt = 0) {
       300_000,
       prompt
     );
-    const { text, triggered } = parseStreamJsonEvents(res.out);
+    const { text, triggered } = parseStreamJsonEvents(res.out, skill);
     const blocker = providerFailureCause(res.out, res.code, res.err);
     if (blocker && !providerBlocker) {
       providerBlocker = blocker;
@@ -276,7 +285,7 @@ ${criteria.map((c, i) => `${i + 1}. ${c}`).join('\n')}`;
   try {
     const res = await runProcess(
       'claude',
-      ['-p', '--model', model, '--setting-sources', 'project', '--tools', 'Read', '--output-format', 'json'],
+      ['-p', '--settings', JSON.stringify({ forceLoginMethod: 'claudeai' }), '--model', model, '--setting-sources', 'project', '--tools', 'Read', '--output-format', 'json'],
       cwd,
       300_000,
       judgePrompt
@@ -417,14 +426,16 @@ if (dryRun) {
 if (!reportOnly) {
   if (maxCalls === null) throw new Error('Live evaluations require --max-calls <N>. Use --dry-run to inspect the plan without provider calls.');
   if (maxCalls === 0) throw new Error('No provider calls permitted by --max-calls 0. Use --dry-run or --report-only.');
+  if (!subscriptionOnly) throw new Error('Live evaluations require --subscription-only; paid API fallback is not supported.');
+  requireIncludedBilling(claudeExtraUsageDisabled ? ['--claude-extra-usage-disabled'] : [], ['claude']);
   fs.mkdirSync(resultDir, { recursive: true });
   acquireLiveLock();
   // Local authentication check: never print account details or start a paid prompt to discover missing credentials.
   const auth = await runProcess('claude', ['auth', 'status'], root, 15_000);
   let authenticated = false;
-  try { authenticated = auth.code === 0 && JSON.parse(auth.out).loggedIn === true; } catch { /* missing/unsupported CLI */ }
+  try { const account = JSON.parse(auth.out); authenticated = auth.code === 0 && account.loggedIn === true && account.authMethod === 'claude.ai'; } catch { /* missing/unsupported CLI */ }
   if (!authenticated) {
-    console.error('Evaluation preflight failed: Claude CLI is unavailable, not authenticated, or does not support `claude auth status`. Install/update the CLI and run `claude auth login`; then retry with --max-calls. No evaluation prompts were sent.');
+    console.error('Evaluation preflight failed: Claude CLI is unavailable, not authenticated with claude.ai, or does not support `claude auth status`. Install/update the CLI and run `claude auth login`; then retry with --max-calls. API/cloud authentication is unsupported. No evaluation prompts were sent.');
     process.exit(1);
   }
   const tasks = [];

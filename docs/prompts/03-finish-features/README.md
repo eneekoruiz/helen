@@ -10,6 +10,7 @@ Turn a working product into a premium one: UX, visual design, copy and conversio
 - Not sure what is wrong: start with `audit-product-ux` or `audit-design-excellence`.
 - Looks generic or AI-made: `audit-ai-trace-erasure-and-human-craft`, then `enhance-taste-and-art-direction`.
 - Copy does not convert: `enhance-copy-and-conversion`.
+- Final slides for a PowerPoint talk: `generate-ted-style-presentation` (quick alias: `presentaciones`).
 - No 3D base yet: `generate-3d-foundation`; a scene on top of it: `generate-3d-experience-component`.
 - Heavy visuals feel slow: `audit-motion-and-3d-performance`.
 - Stop: never add effects that reduce legibility, conversion, performance or accessibility.
@@ -48,6 +49,7 @@ Before moving on to 04-before-production:
 | [apply-basic-accessibility-pass](performance/APPLY-basic-accessibility-pass.md) | APPLY | Find and fix basic accessibility problems: keyboard, focus, contrast, semantics, labels, alt text, touch targets and reduced motion. |
 | [apply-basic-performance-pass](performance/APPLY-basic-performance-pass.md) | APPLY | Find and fix evident, user-visible performance problems: bundle and asset weight, extra requests, re-renders, blocking work, load time. |
 | [audit-motion-and-3d-performance](performance/AUDIT-motion-and-3d-performance.md) | AUDIT | Performance budget and safety of animation, 3D, video and shaders: FPS, CLS, LCP, leaks, context loss, fallbacks and reduced motion. |
+| [generate-ted-style-presentation](presentation/GENERATE-ted-style-presentation.md) | GENERATE | Create an editable PowerPoint for a TED-style talk with a strong narrative, editorial layouts and purposeful native animation. |
 | [apply-empty-states-errors-and-microcopy](ux/APPLY-empty-states-errors-and-microcopy.md) | APPLY | Add or fix loading, empty, error, success, disabled and destructive states, with messages that say what happened and what to do next. |
 | [audit-product-ux](ux/AUDIT-product-ux.md) | AUDIT | Audit product clarity, first-run activation, main journeys, consistency, error resilience, ergonomics and premium perception. |
 | [apply-premium-visual-polish](visual/APPLY-premium-visual-polish.md) | APPLY | Fix the visual details that make a product look less premium or unfinished: hierarchy, spacing, type, contrast, icons, states, consistency. |

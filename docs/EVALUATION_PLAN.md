@@ -13,7 +13,7 @@ Defined before changing the evaluation runner on 2026-10-04. These are acceptanc
 
 ## Procedure
 
-Run `npm run evals -- --dry-run` to inspect the selected cases and call budget. Run deterministic evaluator tests before any provider experiment. Real experiments require an authenticated Claude CLI supporting `claude auth status` and an explicit call budget (`--max-calls`); costs are provider-reported when available. Local preflight fails once with an actionable message rather than running every case without authentication. Use `--force` after prompt/spec revisions; content fingerprints prevent stale runs being reused. Optional `--force-trigger` samples the forced condition separately; default runs avoid that extra provider call.
+Run `npm run evals -- --dry-run` to inspect the selected cases and call budget. Run deterministic evaluator tests before any provider experiment. Real experiments require Claude CLI authentication through `claude.ai`, an explicit call budget (`--max-calls`), `--subscription-only` and the human-confirmed `--claude-extra-usage-disabled` account setting. The runner strips inherited API/cloud credentials and forces subscription login for both task and judge calls; API/cloud authentication is rejected. Provider-reported costs, when available, are not invoices. Local preflight fails once with an actionable message rather than running every case without authentication. Use `--force` after prompt/spec revisions; content fingerprints prevent stale runs being reused. Optional `--force-trigger` samples the forced condition separately; default runs avoid that extra provider call.
 
 The runner returns a nonzero status if requested current paired runs are missing, with-skill acceptance criteria fail, or natural activation disagrees with the case expectation. Statistical inconclusiveness remains explicit: passing individual criteria does not establish an improvement over baseline. `--report-only` rebuilds the report without making quality claims or provider calls.
 
@@ -28,3 +28,11 @@ Frozen cases: `helen-reprompt/question-remains-question` and `explicit-exclusion
 Choose representative tasks and specific pass/fail criteria before adjusting instructions; retain a held-out sample. Compare the same model and task under baseline, naturally selected skill, and forced skill conditions. Record successful outcomes, confusion/scope errors, regressions, time, tokens and cost. Zero observed confusion means zero in that tested sample; it does not prove future error-free behavior.
 
 Source: [Anthropic: define success criteria and build evaluations](https://platform.claude.com/docs/en/test-and-evaluate/develop-tests). The current bundled chat-only cases measure answer criteria and routing; they do not yet establish end-to-end coding task effectiveness.
+
+## Repository outcomes and native clarification
+
+The 2026-10-05 extension uses isolated repositories and actual Codex/Claude Code editing tools, with hidden executable graders instead of an LLM judge. Live execution is limited to the included subscription quota, with an explicit call cap and no API-key fallback. A successful artifact, respected write scope, completed execution and successful skill-file read are distinct observations. Blocked or quota-interrupted calls cannot become valid comparison pairs. See [REPOSITORY_EVALS.md](REPOSITORY_EVALS.md).
+
+Native question forms require an interactive observation in each supported application. Test both a request with an essential missing decision and a sufficiently specified request. Verify that the agent opens the available native form, offers task-specific choices/free text, uses the answer in its work, preserves prior answers and avoids unnecessary questions. An instruction mentioning the tool, a headless text question or a separate mock form does not establish that behavior.
+
+After a case has motivated a skill revision, further runs on that case are regression evidence. Use new held-out tasks to evaluate generalization; do not optimize instructions and claim independent improvement on the same sample.

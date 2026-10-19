@@ -14,3 +14,10 @@ coverage/
 sandbox-qa.js
 .helen/
 *.helen-backup
+*.joblib
+*.pth
+*.pt
+*.bin
+*.weights
+__pycache__/
+.pytest_cache/

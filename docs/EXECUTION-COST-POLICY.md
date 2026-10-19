@@ -33,4 +33,4 @@ This is one instruction-interpretation calibration, not executed task completion
 
 The latency rule is exported through the shared contract and included in all 12 standalone skills, including the personal Codex copies. Build, ESLint, HELEN library validation and the full 375-test suite pass after the revision. These check integration and existing invariants, not response-speed improvement. No paid model benchmark or latency comparison was run.
 
-The generic Codex skill validator rejects the pre-existing top-level `version` field used by HELEN. All 12 isolated validation copies pass with only that legacy field omitted; repository metadata remains unchanged and HELEN's own validator passes.
+The 12 repository skills preserve version `2.1.0` under `metadata.version`, which the generic Codex skill validator supports. All 12 pass that validator and HELEN's structural checks; the migration preserves their instruction bodies byte for byte. Installed global copies and frozen evaluation snapshots retain their original bytes. Historical results remain tied to their recorded input hashes and do not certify a different current skill file.

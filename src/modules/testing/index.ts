@@ -1,33 +1,48 @@
-import { recordFileResult } from '../results.js';
-import type { HelenModule } from '../types.js';
-import type { HelenContext, ModuleResult } from '../../core/context.js';
-import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe, patchPackageJson } from '../../core/fs.js';
-import { getTemplatePath } from '../../core/templateResolver.js';
-import path from 'node:path';
-import fs from 'fs-extra';
+import { recordFileResult } from "../results.js";
+import type { HelenModule } from "../types.js";
+import type { HelenContext, ModuleResult } from "../../core/context.js";
+import { createEmptyResult } from "../../core/context.js";
+import { writeFileSafe, patchPackageJson } from "../../core/fs.js";
+import { getTemplatePath } from "../../core/templateResolver.js";
+import path from "node:path";
+import fs from "fs-extra";
 
-const meta: HelenModule['meta'] = {
-  id: 'testing',
-  name: 'Testing Setup',
-  category: 'Testing',
-  summary: 'Vitest + Testing Library + jsdom + example test',
+const meta: HelenModule["meta"] = {
+  id: "testing",
+  name: "Testing Setup",
+  category: "Testing",
+  summary: "Vitest + Testing Library + jsdom + example test",
   description:
-    'Sets up Vitest as the test runner with jsdom environment, React Testing Library, and a sample test file to get started immediately.',
+    "Sets up Vitest as the test runner with jsdom environment, React Testing Library, and a sample test file to get started immediately.",
   problemItSolves:
-    'Projects without a test setup rarely add tests later. This module removes the setup friction entirely.',
-  whenToUse: 'Always. Tests are not optional in serious projects.',
-  whenNotToUse: 'If you already have a working test setup with Jest or Vitest.',
-  filesCreated: ['vitest.config.ts', 'src/test/setup.ts', 'src/test/example.test.ts'],
-  filesModified: ['package.json'],
+    "Projects without a test setup rarely add tests later. This module removes the setup friction entirely.",
+  whenToUse: "Always. Tests are not optional in serious projects.",
+  whenNotToUse: "If you already have a working test setup with Jest or Vitest.",
+  filesCreated: [
+    "vitest.config.ts",
+    "src/test/setup.ts",
+    "src/test/example.test.ts",
+  ],
+  filesModified: ["package.json"],
   runtimeDependencies: [],
-  devDependencies: ['vitest', '@vitest/coverage-v8', '@testing-library/react', '@testing-library/jest-dom', '@testing-library/user-event', 'jsdom'],
-  requirements: ['Node.js >= 20.19 or >= 22.12', 'React project', 'TypeScript recommended'],
-  risks: ['May conflict with existing vitest.config.ts'],
-  nextSteps: ['Run npm run test to verify setup', 'Write your first real test'],
-  riskLevel: 'low',
-  recommendedLevel: 'beginner',
-  status: 'stable',
+  devDependencies: [
+    "vitest",
+    "@vitest/coverage-v8",
+    "@testing-library/react",
+    "@testing-library/jest-dom",
+    "@testing-library/user-event",
+    "jsdom",
+  ],
+  requirements: [
+    "Node.js >= 20.19 or >= 22.12",
+    "React project",
+    "TypeScript recommended",
+  ],
+  risks: ["May conflict with existing vitest.config.ts"],
+  nextSteps: ["Run npm run test to verify setup", "Write your first real test"],
+  riskLevel: "low",
+  recommendedLevel: "beginner",
+  status: "stable",
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {
@@ -35,10 +50,10 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
   const { cwd, dryRun, force } = ctx;
 
   // vitest.config.ts from template
-  const vitestTemplatePath = getTemplatePath('testing/vitest.config.ts');
+  const vitestTemplatePath = getTemplatePath("testing/vitest.config.ts");
   let vitestContent: string;
   if (fs.existsSync(vitestTemplatePath)) {
-    vitestContent = fs.readFileSync(vitestTemplatePath, 'utf-8');
+    vitestContent = fs.readFileSync(vitestTemplatePath, "utf-8");
   } else {
     vitestContent = `/// <reference types="vitest" />
 import { defineConfig } from 'vitest/config';
@@ -72,8 +87,12 @@ export default defineConfig({
 });
 `;
   }
-  const r1 = writeFileSafe(path.join(cwd, 'vitest.config.ts'), vitestContent, { dryRun, force, root: cwd });
-  recordFileResult(result, 'vitest.config.ts', r1);
+  const r1 = writeFileSafe(path.join(cwd, "vitest.config.ts"), vitestContent, {
+    dryRun,
+    force,
+    root: cwd,
+  });
+  recordFileResult(result, "vitest.config.ts", r1);
 
   // Test setup file
   const setupContent = `import '@testing-library/jest-dom';
@@ -104,8 +123,12 @@ Object.defineProperty(window, 'ResizeObserver', {
   value: ResizeObserverMock,
 });
 `;
-  const r2 = writeFileSafe(path.join(cwd, 'src/test/setup.ts'), setupContent, { dryRun, force, root: cwd });
-  recordFileResult(result, 'src/test/setup.ts', r2);
+  const r2 = writeFileSafe(path.join(cwd, "src/test/setup.ts"), setupContent, {
+    dryRun,
+    force,
+    root: cwd,
+  });
+  recordFileResult(result, "src/test/setup.ts", r2);
 
   // Example test
   const exampleTest = `import { describe, it, expect } from 'vitest';
@@ -123,21 +146,29 @@ describe('Example test suite', () => {
   });
 });
 `;
-  const r3 = writeFileSafe(path.join(cwd, 'src/test/example.test.ts'), exampleTest, { dryRun, force, root: cwd });
-  recordFileResult(result, 'src/test/example.test.ts', r3);
+  const r3 = writeFileSafe(
+    path.join(cwd, "src/test/example.test.ts"),
+    exampleTest,
+    { dryRun, force, root: cwd },
+  );
+  recordFileResult(result, "src/test/example.test.ts", r3);
 
   // Patch package.json
-  const patchResult = patchPackageJson(cwd, {
-    scripts: {
-      test: 'vitest run',
-      'test:watch': 'vitest',
-      'test:coverage': 'vitest run --coverage',
+  const patchResult = patchPackageJson(
+    cwd,
+    {
+      scripts: {
+        test: "vitest run",
+        "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage",
+      },
     },
-  }, { dryRun });
-  recordFileResult(result, 'package.json', patchResult);
+    { dryRun },
+  );
+  recordFileResult(result, "package.json", patchResult);
 
-  result.nextSteps.push('Run npm run test to verify');
-  result.nextSteps.push('Write your first component test');
+  result.nextSteps.push("Run npm run test to verify");
+  result.nextSteps.push("Write your first component test");
 
   return result;
 }

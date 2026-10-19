@@ -1,29 +1,33 @@
-import { recordFileResult, addMissingDependencies } from '../results.js';
-import type { HelenModule } from '../types.js';
-import type { HelenContext, ModuleResult } from '../../core/context.js';
-import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe, patchJson } from '../../core/fs.js';
-import path from 'node:path';
+import { recordFileResult, addMissingDependencies } from "../results.js";
+import type { HelenModule } from "../types.js";
+import type { HelenContext, ModuleResult } from "../../core/context.js";
+import { createEmptyResult } from "../../core/context.js";
+import { writeFileSafe, patchJson } from "../../core/fs.js";
+import path from "node:path";
 
-const meta: HelenModule['meta'] = {
-  id: 'shadcn',
-  name: 'Shadcn UI',
-  category: 'Infrastructure',
-  summary: 'Auto-setup for Shadcn UI components',
-  description: 'Configures components.json, installs lucide-react and clsx, and sets up the lib/utils.ts helper.',
-  problemItSolves: 'Manual Shadcn setup requires many steps and CLI interactions.',
-  whenToUse: 'When you want high-quality, accessible UI components.',
-  whenNotToUse: 'If you are not using Tailwind CSS.',
-  filesCreated: ['components.json', 'src/lib/utils.ts'],
-  filesModified: ['package.json', 'tailwind.config.js'],
-  runtimeDependencies: ['lucide-react', 'clsx', 'tailwind-merge'],
+const meta: HelenModule["meta"] = {
+  id: "shadcn",
+  name: "Shadcn UI",
+  category: "Infrastructure",
+  summary: "Auto-setup for Shadcn UI components",
+  description:
+    "Configures components.json, installs lucide-react and clsx, and sets up the lib/utils.ts helper.",
+  problemItSolves:
+    "Manual Shadcn setup requires many steps and CLI interactions.",
+  whenToUse: "When you want high-quality, accessible UI components.",
+  whenNotToUse: "If you are not using Tailwind CSS.",
+  filesCreated: ["components.json", "src/lib/utils.ts"],
+  filesModified: ["package.json", "tailwind.config.js"],
+  runtimeDependencies: ["lucide-react", "clsx", "tailwind-merge"],
   devDependencies: [],
-  requirements: ['Tailwind CSS must be installed'],
+  requirements: ["Tailwind CSS must be installed"],
   risks: [],
-  nextSteps: ['Run "npx shadcn-ui@latest add button" to add your first component'],
-  riskLevel: 'low',
-  recommendedLevel: 'intermediate',
-  status: 'planned',
+  nextSteps: [
+    'Run "npx shadcn-ui@latest add button" to add your first component',
+  ],
+  riskLevel: "low",
+  recommendedLevel: "intermediate",
+  status: "planned",
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {
@@ -32,23 +36,25 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
 
   // components.json
   const componentsJson = {
-    "$schema": "https://ui.shadcn.com/schema.json",
-    "style": "default",
-    "rsc": false,
-    "tsx": true,
-    "tailwind": {
-      "config": "tailwind.config.js",
-      "css": "src/index.css",
-      "baseColor": "slate",
-      "cssVariables": true
+    $schema: "https://ui.shadcn.com/schema.json",
+    style: "default",
+    rsc: false,
+    tsx: true,
+    tailwind: {
+      config: "tailwind.config.js",
+      css: "src/index.css",
+      baseColor: "slate",
+      cssVariables: true,
     },
-    "aliases": {
-      "components": "@/components",
-      "utils": "@/lib/utils"
-    }
+    aliases: {
+      components: "@/components",
+      utils: "@/lib/utils",
+    },
   };
-  const r1 = patchJson(path.join(cwd, 'components.json'), componentsJson, { dryRun });
-  recordFileResult(result, 'components.json', r1);
+  const r1 = patchJson(path.join(cwd, "components.json"), componentsJson, {
+    dryRun,
+  });
+  recordFileResult(result, "components.json", r1);
 
   // lib/utils.ts
   const utilsTs = `import { type ClassValue, clsx } from "clsx"
@@ -59,18 +65,26 @@ export function cn(...inputs: ClassValue[]) {
 }
 `;
 
-  const r2 = writeFileSafe(path.join(cwd, 'src/lib/utils.ts'), utilsTs, { dryRun, force, root: cwd });
-  recordFileResult(result, 'src/lib/utils.ts', r2);
+  const r2 = writeFileSafe(path.join(cwd, "src/lib/utils.ts"), utilsTs, {
+    dryRun,
+    force,
+    root: cwd,
+  });
+  recordFileResult(result, "src/lib/utils.ts", r2);
 
   // package.json
-  const r3 = addMissingDependencies(cwd, {
-    dependencies: {
-      "lucide-react": "^0.344.0",
-      "clsx": "^2.1.0",
-      "tailwind-merge": "^2.2.1"
-    }
-  }, { dryRun });
-  recordFileResult(result, 'package.json', r3);
+  const r3 = addMissingDependencies(
+    cwd,
+    {
+      dependencies: {
+        "lucide-react": "^0.344.0",
+        clsx: "^2.1.0",
+        "tailwind-merge": "^2.2.1",
+      },
+    },
+    { dryRun },
+  );
+  recordFileResult(result, "package.json", r3);
 
   return result;
 }

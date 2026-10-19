@@ -14,6 +14,8 @@ The user's original intent, exclusions and authorization govern the task. A rewr
 
 Use existing context before asking questions. Ask only for essential missing information or decisions that cannot safely be inferred. Proceed autonomously with reversible, authorized work; do not ask repeatedly whether to continue. Obtain authorization for destructive or irreversible actions outside existing authorization. Respect environment permissions and external blockers.
 
+When missing preferences, constraints or acceptance decisions materially affect implementation or evaluation, invoke the application's available native structured question tool with concise task-specific choices and free text. Reuse existing answers and continue independent work while waiting. If no native question tool is available in the current mode, ask conversationally; never create a separate visual artifact or invent answers. Proceed without a questionnaire when context suffices.
+
 ## Acceptance before changes
 
 1. Inspect the repository, scripts, tests, CI, documentation and affected user workflows.
@@ -23,16 +25,16 @@ Use existing context before asking questions. Ask only for essential missing inf
 
 ## Autonomous improvement discovery
 
-Execute: inspect → implement authorized changes → verify → independently re-audit → discover additional opportunities → repeat.
+Execute: inspect → implement authorized changes → verify → targeted discovery.
 
-After the initial checklist passes, ask: "What further evidence-backed improvement would materially improve correctness, user workflow, clarity, security, performance, recovery or verification?" Examine failure paths, edge cases, adjacent consumers and documentation. Do this without waiting for the user to ask for more ideas.
+After the initial checklist passes, conduct one focused discovery pass: "What critical evidence-backed improvement would materially improve correctness, user workflow, clarity, security, performance, recovery or verification?" Examine failure paths, edge cases, adjacent consumers and documentation.
 
-Apply actionable improvements within original authorization, then re-verify their effects and repeat discovery. An audit-only task continues investigation and reports findings without mutation. Record proposals outside authorization with evidence, benefit, effort and dependencies. There is no arbitrary retry or iteration cap. Stop when acceptance criteria are satisfied and the latest discovery pass finds no further actionable improvement within scope, or when progress requires missing input, authorization or an external dependency. Do not repeat an unchanged failed attempt; change the hypothesis or report the concrete blocker. User cancellation and explicit resource limits remain binding.
+Apply actionable improvements within original authorization, then re-verify their effects. An audit-only task continues investigation and reports findings without mutation. Record proposals outside authorization with evidence, benefit, effort and dependencies. Once defined acceptance criteria are met and the single discovery pass completes, synthesize results and report optional further recommendations rather than looping indefinitely. Do not repeat an unchanged failed attempt; change the hypothesis or report the concrete blocker. User cancellation and explicit resource limits remain binding.
 
 ## Verification and evidence
 
 - During fixes, run focused regressions and reuse unchanged passing evidence; before completion run repository build, typecheck, lint, tests and locally reproducible CI commands. Report each as passed, failed, not run or not applicable with command and result. Local checks do not prove a hosted OS matrix passed.
-- For affected UI, run Chromium via Playwright or an available direct browser MCP at 375, 768 and 1440 px; check interactions, responsive layout, reduced motion and browser errors. If unavailable, state the blocker and leave those criteria unverified.
+- For affected UI where responsive layout or interactions changed, run Chromium via Playwright or an available direct browser MCP at 375, 768 and 1440 px; check interactions, responsive layout, reduced motion and browser errors. If unavailable, state the blocker and leave those criteria unverified.
 - Never delete or weaken checks to manufacture success. Add regression coverage for meaningful defects and invariants, not assertions that merely mirror implementation.
 - Report observable outcomes and residual risks. No perfection scores, guaranteed zero defects or certification from incomplete evidence.
 
@@ -60,6 +62,3 @@ Before tuning instructions, define task-specific success criteria, representativ
 
 Record consequential decisions, verification evidence and residual risks in existing project memory when authorized. Never print secrets. Third-party installations, account connections, paid calls and external publication require authorization when it is not already present; catalog references do not constitute that authorization.
 
-## Runtime-aware efficiency
-
-Use one agent for small cohesive tasks. Choose the cheapest available capable model when routing is supported; keep the current agent when finishing is cheaper than transferring context. Delegate only when expected expertise or context savings outweigh transfer, coordination, integration, verification and retries. Flash is optional when available and suitable. Keep shared instructions as a stable prefix and task facts after it; provider caching requires runtime support and measured cache hits. Prefer an available direct browser MCP. Use focused regressions during fixes and the full repository gate before completion. Never invent savings.

@@ -1,29 +1,38 @@
-import { recordFileResult } from '../results.js';
-import type { HelenModule } from '../types.js';
-import type { HelenContext, ModuleResult } from '../../core/context.js';
-import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe } from '../../core/fs.js';
-import path from 'node:path';
+import { recordFileResult } from "../results.js";
+import type { HelenModule } from "../types.js";
+import type { HelenContext, ModuleResult } from "../../core/context.js";
+import { createEmptyResult } from "../../core/context.js";
+import { writeFileSafe } from "../../core/fs.js";
+import path from "node:path";
 
-const meta: HelenModule['meta'] = {
-  id: 'seo',
-  name: 'SEO Basics',
-  category: 'SEO',
-  summary: 'SEO component + robots.txt + web manifest',
-  description: 'Creates a reusable SEO React component, robots.txt, and a basic web manifest for discoverability.',
-  problemItSolves: 'SPAs have poor SEO by default. This provides the foundational elements search engines need.',
-  whenToUse: 'On any public-facing web application.',
-  whenNotToUse: 'Internal tools or admin panels not indexed by search engines.',
-  filesCreated: ['src/components/SEO.tsx', 'public/robots.txt', 'public/manifest.json'],
+const meta: HelenModule["meta"] = {
+  id: "seo",
+  name: "SEO Basics",
+  category: "SEO",
+  summary: "SEO component + robots.txt + web manifest",
+  description:
+    "Creates a reusable SEO React component, robots.txt, and a basic web manifest for discoverability.",
+  problemItSolves:
+    "SPAs have poor SEO by default. This provides the foundational elements search engines need.",
+  whenToUse: "On any public-facing web application.",
+  whenNotToUse: "Internal tools or admin panels not indexed by search engines.",
+  filesCreated: [
+    "src/components/SEO.tsx",
+    "public/robots.txt",
+    "public/manifest.json",
+  ],
   filesModified: [],
-  runtimeDependencies: ['react-helmet-async'],
+  runtimeDependencies: ["react-helmet-async"],
   devDependencies: [],
-  requirements: ['React project'],
+  requirements: ["React project"],
   risks: [],
-  nextSteps: ['Customize robots.txt for your domain', 'Add og-image.png to public/'],
-  riskLevel: 'low',
-  recommendedLevel: 'beginner',
-  status: 'stable',
+  nextSteps: [
+    "Customize robots.txt for your domain",
+    "Add og-image.png to public/",
+  ],
+  riskLevel: "low",
+  recommendedLevel: "beginner",
+  status: "stable",
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {
@@ -67,32 +76,51 @@ export function SEO({ title, description, canonical, ogImage, noIndex }: SEOProp
   );
 }
 `;
-  const r1 = writeFileSafe(path.join(cwd, 'src/components/SEO.tsx'), seoComponent, { dryRun, force, root: cwd });
-  recordFileResult(result, 'src/components/SEO.tsx', r1);
+  const r1 = writeFileSafe(
+    path.join(cwd, "src/components/SEO.tsx"),
+    seoComponent,
+    { dryRun, force, root: cwd },
+  );
+  recordFileResult(result, "src/components/SEO.tsx", r1);
 
   // robots.txt
   const robots = `User-agent: *\nAllow: /\n\nSitemap: https://example.com/sitemap.xml\n`;
-  const r2 = writeFileSafe(path.join(cwd, 'public/robots.txt'), robots, { dryRun, force, root: cwd });
-  recordFileResult(result, 'public/robots.txt', r2);
+  const r2 = writeFileSafe(path.join(cwd, "public/robots.txt"), robots, {
+    dryRun,
+    force,
+    root: cwd,
+  });
+  recordFileResult(result, "public/robots.txt", r2);
 
   // manifest.json
-  const manifest = JSON.stringify({
-    name: 'My App',
-    short_name: 'App',
-    start_url: '/',
-    display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#000000',
-    icons: [
-      { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-    ],
-  }, null, 2);
-  const r3 = writeFileSafe(path.join(cwd, 'public/manifest.json'), manifest, { dryRun, force, root: cwd });
-  recordFileResult(result, 'public/manifest.json', r3);
+  const manifest = JSON.stringify(
+    {
+      name: "My App",
+      short_name: "App",
+      start_url: "/",
+      display: "standalone",
+      background_color: "#ffffff",
+      theme_color: "#000000",
+      icons: [
+        { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+        { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      ],
+    },
+    null,
+    2,
+  );
+  const r3 = writeFileSafe(path.join(cwd, "public/manifest.json"), manifest, {
+    dryRun,
+    force,
+    root: cwd,
+  });
+  recordFileResult(result, "public/manifest.json", r3);
 
-  result.nextSteps.push('Replace example.com in robots.txt');
-  result.nextSteps.push('Add icon files to public/icons/');
+  result.nextSteps.push("Replace example.com in robots.txt");
+  result.nextSteps.push("Add icon files to public/icons/");
+  result.nextSteps.push(
+    "Render <SEO> in each route. On React 16–18, wrap your app in <HelmetProvider> from react-helmet-async; React 19 manages document metadata natively.",
+  );
   return result;
 }
 

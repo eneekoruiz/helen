@@ -6,6 +6,7 @@ Prompts for every moment of a project, written in concise English, organized by 
 - **Rules every prompt follows:** [RULES.md](RULES.md). **How prompts are written:** [CONTRACT.md](CONTRACT.md).
 - **Paste-into-any-AI entry point:** [MASTER.md](MASTER.md).
 - **Goals and their steps:** [playbooks.json](playbooks.json).
+- **PowerPoint talks:** [TED-style presentation](03-finish-features/presentation/GENERATE-ted-style-presentation.md), available directly as `helen prompts show presentaciones --cache-ready` or through the `powerpoint` alias. From this checkout, `npm run prompt:powerpoint` prints the ready-to-paste prompt.
 
 ## Phases
 

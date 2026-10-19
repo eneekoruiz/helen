@@ -42,7 +42,7 @@ export function formatJsonEnvelope<T = unknown>(
     ok?: boolean;
     warnings?: string[];
     errors?: string[];
-  }
+  },
 ): JsonEnvelope<T> {
   const warnings = [...globalWarnings, ...(options?.warnings ?? [])];
   const errors = [...globalErrors, ...(options?.errors ?? [])];
@@ -65,10 +65,10 @@ export function printJsonAndExit<T = unknown>(
     warnings?: string[];
     errors?: string[];
     exitCode?: number;
-  }
+  },
 ): void {
   const envelope = formatJsonEnvelope(command, data, options);
-  process.stdout.write(JSON.stringify(envelope, null, 2) + '\n');
+  process.stdout.write(JSON.stringify(envelope, null, 2) + "\n");
 
   if (options?.exitCode !== undefined) {
     process.exitCode = options.exitCode;

@@ -1,13 +1,16 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 export interface EvalCase {
   id: string;
   prompt: string;
   criteria: string[];
   expectTrigger?: boolean;
-  checks?: Array<{ type: 'includes' | 'excludes'; value: string } | { type: 'json-equals'; path: string; value: unknown }>;
+  checks?: Array<
+    | { type: "includes" | "excludes"; value: string }
+    | { type: "json-equals"; path: string; value: unknown }
+  >;
 }
 
 export interface EvalSpec {
@@ -27,8 +30,18 @@ export interface DeltaStatSummary extends StatSummary {
   isNoise: boolean;
 }
 
-const EVALS_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'evals');
-const SKILLS_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'skills');
+const EVALS_ROOT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "..",
+  "evals",
+);
+const SKILLS_ROOT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "..",
+  "skills",
+);
 
 export function getEvalsRoot(): string {
   return EVALS_ROOT;
@@ -50,19 +63,19 @@ const T_TABLE_95: Record<number, number> = {
   10: 2.228,
   11: 2.201,
   12: 2.179,
-  13: 2.160,
+  13: 2.16,
   14: 2.145,
   15: 2.131,
-  16: 2.120,
-  17: 2.110,
+  16: 2.12,
+  17: 2.11,
   18: 2.101,
   19: 2.093,
   20: 2.086,
-  21: 2.080,
+  21: 2.08,
   22: 2.074,
   23: 2.069,
   24: 2.064,
-  25: 2.060,
+  25: 2.06,
   26: 2.056,
   27: 2.052,
   28: 2.048,
@@ -74,15 +87,21 @@ export function studentTCriticalValue(df: number): number {
   if (df <= 0) return 0;
   if (T_TABLE_95[df]) return T_TABLE_95[df]!;
   if (df < 20) {
-    const keys = Object.keys(T_TABLE_95).map(Number).sort((a, b) => a - b);
-    const closest = keys.reduce((prev, curr) => (Math.abs(curr - df) < Math.abs(prev - df) ? curr : prev));
+    const keys = Object.keys(T_TABLE_95)
+      .map(Number)
+      .sort((a, b) => a - b);
+    const closest = keys.reduce((prev, curr) =>
+      Math.abs(curr - df) < Math.abs(prev - df) ? curr : prev,
+    );
     return T_TABLE_95[closest]!;
   }
   // Large-df quantile expansion; rounded to the same precision as the NIST table.
   const z = 1.959963984540054;
-  const critical = z + (z ** 3 + z) / (4 * df)
-    + (5 * z ** 5 + 16 * z ** 3 + 3 * z) / (96 * df ** 2)
-    + (3 * z ** 7 + 19 * z ** 5 + 17 * z ** 3 - 15 * z) / (384 * df ** 3);
+  const critical =
+    z +
+    (z ** 3 + z) / (4 * df) +
+    (5 * z ** 5 + 16 * z ** 3 + 3 * z) / (96 * df ** 2) +
+    (3 * z ** 7 + 19 * z ** 5 + 17 * z ** 3 - 15 * z) / (384 * df ** 3);
   return Math.round(critical * 1000) / 1000;
 }
 
@@ -106,7 +125,8 @@ export function sampleStdDev(values: number[]): number {
  * Calculates mean, sample standard deviation and a 95% confidence interval using Student's t-distribution.
  */
 export function confidenceInterval95(values: number[]): StatSummary {
-  if (!values.length || values.some(value => !Number.isFinite(value))) throw new Error('Confidence summaries require finite observations');
+  if (!values.length || values.some((value) => !Number.isFinite(value)))
+    throw new Error("Confidence summaries require finite observations");
   const avg = mean(values);
   const n = values.length;
   if (n <= 1) {
@@ -135,11 +155,15 @@ export function confidenceInterval95(values: number[]): StatSummary {
 /**
  * Calculates paired delta confidence interval (withSkill - baseline) across N runs.
  */
-export function pairedDeltaConfidenceInterval(baselineScores: number[], withSkillScores: number[]): DeltaStatSummary {
-  if (baselineScores.length !== withSkillScores.length) throw new Error('Paired scores must have equal lengths');
+export function pairedDeltaConfidenceInterval(
+  baselineScores: number[],
+  withSkillScores: number[],
+): DeltaStatSummary {
+  if (baselineScores.length !== withSkillScores.length)
+    throw new Error("Paired scores must have equal lengths");
   const n = Math.min(baselineScores.length, withSkillScores.length);
   if (n === 0) {
-    throw new Error('Paired deltas require observations');
+    throw new Error("Paired deltas require observations");
   }
   const diffs: number[] = [];
   for (let i = 0; i < n; i++) {
@@ -157,23 +181,26 @@ export function pairedDeltaConfidenceInterval(baselineScores: number[], withSkil
 export function calculateGrade(
   meanDelta: number,
   withSkillMean: number,
-  isNoise: boolean
-): 'A' | 'B' | 'C' | 'NOISE' {
-  if (isNoise) return 'NOISE';
-  if (meanDelta >= 20 && withSkillMean >= 85) return 'A';
-  if (withSkillMean >= 75) return 'B';
-  return 'C';
+  isNoise: boolean,
+): "A" | "B" | "C" | "NOISE" {
+  if (isNoise) return "NOISE";
+  if (meanDelta >= 20 && withSkillMean >= 85) return "A";
+  if (withSkillMean >= 75) return "B";
+  return "C";
 }
 
-export function falsePositiveRate(cases: Array<{ expectTrigger?: boolean; triggered: boolean }>): {
+export function falsePositiveRate(
+  cases: Array<{ expectTrigger?: boolean; triggered: boolean }>,
+): {
   falsePositives: number;
   totalNegative: number;
   rate: number;
 } {
-  const negativeCases = cases.filter(c => c.expectTrigger === false);
+  const negativeCases = cases.filter((c) => c.expectTrigger === false);
   const totalNegative = negativeCases.length;
-  if (totalNegative === 0) return { falsePositives: 0, totalNegative: 0, rate: 0 };
-  const falsePositives = negativeCases.filter(c => c.triggered).length;
+  if (totalNegative === 0)
+    return { falsePositives: 0, totalNegative: 0, rate: 0 };
+  const falsePositives = negativeCases.filter((c) => c.triggered).length;
   return {
     falsePositives,
     totalNegative,
@@ -184,27 +211,43 @@ export function falsePositiveRate(cases: Array<{ expectTrigger?: boolean; trigge
 /**
  * Parses events from claude `--output-format stream-json` lines.
  */
-export function parseStreamJsonEvents(stdout: string): { text: string; triggered: boolean; toolCalls: string[] } {
-  let text = '';
+export function parseStreamJsonEvents(
+  stdout: string,
+  expectedSkill?: string,
+): { text: string; triggered: boolean; toolCalls: string[] } {
+  let text = "";
   let triggered = false;
   const toolCalls: string[] = [];
+  const skillCalls = new Set<string>();
 
-  for (const line of stdout.split('\n')) {
+  for (const line of stdout.split("\n")) {
     const trimmed = line.trim();
     if (!trimmed) continue;
     try {
       const event = JSON.parse(trimmed);
-      if (event.type === 'assistant') {
+      if (event.type === "assistant") {
         for (const block of event.message?.content ?? []) {
-          if (block.type === 'tool_use') {
+          if (block.type === "tool_use") {
             toolCalls.push(block.name);
-            if (block.name === 'Skill') {
-              triggered = true;
-            }
+            if (
+              block.name === "Skill" &&
+              typeof block.id === "string" &&
+              typeof block.input?.skill === "string" &&
+              (!expectedSkill || block.input.skill === expectedSkill)
+            )
+              skillCalls.add(block.id);
           }
         }
       }
-      if (event.type === 'result' && typeof event.result === 'string') {
+      for (const block of event.message?.content ?? []) {
+        if (
+          block.type === "tool_result" &&
+          block.is_error !== true &&
+          skillCalls.has(block.tool_use_id)
+        )
+          triggered = true;
+      }
+      if (event.type === "result" && typeof event.result === "string") {
         text = event.result;
       }
     } catch {
@@ -215,30 +258,44 @@ export function parseStreamJsonEvents(stdout: string): { text: string; triggered
   return { text, triggered, toolCalls };
 }
 
-const ALLOWED_CASE_KEYS = new Set(['id', 'prompt', 'criteria', 'expectTrigger', 'checks']);
+const ALLOWED_CASE_KEYS = new Set([
+  "id",
+  "prompt",
+  "criteria",
+  "expectTrigger",
+  "checks",
+]);
 
 /**
  * Validates an eval spec JSON against HELEN contract.
  */
-export function validateEvalSpec(spec: unknown, filename: string, skillsRoot: string = SKILLS_ROOT): string[] {
+export function validateEvalSpec(
+  spec: unknown,
+  filename: string,
+  skillsRoot: string = SKILLS_ROOT,
+): string[] {
   const issues: string[] = [];
-  const baseName = path.basename(filename, '.json');
+  const baseName = path.basename(filename, ".json");
 
-  if (!spec || typeof spec !== 'object' || Array.isArray(spec)) {
+  if (!spec || typeof spec !== "object" || Array.isArray(spec)) {
     return [`${filename}: must be an object`];
   }
 
   const record = spec as Record<string, unknown>;
 
-  if (typeof record.skill !== 'string' || !record.skill.trim()) {
+  if (typeof record.skill !== "string" || !record.skill.trim()) {
     issues.push(`${filename}: missing or invalid "skill" property`);
   } else {
     if (record.skill !== baseName) {
-      issues.push(`${filename}: skill "${record.skill}" does not match file name "${baseName}"`);
+      issues.push(
+        `${filename}: skill "${record.skill}" does not match file name "${baseName}"`,
+      );
     }
     const skillPath = path.join(skillsRoot, record.skill);
     if (!fs.existsSync(skillPath)) {
-      issues.push(`${filename}: skill "${record.skill}" does not exist in ${path.relative(process.cwd(), skillsRoot)}`);
+      issues.push(
+        `${filename}: skill "${record.skill}" does not exist in ${path.relative(process.cwd(), skillsRoot)}`,
+      );
     }
   }
 
@@ -251,7 +308,7 @@ export function validateEvalSpec(spec: unknown, filename: string, skillsRoot: st
 
   record.cases.forEach((c: unknown, index: number) => {
     const caseLabel = `${filename} case #${index + 1}`;
-    if (!c || typeof c !== 'object' || Array.isArray(c)) {
+    if (!c || typeof c !== "object" || Array.isArray(c)) {
       issues.push(`${caseLabel}: case must be an object`);
       return;
     }
@@ -261,16 +318,20 @@ export function validateEvalSpec(spec: unknown, filename: string, skillsRoot: st
     // Check unknown keys
     for (const key of Object.keys(caseObj)) {
       if (!ALLOWED_CASE_KEYS.has(key)) {
-        issues.push(`${caseLabel} (${caseObj.id ?? 'unknown'}): unknown property "${key}"`);
+        issues.push(
+          `${caseLabel} (${caseObj.id ?? "unknown"}): unknown property "${key}"`,
+        );
       }
     }
 
     // Check id
-    if (typeof caseObj.id !== 'string' || !caseObj.id.trim()) {
+    if (typeof caseObj.id !== "string" || !caseObj.id.trim()) {
       issues.push(`${caseLabel}: missing or empty "id"`);
     } else {
       if (!/^[a-z0-9_-]+$/.test(caseObj.id)) {
-        issues.push(`${caseLabel} (${caseObj.id}): id must be lowercase alphanumeric with hyphens or underscores`);
+        issues.push(
+          `${caseLabel} (${caseObj.id}): id must be lowercase alphanumeric with hyphens or underscores`,
+        );
       }
       if (seenIds.has(caseObj.id)) {
         issues.push(`${caseLabel}: duplicate case id "${caseObj.id}"`);
@@ -279,45 +340,74 @@ export function validateEvalSpec(spec: unknown, filename: string, skillsRoot: st
     }
 
     // Check prompt
-    if (typeof caseObj.prompt !== 'string' || !caseObj.prompt.trim()) {
+    if (typeof caseObj.prompt !== "string" || !caseObj.prompt.trim()) {
       issues.push(`${caseLabel} (${caseObj.id}): missing or empty "prompt"`);
     } else {
       // Must not ask to modify or create files in the repo during evals
       const lower = caseObj.prompt.toLowerCase();
-      const mentionsFileModification = /modify (?:or create )?files?|create (?:or edit )?files?|write to (?:file|disk)/i.test(lower);
-      const forbidsModification = /do not modify|answer in chat only|chat only/i.test(lower);
+      const mentionsFileModification =
+        /modify (?:or create )?files?|create (?:or edit )?files?|write to (?:file|disk)/i.test(
+          lower,
+        );
+      const forbidsModification =
+        /do not modify|answer in chat only|chat only/i.test(lower);
       if (mentionsFileModification && !forbidsModification) {
-        issues.push(`${caseLabel} (${caseObj.id}): prompt asks to modify files; eval prompts must be chat-only`);
+        issues.push(
+          `${caseLabel} (${caseObj.id}): prompt asks to modify files; eval prompts must be chat-only`,
+        );
       }
     }
 
     // Check criteria
     if (!Array.isArray(caseObj.criteria) || caseObj.criteria.length === 0) {
-      issues.push(`${caseLabel} (${caseObj.id}): "criteria" must be a non-empty array`);
+      issues.push(
+        `${caseLabel} (${caseObj.id}): "criteria" must be a non-empty array`,
+      );
     } else {
       caseObj.criteria.forEach((crit, critIndex) => {
-        if (typeof crit !== 'string' || !crit.trim()) {
-          issues.push(`${caseLabel} (${caseObj.id}): criterion #${critIndex + 1} is empty`);
+        if (typeof crit !== "string" || !crit.trim()) {
+          issues.push(
+            `${caseLabel} (${caseObj.id}): criterion #${critIndex + 1} is empty`,
+          );
         }
       });
     }
 
     // Check expectTrigger
-    if ('expectTrigger' in caseObj && typeof caseObj.expectTrigger !== 'boolean') {
-      issues.push(`${caseLabel} (${caseObj.id}): "expectTrigger" must be a boolean`);
+    if (
+      "expectTrigger" in caseObj &&
+      typeof caseObj.expectTrigger !== "boolean"
+    ) {
+      issues.push(
+        `${caseLabel} (${caseObj.id}): "expectTrigger" must be a boolean`,
+      );
     }
-    if ('checks' in caseObj) {
+    if ("checks" in caseObj) {
       if (!Array.isArray(caseObj.checks) || caseObj.checks.length === 0) {
         issues.push(`${caseLabel}: checks must be a non-empty array`);
       } else {
         caseObj.checks.forEach((check: unknown, checkIndex: number) => {
           const candidate = check as Record<string, unknown> | null;
           const type = candidate?.type;
-          const valid = candidate && !Array.isArray(candidate)
-            && (type === 'includes' || type === 'excludes' ? typeof candidate.value === 'string' && candidate.value.length > 0
-              : type === 'json-equals' && typeof candidate.path === 'string' && /^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(candidate.path) && Object.hasOwn(candidate, 'value'));
-          if (!valid || Object.keys(candidate ?? {}).some(key => !['type', 'path', 'value'].includes(key))) {
-            issues.push(`${caseLabel}: invalid deterministic check #${checkIndex + 1}`);
+          const valid =
+            candidate &&
+            !Array.isArray(candidate) &&
+            (type === "includes" || type === "excludes"
+              ? typeof candidate.value === "string" &&
+                candidate.value.length > 0
+              : type === "json-equals" &&
+                typeof candidate.path === "string" &&
+                /^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(candidate.path) &&
+                Object.hasOwn(candidate, "value"));
+          if (
+            !valid ||
+            Object.keys(candidate ?? {}).some(
+              (key) => !["type", "path", "value"].includes(key),
+            )
+          ) {
+            issues.push(
+              `${caseLabel}: invalid deterministic check #${checkIndex + 1}`,
+            );
           }
         });
       }
@@ -327,19 +417,26 @@ export function validateEvalSpec(spec: unknown, filename: string, skillsRoot: st
   return issues;
 }
 
-export function validateAllEvals(evalsDir: string = EVALS_ROOT, skillsRoot: string = SKILLS_ROOT): string[] {
+export function validateAllEvals(
+  evalsDir: string = EVALS_ROOT,
+  skillsRoot: string = SKILLS_ROOT,
+): string[] {
   if (!fs.existsSync(evalsDir)) return [];
   const issues: string[] = [];
-  const files = fs.readdirSync(evalsDir).filter(f => f.endsWith('.json') && !f.startsWith('.'));
+  const files = fs
+    .readdirSync(evalsDir)
+    .filter((f) => f.endsWith(".json") && !f.startsWith("."));
 
   for (const file of files) {
     const fullPath = path.join(evalsDir, file);
     try {
-      const content = fs.readFileSync(fullPath, 'utf-8');
+      const content = fs.readFileSync(fullPath, "utf-8");
       const spec = JSON.parse(content);
       issues.push(...validateEvalSpec(spec, file, skillsRoot));
     } catch (err) {
-      issues.push(`${file}: invalid JSON - ${err instanceof Error ? err.message : String(err)}`);
+      issues.push(
+        `${file}: invalid JSON - ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 

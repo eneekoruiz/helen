@@ -7,6 +7,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 env:
   GIT_LFS_SKIP_SMUDGE: '1'
 
@@ -16,8 +19,12 @@ concurrency:
 
 jobs:
   smoke:
-    name: CLI Sandbox Integration Smoke Test
+    name: Generated Vite app (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -27,7 +34,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: ${{ matrix.node }}
           cache: 'npm'
 
       - name: Install dependencies
@@ -36,48 +43,116 @@ jobs:
       - name: Build HELEN CLI
         run: npm run build
 
+      - name: Verify the published CLI container entry point and prompt assets
+        run: |
+          docker build -t helen-cli:smoke .
+          docker run --rm helen-cli:smoke --help
+          docker run --rm helen-cli:smoke prompts show presentaciones --cache-ready
+
       - name: Create Sandbox Project and verify HELEN CLI
         run: |
-          set -e
+          set -euo pipefail
           
           # Create a temporary directory outside the repo
           TMP_DIR=$(mktemp -d)
           echo "Created temp sandbox project folder: $TMP_DIR"
           
           # Initialize Vite + React + TS project
-          cd $TMP_DIR
-          npm create vite@latest . -- --template react-ts --yes
-          npm install react@18 react-dom@18 --save
-          npm install @types/react@18 @types/react-dom@18 --save-dev
+          cd "$TMP_DIR"
+          npm create vite@latest sandbox -- --template react-ts --no-interactive
+          cd sandbox
           npm install
           
           # Run CLI health checks
           echo "Verifying CLI diagnostics and commands..."
-          node $GITHUB_WORKSPACE/dist/cli.js doctor
-          node $GITHUB_WORKSPACE/dist/cli.js modules
-          node $GITHUB_WORKSPACE/dist/cli.js explain docker
-          node $GITHUB_WORKSPACE/dist/cli.js init --dry-run
+          node "$GITHUB_WORKSPACE/dist/cli.js" doctor
+          node "$GITHUB_WORKSPACE/dist/cli.js" modules
+          node "$GITHUB_WORKSPACE/dist/cli.js" explain docker
+          node "$GITHUB_WORKSPACE/dist/cli.js" init --dry-run
           
           # Test dry-runs on stable modules individually
           echo "Verifying individual stable module dry-runs..."
-          node $GITHUB_WORKSPACE/dist/cli.js add quality --dry-run
-          node $GITHUB_WORKSPACE/dist/cli.js add testing --dry-run
-          node $GITHUB_WORKSPACE/dist/cli.js add docker --dry-run
-          node $GITHUB_WORKSPACE/dist/cli.js add ci --dry-run
-          node $GITHUB_WORKSPACE/dist/cli.js add seo --dry-run
-          node $GITHUB_WORKSPACE/dist/cli.js add security --dry-run
-          node $GITHUB_WORKSPACE/dist/cli.js add dx --dry-run
-          node $GITHUB_WORKSPACE/dist/cli.js add theme --dry-run
+          node "$GITHUB_WORKSPACE/dist/cli.js" add quality --dry-run
+          node "$GITHUB_WORKSPACE/dist/cli.js" add testing --dry-run
+          node "$GITHUB_WORKSPACE/dist/cli.js" add docker --dry-run
+          node "$GITHUB_WORKSPACE/dist/cli.js" add ci --dry-run
+          node "$GITHUB_WORKSPACE/dist/cli.js" add seo --dry-run
+          node "$GITHUB_WORKSPACE/dist/cli.js" add security --dry-run
+          node "$GITHUB_WORKSPACE/dist/cli.js" add dx --dry-run
+          node "$GITHUB_WORKSPACE/dist/cli.js" add theme --dry-run
           
-          # Apply stable modules for real
-          echo "Applying all stable modules..."
-          node $GITHUB_WORKSPACE/dist/cli.js add quality testing docker ci seo security dx theme --force
+          # Apply the listed modules with the Vite template's current React version.
+          node "$GITHUB_WORKSPACE/dist/cli.js" add quality testing docker ci seo security dx theme --force
+
+          # Exercise generated React behavior, including persistence and restricted storage.
+          cat > src/test/theme.integration.test.tsx <<'HELEN_TEST'
+          import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+          import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+          import { HelmetProvider } from 'react-helmet-async';
+          import { ThemeProvider } from '../components/ThemeProvider';
+          import { ThemeToggle } from '../components/ThemeToggle';
+          import { SEO } from '../components/SEO';
+
+          beforeEach(() => localStorage.clear());
+          afterEach(() => { cleanup(); vi.restoreAllMocks(); });
+          const mount = () => render(<ThemeProvider><ThemeToggle /></ThemeProvider>);
+          describe('generated component runtime', () => {
+            it('updates the document and restores the saved mode on a new mount', () => {
+              mount();
+              fireEvent.click(screen.getByRole('button', { name: 'dark mode' }));
+              expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+              expect(localStorage.getItem('helen-theme')).toBe('dark');
+              cleanup();
+              mount();
+              expect(screen.getByRole('button', { name: 'dark mode' }).getAttribute('aria-pressed')).toBe('true');
+              fireEvent.click(screen.getByRole('button', { name: 'light mode' }));
+              expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+            });
+            it('remains usable when browser storage is denied', () => {
+              vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('storage denied'); });
+              vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('storage denied'); });
+              mount();
+              fireEvent.click(screen.getByRole('button', { name: 'dark mode' }));
+              expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+            });
+            it('updates the title and metadata through the generated SEO component', async () => {
+              render(<HelmetProvider><SEO title="Runtime check" description="Generated metadata" canonical="https://example.com/runtime" /></HelmetProvider>);
+              await waitFor(() => expect(document.title).toBe('Runtime check | My App'));
+              expect(document.head.querySelector('meta[name="description"]')?.getAttribute('content')).toBe('Generated metadata');
+              expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe('https://example.com/runtime');
+            });
+          });
+          HELEN_TEST
           
           # Verify package.json remains valid JSON after modifications
           echo "Validating sandbox package.json structure..."
           node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8')); console.log('package.json is valid JSON!')"
           
-          # Verify the sandbox project still installs and compiles
-          echo "Verifying sandbox project compilation..."
+          # Install generated dependencies and run each advertised quality gate.
           npm install
+          npm run lint
+          npm run typecheck
+          npm run test -- --maxWorkers=2
           npm run build
+
+          # Build the generated image and verify HTML, assets and SPA fallback over HTTP.
+          docker build -t helen-vite:smoke .
+          CONTAINER_ID=$(docker run -d -p 127.0.0.1:4173:80 helen-vite:smoke)
+          trap 'docker rm -f "$CONTAINER_ID" >/dev/null' EXIT
+          curl --fail --retry 10 --retry-delay 1 --retry-connrefused http://127.0.0.1:4173/ >/dev/null
+          node --input-type=module <<'HELEN_HTTP'
+          import assert from 'node:assert/strict';
+          const base = 'http://127.0.0.1:4173';
+          const root = await fetch(base);
+          assert.equal(root.status, 200);
+          const html = await root.text();
+          assert.match(html, /id="root"/);
+          const script = html.match(/<script[^>]+src="([^"]+)"/);
+          assert.ok(script, 'production HTML must reference its compiled JavaScript');
+          const asset = await fetch(new URL(script[1], base));
+          assert.equal(asset.status, 200);
+          assert.ok((await asset.text()).length > 0);
+          const route = await fetch(base + '/settings/profile');
+          assert.equal(route.status, 200);
+          assert.equal(await route.text(), html, 'Nginx must serve the SPA on deep routes');
+          HELEN_HTTP

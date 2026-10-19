@@ -1,48 +1,68 @@
-import { recordFileResult } from '../results.js';
-import type { HelenModule } from '../types.js';
-import type { HelenContext, ModuleResult } from '../../core/context.js';
-import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe } from '../../core/fs.js';
-import path from 'node:path';
+import { recordFileResult } from "../results.js";
+import type { HelenModule } from "../types.js";
+import type { HelenContext, ModuleResult } from "../../core/context.js";
+import { createEmptyResult } from "../../core/context.js";
+import { writeFileSafe } from "../../core/fs.js";
+import path from "node:path";
 
-const meta: HelenModule['meta'] = {
-  id: 'security',
-  name: 'Security Utilities',
-  category: 'Security',
-  summary: 'Env validation (zod) + sanitize utils + security headers reference [Simple / Strict Tiers]',
-  description: 'Creates environment variable validation with Zod, HTML/text sanitization utilities, and an optional advanced Web Crypto module (strict mode) with AES-GCM symmetric encryption/decryption, secure hashing, CSRF generators, and strict Content-Security-Policy (CSP) validators.',
-  problemItSolves: 'Missing env vars crash at runtime, unsanitized input leads to XSS, and security headers or cryptographic helpers are often forgotten.',
-  whenToUse: 'On every project that handles user input, environment variables, or symmetric encryption.',
-  whenNotToUse: 'If you already have strict env validation and enterprise-grade sanitization in place.',
-  filesCreated: ['src/lib/env.ts', 'src/lib/sanitize.ts', 'docs/security-headers.md', 'src/lib/security.ts'],
+const meta: HelenModule["meta"] = {
+  id: "security",
+  name: "Security Utilities",
+  category: "Security",
+  summary:
+    "Env validation (zod) + sanitize utils + security headers reference [Simple / Strict Tiers]",
+  description:
+    "Creates environment variable validation with Zod, HTML/text sanitization utilities, and an optional advanced Web Crypto module (strict mode) with AES-GCM symmetric encryption/decryption, secure hashing, CSRF generators, and strict Content-Security-Policy (CSP) validators.",
+  problemItSolves:
+    "Missing env vars crash at runtime, unsanitized input leads to XSS, and security headers or cryptographic helpers are often forgotten.",
+  whenToUse:
+    "On every project that handles user input, environment variables, or symmetric encryption.",
+  whenNotToUse:
+    "If you already have strict env validation and enterprise-grade sanitization in place.",
+  filesCreated: [
+    "src/lib/env.ts",
+    "src/lib/sanitize.ts",
+    "docs/security-headers.md",
+    "src/lib/security.ts",
+  ],
   filesModified: [],
-  runtimeDependencies: ['zod'],
+  runtimeDependencies: ["zod"],
   devDependencies: [],
-  requirements: ['TypeScript project'],
-  risks: ['env.ts will throw on missing required vars — intentional', 'strict mode enforces HTTPS in production'],
-  nextSteps: ['Fill in your .env.local with real values', 'Review security headers for your deploy target', 'Import crypto utility wrappers for symmetric data encryption'],
-  riskLevel: 'medium',
-  recommendedLevel: 'intermediate',
-  status: 'stable',
+  requirements: ["TypeScript project"],
+  risks: [
+    "env.ts will throw on missing required vars — intentional",
+    "strict mode enforces HTTPS in production",
+  ],
+  nextSteps: [
+    "Fill in your .env.local with real values",
+    "Review security headers for your deploy target",
+    "Import crypto utility wrappers for symmetric data encryption",
+  ],
+  riskLevel: "medium",
+  recommendedLevel: "intermediate",
+  status: "stable",
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {
   const result = createEmptyResult(meta.id, meta.name);
   const { cwd, dryRun, force, settings } = ctx;
-  const securityLevel = settings?.securityLevel === 'strict' ? 'strict' : 'simple';
+  const securityLevel =
+    settings?.securityLevel === "strict" ? "strict" : "simple";
 
-  result.warnings.push(`Configured in CYBERSECURITY LEVEL: ${securityLevel.toUpperCase()}`);
+  result.warnings.push(
+    `Configured in CYBERSECURITY LEVEL: ${securityLevel.toUpperCase()}`,
+  );
 
   // env.ts
-  let envTs = '';
-  if (securityLevel === 'strict') {
+  let envTs = "";
+  if (securityLevel === "strict") {
     envTs = `import { z } from 'zod';
 
 const envSchema = z.object({
   // Enforced production environment vs local development fallback
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   VITE_APP_URL: z.string().url().refine((url) => {
-    const isProd = (import.meta as { env?: { PROD?: boolean } }).env?.PROD || (typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process.env?.NODE_ENV === 'production');
+    const isProd = (import.meta as { env?: { PROD?: boolean } }).env?.PROD || (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process?.env?.NODE_ENV === 'production';
     const parsed = new URL(url);
     if (isProd) {
       return parsed.protocol === 'https:';
@@ -64,8 +84,8 @@ const envSchema = z.object({
 export type Env = z.infer<typeof envSchema>;
 
 function validateEnv(): Env {
-  const metaEnv = (import.meta as any).env || {};
-  const processEnv = typeof (globalThis as any).process !== 'undefined' ? (globalThis as any).process.env : {};
+  const metaEnv = (import.meta as { env?: Record<string, unknown> }).env ?? {};
+  const processEnv = (globalThis as { process?: { env?: Record<string, unknown> } }).process?.env ?? {};
   const parsed = envSchema.safeParse({ ...metaEnv, ...processEnv });
 
   if (!parsed.success) {
@@ -99,8 +119,8 @@ const envSchema = z.object({
 export type Env = z.infer<typeof envSchema>;
 
 function validateEnv(): Env {
-  const metaEnv = (import.meta as any).env || {};
-  const processEnv = typeof (globalThis as any).process !== 'undefined' ? (globalThis as any).process.env : {};
+  const metaEnv = (import.meta as { env?: Record<string, unknown> }).env ?? {};
+  const processEnv = (globalThis as { process?: { env?: Record<string, unknown> } }).process?.env ?? {};
   const parsed = envSchema.safeParse({ ...metaEnv, ...processEnv });
 
   if (!parsed.success) {
@@ -117,12 +137,16 @@ export const env = validateEnv();
 `;
   }
 
-  const r1 = writeFileSafe(path.join(cwd, 'src/lib/env.ts'), envTs, { dryRun, force, root: cwd });
-  recordFileResult(result, 'src/lib/env.ts', r1);
+  const r1 = writeFileSafe(path.join(cwd, "src/lib/env.ts"), envTs, {
+    dryRun,
+    force,
+    root: cwd,
+  });
+  recordFileResult(result, "src/lib/env.ts", r1);
 
   // sanitize.ts
-  let sanitizeTs = '';
-  if (securityLevel === 'strict') {
+  let sanitizeTs = "";
+  if (securityLevel === "strict") {
     sanitizeTs = `/**
  * Strict HTML entity encoding to completely mitigate XSS injection paths.
  */
@@ -153,8 +177,7 @@ export function stripHtml(str: string): string {
  */
 export function sanitizeUrl(url: string): string {
   try {
-    const hasWindow = typeof globalThis !== 'undefined' && 'window' in globalThis;
-    const origin = hasWindow ? (globalThis as any).window.location.origin : undefined;
+    const origin = (globalThis as { window?: { location?: { origin?: string } } }).window?.location?.origin;
     const parsed = new URL(url, origin);
     if (!['http:', 'https:', 'mailto:'].includes(parsed.protocol)) {
       return '';
@@ -196,8 +219,7 @@ export function stripHtml(str: string): string {
  */
 export function sanitizeUrl(url: string): string {
   try {
-    const hasWindow = typeof globalThis !== 'undefined' && 'window' in globalThis;
-    const origin = hasWindow ? (globalThis as any).window.location.origin : undefined;
+    const origin = (globalThis as { window?: { location?: { origin?: string } } }).window?.location?.origin;
     const parsed = new URL(url, origin);
     if (!['http:', 'https:', 'mailto:'].includes(parsed.protocol)) {
       return '';
@@ -210,11 +232,15 @@ export function sanitizeUrl(url: string): string {
 `;
   }
 
-  const r2 = writeFileSafe(path.join(cwd, 'src/lib/sanitize.ts'), sanitizeTs, { dryRun, force, root: cwd });
-  recordFileResult(result, 'src/lib/sanitize.ts', r2);
+  const r2 = writeFileSafe(path.join(cwd, "src/lib/sanitize.ts"), sanitizeTs, {
+    dryRun,
+    force,
+    root: cwd,
+  });
+  recordFileResult(result, "src/lib/sanitize.ts", r2);
 
   // src/lib/security.ts (Strict mode only)
-  if (securityLevel === 'strict') {
+  if (securityLevel === "strict") {
     const securityTs = `/**
  * HELEN Cryptographic Security Engine
  * Web Crypto Standard Compliant (compatible with modern browser and node backends).
@@ -308,8 +334,12 @@ export function generateCSPDirectives(): string {
   ].join('; ');
 }
 `;
-    const r4 = writeFileSafe(path.join(cwd, 'src/lib/security.ts'), securityTs, { dryRun, force, root: cwd });
-    recordFileResult(result, 'src/lib/security.ts', r4);
+    const r4 = writeFileSafe(
+      path.join(cwd, "src/lib/security.ts"),
+      securityTs,
+      { dryRun, force, root: cwd },
+    );
+    recordFileResult(result, "src/lib/security.ts", r4);
   }
 
   // Security headers reference doc
@@ -327,25 +357,34 @@ Recommended headers for production deployments.
 | Permissions-Policy | camera=(), microphone=() | Disable browser APIs |
 | Cross-Origin-Opener-Policy | same-origin | Isolate browsing context |
 
-${securityLevel === 'strict' ? `
+${
+  securityLevel === "strict"
+    ? `
 ### Strict Mode Checklist
 1. **CSP Enforced**: Directives generated in \`src/lib/security.ts\` are ready to deploy to production.
 2. **Web Crypto Symmetric Ciphers**: Use the \`encryptAES\` and \`decryptAES\` features to protect local or database user-bound payload files.
 3. **Environment Security Enforcements**: HTTPS is strictly verified in production to block plaintext leakage.
-` : `
+`
+    : `
 Configure these in your hosting platform (Vercel, Nginx, Cloudflare, etc.).
-`}
+`
+}
 `;
-  const r3 = writeFileSafe(path.join(cwd, 'docs/security-headers.md'), headersDoc, { dryRun, force, root: cwd });
-  recordFileResult(result, 'docs/security-headers.md', r3);
+  const r3 = writeFileSafe(
+    path.join(cwd, "docs/security-headers.md"),
+    headersDoc,
+    { dryRun, force, root: cwd },
+  );
+  recordFileResult(result, "docs/security-headers.md", r3);
 
-  result.nextSteps.push('Fill .env.local with your values');
-  result.nextSteps.push('Configure security headers in your hosting platform');
-  if (securityLevel === 'strict') {
-    result.nextSteps.push('Import the AES, Hashing, and Token utilities from src/lib/security.ts');
+  result.nextSteps.push("Fill .env.local with your values");
+  result.nextSteps.push("Configure security headers in your hosting platform");
+  if (securityLevel === "strict") {
+    result.nextSteps.push(
+      "Import the AES, Hashing, and Token utilities from src/lib/security.ts",
+    );
   }
   return result;
 }
 
 export const securityModule: HelenModule = { meta, execute };
-

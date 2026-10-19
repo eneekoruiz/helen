@@ -1,5 +1,5 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,6 +10,6 @@ const __dirname = path.dirname(__filename);
  */
 export function getTemplatePath(templateRelPath: string): string {
   // Go up from src/core/ or dist/core/ to project root, then into templates/
-  const projectRoot = path.resolve(__dirname, '..', '..');
-  return path.join(projectRoot, 'templates', templateRelPath);
+  const projectRoot = path.resolve(__dirname, "..", "..");
+  return path.join(projectRoot, "templates", templateRelPath);
 }

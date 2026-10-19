@@ -14,6 +14,8 @@ If no native tool is exposed, ask a concise conversational question. Do not manu
 
 ## Acceptance
 
+For [background tasks](BACKGROUND-JOBS.md), a worker persists a pending question as `needs_input` and exits. On return, the foreground agent reads `helen_job_show`/`helen jobs show`, invokes its native form with the recorded question/options, and uses the actual answer for an explicitly authorized continuation. Closing the foreground interface does not create an answer or authorize another attempt.
+
 - Already supplied details are reused; questions concern only unresolved decisions.
 - Evaluation requests stay evaluation; implementation stays within existing authorization.
 - Native answers become explicit context or constraints in the rewritten brief.

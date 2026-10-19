@@ -1,34 +1,41 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { getStableModules, getModule } from '../src/modules/registry.js';
-import { detectProject } from '../src/core/projectDetector.js';
-import path from 'node:path';
-import os from 'node:os';
-import fs from 'fs-extra';
-import type { HelenContext } from '../src/core/context.js';
-import { runModule } from '../src/core/moduleRunner.js';
-import ts from 'typescript';
-import vm from 'node:vm';
-import { z } from 'zod';
-import { tailwindModule } from '../src/modules/tailwind/index.js';
-import { shadcnModule } from '../src/modules/shadcn/index.js';
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { getStableModules, getModule } from "../src/modules/registry.js";
+import { detectProject } from "../src/core/projectDetector.js";
+import path from "node:path";
+import os from "node:os";
+import fs from "fs-extra";
+import type { HelenContext } from "../src/core/context.js";
+import { runModule } from "../src/core/moduleRunner.js";
+import ts from "typescript";
+import vm from "node:vm";
+import { z } from "zod";
+import { tailwindModule } from "../src/modules/tailwind/index.js";
+import { shadcnModule } from "../src/modules/shadcn/index.js";
 
-describe('Module Hardening - Idempotency & Dry-Run', () => {
+describe("Module Hardening - Idempotency & Dry-Run", () => {
   let tmpDir: string;
   let ctx: HelenContext;
 
   beforeEach(() => {
     // Create a clean temp project directory
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'helen-hardening-'));
-    
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "helen-hardening-"));
+
     // Create minimal vite project structure
-    fs.ensureDirSync(path.join(tmpDir, 'src'));
-    fs.writeFileSync(path.join(tmpDir, 'package.json'), JSON.stringify({
-      name: 'test-project',
-      version: '1.0.0',
-      type: 'module',
-      dependencies: { react: '^18.0.0', 'react-dom': '^18.0.0' },
-      devDependencies: { vite: '^5.0.0', typescript: '^5.0.0' }
-    }, null, 2));
+    fs.ensureDirSync(path.join(tmpDir, "src"));
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify(
+        {
+          name: "test-project",
+          version: "1.0.0",
+          type: "module",
+          dependencies: { react: "^18.0.0", "react-dom": "^18.0.0" },
+          devDependencies: { vite: "^5.0.0", typescript: "^5.0.0" },
+        },
+        null,
+        2,
+      ),
+    );
 
     // Create HelenContext for testing
     const projectInfo = detectProject(tmpDir);
@@ -46,33 +53,33 @@ describe('Module Hardening - Idempotency & Dry-Run', () => {
     }
   });
 
-  describe('Dry-run mode', () => {
-    it('should preview changes without writing files', async () => {
+  describe("Dry-run mode", () => {
+    it("should preview changes without writing files", async () => {
       const dryRunCtx = { ...ctx, dryRun: true };
-      const mod = getModule('quality');
-      
+      const mod = getModule("quality");
+
       if (!mod) {
-        throw new Error('quality module not found');
+        throw new Error("quality module not found");
       }
 
       const result = await mod.execute(dryRunCtx);
-      
+
       // Verify no files were actually created
-      const eslintPath = path.join(tmpDir, '.eslintrc.json');
-      const prettierPath = path.join(tmpDir, '.prettierrc');
-      
+      const eslintPath = path.join(tmpDir, ".eslintrc.json");
+      const prettierPath = path.join(tmpDir, ".prettierrc");
+
       expect(fs.existsSync(eslintPath)).toBe(false);
       expect(fs.existsSync(prettierPath)).toBe(false);
       expect(result.created.length).toBeGreaterThan(0);
     });
   });
 
-  describe('Idempotency', () => {
-    it('should handle re-running quality module without errors', async () => {
-      const mod = getModule('quality');
-      
+  describe("Idempotency", () => {
+    it("should handle re-running quality module without errors", async () => {
+      const mod = getModule("quality");
+
       if (!mod) {
-        throw new Error('quality module not found');
+        throw new Error("quality module not found");
       }
 
       // First run
@@ -82,17 +89,19 @@ describe('Module Hardening - Idempotency & Dry-Run', () => {
       // Second run (should detect conflicts and skip without error)
       const result2 = await mod.execute(ctx);
       expect(result2).toBeDefined();
-      
+
       // Verify package.json is valid after second run
-      const pkgJson = JSON.parse(fs.readFileSync(path.join(tmpDir, 'package.json'), 'utf-8'));
+      const pkgJson = JSON.parse(
+        fs.readFileSync(path.join(tmpDir, "package.json"), "utf-8"),
+      );
       expect(pkgJson.scripts).toBeDefined();
     });
 
-    it('should handle re-running docker module without conflicts', async () => {
-      const mod = getModule('docker');
-      
+    it("should handle re-running docker module without conflicts", async () => {
+      const mod = getModule("docker");
+
       if (!mod) {
-        throw new Error('docker module not found');
+        throw new Error("docker module not found");
       }
 
       // First run
@@ -102,40 +111,40 @@ describe('Module Hardening - Idempotency & Dry-Run', () => {
       // Second run
       const result2 = await mod.execute(ctx);
       expect(result2).toBeDefined();
-      
+
       // Verify files exist and are valid
-      const dockerfilePath = path.join(tmpDir, 'Dockerfile');
+      const dockerfilePath = path.join(tmpDir, "Dockerfile");
       expect(fs.existsSync(dockerfilePath)).toBe(true);
-      const dockerfile = fs.readFileSync(dockerfilePath, 'utf-8');
-      expect(dockerfile).toContain('FROM');
+      const dockerfile = fs.readFileSync(dockerfilePath, "utf-8");
+      expect(dockerfile).toContain("FROM");
     });
   });
 
-  describe('Package.json merging', () => {
-    it('should merge scripts without overwriting existing entries', async () => {
+  describe("Package.json merging", () => {
+    it("should merge scripts without overwriting existing entries", async () => {
       // Add pre-existing script
-      const pkgPath = path.join(tmpDir, 'package.json');
-      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-      pkg.scripts = { 'dev:vite': 'vite' };
+      const pkgPath = path.join(tmpDir, "package.json");
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+      pkg.scripts = { "dev:vite": "vite" };
       fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
 
-      const mod = getModule('quality');
-      
+      const mod = getModule("quality");
+
       if (!mod) {
-        throw new Error('quality module not found');
+        throw new Error("quality module not found");
       }
 
       await mod.execute(ctx);
 
       // Verify both old and new scripts exist
-      const updatedPkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-      expect(updatedPkg.scripts['dev:vite']).toBe('vite');
-      expect(updatedPkg.scripts['lint']).toBeDefined();
+      const updatedPkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+      expect(updatedPkg.scripts["dev:vite"]).toBe("vite");
+      expect(updatedPkg.scripts["lint"]).toBeDefined();
     });
   });
 
-  describe('All stable modules dry-run', () => {
-    it('should support dry-run for all stable modules', async () => {
+  describe("All stable modules dry-run", () => {
+    it("should support dry-run for all stable modules", async () => {
       const stableModules = getStableModules();
       const dryRunCtx = { ...ctx, dryRun: true };
 
@@ -151,146 +160,204 @@ describe('Module Hardening - Idempotency & Dry-Run', () => {
     });
   });
 
-  describe('Security levels (Simple vs Strict)', () => {
-    it('should scaffold simple security files by default', async () => {
-      const mod = getModule('security');
-      if (!mod) throw new Error('security module not found');
+  describe("Security levels (Simple vs Strict)", () => {
+    it("should scaffold simple security files by default", async () => {
+      const mod = getModule("security");
+      if (!mod) throw new Error("security module not found");
 
-      const simpleCtx = { ...ctx, settings: { securityLevel: 'simple' } };
+      const simpleCtx = { ...ctx, settings: { securityLevel: "simple" } };
       const result = await mod.execute(simpleCtx);
-      
-      expect(result.created).toContain('src/lib/env.ts');
-      expect(result.created).toContain('src/lib/sanitize.ts');
-      expect(result.created).not.toContain('src/lib/security.ts');
 
-      const envContent = fs.readFileSync(path.join(tmpDir, 'src/lib/env.ts'), 'utf-8');
-      expect(envContent).toContain('VITE_APP_URL');
-      expect(envContent).not.toContain('NODE_ENV');
+      expect(result.created).toContain("src/lib/env.ts");
+      expect(result.created).toContain("src/lib/sanitize.ts");
+      expect(result.created).not.toContain("src/lib/security.ts");
+
+      const envContent = fs.readFileSync(
+        path.join(tmpDir, "src/lib/env.ts"),
+        "utf-8",
+      );
+      expect(envContent).toContain("VITE_APP_URL");
+      expect(envContent).not.toContain("NODE_ENV");
     });
 
-    it('should scaffold strict security files, including cryptography and strict CSP guidelines', async () => {
-      const mod = getModule('security');
-      if (!mod) throw new Error('security module not found');
+    it("should scaffold strict security files, including cryptography and strict CSP guidelines", async () => {
+      const mod = getModule("security");
+      if (!mod) throw new Error("security module not found");
 
-      const strictCtx = { ...ctx, settings: { securityLevel: 'strict' } };
+      const strictCtx = { ...ctx, settings: { securityLevel: "strict" } };
       const result = await mod.execute(strictCtx);
-      
-      expect(result.created).toContain('src/lib/env.ts');
-      expect(result.created).toContain('src/lib/sanitize.ts');
-      expect(result.created).toContain('src/lib/security.ts');
 
-      const envContent = fs.readFileSync(path.join(tmpDir, 'src/lib/env.ts'), 'utf-8');
-      expect(envContent).toContain('NODE_ENV');
-      expect(envContent).toContain('Security Violation: VITE_APP_URL must resolve');
+      expect(result.created).toContain("src/lib/env.ts");
+      expect(result.created).toContain("src/lib/sanitize.ts");
+      expect(result.created).toContain("src/lib/security.ts");
 
-      const cryptoContent = fs.readFileSync(path.join(tmpDir, 'src/lib/security.ts'), 'utf-8');
-      expect(cryptoContent).toContain('encryptAES');
-      expect(cryptoContent).toContain('decryptAES');
-      expect(cryptoContent).toContain('hashData');
-      expect(cryptoContent).toContain('generateSecureToken');
+      const envContent = fs.readFileSync(
+        path.join(tmpDir, "src/lib/env.ts"),
+        "utf-8",
+      );
+      expect(envContent).toContain("NODE_ENV");
+      expect(envContent).toContain(
+        "Security Violation: VITE_APP_URL must resolve",
+      );
+
+      const cryptoContent = fs.readFileSync(
+        path.join(tmpDir, "src/lib/security.ts"),
+        "utf-8",
+      );
+      expect(cryptoContent).toContain("encryptAES");
+      expect(cryptoContent).toContain("decryptAES");
+      expect(cryptoContent).toContain("hashData");
+      expect(cryptoContent).toContain("generateSecureToken");
     });
   });
 
-  describe('Visual CMS (i18n Adaptability)', () => {
-    it('should scaffold non-i18n CMS files by default when no i18n is detected', async () => {
-      const mod = getModule('cms');
-      if (!mod) throw new Error('cms module not found');
+  describe("Visual CMS (i18n Adaptability)", () => {
+    it("should scaffold non-i18n CMS files by default when no i18n is detected", async () => {
+      const mod = getModule("cms");
+      if (!mod) throw new Error("cms module not found");
 
       const result = await mod.execute(ctx);
-      expect(result.created).toContain('src/cms/content.json');
-      expect(result.created).toContain('src/context/CMSContext.tsx');
-      expect(result.created).toContain('src/components/CMS/EditableText.tsx');
+      expect(result.created).toContain("src/cms/content.json");
+      expect(result.created).toContain("src/context/CMSContext.tsx");
+      expect(result.created).toContain("src/components/CMS/EditableText.tsx");
 
-      const contextContent = fs.readFileSync(path.join(tmpDir, 'src/context/CMSContext.tsx'), 'utf-8');
-      expect(contextContent).not.toContain('react-i18next');
-      expect(contextContent).not.toContain('useTranslation');
+      const contextContent = fs.readFileSync(
+        path.join(tmpDir, "src/context/CMSContext.tsx"),
+        "utf-8",
+      );
+      expect(contextContent).not.toContain("react-i18next");
+      expect(contextContent).not.toContain("useTranslation");
 
-      const contentJson = JSON.parse(fs.readFileSync(path.join(tmpDir, 'src/cms/content.json'), 'utf-8'));
+      const contentJson = JSON.parse(
+        fs.readFileSync(path.join(tmpDir, "src/cms/content.json"), "utf-8"),
+      );
       expect(contentJson.translatable).toBeUndefined();
       expect(contentJson.welcome).toBeDefined();
     });
 
-    it('should scaffold i18n CMS files when i18n configuration is detected', async () => {
-      const mod = getModule('cms');
-      if (!mod) throw new Error('cms module not found');
+    it("should scaffold i18n CMS files when i18n configuration is detected", async () => {
+      const mod = getModule("cms");
+      if (!mod) throw new Error("cms module not found");
 
       // Simulate i18n project
-      fs.ensureDirSync(path.join(tmpDir, 'src/i18n'));
-      fs.writeFileSync(path.join(tmpDir, 'src/i18n/config.ts'), 'export default {}');
+      fs.ensureDirSync(path.join(tmpDir, "src/i18n"));
+      fs.writeFileSync(
+        path.join(tmpDir, "src/i18n/config.ts"),
+        "export default {}",
+      );
 
       const result = await mod.execute(ctx);
-      expect(result.created).toContain('src/context/CMSContext.tsx');
+      expect(result.created).toContain("src/context/CMSContext.tsx");
 
-      const contextContent = fs.readFileSync(path.join(tmpDir, 'src/context/CMSContext.tsx'), 'utf-8');
-      expect(contextContent).toContain('react-i18next');
-      expect(contextContent).toContain('useTranslation');
+      const contextContent = fs.readFileSync(
+        path.join(tmpDir, "src/context/CMSContext.tsx"),
+        "utf-8",
+      );
+      expect(contextContent).toContain("react-i18next");
+      expect(contextContent).toContain("useTranslation");
 
-      const contentJson = JSON.parse(fs.readFileSync(path.join(tmpDir, 'src/cms/content.json'), 'utf-8'));
+      const contentJson = JSON.parse(
+        fs.readFileSync(path.join(tmpDir, "src/cms/content.json"), "utf-8"),
+      );
       expect(contentJson.translatable).toBeDefined();
       expect(contentJson.universal).toBeDefined();
     });
   });
 
-  it('reports skipped files on repeated experimental module execution', async () => {
-    for (const id of ['cms', 'gdpr', 'pwa', 'i18n', 'sentry']) {
+  it("reports skipped files on repeated experimental module execution", async () => {
+    for (const id of ["cms", "gdpr", "pwa", "i18n", "sentry"]) {
       const mod = getModule(id);
       if (!mod) throw new Error(`${id} module not found`);
       const first = await mod.execute(ctx);
       const second = await mod.execute(ctx);
       expect(second.created, id).toEqual([]);
       expect(second.modified, id).toEqual([]);
-      expect(second.skipped, id).toEqual(expect.arrayContaining([...first.created, ...first.modified]));
+      expect(second.skipped, id).toEqual(
+        expect.arrayContaining([...first.created, ...first.modified]),
+      );
       for (const file of mod.meta.filesCreated) {
-        expect(fs.existsSync(path.join(tmpDir, file)), `${id}: ${file}`).toBe(true);
+        expect(fs.existsSync(path.join(tmpDir, file)), `${id}: ${file}`).toBe(
+          true,
+        );
       }
     }
   });
 
-  it('preserves existing dependency versions and module-specific pins', async () => {
-    const pkgPath = path.join(tmpDir, 'package.json');
+  it("preserves existing dependency versions and module-specific pins", async () => {
+    const pkgPath = path.join(tmpDir, "package.json");
     const pkg = fs.readJsonSync(pkgPath);
-    pkg.devDependencies.vitest = '^2.1.9';
+    pkg.devDependencies.vitest = "^2.1.9";
     fs.writeJsonSync(pkgPath, pkg);
-    await runModule('testing', ctx);
+    await runModule("testing", ctx);
     const testingPkg = fs.readJsonSync(pkgPath);
-    expect(testingPkg.devDependencies.vitest).toBe('^2.1.9');
-    expect(testingPkg.devDependencies['@vitest/coverage-v8']).toBe('^2.1.9');
-    await runModule('i18n', ctx);
-    expect(fs.readJsonSync(pkgPath).dependencies.i18next).toBe('^23.0.0');
+    expect(testingPkg.devDependencies.vitest).toBe("^2.1.9");
+    expect(testingPkg.devDependencies["@vitest/coverage-v8"]).toBe("^2.1.9");
+    await runModule("i18n", ctx);
+    expect(fs.readJsonSync(pkgPath).dependencies.i18next).toBe("^23.0.0");
   });
 
-  it('reports forced replacements as modified and preserves user dependency versions', async () => {
-    for (const mod of [getModule('i18n')!, getModule('sentry')!, getModule('pwa')!, tailwindModule, shadcnModule]) {
+  it("reports forced replacements as modified and preserves user dependency versions", async () => {
+    for (const mod of [
+      getModule("i18n")!,
+      getModule("sentry")!,
+      getModule("pwa")!,
+      tailwindModule,
+      shadcnModule,
+    ]) {
       const id = mod.meta.id;
-      const pkgPath = path.join(tmpDir, 'package.json');
+      const pkgPath = path.join(tmpDir, "package.json");
       const pkg = fs.readJsonSync(pkgPath);
-      for (const dep of mod.meta.runtimeDependencies ?? []) pkg.dependencies[dep] = '9.9.9';
-      for (const dep of mod.meta.devDependencies ?? []) pkg.devDependencies[dep] = '9.9.9';
+      for (const dep of mod.meta.runtimeDependencies ?? [])
+        pkg.dependencies[dep] = "9.9.9";
+      for (const dep of mod.meta.devDependencies ?? [])
+        pkg.devDependencies[dep] = "9.9.9";
       fs.writeJsonSync(pkgPath, pkg);
       const first = await mod.execute(ctx);
       const forced = await mod.execute({ ...ctx, force: true });
       expect(forced.created, id).toEqual([]);
-      expect([...forced.modified, ...forced.skipped], id).toEqual(expect.arrayContaining(first.created));
+      expect([...forced.modified, ...forced.skipped], id).toEqual(
+        expect.arrayContaining(first.created),
+      );
       expect(forced.modified.length, id).toBeGreaterThan(0);
       const updated = fs.readJsonSync(pkgPath);
-      for (const dep of mod.meta.runtimeDependencies ?? []) expect(updated.dependencies[dep], dep).toBe('9.9.9');
-      for (const dep of mod.meta.devDependencies ?? []) expect(updated.devDependencies[dep], dep).toBe('9.9.9');
+      for (const dep of mod.meta.runtimeDependencies ?? [])
+        expect(updated.dependencies[dep], dep).toBe("9.9.9");
+      for (const dep of mod.meta.devDependencies ?? [])
+        expect(updated.devDependencies[dep], dep).toBe("9.9.9");
     }
   });
 
-  it('enforces HTTPS using Vite production flags and validates local hostnames', async () => {
-    const mod = getModule('security');
-    if (!mod) throw new Error('security module not found');
-    await mod.execute({ ...ctx, settings: { securityLevel: 'strict' } });
-    const source = fs.readFileSync(path.join(tmpDir, 'src/lib/env.ts'), 'utf-8')
-      .replaceAll('import.meta', '({ env: runtimeEnv })');
-    const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
-    const execute = (runtimeEnv: Record<string, unknown>) => vm.runInNewContext(compiled, {
-      runtimeEnv, URL, exports: {}, require: () => ({ z }),
-    });
-    expect(() => execute({ PROD: true, VITE_APP_URL: 'http://localhost:5173' })).toThrow('secure HTTPS');
-    expect(() => execute({ PROD: false, VITE_APP_URL: 'http://localhost.attacker.example' })).toThrow('secure HTTPS');
-    expect(() => execute({ PROD: true, VITE_APP_URL: 'https://example.com' })).not.toThrow();
-    expect(() => execute({ PROD: false, VITE_APP_URL: 'http://localhost:5173' })).not.toThrow();
+  it("enforces HTTPS using Vite production flags and validates local hostnames", async () => {
+    const mod = getModule("security");
+    if (!mod) throw new Error("security module not found");
+    await mod.execute({ ...ctx, settings: { securityLevel: "strict" } });
+    const source = fs
+      .readFileSync(path.join(tmpDir, "src/lib/env.ts"), "utf-8")
+      .replaceAll("import.meta", "({ env: runtimeEnv })");
+    const compiled = ts.transpileModule(source, {
+      compilerOptions: { module: ts.ModuleKind.CommonJS },
+    }).outputText;
+    const execute = (runtimeEnv: Record<string, unknown>) =>
+      vm.runInNewContext(compiled, {
+        runtimeEnv,
+        URL,
+        exports: {},
+        require: () => ({ z }),
+      });
+    expect(() =>
+      execute({ PROD: true, VITE_APP_URL: "http://localhost:5173" }),
+    ).toThrow("secure HTTPS");
+    expect(() =>
+      execute({
+        PROD: false,
+        VITE_APP_URL: "http://localhost.attacker.example",
+      }),
+    ).toThrow("secure HTTPS");
+    expect(() =>
+      execute({ PROD: true, VITE_APP_URL: "https://example.com" }),
+    ).not.toThrow();
+    expect(() =>
+      execute({ PROD: false, VITE_APP_URL: "http://localhost:5173" }),
+    ).not.toThrow();
   });
 });

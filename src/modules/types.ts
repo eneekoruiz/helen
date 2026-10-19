@@ -1,22 +1,22 @@
-import type { HelenContext, ModuleResult } from '../core/context.js';
+import type { HelenContext, ModuleResult } from "../core/context.js";
 
 export type { ModuleResult };
 
 /**
  * Risk level for a module.
  */
-export type ModuleRisk = 'low' | 'medium' | 'high';
+export type ModuleRisk = "low" | "medium" | "high";
 export type RiskLevel = ModuleRisk;
 
 /**
  * Recommended skill level for using this module.
  */
-export type SkillLevel = 'beginner' | 'intermediate' | 'advanced';
+export type SkillLevel = "beginner" | "intermediate" | "advanced";
 
 /**
  * Module lifecycle status.
  */
-export type ModuleStatus = 'stable' | 'experimental' | 'planned' | 'deprecated';
+export type ModuleStatus = "stable" | "experimental" | "planned" | "deprecated";
 
 /**
  * Full metadata for a HELEN module.
@@ -43,7 +43,7 @@ export interface ModuleMeta {
   /** IDs of modules this module depends on */
   dependencies?: string[];
   /** Optional: specific frameworks this module is compatible with */
-  compatibleFrameworks?: ('vite' | 'next' | 'cra' | 'remix' | 'any')[];
+  compatibleFrameworks?: ("vite" | "next" | "cra" | "remix" | "any")[];
 }
 
 /**

@@ -1,6 +1,10 @@
-import pc from 'picocolors';
-import { listPromptEntries, readPromptEntry, type PromptEntry } from './prompts.js';
-import { readPlaybooks, type PlaybookStep } from './apply.js';
+import pc from "picocolors";
+import {
+  listPromptEntries,
+  readPromptEntry,
+  type PromptEntry,
+} from "./prompts.js";
+import { readPlaybooks, type PlaybookStep } from "./apply.js";
 
 export interface TokenEstimate {
   id: string;
@@ -18,7 +22,12 @@ export interface TokenEstimate {
 }
 
 export interface TokenBudgetSummary {
-  measurement: { kind: 'estimate'; method: 'characters/3.8'; pricing: 'historical-reference'; includes: 'input-only' };
+  measurement: {
+    kind: "estimate";
+    method: "characters/3.8";
+    pricing: "historical-reference";
+    includes: "input-only";
+  };
   target: string;
   totalPrompts: number;
   totalTokens: number;
@@ -62,15 +71,32 @@ export function computeTokenBudget(target?: string): TokenBudgetSummary {
   // If target matches a playbook, filter prompts in that playbook
   if (target) {
     const playbooks = readPlaybooks();
-    const playbook = Object.hasOwn(playbooks.goals, target) ? playbooks.goals[target] : undefined;
+    const playbook = Object.hasOwn(playbooks.goals, target)
+      ? playbooks.goals[target]
+      : undefined;
     if (playbook) {
-      const stepRefs = new Set(playbook.steps.filter((s: PlaybookStep) => ['prompt', 'flow', 'checkpoint'].includes(s.kind)).map((s: PlaybookStep) => s.ref));
-      entries = entries.filter(e => {
-        return stepRefs.has(e.id) || Array.from(stepRefs).some(ref => e.id === ref || e.id.endsWith(`/${ref}`));
+      const stepRefs = new Set(
+        playbook.steps
+          .filter((s: PlaybookStep) =>
+            ["prompt", "flow", "checkpoint"].includes(s.kind),
+          )
+          .map((s: PlaybookStep) => s.ref),
+      );
+      entries = entries.filter((e) => {
+        return (
+          stepRefs.has(e.id) ||
+          Array.from(stepRefs).some(
+            (ref) => e.id === ref || e.id.endsWith(`/${ref}`),
+          )
+        );
       });
     } else {
       // Filter by phase or id match
-      entries = entries.filter(e => e.id.includes(target) || (e.phase && e.phase.toLowerCase() === target.toLowerCase()));
+      entries = entries.filter(
+        (e) =>
+          e.id.includes(target) ||
+          (e.phase && e.phase.toLowerCase() === target.toLowerCase()),
+      );
     }
   }
 
@@ -86,7 +112,7 @@ export function computeTokenBudget(target?: string): TokenBudgetSummary {
     breakdown.push({
       id: entry.id,
       title: entry.title,
-      phase: entry.phase || 'general',
+      phase: entry.phase || "general",
       characters: content.length,
       words,
       estimatedTokens: tokens,
@@ -95,8 +121,13 @@ export function computeTokenBudget(target?: string): TokenBudgetSummary {
   }
 
   return {
-    measurement: { kind: 'estimate', method: 'characters/3.8', pricing: 'historical-reference', includes: 'input-only' },
-    target: target || 'all',
+    measurement: {
+      kind: "estimate",
+      method: "characters/3.8",
+      pricing: "historical-reference",
+      includes: "input-only",
+    },
+    target: target || "all",
     totalPrompts: breakdown.length,
     totalTokens,
     totalCost: calculateCost(totalTokens),
@@ -105,31 +136,57 @@ export function computeTokenBudget(target?: string): TokenBudgetSummary {
 }
 
 export function printTokenBudget(summary: TokenBudgetSummary): void {
-  console.log(pc.bold(`\n  HELEN Token & Cost Budget (${pc.cyan(summary.target)})`));
-  console.log(pc.dim('  ─────────────────────────────────────────────────────────────'));
-  console.log(`  Total Prompts Analyzed: ${pc.bold(String(summary.totalPrompts))}`);
-  console.log(`  Estimated Total Tokens: ${pc.bold(pc.yellow(summary.totalTokens.toLocaleString()))}`);
+  console.log(
+    pc.bold(`\n  HELEN Token & Cost Budget (${pc.cyan(summary.target)})`),
+  );
+  console.log(
+    pc.dim("  ─────────────────────────────────────────────────────────────"),
+  );
+  console.log(
+    `  Total Prompts Analyzed: ${pc.bold(String(summary.totalPrompts))}`,
+  );
+  console.log(
+    `  Estimated Total Tokens: ${pc.bold(pc.yellow(summary.totalTokens.toLocaleString()))}`,
+  );
   console.log();
-  console.log(pc.bold('  Projected Cost (per full context pass):'));
-  console.log(pc.dim('  Approximate token counts and historical reference rates; these are not current price quotes.'));
-  console.log(`    • Gemini 1.5 Flash : $${summary.totalCost.geminiFlash.toFixed(4)}`);
-  console.log(`    • Gemini 1.5 Pro   : $${summary.totalCost.geminiPro.toFixed(4)}`);
-  console.log(`    • Claude 3.5 Sonnet: $${summary.totalCost.claudeSonnet.toFixed(4)}`);
-  console.log(`    • GPT-4o           : $${summary.totalCost.gpt4o.toFixed(4)}`);
+  console.log(pc.bold("  Projected Cost (per full context pass):"));
+  console.log(
+    pc.dim(
+      "  Approximate token counts and historical reference rates; these are not current price quotes.",
+    ),
+  );
+  console.log(
+    `    • Gemini 1.5 Flash : $${summary.totalCost.geminiFlash.toFixed(4)}`,
+  );
+  console.log(
+    `    • Gemini 1.5 Pro   : $${summary.totalCost.geminiPro.toFixed(4)}`,
+  );
+  console.log(
+    `    • Claude 3.5 Sonnet: $${summary.totalCost.claudeSonnet.toFixed(4)}`,
+  );
+  console.log(
+    `    • GPT-4o           : $${summary.totalCost.gpt4o.toFixed(4)}`,
+  );
   console.log();
 
   if (summary.breakdown.length <= 15) {
-    console.log(pc.bold('  Prompt Breakdown:'));
+    console.log(pc.bold("  Prompt Breakdown:"));
     for (const item of summary.breakdown) {
-      console.log(`    ${pc.cyan(item.id.padEnd(28))} ${String(item.estimatedTokens).padStart(6)} tokens  ${pc.dim(`($${item.cost.claudeSonnet.toFixed(4)} Sonnet)`)}`);
+      console.log(
+        `    ${pc.cyan(item.id.padEnd(28))} ${String(item.estimatedTokens).padStart(6)} tokens  ${pc.dim(`($${item.cost.claudeSonnet.toFixed(4)} Sonnet)`)}`,
+      );
     }
     console.log();
   } else {
     // Show top 5 heaviest
-    const sorted = [...summary.breakdown].sort((a, b) => b.estimatedTokens - a.estimatedTokens);
-    console.log(pc.bold('  Top 5 Heaviest Prompts:'));
+    const sorted = [...summary.breakdown].sort(
+      (a, b) => b.estimatedTokens - a.estimatedTokens,
+    );
+    console.log(pc.bold("  Top 5 Heaviest Prompts:"));
     for (const item of sorted.slice(0, 5)) {
-      console.log(`    ${pc.yellow(item.id.padEnd(28))} ${String(item.estimatedTokens).padStart(6)} tokens  ${pc.dim(`($${item.cost.claudeSonnet.toFixed(4)} Sonnet)`)}`);
+      console.log(
+        `    ${pc.yellow(item.id.padEnd(28))} ${String(item.estimatedTokens).padStart(6)} tokens  ${pc.dim(`($${item.cost.claudeSonnet.toFixed(4)} Sonnet)`)}`,
+      );
     }
     console.log();
   }
