@@ -1,7 +1,6 @@
 ---
 name: helen-design
 description: Master skill for premium UX/UI, eliminating AI tropes (slop), optimizing web accessibility, scroll behavior, transitions, and 3D web graphics in an autonomous convergence loop.
-version: 2.1.0
 ---
 
 # Premium Design & Anti-Slop (UX/UI Master Skill)

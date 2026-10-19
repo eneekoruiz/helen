@@ -27,7 +27,7 @@ Wave 1 implementation: automated project bootstrap, machine-readable JSON output
   - Negative test case support (`expectTrigger: false`) to measure and report false positive trigger rates.
   - Eval runner CLI options: `--dry-run`, `--cases`, `--skill`, `--max-calls` budget enforcement, and run resumability.
   - Strict schema validation in `helen lint` and documentation in `evals/README.md`.
-  - Eval suite of <!--fact:evalCases-->124<!--/fact--> cases across the bundled skills, each with negative (must-not-trigger) cases.
+  - Eval suite of <!--fact:evalCases-->130<!--/fact--> cases across the bundled skills, each with negative (must-not-trigger) cases.
 - Publishing: `helen-cli` bin alias in `package.json`, `SECURITY.md` and `docs/RELEASING.md`. The npm publish and release-please workflows described in the first draft of this entry did not exist in the repository; they are added for real under Unreleased.
 - Windows portability: normalized CRLF vs LF in frontmatter parsing, unified forward-slash relative paths, and safe spawn handling.
 

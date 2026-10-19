@@ -1,7 +1,6 @@
 ---
 name: helen-security
 description: Master skill for auditing and hardening project security before public exposure, client delivery, or release; detecting secrets, injection vulnerabilities, dependency risks, and MCP server permissions in an autonomous convergence loop.
-version: 2.1.0
 ---
 
 # Security Hardening (Security Master Skill)

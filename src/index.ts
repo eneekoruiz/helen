@@ -18,6 +18,7 @@ import { detectPhase, readPlaybooks, suggestedGoals, validatePlaybooks } from '.
 import { validateCatalog } from './core/catalog.js';
 import { registerProgressCommands } from './commands/progressCmd.js';
 import { registerApplyCommand } from './commands/applyCmd.js';
+import { registerTeamCommands } from './commands/teamCmd.js';
 import { runAgentDoctor } from './core/agentDoctor.js';
 import { readGuide } from './core/guide.js';
 import { setupProject, uninstallProject, detectInstalledAgents, type SetupAgent } from './core/setup.js';
@@ -801,6 +802,7 @@ export function createProgram(): Command {
     });
 
   registerApplyCommand(program);
+  registerTeamCommands(program);
 
   // helen skills
   registerSkillsCommands(program);

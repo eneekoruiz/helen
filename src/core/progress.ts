@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
 import { logger } from './logger.js';
 import { isSafeProjectPath } from './fs.js';
+import { withLockSync } from './fileLock.js';
 import { repositoryFingerprint, repositoryContext, formatRepositoryContext, profileInstructions, type WorkProfile } from './workflowContext.js';
 
 export type StepStatus = 'pending' | 'done' | 'skipped';
@@ -160,32 +161,40 @@ function requireProgress(cwd: string): Progress {
   return progress;
 }
 
+/**
+ * Several agents may update the same plan at once. Every read-modify-write of progress.json goes
+ * through this lock, otherwise the last writer silently erases the others' updates.
+ */
+function withProgressLock<T>(cwd: string, action: () => T): T {
+  const lock = path.join(cwd, '.helen', 'progress.lock');
+  if (!isSafeProjectPath(cwd, lock)) throw new Error('Progress lock must remain inside the project directory');
+  return withLockSync(lock, action);
+}
+
 export function currentIndex(progress: Progress): number {
   return progress.steps.findIndex(step => step.status === 'pending');
 }
 
 export function startProgress(cwd: string, plan: ApplyPlan, force = false, profile: WorkProfile = 'standard'): Progress {
-  const existing = readProgress(cwd);
-  if (existing && currentIndex(existing) !== -1 && !force) {
-    throw new Error(`"${existing.goal}" is still in progress. Finish it (helen next / helen done), or restart with --force.`);
-  }
-  const progress: Progress = {
-    goal: plan.goalId,
-    title: plan.goal.title,
-    phase: plan.detection.phase,
-    startedAt: new Date().toISOString(),
-    profile,
-    steps: plan.goal.steps.map(step => ({ ...step, status: 'pending' as StepStatus })),
-  };
-  save(cwd, progress);
-  return progress;
+  return withProgressLock(cwd, () => {
+    const existing = readProgress(cwd);
+    if (existing && currentIndex(existing) !== -1 && !force) {
+      throw new Error(`"${existing.goal}" is still in progress. Finish it (helen next / helen done), or restart with --force.`);
+    }
+    const progress: Progress = {
+      goal: plan.goalId,
+      title: plan.goal.title,
+      phase: plan.detection.phase,
+      startedAt: new Date().toISOString(),
+      profile,
+      steps: plan.goal.steps.map(step => ({ ...step, status: 'pending' as StepStatus })),
+    };
+    save(cwd, progress);
+    return progress;
+  });
 }
 
-/** Mark the current step done. A checkpoint needs a passing `helen check` unless forced. */
-export function markDone(cwd: string, note?: string, force = false): Progress {
-  const progress = requireProgress(cwd);
-  const index = currentIndex(progress);
-  if (index === -1) throw new Error('All steps are already finished.');
+function finishStep(cwd: string, progress: Progress, index: number, note: string | undefined, force: boolean): Progress {
   const step = progress.steps[index]!;
   if (step.kind === 'checkpoint' && force && !note?.trim()) throw new Error('Forcing a checkpoint requires a note explaining why verification is bypassed.');
   if (step.kind === 'checkpoint' && !force && !(progress.lastCheck?.ok && progress.lastCheck.at >= progress.startedAt && progress.lastCheck.fingerprint === repositoryFingerprint(cwd))) {
@@ -199,11 +208,28 @@ export function markDone(cwd: string, note?: string, force = false): Progress {
   return progress;
 }
 
-export function skipStep(cwd: string, reason: string): Progress {
-  if (!reason.trim()) throw new Error('Say why the step is skipped: helen skip <reason>');
-  const progress = requireProgress(cwd);
-  const index = currentIndex(progress);
-  if (index === -1) throw new Error('All steps are already finished.');
+/** Mark the current step done. A checkpoint needs a passing `helen check` unless forced. */
+export function markDone(cwd: string, note?: string, force = false): Progress {
+  return withProgressLock(cwd, () => {
+    const progress = requireProgress(cwd);
+    const index = currentIndex(progress);
+    if (index === -1) throw new Error('All steps are already finished.');
+    return finishStep(cwd, progress, index, note, force);
+  });
+}
+
+/** Mark a specific pending step done (parallel work: steps need not finish in order). Same checkpoint gate as markDone. */
+export function completeStepAt(cwd: string, index: number, note?: string, force = false): Progress {
+  return withProgressLock(cwd, () => {
+    const progress = requireProgress(cwd);
+    const step = progress.steps[index];
+    if (!step) throw new Error(`There is no step ${index + 1} in the tracked plan.`);
+    if (step.status !== 'pending') throw new Error(`Step ${index + 1} is already ${step.status}.`);
+    return finishStep(cwd, progress, index, note, force);
+  });
+}
+
+function skipAt(cwd: string, progress: Progress, index: number, reason: string): Progress {
   const step = progress.steps[index]!;
   step.status = 'skipped';
   step.note = reason;
@@ -211,6 +237,28 @@ export function skipStep(cwd: string, reason: string): Progress {
   delete progress.lastCheck;
   save(cwd, progress);
   return progress;
+}
+
+export function skipStep(cwd: string, reason: string): Progress {
+  if (!reason.trim()) throw new Error('Say why the step is skipped: helen skip <reason>');
+  return withProgressLock(cwd, () => {
+    const progress = requireProgress(cwd);
+    const index = currentIndex(progress);
+    if (index === -1) throw new Error('All steps are already finished.');
+    return skipAt(cwd, progress, index, reason);
+  });
+}
+
+/** Skip a specific pending step with a recorded reason. */
+export function skipStepAt(cwd: string, index: number, reason: string): Progress {
+  if (!reason.trim()) throw new Error('Say why the step is skipped.');
+  return withProgressLock(cwd, () => {
+    const progress = requireProgress(cwd);
+    const step = progress.steps[index];
+    if (!step) throw new Error(`There is no step ${index + 1} in the tracked plan.`);
+    if (step.status !== 'pending') throw new Error(`Step ${index + 1} is already ${step.status}.`);
+    return skipAt(cwd, progress, index, reason);
+  });
 }
 
 export type ScriptRunner = (cwd: string, packageManager: string, script: string) => boolean;
@@ -232,11 +280,13 @@ const defaultRunner: ScriptRunner = (cwd, packageManager, script) =>
 /** Run the project's own typecheck, lint, test and build scripts (those that exist) as a gate. */
 export function runChecks(cwd: string, runner: ScriptRunner = defaultRunner): CheckRun {
   // A new attempt invalidates an earlier success even if parsing or execution throws.
-  const progress = readProgress(cwd);
-  if (progress?.lastCheck) {
-    delete progress.lastCheck;
-    save(cwd, progress);
-  }
+  withProgressLock(cwd, () => {
+    const progress = readProgress(cwd);
+    if (progress?.lastCheck) {
+      delete progress.lastCheck;
+      save(cwd, progress);
+    }
+  });
   const pkgFile = path.join(cwd, 'package.json');
   const scripts = fs.existsSync(pkgFile)
     ? (z.object({ scripts: z.record(z.string()).optional() }).parse(JSON.parse(fs.readFileSync(pkgFile, 'utf-8'))).scripts ?? {})
@@ -254,10 +304,14 @@ export function runChecks(cwd: string, runner: ScriptRunner = defaultRunner): Ch
   const unchanged = before === fingerprint;
   if (!unchanged) results.push({ script: 'repository-unchanged-during-check', ok: false });
   const run: CheckRun = { ok: results.length > 0 && results.every(result => result.ok), at: new Date().toISOString(), results, fingerprint };
-  if (progress) {
-    progress.lastCheck = run;
-    save(cwd, progress);
-  }
+  // The scripts above can run for minutes: re-read the plan so steps other agents finished meanwhile are kept.
+  withProgressLock(cwd, () => {
+    const fresh = readProgress(cwd);
+    if (fresh) {
+      fresh.lastCheck = run;
+      save(cwd, fresh);
+    }
+  });
   return run;
 }
 
@@ -289,6 +343,11 @@ function promptBody(ref: string): string {
 export function formatNext(progress: Progress, includeContent = true): string {
   const index = currentIndex(progress);
   if (index === -1) return formatStatus(progress);
+  return formatStepAt(progress, index, includeContent);
+}
+
+/** The same instructions as `formatNext`, for any step (parallel work addresses steps directly). */
+export function formatStepAt(progress: Progress, index: number, includeContent = true): string {
   const step = progress.steps[index]!;
   const lines = [`Step ${index + 1}/${progress.steps.length} [${step.kind}] ${step.ref}`, step.why, ''];
   lines.push(`Why now: this is the first unfinished step in the recorded ${progress.goal} playbook.`, profileInstructions(progress.profile ?? 'standard'), 'Acceptance: complete this step\'s observable outcome, record the checks or artifacts proving it, and disclose remaining blockers before marking it done.', '');
@@ -521,12 +580,16 @@ export interface ResumeState {
 
 /** Resume the existing plan, not a guessed reconstruction of an agent conversation. */
 export function resumeProgress(cwd: string, decision?: string): ResumeState {
-  const progress = requireProgress(cwd);
+  let progress = requireProgress(cwd);
   if (decision !== undefined) {
     if (!decision.trim() || decision.length > 2000 || Array.from(decision).some(char => char.charCodeAt(0) < 32 && ![9, 10, 13].includes(char.charCodeAt(0)))) throw new Error('Decision must contain 1–2000 characters without control characters');
-    progress.decisions = [...(progress.decisions ?? []), decision.trim()];
-    if (progress.decisions.length > 30) throw new Error('At most 30 session decisions can be recorded');
-    save(cwd, progress);
+    progress = withProgressLock(cwd, () => {
+      const fresh = requireProgress(cwd);
+      fresh.decisions = [...(fresh.decisions ?? []), decision.trim()];
+      if (fresh.decisions.length > 30) throw new Error('At most 30 session decisions can be recorded');
+      save(cwd, fresh);
+      return fresh;
+    });
   }
   const verification = !progress.lastCheck ? 'missing' : progress.lastCheck.fingerprint === repositoryFingerprint(cwd) ? 'current' : 'stale';
   const instructions = [

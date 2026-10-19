@@ -1,7 +1,6 @@
 ---
 name: helen-release
 description: Master skill for release engineering, SEO technical compliance, version bumps, changelogs, privacy policies, and preparing clean handoffs to clients in an autonomous convergence loop.
-version: 2.1.0
 ---
 
 # Release Engineering & Client Handoff (Release Master Skill)

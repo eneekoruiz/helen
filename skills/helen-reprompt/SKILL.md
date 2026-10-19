@@ -1,7 +1,6 @@
 ---
 name: helen-reprompt
 description: Clarify requests through native questions and concise English briefs while preserving intent, exclusions and authorization; use measurable acceptance, cost-aware routing and autonomous discovery.
-version: 2.1.0
 ---
 
 # HELEN Reprompt

@@ -14,27 +14,16 @@ import { installedHelenSkills, runAgentDoctor } from './agentDoctor.js';
 import { withStderrLogging } from './logger.js';
 import { helenVersion } from './version.js';
 import { isPathInside } from './fs.js';
+import { matchesType, type McpPolicy, type McpTool, type McpToolHandler } from './mcpTypes.js';
+import { TEAM_TOOLS } from './mcpTeam.js';
 
-export interface McpTool {
-  name: string;
-  description: string;
-  inputSchema: {
-    type: 'object';
-    properties: Record<string, { type: string; description: string }>;
-    required?: string[];
-  };
-}
+export type { McpTool, McpPolicy } from './mcpTypes.js';
 
 /**
  * Access policy for a running MCP server. An agent talking to the server is not fully trusted:
  * it may only address project directories under the allowed roots and may not bypass checkpoints.
  * A caller that passes no policy (in-process use, tests) is unrestricted.
  */
-export interface McpPolicy {
-  roots?: string[];
-  allowForce?: boolean;
-}
-
 /** Roots default to the directory the server was started in, plus --root flags and HELEN_MCP_ROOTS. */
 export function serverPolicy(options: { cwd?: string; roots?: string[]; env?: NodeJS.ProcessEnv } = {}): Required<McpPolicy> {
   const env = options.env ?? process.env;
@@ -73,7 +62,7 @@ export function resolveToolCwd(requested: unknown, policy?: McpPolicy): string {
   return cwd;
 }
 
-export const HELEN_MCP_TOOLS: McpTool[] = [
+const CORE_TOOLS: McpTool[] = [
   {
     name: 'helen_resume',
     description: 'Resume recorded progress and decisions, with current or stale verification and a concise next action.',
@@ -182,6 +171,11 @@ export const HELEN_MCP_TOOLS: McpTool[] = [
   },
 ];
 
+/** Tools implemented in their own modules (coordination, assistant...). */
+const EXTENSION_TOOLS: McpToolHandler[] = [...TEAM_TOOLS];
+
+export const HELEN_MCP_TOOLS: McpTool[] = [...CORE_TOOLS, ...EXTENSION_TOOLS.map(tool => tool.definition)];
+
 export async function handleToolCall(name: string, args: Record<string, unknown> = {}, policy?: McpPolicy): Promise<{ content: Array<{ type: 'text'; text: string }>; isError?: boolean }> {
   return withStderrLogging(() => executeToolCall(name, args, policy));
 }
@@ -197,7 +191,9 @@ async function executeToolCall(name: string, args: Record<string, unknown>, poli
       for (const [key, value] of Object.entries(args)) {
         if (value === undefined) continue;
         const property = tool.inputSchema.properties[key];
-        if (property && typeof value !== property.type) throw new Error(`Invalid argument ${key}: expected ${property.type}`);
+        if (property && !matchesType(value, property.type)) throw new Error(`Invalid argument ${key}: expected ${property.type}`);
+        if (property?.enum && !property.enum.includes(String(value))) throw new Error(`Invalid argument ${key}: expected one of ${property.enum.join(', ')}`);
+        if (property?.items && Array.isArray(value) && value.some(entry => !matchesType(entry, property.items!.type))) throw new Error(`Invalid argument ${key}: every entry must be a ${property.items.type}`);
       }
       if (args.limit !== undefined && (!Number.isInteger(args.limit) || (args.limit as number) < 0)) throw new Error('limit must be a non-negative integer');
     }
@@ -493,11 +489,17 @@ async function executeToolCall(name: string, args: Record<string, unknown>, poli
         };
       }
 
-      default:
+      default: {
+        const extension = EXTENSION_TOOLS.find(candidate => candidate.definition.name === name);
+        if (extension) {
+          const data = await extension.run(args, { cwd, policy });
+          return { content: [{ type: 'text', text: typeof data === 'string' ? data : JSON.stringify(data, null, 2) }] };
+        }
         return {
           isError: true,
           content: [{ type: 'text', text: `Unknown tool: "${name}"` }],
         };
+      }
     }
   } catch (err: unknown) {
     return {

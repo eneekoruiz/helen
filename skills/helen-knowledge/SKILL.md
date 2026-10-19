@@ -1,7 +1,6 @@
 ---
 name: helen-knowledge
 description: Master skill for drafting and reviewing Architectural Decision Records (ADRs), writing AI context files (AGENTS.md, CLAUDE.md), operations runbooks, onboarding guides, and mitigating bus factor risks in an autonomous convergence loop.
-version: 2.1.0
 ---
 
 # Knowledge Preservation & Onboarding (Knowledge Master Skill)

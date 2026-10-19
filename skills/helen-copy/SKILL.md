@@ -1,7 +1,6 @@
 ---
 name: helen-copy
 description: Master skill for writing, rewriting, and auditing website copy, headlines, and calls-to-action (CTAs) to maximize conversion rate (CRO); eliminating AI buzzwords and robotic tropes in an autonomous convergence loop.
-version: 2.1.0
 ---
 
 # Copy, Claims and Conversion (CRO Master Skill)

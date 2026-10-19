@@ -1,7 +1,6 @@
 ---
 name: helen-audit
 description: Audit correctness, workflows, security, performance and verification with evidence, cost-aware routing and optional specialists; discover further improvements and remediate when authorized.
-version: 2.1.0
 ---
 
 # HELEN Audit

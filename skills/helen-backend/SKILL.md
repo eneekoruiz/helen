@@ -1,7 +1,6 @@
 ---
 name: helen-backend
 description: Master skill for designing and reviewing data models, API contracts, JSON responses, error formats, or schema definitions; eliminating impossible states, evaluating breaking changes, ensuring idempotency, and enforcing data migration safety in an autonomous convergence loop.
-version: 2.1.0
 ---
 
 # Data, Schema and API Contracts (Backend Master Skill)

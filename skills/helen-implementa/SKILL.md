@@ -1,7 +1,6 @@
 ---
 name: helen-implementa
 description: Execute authorized plans, features and improvements end to end with measurable acceptance, cost-aware model routing, optional specialists and autonomous discovery.
-version: 2.1.0
 ---
 
 # HELEN Implementation

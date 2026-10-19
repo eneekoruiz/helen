@@ -1,7 +1,6 @@
 ---
 name: helen-router
 description: Use when the user asks what phase a project is in, what to do next, or which HELEN prompt or flow to run - detects the project phase from evidence, checks transition criteria, reuses existing scope and recommends the next step.
-version: 2.1.0
 ---
 
 # HELEN Phase Router
