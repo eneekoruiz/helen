@@ -2,6 +2,7 @@ import pc from 'picocolors';
 import { detectProject, type ProjectInfo } from './projectDetector.js';
 import { logger } from './logger.js';
 import { listOperations } from './operations.js';
+import { hooksStatus } from './gitHooks.js';
 
 export interface DoctorCheck {
   label: string;
@@ -36,6 +37,20 @@ export function runDoctor(cwd: string): DoctorCheck[] {
     status: project.hasGit ? 'ok' : 'warn',
     message: project.hasGit ? 'Initialized' : 'No .git directory — run git init',
   });
+
+  // Git hooks: only checked when the project has them. A hook git cannot execute protects nothing.
+  const hooks = hooksStatus(cwd);
+  if (hooks.directory) {
+    const problems = [
+      ...hooks.notExecutable.map(name => `.githooks/${name} is not executable (git ignores it)`),
+      ...(hooks.hooksPathActive === false ? ['core.hooksPath is not .githooks, so git does not run them'] : []),
+    ];
+    checks.push({
+      label: 'Git hooks',
+      status: problems.length ? 'warn' : 'ok',
+      message: problems.length ? `${problems.join('; ')} — run helen doctor --fix` : `${hooks.present.length} hook(s) active`,
+    });
+  }
 
   // src directory
   checks.push({

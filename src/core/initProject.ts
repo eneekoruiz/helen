@@ -6,6 +6,7 @@ import { detectProject } from './projectDetector.js';
 import { buildPlan, detectPhase, readPlaybooks, suggestedGoals } from './apply.js';
 import { startProgress, readProgress, currentIndex } from './progress.js';
 import { spawnSync } from 'node:child_process';
+import { activateHooks } from './gitHooks.js';
 import { createEmptyResult, type HelenContext } from './context.js';
 import { isSafeProjectPath } from './fs.js';
 
@@ -54,38 +55,34 @@ export interface InitProjectResult {
   nextSteps: string[];
 }
 
-function git(cwd: string, args: string[]): { ok: boolean; out: string } {
-  const result = spawnSync('git', ['-C', cwd, ...args], { encoding: 'utf8', timeout: 10000, windowsHide: true });
-  return { ok: result.status === 0, out: (result.stdout ?? '').trim() };
-}
-
 /** Create the repository when missing and point git at the hooks that guardrails installed. */
 export function setupGit(targetDir: string, options: { enabled: boolean; dryRun: boolean }, actions: string[]): GitSetupResult {
   if (!options.enabled) return { initialized: false, hooksActive: false, note: 'Git setup skipped (--no-git).' };
   if (spawnSync('git', ['--version'], { stdio: 'ignore', windowsHide: true }).status !== 0) {
     return { initialized: false, hooksActive: false, note: 'git is not installed; hooks stay inactive.' };
   }
-  const exists = fs.existsSync(targetDir);
-  const top = exists ? git(targetDir, ['rev-parse', '--show-toplevel']) : { ok: false, out: '' };
+  const inside = fs.existsSync(targetDir) && spawnSync('git', ['-C', targetDir, 'rev-parse', '--show-toplevel'], { stdio: 'ignore', windowsHide: true }).status === 0;
   let initialized = false;
-  if (!top.ok) {
+  if (!inside) {
     if (options.dryRun) {
       actions.push('[DRY-RUN] Would run git init');
       return { initialized: false, hooksActive: false };
     }
-    if (!git(targetDir, ['init', '-q']).ok) return { initialized: false, hooksActive: false, note: 'git init failed; hooks stay inactive.' };
+    if (spawnSync('git', ['-C', targetDir, 'init', '-q'], { stdio: 'ignore', windowsHide: true }).status !== 0) {
+      return { initialized: false, hooksActive: false, note: 'git init failed; hooks stay inactive.' };
+    }
     initialized = true;
     actions.push('Initialized a git repository');
-  } else if (fs.realpathSync(top.out) !== fs.realpathSync(targetDir)) {
-    // A parent repository owns this folder: changing its shared hooks path would affect unrelated code.
-    return { initialized: false, hooksActive: false, note: `Inside the git repository at ${top.out}; hooks path left unchanged.` };
   }
   if (options.dryRun || !fs.existsSync(path.join(targetDir, '.githooks'))) return { initialized, hooksActive: false };
-  const current = git(targetDir, ['config', '--local', 'core.hooksPath']);
-  if (current.out === '.githooks') return { initialized, hooksActive: true };
-  const set = git(targetDir, ['config', '--local', 'core.hooksPath', '.githooks']);
-  if (set.ok) actions.push('Activated the git hooks (core.hooksPath = .githooks)');
-  return { initialized, hooksActive: set.ok, ...(set.ok ? {} : { note: 'Could not set core.hooksPath.' }) };
+  // A parent repository owns the folder when it is not a repository root: its shared hooks path stays untouched.
+  const activation = activateHooks(targetDir);
+  if (activation.changed && activation.active) actions.push('Activated the git hooks (core.hooksPath = .githooks)');
+  return {
+    initialized,
+    hooksActive: activation.active,
+    ...(activation.note ? { note: activation.note.includes('Not the root') ? 'Inside a parent git repository; hooks path left unchanged.' : activation.note } : {}),
+  };
 }
 
 export async function runInitProject(options: InitProjectOptions): Promise<InitProjectResult> {
