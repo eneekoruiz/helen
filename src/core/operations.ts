@@ -124,7 +124,9 @@ function atomicWrite(
           attempt < 7
         ) {
           const end = Date.now() + (attempt + 1) * 15;
-          while (Date.now() < end) {}
+          while (Date.now() < end) {
+            // Wait for Windows file lock to clear.
+          }
           continue;
         }
         throw error;
