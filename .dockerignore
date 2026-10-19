@@ -5,3 +5,8 @@ tests
 coverage
 *.log
 .helen
+dist
+evals/results
+*.tgz
+.env
+.env.*

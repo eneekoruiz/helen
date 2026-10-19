@@ -104,7 +104,9 @@ export function writeFileSafe(
 
     if (exists) {
       if (!options.force) {
-        logger.warn(`File exists, skipping: ${filePath}`);
+        // Re-running a command over identical files is the normal idempotent case, not something to warn about.
+        if (readText(absolutePath) === finalContent) logger.step(`Unchanged: ${filePath}`);
+        else logger.warn(`File exists with different content, skipping: ${filePath}`);
         return 'skipped';
       }
       backupFile(absolutePath, { root: options.root });

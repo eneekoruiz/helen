@@ -27,16 +27,12 @@ Wave 1 implementation: automated project bootstrap, machine-readable JSON output
   - Negative test case support (`expectTrigger: false`) to measure and report false positive trigger rates.
   - Eval runner CLI options: `--dry-run`, `--cases`, `--skill`, `--max-calls` budget enforcement, and run resumability.
   - Strict schema validation in `helen lint` and documentation in `evals/README.md`.
-  - Expanded eval suite to 90 cases (6 per skill, including 2 negative cases each).
-- Publishing and Release Pipeline:
-  - npm trusted publishing with provenance via OIDC (`.github/workflows/publish.yml`).
-  - Automated versioning and changelog with Release Please (`.github/workflows/release-please.yml`, `release-please-config.json`, `.release-please-manifest.json`).
-  - Added `helen-cli` bin alias in `package.json` for seamless `npx helen-cli` usage.
-  - Added `SECURITY.md` (vulnerability disclosure policy) and `docs/RELEASING.md` (maintainer release checklist).
+  - Eval suite of <!--fact:evalCases-->124<!--/fact--> cases across the bundled skills, each with negative (must-not-trigger) cases.
+- Publishing: `helen-cli` bin alias in `package.json`, `SECURITY.md` and `docs/RELEASING.md`. The npm publish and release-please workflows described in the first draft of this entry did not exist in the repository; they are added for real under Unreleased.
 - Windows portability: normalized CRLF vs LF in frontmatter parsing, unified forward-slash relative paths, and safe spawn handling.
 
 ### Changed
-- Skill trigger descriptions tuned with concrete user trigger phrasing across all 15 skills to improve autonomous AI agent invocation.
+- Skill trigger descriptions tuned with concrete user trigger phrasing across the bundled skills to improve autonomous AI agent invocation.
 
 ## 2.0.0 — 2026-09-30
 

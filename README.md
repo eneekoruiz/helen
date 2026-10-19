@@ -6,10 +6,10 @@ Use your agent's native question form through `helen-reprompt` to clarify missin
 
 HELEN is a workflow kit for building projects with AI agents (Claude Code, Codex, Antigravity or any agent that reads `SKILL.md` folders):
 
-- **Prompts** (`docs/prompts`): 98 English, lint-checked task prompts and flows (105 total library documents), organized by project phase.
-- **Skills** (`skills/`): 12 bundled agent skills that load the right prompts automatically.
+- **Prompts** (`docs/prompts`): <!--fact:prompts-->98<!--/fact--> English, lint-checked task prompts and flows (<!--fact:library-->105<!--/fact--> library documents in total), organized by project phase.
+- **Skills** (`skills/`): <!--fact:skills-->12<!--/fact--> bundled agent skills that load the right prompts automatically.
 - **Playbooks** (`helen apply`): detect the project phase and plan which prompts, skills and tools to use for a goal.
-- **Catalog** (`helen skills catalog`): 41 vetted third-party skills, CLIs, MCP servers and references, with install commands HELEN prints but never runs.
+- **Catalog** (`helen skills catalog`): <!--fact:catalog-->41<!--/fact--> vetted third-party skills, CLIs, MCP servers and references, with install commands HELEN prints but never runs.
 - **Scaffolding**: optional modules for React + Vite + TypeScript projects (`helen init`, `helen add`).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg?style=flat-square)](LICENSE)

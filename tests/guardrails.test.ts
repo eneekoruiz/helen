@@ -27,7 +27,7 @@ describe('guardrails module', () => {
       expect(fs.statSync(path.join(tmp, '.githooks/pre-commit')).mode & 0o111).not.toBe(0);
     }
     const pkg = JSON.parse(fs.readFileSync(path.join(tmp, 'package.json'), 'utf-8'));
-    expect(pkg.scripts.prepare).toContain('core.hooksPath .githooks');
+    expect(pkg.scripts.prepare).toContain('core.hooksPath');
   });
 
   it('pre-commit blocks secrets and .env files but allows normal commits', async () => {

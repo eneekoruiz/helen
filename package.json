@@ -21,9 +21,11 @@
   },
   "files": [
     "dist",
+    "!dist/**/*.map",
     "templates",
     "skills",
     "docs",
+    "!docs/archive",
     "evals/*.json",
     "evals/README.md",
     "scripts/run-skill-evals.mjs",
@@ -42,7 +44,9 @@
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
     "clean": "node -e \"const fs=require('fs');fs.rmSync('dist',{recursive:true,force:true});\"",
     "evals": "node scripts/run-skill-evals.mjs --concurrency 8",
-    "prepare": "node -e \"require('node:child_process').spawnSync('git',['config','core.hooksPath','.githooks'],{stdio:'ignore',windowsHide:true})\""
+    "prepare": "node -e \"require('node:child_process').spawnSync('git',['config','core.hooksPath','.githooks'],{stdio:'ignore',windowsHide:true})\"",
+    "docs:check": "tsc && node scripts/docs-facts.mjs check",
+    "docs:sync": "tsc && node scripts/docs-facts.mjs sync"
   },
   "keywords": [
     "cli",

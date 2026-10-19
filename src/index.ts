@@ -32,10 +32,11 @@ import { runRollback } from './core/rollback.js';
 import { validateAllEvals } from './core/evals.js';
 import { isJsonMode, setJsonMode, printJsonAndExit, clearJsonBuffers } from './core/jsonOutput.js';
 import { runInitProject } from './core/initProject.js';
+import { helenVersion } from './core/version.js';
 import { runProjectOperation, listOperations, recoverOperation } from './core/operations.js';
 import { withPreview, previewToJSON, renderPreview } from './core/preview.js';
 
-const VERSION = '2.1.0';
+const VERSION = helenVersion();
 
 interface ModuleRunResult {
   failed?: boolean;
@@ -327,8 +328,9 @@ export function createProgram(): Command {
     .option('--agents <agents...>', 'Agents to configure: claude, codex, antigravity', ['claude', 'codex', 'antigravity'])
     .option('--goal <goal>', 'Initial goal to plan and track (default: strategy for new project, or phase recommendation)')
     .option('--yes', 'Skip confirmation prompts', false)
+    .option('--no-git', 'Do not create a git repository or activate the hooks')
     .option('--dry-run', 'Preview actions without modifying disk', false)
-    .action(async (name?: string, opts?: { agents: string[]; goal?: string; yes?: boolean; dryRun?: boolean }) => {
+    .action(async (name?: string, opts?: { agents: string[]; goal?: string; yes?: boolean; dryRun?: boolean; git?: boolean }) => {
       try {
         const result = await runInitProject({
           name,
@@ -337,6 +339,7 @@ export function createProgram(): Command {
           goal: opts?.goal,
           yes: opts?.yes,
           dryRun: opts?.dryRun,
+          git: opts?.git,
         });
 
         if (isJsonMode()) {
@@ -666,6 +669,8 @@ export function createProgram(): Command {
         const exitCode = errorCount > 0 ? 1 : warnCount > 0 ? 2 : 0;
         printJsonAndExit('doctor', { project, issues, fixReport }, {
           ok: errorCount === 0,
+          errors: issues.filter(i => i.status === 'error').map(i => `${i.label}: ${i.message}`),
+          warnings: issues.filter(i => i.status === 'warn').map(i => `${i.label}: ${i.message}`),
           exitCode,
         });
         return;
@@ -885,9 +890,10 @@ export function createProgram(): Command {
   program
     .command('mcp')
     .description('Start the HELEN Model Context Protocol (MCP) server over stdio')
-    .action(async () => {
-      const { startMcpServer } = await import('./core/mcp.js');
-      startMcpServer(process.stdin, process.stdout);
+    .option('--root <dir...>', 'Extra project directories clients may address with cwd (default: the directory the server starts in; also HELEN_MCP_ROOTS)')
+    .action(async (opts: { root?: string[] }) => {
+      const { startMcpServer, serverPolicy } = await import('./core/mcp.js');
+      startMcpServer(process.stdin, process.stdout, serverPolicy({ roots: opts.root }));
     });
 
   // helen config

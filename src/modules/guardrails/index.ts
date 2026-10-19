@@ -28,6 +28,9 @@ const meta: HelenModule['meta'] = {
   status: 'stable',
 };
 
+/** Portable on cmd.exe, PowerShell and POSIX shells, and harmless outside a git repository. */
+export const PREPARE_SCRIPT = `node -e "require('node:child_process').spawnSync('git',['config','core.hooksPath','.githooks'],{stdio:'ignore',windowsHide:true})"`;
+
 const preCommit = `#!/bin/sh
 # HELEN pre-commit: fast checks on staged files only, no dependencies.
 # Skip once with: git commit --no-verify
@@ -110,12 +113,13 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
   }
 
   const pkg = readJson<{ scripts?: Record<string, string> }>(path.join(cwd, 'package.json'));
-  if (pkg && !pkg.scripts?.prepare) {
-    const status = patchPackageJson(cwd, { scripts: { prepare: 'git config core.hooksPath .githooks || true' } }, { dryRun });
+  const prepare = pkg?.scripts?.prepare;
+  if (pkg && !prepare) {
+    const status = patchPackageJson(cwd, { scripts: { prepare: PREPARE_SCRIPT } }, { dryRun });
     recordFileResult(result, 'package.json', status);
     result.nextSteps.push('Run your package manager install once to activate the hooks');
-  } else {
-    result.nextSteps.push('Activate the hooks: git config core.hooksPath .githooks (a prepare script already exists)');
+  } else if (!prepare?.includes('core.hooksPath')) {
+    result.nextSteps.push('Activate the hooks: git config core.hooksPath .githooks (a different prepare script already exists)');
   }
   result.nextSteps.push('Enable Dependabot security updates in the GitHub repository settings');
   return result;

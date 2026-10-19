@@ -1,33 +1,53 @@
 name: Dependabot Auto-merge
+
 on: pull_request
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 concurrency:
-  group: dependabot-automerge-${{ github.ref }}
+  group: dependabot-automerge-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
   dependabot:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     if: github.actor == 'dependabot[bot]'
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: read
     steps:
       - name: Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@v3
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
         with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-      - name: Auto-approve safe Dependabot PRs
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      # Without required status checks, "gh pr merge --auto" merges immediately, even with red CI.
+      # So wait for the Quality Gates check explicitly and merge only when it passed.
+      - name: Merge safe updates once Quality Gates passed
         if: steps.metadata.outputs.update-type != 'version-update:semver-major'
-        run: gh pr review --approve "$PR_URL" || true
         env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Enable auto-merge for safe Dependabot PRs
-        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
-        run: gh pr merge --auto --squash "$PR_URL"
-        env:
           PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -eu
+          for attempt in $(seq 1 100); do
+            conclusion=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/check-runs" \
+              --jq '[.check_runs[] | select(.name == "Quality Gates")] | last | .conclusion // "pending"')
+            case "$conclusion" in
+              success) break ;;
+              failure|cancelled|timed_out|action_required|startup_failure)
+                echo "Quality Gates finished as $conclusion: not merging."
+                exit 1 ;;
+            esac
+            sleep 20
+          done
+          if [ "$conclusion" != "success" ]; then
+            echo "Timed out waiting for Quality Gates: not merging."
+            exit 1
+          fi
+          gh pr review --approve "$PR_URL" || true
+          gh pr merge --squash "$PR_URL"

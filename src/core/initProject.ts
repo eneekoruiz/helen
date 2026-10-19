@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { setupProject, type SetupAgent } from './setup.js';
-import { guardrailsModule } from '../modules/guardrails/index.js';
+import { guardrailsModule, PREPARE_SCRIPT } from '../modules/guardrails/index.js';
 import { detectProject } from './projectDetector.js';
 import { buildPlan, detectPhase, readPlaybooks, suggestedGoals } from './apply.js';
-import { startProgress, readProgress } from './progress.js';
+import { startProgress, readProgress, currentIndex } from './progress.js';
+import { spawnSync } from 'node:child_process';
 import { createEmptyResult, type HelenContext } from './context.js';
 import { isSafeProjectPath } from './fs.js';
 
@@ -15,6 +16,14 @@ export interface InitProjectOptions {
   goal?: string;
   yes?: boolean;
   dryRun?: boolean;
+  /** Create a git repository when there is none and activate the hooks. Default: true. */
+  git?: boolean;
+}
+
+export interface GitSetupResult {
+  initialized: boolean;
+  hooksActive: boolean;
+  note?: string;
 }
 
 export interface InitProjectResult {
@@ -32,14 +41,51 @@ export interface InitProjectResult {
     modified: string[];
     skipped: string[];
   };
+  gitResult: GitSetupResult;
   planResult: {
     goalId: string;
     title: string;
     phase: string;
     stepsCount: number;
+    /** True when an unfinished plan was already tracked and has been preserved. */
+    kept: boolean;
   };
   actionsTaken: string[];
   nextSteps: string[];
+}
+
+function git(cwd: string, args: string[]): { ok: boolean; out: string } {
+  const result = spawnSync('git', ['-C', cwd, ...args], { encoding: 'utf8', timeout: 10000, windowsHide: true });
+  return { ok: result.status === 0, out: (result.stdout ?? '').trim() };
+}
+
+/** Create the repository when missing and point git at the hooks that guardrails installed. */
+export function setupGit(targetDir: string, options: { enabled: boolean; dryRun: boolean }, actions: string[]): GitSetupResult {
+  if (!options.enabled) return { initialized: false, hooksActive: false, note: 'Git setup skipped (--no-git).' };
+  if (spawnSync('git', ['--version'], { stdio: 'ignore', windowsHide: true }).status !== 0) {
+    return { initialized: false, hooksActive: false, note: 'git is not installed; hooks stay inactive.' };
+  }
+  const exists = fs.existsSync(targetDir);
+  const top = exists ? git(targetDir, ['rev-parse', '--show-toplevel']) : { ok: false, out: '' };
+  let initialized = false;
+  if (!top.ok) {
+    if (options.dryRun) {
+      actions.push('[DRY-RUN] Would run git init');
+      return { initialized: false, hooksActive: false };
+    }
+    if (!git(targetDir, ['init', '-q']).ok) return { initialized: false, hooksActive: false, note: 'git init failed; hooks stay inactive.' };
+    initialized = true;
+    actions.push('Initialized a git repository');
+  } else if (fs.realpathSync(top.out) !== fs.realpathSync(targetDir)) {
+    // A parent repository owns this folder: changing its shared hooks path would affect unrelated code.
+    return { initialized: false, hooksActive: false, note: `Inside the git repository at ${top.out}; hooks path left unchanged.` };
+  }
+  if (options.dryRun || !fs.existsSync(path.join(targetDir, '.githooks'))) return { initialized, hooksActive: false };
+  const current = git(targetDir, ['config', '--local', 'core.hooksPath']);
+  if (current.out === '.githooks') return { initialized, hooksActive: true };
+  const set = git(targetDir, ['config', '--local', 'core.hooksPath', '.githooks']);
+  if (set.ok) actions.push('Activated the git hooks (core.hooksPath = .githooks)');
+  return { initialized, hooksActive: set.ok, ...(set.ok ? {} : { note: 'Could not set core.hooksPath.' }) };
 }
 
 export async function runInitProject(options: InitProjectOptions): Promise<InitProjectResult> {
@@ -88,7 +134,7 @@ export async function runInitProject(options: InitProjectOptions): Promise<InitP
       name: defaultPkgName,
       version: '0.1.0',
       private: true,
-      scripts: {},
+      scripts: { prepare: PREPARE_SCRIPT },
     };
     actionsTaken.push('Create minimal package.json');
     if (!dryRun) {
@@ -136,6 +182,10 @@ export async function runInitProject(options: InitProjectOptions): Promise<InitP
     actionsTaken.push(`Guardrails note: ${err instanceof Error ? err.message : String(err)}`);
   }
 
+  // 3b. Repository and hooks
+  const gitResult = setupGit(targetDir, { enabled: options.git !== false, dryRun }, actionsTaken);
+  if (gitResult.note) actionsTaken.push(gitResult.note);
+
   // 4. Determine phase and goal, then start tracking
   const detection = detectPhase(targetDir);
   let chosenGoal = options.goal;
@@ -151,18 +201,23 @@ export async function runInitProject(options: InitProjectOptions): Promise<InitP
   }
 
   const plan = buildPlan(targetDir, chosenGoal, playbooks);
+  const existingProgress = dryRun ? null : readProgress(targetDir);
+  const unfinished = existingProgress !== null && currentIndex(existingProgress) !== -1;
+  let kept = false;
 
-  if (!dryRun) {
-    // Start tracking the plan (safely re-usable)
-    const existingProgress = readProgress(targetDir);
-    if (!existingProgress || existingProgress.goal !== chosenGoal) {
-      startProgress(targetDir, plan, true);
-      actionsTaken.push(`Started plan tracking: "${chosenGoal}" (${plan.goal.steps.length} steps)`);
-    } else {
-      actionsTaken.push(`Plan "${chosenGoal}" already tracked in .helen/progress.json`);
-    }
-  } else {
+  if (dryRun) {
     actionsTaken.push(`[DRY-RUN] Would start plan tracking for "${chosenGoal}" (${plan.goal.steps.length} steps)`);
+  } else if (!existingProgress || !unfinished) {
+    startProgress(targetDir, plan, true);
+    actionsTaken.push(`Started plan tracking: "${chosenGoal}" (${plan.goal.steps.length} steps)`);
+  } else if (existingProgress.goal === chosenGoal) {
+    kept = true;
+    actionsTaken.push(`Plan "${chosenGoal}" already tracked in .helen/progress.json`);
+  } else {
+    // Never discard recorded work: an unfinished plan wins over a re-run of init-project.
+    kept = true;
+    chosenGoal = existingProgress.goal;
+    actionsTaken.push(`Kept the unfinished plan "${existingProgress.goal}". To switch: helen apply ${plan.goalId} --track --force`);
   }
 
   // 5. Build next steps
@@ -189,12 +244,10 @@ export async function runInitProject(options: InitProjectOptions): Promise<InitP
       modified: guardrailsRes.modified,
       skipped: guardrailsRes.skipped,
     },
-    planResult: {
-      goalId: plan.goalId,
-      title: plan.goal.title,
-      phase: plan.detection.phase,
-      stepsCount: plan.goal.steps.length,
-    },
+    gitResult,
+    planResult: kept && existingProgress
+      ? { goalId: existingProgress.goal, title: existingProgress.title, phase: existingProgress.phase, stepsCount: existingProgress.steps.length, kept }
+      : { goalId: plan.goalId, title: plan.goal.title, phase: plan.detection.phase, stepsCount: plan.goal.steps.length, kept },
     actionsTaken,
     nextSteps,
   };

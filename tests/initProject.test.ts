@@ -3,7 +3,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { runInitProject } from '../src/core/initProject.js';
-import { readProgress } from '../src/core/progress.js';
+import { markDone, readProgress } from '../src/core/progress.js';
+import { spawnSync } from 'node:child_process';
 
 describe('helen init-project', () => {
   let tmp: string;
@@ -109,5 +110,51 @@ describe('helen init-project', () => {
     expect(result.chosenGoal).toBe('qa');
     const progress = readProgress(tmp);
     expect(progress?.goal).toBe('qa');
+  });
+
+  describe('idempotency and git', () => {
+    const hasGit = spawnSync('git', ['--version'], { stdio: 'ignore' }).status === 0;
+    const hooksPath = (dir: string) => spawnSync('git', ['-C', dir, 'config', '--local', 'core.hooksPath'], { encoding: 'utf8' }).stdout.trim();
+
+    it.runIf(hasGit)('creates the repository and activates the hooks, then leaves everything alone on a second run', async () => {
+      const first = await runInitProject({ cwd: tmp, name: 'app', agents: ['claude'] });
+      const dir = path.join(tmp, 'app');
+      expect(first.gitResult).toMatchObject({ initialized: true, hooksActive: true });
+      expect(hooksPath(dir)).toBe('.githooks');
+      expect(fs.existsSync(path.join(dir, 'package.json.helen-backup'))).toBe(false);
+
+      const files = () => fs.readdirSync(dir, { recursive: true }).filter(f => !String(f).startsWith('.git' + path.sep) && String(f) !== '.git').sort();
+      const before = files();
+      const second = await runInitProject({ cwd: tmp, name: 'app', agents: ['claude'] });
+      expect(files()).toEqual(before);
+      expect(second.gitResult).toMatchObject({ initialized: false, hooksActive: true });
+      expect(second.planResult.kept).toBe(true);
+    });
+
+    it.runIf(hasGit)('does not touch the hooks path of a parent repository', async () => {
+      spawnSync('git', ['-C', tmp, 'init', '-q']);
+      const result = await runInitProject({ cwd: tmp, name: 'inner', agents: ['claude'] });
+      expect(result.gitResult.hooksActive).toBe(false);
+      expect(result.gitResult.note).toContain('hooks path left unchanged');
+      expect(hooksPath(tmp)).toBe('');
+    });
+
+    it('skips git entirely with git: false', async () => {
+      const result = await runInitProject({ cwd: tmp, name: 'nogit', agents: ['claude'], git: false });
+      expect(result.gitResult.initialized).toBe(false);
+      expect(fs.existsSync(path.join(tmp, 'nogit', '.git'))).toBe(false);
+    });
+
+    it('never discards an unfinished plan when re-run with another goal', async () => {
+      await runInitProject({ cwd: tmp, name: 'app', agents: ['claude'], git: false });
+      const dir = path.join(tmp, 'app');
+      markDone(dir, 'first step done');
+      const again = await runInitProject({ cwd: tmp, name: 'app', agents: ['claude'], git: false, goal: 'design' });
+      expect(again.planResult).toMatchObject({ goalId: 'strategy', kept: true });
+      expect(again.actionsTaken.join('\n')).toContain('helen apply design --track --force');
+      const progress = readProgress(dir)!;
+      expect(progress.goal).toBe('strategy');
+      expect(progress.steps[0]!.status).toBe('done');
+    });
   });
 });
