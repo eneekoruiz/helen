@@ -21,6 +21,7 @@ import { registerApplyCommand } from './commands/applyCmd.js';
 import { registerTeamCommands } from './commands/teamCmd.js';
 import { registerLoopCommands } from './commands/loopCmd.js';
 import { registerDesignCommands } from './commands/designCmd.js';
+import { registerAssistantCommands } from './commands/assistantCmd.js';
 import { runAgentDoctor } from './core/agentDoctor.js';
 import { readGuide } from './core/guide.js';
 import { setupProject, uninstallProject, detectInstalledAgents, type SetupAgent } from './core/setup.js';
@@ -810,6 +811,7 @@ export function createProgram(): Command {
   registerTeamCommands(program);
   registerLoopCommands(program);
   registerDesignCommands(program);
+  registerAssistantCommands(program);
 
   // helen skills
   registerSkillsCommands(program);

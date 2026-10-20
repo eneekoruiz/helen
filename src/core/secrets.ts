@@ -14,6 +14,8 @@ const SECRET_PATTERNS: Array<{ name: string; pattern: RegExp }> = [
   { name: 'JSON web token', pattern: /\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/ },
   { name: 'password', pattern: /\b(?:password|passwd|contrase(?:ñ|n)a|clave|pwd)\s*[:=]\s*\S{4,}/i },
   { name: 'bearer token', pattern: /\bBearer\s+[A-Za-z0-9._~+/=-]{20,}/ },
+  // "la contraseña del portátil es hunter2", "my PIN is 4321": a credential stated in words.
+  { name: 'password', pattern: /\b(?:contrase(?:ñ|n)a|password|passwd|passcode|pin|clave\s+(?:de(?:l|\s+la|\s+mi)?\s+)?(?:wifi|banco|tarjeta|correo|email|cuenta|acceso|ordenador|port(?:á|a)til|m(?:ó|o)vil|tel(?:é|e)fono))\b[^.\n]{0,40}?\s(?:es|son|is|was|era)\s+["'«]?(?:(?=[^\s"'»]*\d)[^\s"'»]{3,}|[^\s"'»]{8,})/i },
 ];
 
 /** NAME=value or "name": "value" where the name says it is a credential; only the value is redacted. */
@@ -57,6 +59,8 @@ export function findSecrets(text: string): string[] {
 /** Identifiers that are fine to remember but must not be read aloud or sent to a model by default. */
 export function looksSensitive(text: string): boolean {
   return /\b[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]{4}){3,7}\b/.test(text) // IBAN
+    || /\b(?:contrase(?:ñ|n)a|password|passcode|pin|cvv|cvc|iban|cuenta\s+bancaria|bank\s+account|n(?:ú|u)mero\s+de\s+(?:tarjeta|cuenta|la\s+seguridad\s+social|pasaporte)|card\s+number|social\s+security|pasaporte|passport)\b/i.test(text)
+    || /\b(?:c(?:ó|o)digo|code|combinaci(?:ó|o)n|combination)\s+(?:del?\s+|de\s+la\s+|of\s+the\s+|for\s+the\s+)?(?:portal|puerta|alarma|garaje|caja\s+fuerte|taquilla|candado|door|alarm|gate|garage|safe|locker|padlock)\b/i.test(text)
     || /\b\d{8}[A-HJ-NP-TV-Z]\b/.test(text) // Spanish DNI
     || /\b[XYZ]\d{7}[A-HJ-NP-TV-Z]\b/.test(text) // NIE
     || /\b\d{3}-\d{2}-\d{4}\b/.test(text) // US SSN
@@ -68,4 +72,16 @@ export function redact(text: string): string {
   let out = text.replace(ASSIGNMENT, (_match, name: string) => `${name}[redacted]`);
   for (const { pattern } of SECRET_PATTERNS) out = out.replace(new RegExp(pattern.source, pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`), '[redacted]');
   return out.replace(CARD, match => (isCardNumber(match) ? `[redacted]${/[ -]$/.exec(match)?.[0] ?? ''}` : match));
+}
+
+const SECRET_NAMES_ES: Record<string, string> = {
+  'private key': 'clave privada', 'AWS access key': 'clave de AWS', 'GitHub token': 'token de GitHub', 'Slack token': 'token de Slack', 'API key': 'clave de API',
+  'Google API key': 'clave de Google', 'Stripe key': 'clave de Stripe', 'JSON web token': 'token JWT', password: 'contraseña', 'bearer token': 'token', credential: 'credencial',
+  'card number': 'número de tarjeta',
+};
+
+/** Why HELEN refuses to keep something, in the owner's language. */
+export function secretRefusal(kinds: string[], lang: 'es' | 'en'): string {
+  if (lang === 'es') return `Eso parece un secreto (${kinds.map(kind => SECRET_NAMES_ES[kind] ?? kind).join(', ')}). No guardo credenciales: usa un gestor de contraseñas.`;
+  return `That looks like a secret (${kinds.join(', ')}). I do not keep credentials: use a password manager.`;
 }

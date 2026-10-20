@@ -17,6 +17,7 @@ import { isPathInside } from './fs.js';
 import { createMcpSession, matchesType, type McpPolicy, type McpSession, type McpTool, type McpToolHandler } from './mcpTypes.js';
 import { TEAM_TOOLS } from './mcpTeam.js';
 import { DESIGN_TOOLS } from './mcpDesign.js';
+import { ASSISTANT_TOOLS } from '../assistant/mcpAssistant.js';
 
 export type { McpTool, McpPolicy } from './mcpTypes.js';
 
@@ -173,7 +174,7 @@ const CORE_TOOLS: McpTool[] = [
 ];
 
 /** Tools implemented in their own modules (coordination, assistant...). */
-const EXTENSION_TOOLS: McpToolHandler[] = [...TEAM_TOOLS, ...DESIGN_TOOLS];
+const EXTENSION_TOOLS: McpToolHandler[] = [...TEAM_TOOLS, ...DESIGN_TOOLS, ...ASSISTANT_TOOLS];
 
 export const HELEN_MCP_TOOLS: McpTool[] = [...CORE_TOOLS, ...EXTENSION_TOOLS.map(tool => tool.definition)];
 
