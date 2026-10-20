@@ -45,10 +45,10 @@ export function configureHelenHooksPath(
     timeout: 5000,
   });
   if (root.error) throw root.error;
+  const realpath = fs.realpathSync.native ?? fs.realpathSync;
   if (
     root.status !== 0 ||
-    path.relative(fs.realpathSync(cwd), fs.realpathSync(root.stdout.trim())) !==
-      ""
+    path.relative(realpath(cwd), realpath(root.stdout.trim())) !== ""
   )
     throw new Error("Activate HELEN hooks from the Git worktree root");
   const result = spawnSync(
@@ -71,5 +71,5 @@ export function configureHelenHooksPath(
 // This must run before dist/ exists during npm ci and when the package is installed without a Git checkout.
 // Keep it dependency-free and portable across the Windows and POSIX package-script shells.
 const prepareSource =
-  "const {spawnSync}=require('node:child_process');const path=require('node:path');const fs=require('node:fs');const opts={encoding:'utf8',windowsHide:true,timeout:5000};const root=spawnSync('git',['rev-parse','--show-toplevel'],opts);if(process.env.npm_config_ignore_scripts!=='true'&&root.status===0&&path.relative(fs.realpathSync(process.cwd()),fs.realpathSync(root.stdout.trim()))===''){const current=spawnSync('git',['config','--get','core.hooksPath'],opts);const value=(current.stdout||'').replace(/\\r?\\n$/,'');if(current.status===1||(current.status===0&&value!==''&&path.resolve(value)===path.resolve('.githooks'))){const result=spawnSync('git',['config','--local','core.hooksPath','.githooks'],opts);if(result.error||result.status!==0){console.error(result.stderr||String(result.error));process.exitCode=1;}}}";
+  "const {spawnSync}=require('node:child_process');const path=require('node:path');const fs=require('node:fs');const realpath=fs.realpathSync.native||fs.realpathSync;const opts={encoding:'utf8',windowsHide:true,timeout:5000};const root=spawnSync('git',['rev-parse','--show-toplevel'],opts);if(process.env.npm_config_ignore_scripts!=='true'&&root.status===0&&path.relative(realpath(process.cwd()),realpath(root.stdout.trim()))===''){const current=spawnSync('git',['config','--get','core.hooksPath'],opts);const value=(current.stdout||'').replace(/\\r?\\n$/,'');if(current.status===1||(current.status===0&&value!==''&&path.resolve(value)===path.resolve('.githooks'))){const result=spawnSync('git',['config','--local','core.hooksPath','.githooks'],opts);if(result.error||result.status!==0){console.error(result.stderr||String(result.error));process.exitCode=1;}}}";
 export const hooksPathPrepareScript = `node -e "${prepareSource}"`;
