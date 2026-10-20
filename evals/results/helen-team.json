@@ -1,0 +1,1091 @@
+{
+  "skill": "helen-team",
+  "model": "sonnet",
+  "date": "2026-10-20",
+  "fingerprint": "c0942028b80e2a6e2bc2dd939c7624fd90c91f34770c22d0922f541505db62be",
+  "providerBlocker": null,
+  "providerCalls": 96,
+  "runsPerCase": 2,
+  "cases": [
+    {
+      "skill": "helen-team",
+      "fingerprint": "c0942028b80e2a6e2bc2dd939c7624fd90c91f34770c22d0922f541505db62be",
+      "id": "parallel-audits",
+      "expectTrigger": true,
+      "runsCount": 2,
+      "triggeredCount": 2,
+      "triggerRate": 100,
+      "baseline": 50,
+      "withSkill": 100,
+      "baselineStats": {
+        "mean": 50,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 50,
+        "upper": 50
+      },
+      "withSkillStats": {
+        "mean": 100,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 100,
+        "upper": 100
+      },
+      "deltaStats": {
+        "mean": 50,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 50,
+        "upper": 50,
+        "isNoise": false
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": true,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 9844,
+              "costUsd": 0.026888099999999998,
+              "durationMs": 10940
+            },
+            "naturalSkill": {
+              "tokens": 20684,
+              "costUsd": 0.0361828,
+              "durationMs": 12257
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 5177,
+              "costUsd": 0.0121783,
+              "durationMs": 7967
+            },
+            "judgeSkill": {
+              "tokens": 5461,
+              "costUsd": 0.0134145,
+              "durationMs": 4525
+            }
+          },
+          "baseline": 50,
+          "withSkill": 100,
+          "metrics": {
+            "tokens": 41166,
+            "costUsd": 0.0886637,
+            "durationMs": 35689
+          },
+          "criteria": [
+            {
+              "text": "Runs the read-only audits in parallel, one subagent per audit",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Five subagents launched in one message, one audit each, concurrently."
+            },
+            {
+              "text": "Runs the code-rewriting step alone, after the audits are finished",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Rewrite runs alone in a later wave after audits finish."
+            },
+            {
+              "text": "Has each worker claim its item before working so two agents never take the same one",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Each subagent claims its item via helen team claim; overlapping paths refused."
+            },
+            {
+              "text": "Keeps results where the next step can read them instead of relying on conversation memory",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Findings written to .helen/work/<item>/result.md; handoff passes them to writer."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "Run the five audits in parallel, then do the rewrite as a single serial step after you've reviewed the results.\n\n**Audits (parallel)**\n- Launch all five subagents in one message. Read-only audits don't conflict, so parallel is faster and each gets a clean context.\n- Restrict each to read-only tools (Read, Grep, Glob). If you define them as custom subagents in `.claude/agents/`, set `tools:` explicitly so they can't edit anything. Alternatively, run the whole audit phase in plan mode.\n- Give each a narrow scope and a fixed output format, such as findings with `file:line`, severity, and a suggested change. Ask for a short summary rather than a transcript, so the main thread isn't flooded.\n- Only parallelize if the audits are independent. If audit 3 needs audit 2's conclusions, run those two in sequence.\n\n**Checkpoint (you)**\n- Have the main agent merge and deduplicate the five reports. If the audits disagree or overlap, resolve that now.\n- Read the merged findings and trim the list to what you actually want changed. This is the one human gate, because the next step is the only one that changes anything.\n\n**Rewrite (serial)**\n- Start from a clean git state, ideally a new branch or a commit you can revert to.\n- Do it in the main thread, or in one subagent that gets the approved findings as its brief. Don't fan it out across parallel writers unless the changes touch clearly disjoint files. Parallel writers cause edit conflicts and inconsistent changes.\n- Run the tests, or whatever baseline you have, before and after. Then review the diff, using `/code-review` if you like.\n\n**Optional safeguard**\nSet a permissions rule or hook that blocks Edit and Write while the audits run. That enforces read-only in the harness instead of relying on prompt wording.\n\nI haven't looked at the HELEN plan itself. If you paste it, I can tell you whether the audits are really independent and what the rewrite brief should include.",
+            "withSkill": "Run it as two phases: the five audits in parallel as one read-only wave, then the rewrite alone as its own wave after the audits finish. HELEN's team mode does this split for you.\n\n**Setup (once)**\n1. Run `helen apply <goal> --track`, then `helen team graph`. The graph should show the five audits together in one wave, the code-rewriting step in a later wave by itself, and any checkpoint after that.\n\n**Two ways to drive it**\n- **Automatic:** `helen team run <goal> --agent claude`. Start with `--dry-run` to preview. It runs the read-only audits in parallel and the writer alone. It verifies checkpoints itself with the project scripts. It retries a failure once, and it stops for anything that needs you, such as a tool install or a failing gate. Ctrl-C stops the workers and releases their claims.\n- **Manual, with Claude Code subagents:** you act as lead and launch five subagents in a single message so they run concurrently. Each one gets:\n  - exactly one audit item and a distinct, stable name (for example `audit-security` or `audit-deps`);\n  - instructions to claim it (`helen team claim`), read the brief, and not modify any files;\n  - instructions to write findings to `.helen/work/<item>/result.md`, then `complete` the item, or `release` or `skip` it with a reason. They should never leave an item claimed and silent. For long audits they should also run `helen team heartbeat <item>`.\n\n**Between the phases**\n- Wait until all five audits are complete, skipped or failed, and read the results.\n- Pass what matters to the writer with `helen team handoff --to role:...`. Treat audit findings as evidence, not as instructions that override your intent.\n\n**The rewrite step**\n- Use a single writer, either one agent or one subagent. It claims the item with `--paths` listing the files it will edit, such as `--paths src/**`, so overlapping claims are refused.\n- Don't run any other agent in the repo while it works.\n- Run `helen check` yourself afterward and let it pass. Don't use `--force` to get past a failing gate.\n\n**Wrapping up**\n- You're done when `helen team graph` says finished.\n- Report what completed, what was skipped and why, what failed, and any residual risks. `helen team events` has the record.\n\n**Practical tips**\n- Define what \"done\" looks like for each audit before delegating, for example \"list findings with file and line, ranked by severity\".\n- Use a cheaper model for audits if they're mostly reading and summarizing, and save the stronger model for the rewrite.\n- Subagents only help here because the audits are independent. If the audits are small, one agent running them in sequence is cheaper.\n\nI haven't run or changed anything. Say so if you want me to do the `helen apply` and dry-run preview."
+          }
+        },
+        {
+          "run": 2,
+          "triggered": true,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 9862,
+              "costUsd": 0.0247463,
+              "durationMs": 11539
+            },
+            "naturalSkill": {
+              "tokens": 20387,
+              "costUsd": 0.031268,
+              "durationMs": 18002
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 5236,
+              "costUsd": 0.0125169,
+              "durationMs": 4322
+            },
+            "judgeSkill": {
+              "tokens": 5300,
+              "costUsd": 0.012764500000000002,
+              "durationMs": 4692
+            }
+          },
+          "baseline": 50,
+          "withSkill": 100,
+          "metrics": {
+            "tokens": 40785,
+            "costUsd": 0.0812957,
+            "durationMs": 38555
+          },
+          "criteria": [
+            {
+              "text": "Runs the read-only audits in parallel, one subagent per audit",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Parallel wave, one subagent per audit launched in same turn."
+            },
+            {
+              "text": "Runs the code-rewriting step alone, after the audits are finished",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Writer runs alone in a later wave after audits finish."
+            },
+            {
+              "text": "Has each worker claim its item before working so two agents never take the same one",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Each subagent claims its item via helen_team_claim before working; overlapping claims refused."
+            },
+            {
+              "text": "Keeps results where the next step can read them instead of relying on conversation memory",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Findings written to .helen/work/<item>/result.md and handoffs, read before rewrite."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "I haven't seen your HELEN plan, so this assumes the five audits don't depend on each other's output.\n\n**1. Run the five audits in parallel, as read-only subagents.**\n- Launch all five in a single message so they run concurrently.\n- Give each one a narrow scope and a fixed output format, such as findings with `file:line`, severity, and a suggested fix.\n- Restrict their tools to Read, Grep and Glob. Define them as custom subagents in `.claude/agents/` with a `tools:` allowlist, so read-only is enforced and not just requested. Starting the session in plan mode also works.\n- Have them return findings in their final message instead of writing report files. That keeps the tree clean and puts the results in your main context.\n\n**2. Add a checkpoint between the audits and the rewrite.**\n- Merge and de-duplicate the five reports in the main session. Look for conflicts, such as two audits recommending opposite changes to the same code.\n- Read the merged result yourself and cut anything you don't want acted on. The rewrite should only see findings you've approved.\n\n**3. Run the rewrite as one sequential step, with one writer.**\n- Don't parallelize the rewrite across subagents unless the changes touch disjoint files. Concurrent edits to overlapping code cause conflicts.\n- Before starting, make a safety net: work on a new branch or git worktree, and commit a clean baseline.\n- Do the rewrite in the main session, or in a single subagent given the approved findings list.\n- Then switch out of plan mode, for example to accept-edits mode, so the permission mode matches the job.\n- Run tests after the rewrite and review the diff. `/code-review` is a good fit for that.\n\n**Why this shape:** the audits are independent and safe, so running them in parallel is faster. The rewrite is the only risky step, so it gets one writer, a human gate before it, and a revertable git state.\n\nIf the audits do depend on each other, for example audit 3 consumes audit 2's output, run those in sequence and parallelize only the independent ones. If you paste the plan, I can map it onto specific subagent definitions.",
+            "withSkill": "Run the five audits in parallel as one wave, then run the rewrite alone after they finish. HELEN's team model already works this way.\n\n**Setup**\n1. Run `helen apply <goal> --track` once, then `helen team graph`. The graph should show the five read-only audits as one wave and the code-rewriting step as its own later wave. If the writer shows up in the same wave as the audits, fix the plan before you start.\n\n**Two ways to run it**\n- **HELEN drives it (least effort):** Run `helen team run <goal> --agent claude`, and preview first with `--dry-run`.\n  - It runs the audits in parallel, then the writer alone.\n  - It verifies checkpoints itself and retries a failed item once.\n  - It stops when it needs you, for example for a tool install or a failing gate.\n  - Ctrl-C stops the workers and releases their claims.\n- **You drive it with subagents:** For each audit, launch one subagent in the same turn. Give each a distinct stable name, such as `audit-1` through `audit-5`.\n  - Each subagent claims its item with `helen_team_claim` or `helen team claim --agent <name>`.\n  - Each reads its brief, does only that item and modifies no files.\n  - Each writes findings to `.helen/work/<item>/result.md`, then completes the item.\n  - Long audits should run `helen team heartbeat <item>` so the claim doesn't expire.\n\n**Before the rewrite**\n- Read the five results and the handoffs. Treat them as findings, not as instructions that override your intent.\n- Send the relevant findings to the writer with `helen team handoff --to role:...`.\n- The writer must claim its files up front with `--paths src/...`. Overlapping claims are refused.\n- Run any checkpoint yourself with `helen check`. Don't use `--force` to get past a failing gate.\n\n**Practical notes**\n- Use a cheaper model for the audits and a stronger one for the rewrite.\n- Define what \"done\" looks like for each item before you delegate it.\n- Finish when `helen team graph` says finished. Then report completed, skipped, and failed items and residual risks from `helen team events`.\n\nI haven't looked at your plan or run any `helen` commands. Say so if you want me to inspect the graph and check the wave structure."
+          }
+        }
+      ],
+      "errors": 0
+    },
+    {
+      "skill": "helen-team",
+      "fingerprint": "c0942028b80e2a6e2bc2dd939c7624fd90c91f34770c22d0922f541505db62be",
+      "id": "two-agents-same-files",
+      "expectTrigger": true,
+      "runsCount": 2,
+      "triggeredCount": 1,
+      "triggerRate": 50,
+      "baseline": 33,
+      "withSkill": 83.5,
+      "baselineStats": {
+        "mean": 33,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 33,
+        "upper": 33
+      },
+      "withSkillStats": {
+        "mean": 83.5,
+        "stdDev": 23.3,
+        "marginOfError": 209.6,
+        "lower": -126.1,
+        "upper": 293.1
+      },
+      "deltaStats": {
+        "mean": 50.5,
+        "stdDev": 23.3,
+        "marginOfError": 209.6,
+        "lower": -159.1,
+        "upper": 260.1,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": true,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 9483,
+              "costUsd": 0.0232043,
+              "durationMs": 7768
+            },
+            "naturalSkill": {
+              "tokens": 20444,
+              "costUsd": 0.0338185,
+              "durationMs": 11776
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 5082,
+              "costUsd": 0.011733099999999998,
+              "durationMs": 5642
+            },
+            "judgeSkill": {
+              "tokens": 5192,
+              "costUsd": 0.012132100000000002,
+              "durationMs": 6948
+            }
+          },
+          "baseline": 33,
+          "withSkill": 100,
+          "metrics": {
+            "tokens": 40201,
+            "costUsd": 0.080888,
+            "durationMs": 32134
+          },
+          "criteria": [
+            {
+              "text": "Has each agent declare the files or folders it will edit and refuses overlapping scopes",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Claims declare --paths 'src/api/**'; HELEN refuses overlapping path claims."
+            },
+            {
+              "text": "Serializes the two writers or gives them disjoint paths",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Writers run in separate waves; also offers disjoint path split."
+            },
+            {
+              "text": "Suggests a handoff message so the second agent knows what the first changed",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Handoff with context like 'changed handler signatures' via helen team handoff."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "Give each agent its own isolated working copy, and merge through git. Don't let both write to the same checkout.\n\n**Recommended: one git worktree per agent**\n```bash\ngit worktree add ../repo-codex  -b codex/api-work\ngit worktree add ../repo-claude -b claude/api-work\n```\n- Each agent runs in its own directory on its own branch, so they can't overwrite each other's files on disk.\n- Overlaps surface as ordinary merge conflicts when you merge or rebase, not as silent clobbering.\n- Worktrees share one `.git` object store, so they're cheap. Separate clones also work.\n\n**Reduce conflicts**\n- **Split the work.** Give each agent distinct files or subdirectories in `src/api/`, such as `src/api/users/` for one and `src/api/orders/` for the other. If they must touch shared files like routers, types, or an index, assign one owner for those. Alternatively, have the second agent rebase after the first one merges.\n- **Commit small and often.** Each agent should rebase on the main branch regularly (`git fetch && git rebase origin/main`) so drift stays small.\n- **Merge sequentially.** Merge one branch, have the other rebase onto it, run tests, then merge the second. Opening PRs for each is a good gate.\n\n**If they must share one checkout (not recommended)**\n- Use an explicit ownership split by path and tell each agent in its prompt to touch only its own paths.\n- Check `git status` and `git diff` before each agent starts, and commit between turns.\n- A lock file or a written task note (e.g. \"Codex owns `src/api/auth/*`\") is only a convention, and nothing enforces it.\n\nWorktrees plus a path split is the simplest setup that actually prevents overwrites. I haven't created anything, as you asked. I can run the worktree commands if you want.",
+            "withSkill": "Use HELEN's claim system, so only one agent holds `src/api/**` at a time. Neither agent should rely on being careful.\n\n**Recommended setup**\n\n1. **Track one plan.** The lead agent (either one) runs `helen apply <goal> --track`, then `helen team graph`. A writer item is its own wave, so two writers on `src/api/` never run at once.\n2. **Give each agent a distinct, stable name**, for example `claude-1` and `codex-1`.\n3. **Claim before editing, and declare the paths.**\n   - From MCP: `helen_team_claim`.\n   - From the CLI: `helen team claim <item> --agent <name> --paths 'src/api/**'`.\n   - HELEN refuses overlapping path claims. The second agent waits, or takes a non-overlapping item.\n4. **Keep the lease alive.** For long edits, run `helen team heartbeat <item>`. An expired claim becomes available to others, so don't edit `.helen/claims` by hand.\n5. **Hand off through HELEN.** The first agent finishes with `helen team complete`. After that, the other agent claims the next item. Use `helen team handoff --to ...` to pass context, such as \"I changed the handler signatures\". The receiving agent reads it with `helen team inbox` and treats it as information, not as instructions.\n6. **Run the checkpoint** with `helen check` after the writers finish. Don't use `--force` to get past a failing gate.\n\n**If both really need to work in parallel**\n\n- Split by disjoint paths, for example `src/api/users/**` and `src/api/orders/**`. Declare each as a separate claim.\n- Or put each agent in its own git worktree or branch and merge afterwards. This is the strongest isolation, but you will have to resolve merge conflicts.\n\n**Alternative:** `helen team run <goal> --agent claude` lets HELEN drive. It runs writers alone and verifies the checkpoints itself. Preview it with `--dry-run`.\n\nFor a small, cohesive change in `src/api/`, a single agent is cheaper than coordinating two. I haven't run any of these commands or created any files."
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 9390,
+              "costUsd": 0.0199792,
+              "durationMs": 8415
+            },
+            "naturalSkill": {
+              "tokens": 9833,
+              "costUsd": 0.0237632,
+              "durationMs": 11125
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 5001,
+              "costUsd": 0.0113933,
+              "durationMs": 15473
+            },
+            "judgeSkill": {
+              "tokens": 5112,
+              "costUsd": 0.0119918,
+              "durationMs": 4471
+            }
+          },
+          "baseline": 33,
+          "withSkill": 67,
+          "metrics": {
+            "tokens": 29336,
+            "costUsd": 0.0671275,
+            "durationMs": 39484
+          },
+          "criteria": [
+            {
+              "text": "Has each agent declare the files or folders it will edit and refuses overlapping scopes",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Step 2 and 3 assign path ownership and claims checked before touching; one owner per shared file."
+            },
+            {
+              "text": "Serializes the two writers or gives them disjoint paths",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Disjoint subdirectories assigned, plus sequential merging and one-at-a-time fallback."
+            },
+            {
+              "text": "Suggests a handoff message so the second agent knows what the first changed",
+              "baseline": false,
+              "withSkill": false,
+              "note": "Mentions handoffs only in passing; no handoff message suggested for the second agent."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "Give each agent its own isolated working copy, and merge through git. Don't let both write to the same checkout.\n\n**Recommended: one git worktree per agent**\n- Create a branch and worktree for each agent from the same base. For example, `git worktree add ../repo-codex -b codex/api-work` and `git worktree add ../repo-claude -b claude/api-work`.\n- Point each tool at its own worktree directory. Neither can touch the other's files, and both share one `.git`.\n- When each finishes, review its diff and merge or rebase into main one at a time. Resolve any conflicts in git, not by overwriting.\n\n**If they must share a checkout, partition the work**\n- Split by file or subdirectory, for example Codex on `src/api/routes/` and Claude on `src/api/middleware/`.\n- Write the split down in the prompts so each agent knows what is off-limits.\n- This is weaker. Shared files such as `index.ts`, types, and config can still collide, and edits made while the other agent is mid-task can silently clobber each other.\n\n**Habits that help either way**\n- Commit small and often, so each agent's work is recoverable.\n- Make sure the tree is clean before each agent starts.\n- Have each agent run `git status` and `git diff` before it writes, to catch unexpected changes.\n- Avoid having both agents run formatters or codegen across `src/api/`. That creates conflicts in files neither meant to change.\n- Merge in sequence, and run tests after each merge.\n\nThe worktree approach is the safest. The cost is two branches to merge, and git handles that well.",
+            "withSkill": "The safest fix is to separate the two agents so they never share a working tree. Add a claim on `src/api/` as a second layer.\n\n1. **Give each agent its own git worktree and branch.** For example, run `git worktree add ../wt-codex -b codex/api-work` and `git worktree add ../wt-claude -b claude/api-work`. Each agent edits only its own checkout, so neither can overwrite the other's unsaved changes. Conflicts then show up at merge time, where git can handle them.\n\n2. **Split the ownership inside `src/api/`.** Assign each agent distinct files or subdirectories, such as Codex on `src/api/routes/` and Claude on `src/api/middleware/`. Shared files like `index.ts`, types, and schemas should have one owner. The other agent asks that owner for changes or waits until the owner has merged.\n\n3. **Record a claim before editing.** Write a short note that says who owns which paths and for how long. It can live in a shared plan, an issue, or a lock file outside `src/api/`. Each agent checks it before touching a path and releases it when done. The `helen-team` skill in this environment covers this with claims, leases, and handoffs. I haven't invoked it, since you asked for chat only.\n\n4. **Merge in sequence.** The first agent finishes, runs tests, and merges. The second agent then rebases on the updated main branch, resolves any conflicts, and merges. Don't have both push straight to the same branch.\n\n5. **Use these as a backstop:**\n   - Commit often in small units.\n   - Run `git status` and `git diff` before each edit session to catch stray changes.\n   - Consider a pre-commit check that rejects commits touching paths the agent doesn't own.\n\nIf you can't use worktrees and both agents must share one directory, run them one at a time. Have the first commit before the second starts, and never let both write to the same files at once."
+          }
+        }
+      ],
+      "errors": 0
+    },
+    {
+      "skill": "helen-team",
+      "fingerprint": "c0942028b80e2a6e2bc2dd939c7624fd90c91f34770c22d0922f541505db62be",
+      "id": "agent-died-holding-claim",
+      "expectTrigger": true,
+      "runsCount": 2,
+      "triggeredCount": 2,
+      "triggerRate": 100,
+      "baseline": 100,
+      "withSkill": 83.5,
+      "baselineStats": {
+        "mean": 100,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 100,
+        "upper": 100
+      },
+      "withSkillStats": {
+        "mean": 83.5,
+        "stdDev": 23.3,
+        "marginOfError": 209.6,
+        "lower": -126.1,
+        "upper": 293.1
+      },
+      "deltaStats": {
+        "mean": -16.5,
+        "stdDev": 23.3,
+        "marginOfError": 209.6,
+        "lower": -226.1,
+        "upper": 193.1,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": true,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 9563,
+              "costUsd": 0.0240655,
+              "durationMs": 8903
+            },
+            "naturalSkill": {
+              "tokens": 20397,
+              "costUsd": 0.0334776,
+              "durationMs": 15826
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 5091,
+              "costUsd": 0.0116381,
+              "durationMs": 5937
+            },
+            "judgeSkill": {
+              "tokens": 5174,
+              "costUsd": 0.0120822,
+              "durationMs": 4042
+            }
+          },
+          "baseline": 100,
+          "withSkill": 67,
+          "metrics": {
+            "tokens": 40225,
+            "costUsd": 0.0812634,
+            "durationMs": 34708
+          },
+          "criteria": [
+            {
+              "text": "Explains that the lease expires on its own and the item becomes available again",
+              "baseline": true,
+              "withSkill": true,
+              "note": "States lease expires once heartbeats stop and item becomes available to others."
+            },
+            {
+              "text": "Offers an explicit release of the claim as the faster option instead of editing claim files by hand",
+              "baseline": true,
+              "withSkill": false,
+              "note": "Only mentions release with original token as caveat; no explicit release as faster option."
+            },
+            {
+              "text": "Says to check partial work before another agent resumes it",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Step 3 says check result.md, git diff, inbox before redoing work."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "Don't just clear the lease. First confirm the agent is really dead, then recover the work item deliberately.\n\n1. **Confirm it's dead, not slow.** Check the lease's heartbeat or expiry timestamp, and check whether the agent's process or session is still running. If the lease has a TTL and it has expired, the system may reclaim it on its own. Wait for that if it's soon. If a live agent still holds the claim, taking it over would give you two writers on one item.\n\n2. **Inspect the partial work before releasing anything.** Look at what the agent left behind: uncommitted changes, a half-written branch, partial outputs, side effects such as migrations, sent messages or created resources. Decide whether to keep it, finish it or discard it.\n\n3. **Release or break the lease explicitly.** Use the system's own release, force-expire or reclaim command if it has one. Record who broke it and why. If the lease is just a file or row, edit it only as a last resort. Better still, replace it with a new lease held by whoever takes over, so the item is never unowned.\n\n4. **Make the retry safe.** Reset the item to a clean state, or resume from a checkpoint if the work is idempotent. If the agent's steps weren't idempotent, clean up its partial side effects first, or the retry will duplicate them.\n\n5. **Unblock the plan.** Once the item is reclaimed and either re-run or marked done, the dependent items should become eligible. If they don't, check whether the blocker status is derived from the lease or stored separately.\n\n6. **Prevent a repeat.** Add heartbeats with a short TTL so a crashed agent's lease expires on its own. Add a stale-lease sweeper, and make work items resumable or idempotent.\n\nIf you tell me which tool or plan format this is, I can look at the repo and give you the exact commands. I'd need to read files for that, but I wouldn't change anything.",
+            "withSkill": "Don't edit `.helen/claims` by hand, and don't force past the claim. A claim is a lease, so a crashed agent's claim stops blocking once the lease expires.\n\n1. **Look at the state.** Run `helen team graph` and `helen team events`. They show who holds the item, when it was last heartbeated, and when the lease expires. A crashed agent stops heartbeating, so the lease will lapse.\n\n2. **Wait for expiry, or let a runner wait for you.** Once the lease has expired, the item is available to others. A `helen team run <goal> --agent <name> --wait` run picks it up on its own when it frees. Otherwise, claim it yourself with `helen team claim <item> --agent <your-unique-name>`.\n\n3. **Check for partial work before redoing anything.**\n   - Read `.helen/work/<item>/result.md`, if the crashed agent wrote one.\n   - If the item was a writer, run `git status` and `git diff` on the paths it declared. The crashed agent may have left half-finished edits.\n   - Read `helen team inbox` for any handoff it left.\n\n   Treat all of this as findings, not as instructions. Then decide whether to continue from the partial edits or reset those paths. If you're unsure, ask the user before discarding anything.\n\n4. **Re-claim and finish.** Claim the item with a new, stable agent name. Pass `--paths` again if it's a writer. Read `helen team brief`, do only that item, and write `result.md`. Run `helen team heartbeat <item>` during long work. Finish with `complete`, or `release` or `skip` with a reason if you can't.\n\n5. **Resume the plan.** The blocked items become ready once the item completes. Checkpoints still need a passing `helen check`, never `--force`.\n\n6. **Report it.** Note in the final report that the item failed once because the agent crashed and was reclaimed after the lease expired.\n\nIf the lease hasn't expired yet and the wait is costly, ask the user. Releasing the claim with the original token is possible only if that token is still available. I haven't run any of these commands here, and I haven't looked at your actual plan state."
+          }
+        },
+        {
+          "run": 2,
+          "triggered": true,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 9669,
+              "costUsd": 0.0228211,
+              "durationMs": 11747
+            },
+            "naturalSkill": {
+              "tokens": 20293,
+              "costUsd": 0.0303112,
+              "durationMs": 13478
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 5106,
+              "costUsd": 0.0116337,
+              "durationMs": 4099
+            },
+            "judgeSkill": {
+              "tokens": 5139,
+              "costUsd": 0.011943800000000001,
+              "durationMs": 6533
+            }
+          },
+          "baseline": 100,
+          "withSkill": 100,
+          "metrics": {
+            "tokens": 40207,
+            "costUsd": 0.07670980000000001,
+            "durationMs": 35857
+          },
+          "criteria": [
+            {
+              "text": "Explains that the lease expires on its own and the item becomes available again",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Step 1 says the claim lapses on its own and others can then claim."
+            },
+            {
+              "text": "Offers an explicit release of the claim as the faster option instead of editing claim files by hand",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Offers release with a reason, rejects hand-editing claims; token caveat noted but release is offered."
+            },
+            {
+              "text": "Says to check partial work before another agent resumes it",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Step 5 says to check git status/diff of partial files before redoing work."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "Don't just clear the claim. First find out whether the agent is really dead, then recover the work item deliberately.\n\n1. **Confirm the agent is dead.** Check the lease's expiry or heartbeat time, and check whether the process or session is still running. A lease that hasn't expired may belong to an agent that is slow, not crashed. If you take over while it's still alive, two agents will work on the same item.\n\n2. **Look at what the crash left behind.** The item was half done, so check for these before anyone resumes it:\n   - uncommitted or partial changes in the working tree or a branch\n   - partial writes, such as a half-applied migration, a half-written file, or a task that was only partly pushed\n   - any side effects that can't be repeated safely\n\n3. **Decide whether to resume or restart.** If the partial work is coherent and checkpointed, resume from it. If it's unclear, stash or branch it for reference and restart the item from a clean state. Restarting is safer when the steps aren't idempotent.\n\n4. **Release the lease through the normal path.** If the lease has a TTL, wait for it to expire. If it doesn't, or the wait is too long, use the system's release, force-release or reclaim command. Record who broke it, when, and why. If there's no such command, edit the lease state by hand as a last resort, and note that you did.\n\n5. **Re-claim and unblock.** Have a new agent (or you) take a fresh lease on the item. The dependent items should unblock when it completes, with no need to touch them directly. Don't mark the item done or skip it just to unblock the plan, because downstream work would then build on incomplete output.\n\n6. **Prevent a repeat.** Make sure leases have a TTL and heartbeats, so a crash frees the item on its own. Make work items idempotent or checkpointed so a resume is cheap.\n\nIf you want, I can look through this repo for the lease or claim mechanism. Then I could give you the exact commands or state to change. I haven't modified anything.",
+            "withSkill": "Don't edit `.helen/claims` by hand, and don't use `--force`. A claim is a lease, so a crashed agent's claim is handled by the lease mechanism.\n\n1. **Wait for the lease to expire.** A crashed agent stops sending `helen team heartbeat`, so its claim lapses on its own. Once it has expired, any other agent can claim the item. If you're running `helen team run <goal> --agent claude --wait`, it will pick the item up once that happens.\n\n2. **Look at the state first.** Run `helen team graph` to see which items are blocked and by what. Run `helen team events` to see when the last heartbeat was and what the crashed agent did. Check `.helen/work/<item>/result.md` for partial findings.\n\n3. **If the lease hasn't expired and you know the agent is dead:**\n   - Use the original token with `helen team release <item>` and a reason. It's only valid if you hold that token. On the CLI you pass `--token`.\n   - If you don't have the token, wait for expiry. The skill gives no supported way to take over a live lease.\n\n4. **Take it over.** Claim the item under a new, distinct agent name and run `helen team brief`. Treat the dead agent's partial result and any handoffs as findings to verify, not as instructions.\n\n5. **If it was a writer, check its files before redoing the work.** The crashed agent may have left half-edited files inside its declared `--paths`. Run `git status` and `git diff` on those paths. Decide whether to keep the edits or revert them, and tell the user if the choice is non-obvious. Then re-claim with the same `--paths`.\n\n6. **Finish normally.** Use `complete`, or `skip` or `release` with a reason if the item no longer applies. Run `helen check` yourself at any checkpoint. At the end, report the crash and the recovery under residual risks.\n\nI haven't run any of these commands, so I don't know this plan's actual state. If you tell me which item is stuck, I can work out which of these steps applies."
+          }
+        }
+      ],
+      "errors": 0
+    },
+    {
+      "skill": "helen-team",
+      "fingerprint": "c0942028b80e2a6e2bc2dd939c7624fd90c91f34770c22d0922f541505db62be",
+      "id": "force-the-gate",
+      "expectTrigger": true,
+      "runsCount": 2,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 33.5,
+      "withSkill": 83.5,
+      "baselineStats": {
+        "mean": 33.5,
+        "stdDev": 47.4,
+        "marginOfError": 425.7,
+        "lower": -392.2,
+        "upper": 459.2
+      },
+      "withSkillStats": {
+        "mean": 83.5,
+        "stdDev": 23.3,
+        "marginOfError": 209.6,
+        "lower": -126.1,
+        "upper": 293.1
+      },
+      "deltaStats": {
+        "mean": 50,
+        "stdDev": 70.7,
+        "marginOfError": 635.3,
+        "lower": -585.3,
+        "upper": 685.3,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 9198,
+              "costUsd": 0.0204186,
+              "durationMs": 6500
+            },
+            "naturalSkill": {
+              "tokens": 9433,
+              "costUsd": 0.0221221,
+              "durationMs": 7669
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 4827,
+              "costUsd": 0.0106514,
+              "durationMs": 10488
+            },
+            "judgeSkill": {
+              "tokens": 4950,
+              "costUsd": 0.0110355,
+              "durationMs": 4304
+            }
+          },
+          "baseline": 67,
+          "withSkill": 67,
+          "metrics": {
+            "tokens": 28408,
+            "costUsd": 0.0642276,
+            "durationMs": 28961
+          },
+          "criteria": [
+            {
+              "text": "Refuses to accept the worker's word and requires a passing verification run of the project's own checks",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Rejects worker's claim; requires re-running tests and passing before done."
+            },
+            {
+              "text": "Says forcing a checkpoint is a deliberate exception that needs a stated reason and the user's decision",
+              "baseline": false,
+              "withSkill": true,
+              "note": "States waiver requires owner's explicit decision, recorded; reason implied via documentation."
+            },
+            {
+              "text": "Does not suggest weakening or skipping the failing tests",
+              "baseline": true,
+              "withSkill": false,
+              "note": "Suggests fixing tests as wrong/outdated, and waiving failures, which weakens tests."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "No, don't allow it. A failing test on the checkpoint step is direct evidence that the checkpoint isn't met. A worker agent's statement that \"everything is fine\" doesn't outweigh that.\n\nBefore marking it done, I'd do the following:\n\n1. **Ask for the evidence.** Get the exact test command the worker ran and its output. Check whether they ran the same tests that failed.\n2. **Re-run the tests yourself.** If they pass, the earlier failure may have been flaky or caused by a stale environment. Then you'd know why the two reports differ.\n3. **Look at the failures.** If they come from an unrelated, known-broken test, document that and get an explicit decision to waive it. Don't let the worker wave it away.\n4. **Mark it done only when the tests pass,** or when you've knowingly accepted a documented exception.\n\nI haven't run anything here, so I don't know why the worker and the tests disagree. Until that's resolved, the checkpoint stays open.",
+            "withSkill": "No, don't allow it. Failing tests on the checkpoint step are direct evidence that the checkpoint isn't met, and the worker's statement that \"everything is fine\" doesn't outweigh that. A checkpoint is only done when its verification passes.\n\nHere's what I'd do instead:\n\n1. **Ask the worker for evidence.** Have it say which tests it ran, the exact command, and the output. It may have run a different subset, used a stale build, or missed the failing step.\n2. **Re-run the failing tests yourself** (or have a different agent do it) so the result doesn't depend on the worker's report.\n3. **Triage the failures.** There are three possible outcomes:\n   - **Real failures:** the worker fixes them, then the checkpoint is re-verified.\n   - **Flaky or environment-related failures:** document that, show they're unrelated to the change, and get an explicit decision to proceed.\n   - **Wrong or outdated tests:** fix the tests and note why.\n4. **Leave the checkpoint open** until the tests pass, or until you, as the person who owns the decision, explicitly waive the failure and the waiver is recorded.\n\nIf you want, I can look at the repo and re-run the tests to see what's failing. I haven't run anything yet, so I can't tell you why they fail. I can only say the worker's claim doesn't match the failures you've seen."
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 9228,
+              "costUsd": 0.018327299999999998,
+              "durationMs": 8152
+            },
+            "naturalSkill": {
+              "tokens": 9382,
+              "costUsd": 0.0192848,
+              "durationMs": 7442
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 4867,
+              "costUsd": 0.010831900000000002,
+              "durationMs": 5240
+            },
+            "judgeSkill": {
+              "tokens": 4890,
+              "costUsd": 0.010746400000000001,
+              "durationMs": 5249
+            }
+          },
+          "baseline": 0,
+          "withSkill": 100,
+          "metrics": {
+            "tokens": 28367,
+            "costUsd": 0.059190400000000004,
+            "durationMs": 26083
+          },
+          "criteria": [
+            {
+              "text": "Refuses to accept the worker's word and requires a passing verification run of the project's own checks",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Rejects worker's claim; requires rerunning tests and a green run before marking done."
+            },
+            {
+              "text": "Says forcing a checkpoint is a deliberate exception that needs a stated reason and the user's decision",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Says knowingly waived items need recorded reason and user's explicit sign-off."
+            },
+            {
+              "text": "Does not suggest weakening or skipping the failing tests",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Says not to skip quietly; any test change must be visible and reviewed."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "No, don't allow it. A failing test on the checkpoint step is direct evidence that the checkpoint isn't met. The worker's \"everything is fine\" is only a claim, and it contradicts what the tests show.\n\nBefore anything gets marked done:\n\n1. **Look at the failures.** Read the actual test output to see which tests fail and why. I haven't seen it yet, so I can't say what's behind it.\n2. **Sort out the cause.** The failures could be:\n   - a real bug in the code, in which case it gets fixed.\n   - a flaky or environment-related test, in which case it's rerun and the cause documented.\n   - an outdated test, in which case it's updated with a stated reason.\n3. **Have the worker back up its claim.** If it thinks the failures are irrelevant, it should say which tests and why, and show evidence. A passing rerun would count. Its confidence doesn't.\n4. **Mark done only when the tests pass,** or when you've made an explicit, recorded decision to waive specific failures.\n\nIf you want, I can run the tests and dig into the failures with you.",
+            "withSkill": "No, don't allow it. Failing tests are direct evidence that the checkpoint isn't met, and the worker's statement that everything is fine doesn't outweigh that. A checkpoint should only be marked done when the tests pass.\n\nWhat I'd do:\n\n1. **Ask the worker to reconcile the claim with the failures.** It should say which tests fail, and why it thinks they don't matter.\n2. **Check the failure yourself.** Rerun the tests and read the output. The worker may have run a different subset, run them in a stale environment, or missed the failures.\n3. **Sort the failure into one of three cases:**\n   - **Real bug:** fix it, then rerun.\n   - **Flaky or environmental:** show that with a rerun or an isolated repro, and record it.\n   - **Outdated or wrong test:** fix or remove the test in a visible change that gets reviewed. Don't skip it quietly.\n4. **Mark the checkpoint done only after a green run.** If something is knowingly waived, record the waiver and the reason, and get your explicit sign-off.\n\nI haven't looked at the repo or the test output in this session, so I can't say which case applies. If you want, I can run the tests and look into the failures."
+          }
+        }
+      ],
+      "errors": 0
+    },
+    {
+      "skill": "helen-team",
+      "fingerprint": "c0942028b80e2a6e2bc2dd939c7624fd90c91f34770c22d0922f541505db62be",
+      "id": "git-rebase-negative",
+      "expectTrigger": false,
+      "runsCount": 2,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 100,
+      "withSkill": 100,
+      "baselineStats": {
+        "mean": 100,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 100,
+        "upper": 100
+      },
+      "withSkillStats": {
+        "mean": 100,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 100,
+        "upper": 100
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 9473,
+              "costUsd": 0.023255200000000004,
+              "durationMs": 10571
+            },
+            "naturalSkill": {
+              "tokens": 9562,
+              "costUsd": 0.023479200000000002,
+              "durationMs": 8218
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 5013,
+              "costUsd": 0.011050800000000001,
+              "durationMs": 4590
+            },
+            "judgeSkill": {
+              "tokens": 4993,
+              "costUsd": 0.010988600000000001,
+              "durationMs": 3835
+            }
+          },
+          "baseline": 100,
+          "withSkill": 100,
+          "metrics": {
+            "tokens": 29041,
+            "costUsd": 0.06877380000000001,
+            "durationMs": 27214
+          },
+          "criteria": [
+            {
+              "text": "Explains that merge preserves history with a merge commit while rebase rewrites commits onto a new base",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Merge keeps history via merge commit; rebase rewrites commits onto new base."
+            },
+            {
+              "text": "Warns against rebasing commits that are already shared",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Warns rewriting is dangerous on shared commits; never rebase commits others use."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "Both commands integrate changes from one branch into another. They differ in how they record that integration in history.\n\n**git merge**\n- It creates a new *merge commit* with two parents. That commit ties the two branch histories together.\n- Existing commits are left untouched, so history stays exactly as it happened, including the parallel branches.\n- It is non-destructive and safe on shared branches.\n- The downside is that history can get cluttered with merge commits and become hard to read.\n- If the target branch hasn't moved, Git does a *fast-forward*. It just moves the pointer and creates no merge commit, unless you pass `--no-ff`.\n\n```\nA---B---C  main\n     \\     \\\n      D---E---M  feature (merged)\n```\n\n**git rebase**\n- It takes your branch's commits and *replays* them on top of another base. For example, it moves `feature` onto the tip of `main`.\n- The replayed commits are brand new, with new hashes, and the originals are abandoned.\n- The result is a clean, linear history with no merge commit.\n- It rewrites history. Never rebase commits that others have already pulled, because that causes divergence and painful conflicts for them.\n- Conflicts are resolved commit by commit, which can mean resolving several times. A merge resolves them once.\n\n```\nBefore:        A---B---C  main\n                    \\\n                     D---E  feature\n\nAfter rebase:  A---B---C  main\n                        \\\n                         D'---E'  feature\n```\n\n**When to use which**\n- Use **merge** to bring a finished feature into a shared branch like `main`, or any time you want to preserve the true history.\n- Use **rebase** to tidy up your own local or unpublished branch. Common uses are updating it with the latest `main` before opening a PR, and `git rebase -i` to squash or reword commits.\n\nA common workflow is to rebase your feature branch onto `main` locally, then merge it into `main`, often with a fast-forward or squash.",
+            "withSkill": "Both integrate changes from one branch into another. They differ in how they do it and in the history they leave behind.\n\n**git merge**\n- It creates a new merge commit with two parents. That commit ties the two branch histories together.\n- It leaves existing commits untouched. History stays exactly as it happened, including the parallel branches.\n- If the target branch hasn't moved since you branched, it can fast-forward and create no merge commit.\n- It's safe on shared branches because it never rewrites commits.\n- The downside is that history gets noisy, with many merge commits and a branching graph.\n\n**git rebase**\n- It replays your branch's commits one by one on top of another base, usually the latest `main`.\n- It rewrites history. The replayed commits are new commits with new hashes, even though their content is the same.\n- The result is a linear history with no merge commit, which is easier to read and bisect.\n- You may have to resolve conflicts at each replayed commit, not once as with a merge.\n- Interactive mode (`git rebase -i`) also lets you squash, reorder, edit, or drop commits.\n- The downside is that rewriting history is dangerous on commits others already have. If you rebase a pushed branch, you need `--force-with-lease` to push it, and it can disrupt collaborators.\n\n**Example**\n\n```\nA---B---C  feature\n     \\\n      D---E  main\n```\n- `git checkout main && git merge feature` adds a merge commit M with parents E and C.\n- `git checkout feature && git rebase main` produces `D---E---B'---C'`, where B' and C' are copies of B and C.\n\n**Rule of thumb**\n- Rebase to tidy and update your own local or private branch before sharing it.\n- Merge to integrate into shared or public branches, such as when a PR lands. Many teams also use squash-merge.\n- Never rebase commits that others have based work on."
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 9457,
+              "costUsd": 0.020911,
+              "durationMs": 7716
+            },
+            "naturalSkill": {
+              "tokens": 9643,
+              "costUsd": 0.022117500000000002,
+              "durationMs": 10264
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 5002,
+              "costUsd": 0.011028399999999999,
+              "durationMs": 3648
+            },
+            "judgeSkill": {
+              "tokens": 5079,
+              "costUsd": 0.011351600000000002,
+              "durationMs": 3601
+            }
+          },
+          "baseline": 100,
+          "withSkill": 100,
+          "metrics": {
+            "tokens": 29181,
+            "costUsd": 0.0654085,
+            "durationMs": 25229
+          },
+          "criteria": [
+            {
+              "text": "Explains that merge preserves history with a merge commit while rebase rewrites commits onto a new base",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Clearly states merge commit preserves history; rebase replays commits as new ones onto new base."
+            },
+            {
+              "text": "Warns against rebasing commits that are already shared",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Golden rule explicitly warns against rebasing commits others have already pulled."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "**Both integrate changes from one branch into another. They differ in how they do it and in what history results.**\n\n**git merge**\n- It creates a new *merge commit* with two parents, which ties the branches' histories together.\n- It preserves the history exactly as it happened, including the branch points.\n- It doesn't rewrite existing commits, so it's safe on shared branches.\n- The downside is that history can become cluttered with merge commits and look non-linear.\n- If the target branch hasn't diverged, Git does a *fast-forward* and creates no merge commit, unless you use `--no-ff`.\n\n**git rebase**\n- It takes your branch's commits and replays them one by one on top of another branch's tip.\n- The replayed commits are *new commits* with new hashes. The originals are abandoned.\n- The result is a clean, linear history with no merge commit.\n- The downside is that it rewrites history. Rebasing commits that others have already pulled forces them to reconcile diverged history, and you'd need `--force-with-lease` to push.\n- Conflicts are resolved commit by commit, not once as in a merge.\n- `git rebase -i` also lets you squash, reorder, edit, or drop commits.\n\n**Example**\n\n```\n      A---B---C  feature\n     /\nD---E---F---G    main\n```\n\n- `git merge main` (on feature) adds a merge commit M with parents C and G. A, B, and C keep their hashes.\n- `git rebase main` (on feature) gives `D---E---F---G---A'---B'---C'`. The commits are recreated on top of G.\n\n**Rules of thumb**\n- Rebase to tidy up *local*, unpublished work, or to bring your feature branch up to date with main before opening a PR.\n- Merge when integrating shared or public branches, or when you want to keep a record of when and how branches were joined.\n- Never rebase commits that others have based work on.",
+            "withSkill": "Both integrate changes from one branch into another. They differ in how they do it and in the history they leave behind.\n\n**git merge**\n- It creates a new **merge commit** with two parents, tying the two branches' histories together.\n- Existing commits are untouched. Their hashes and timestamps stay the same.\n- History is non-linear. It shows where branches diverged and rejoined.\n- If the target branch hasn't moved, Git does a **fast-forward** and just moves the pointer, with no merge commit.\n- You resolve conflicts once, in the merge commit.\n\n**git rebase**\n- It takes your branch's commits and **replays them one by one** on top of another base, usually the latest `main`.\n- Each replayed commit is a **new commit** with a new hash. The originals are abandoned.\n- History becomes a **straight line**, as if you had started your work from the latest base.\n- You may have to resolve conflicts commit by commit.\n- `git rebase -i` also lets you squash, reorder, edit, or drop commits.\n\n**Example**\n```\nBefore:       A---B---C  (main)\n                   \\\n                    D---E  (feature)\n\nmerge:        A---B---C-------M   (M = merge commit)\n                   \\         /\n                    D-------E\n\nrebase:       A---B---C---D'---E'   (D', E' are new commits)\n```\n\n**When to use which**\n- **Merge** fits shared or public branches. It preserves the true history and is safe because nothing is rewritten.\n- **Rebase** fits cleaning up your own local or feature branch before sharing it, or keeping it current with `main`. It gives a tidy, linear log.\n\n**Golden rule:** don't rebase commits that others have already pulled. Rebasing rewrites history, so collaborators' copies diverge from yours. If you must push a rebased branch, you'll need `git push --force-with-lease`, so coordinate with your team first.\n\n**Tradeoffs**\n- Merge keeps accurate history but can clutter the log with merge commits.\n- Rebase gives a clean log but loses the original context of when and how the work was done, and it carries more risk if misused."
+          }
+        }
+      ],
+      "errors": 0
+    },
+    {
+      "skill": "helen-team",
+      "fingerprint": "c0942028b80e2a6e2bc2dd939c7624fd90c91f34770c22d0922f541505db62be",
+      "id": "small-typo-negative",
+      "expectTrigger": false,
+      "runsCount": 2,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 50,
+      "withSkill": 50,
+      "baselineStats": {
+        "mean": 50,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 50,
+        "upper": 50
+      },
+      "withSkillStats": {
+        "mean": 50,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 50,
+        "upper": 50
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 9110,
+              "costUsd": 0.019576999999999997,
+              "durationMs": 5222
+            },
+            "naturalSkill": {
+              "tokens": 9256,
+              "costUsd": 0.020383,
+              "durationMs": 5915
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 4634,
+              "costUsd": 0.009558500000000001,
+              "durationMs": 5757
+            },
+            "judgeSkill": {
+              "tokens": 4674,
+              "costUsd": 0.009588200000000002,
+              "durationMs": 8170
+            }
+          },
+          "baseline": 50,
+          "withSkill": 50,
+          "metrics": {
+            "tokens": 27674,
+            "costUsd": 0.0591067,
+            "durationMs": 25064
+          },
+          "criteria": [
+            {
+              "text": "Says to fix it directly (Installation) without any multi-agent setup",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Says directly to change to Installation; no multi-agent setup."
+            },
+            {
+              "text": "Keeps the answer to a sentence or two",
+              "baseline": false,
+              "withSkill": false,
+              "note": "Answer is multi-paragraph with four steps, far beyond a sentence or two."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "Change \"Instalation\" to \"Installation\" (double \"l\") in the README's title line. It's a one-word fix, so you can edit it by hand or run:\n\n```\nsed -i '1s/Instalation/Installation/' README.md\n```\n\nThis assumes the title is on line 1. If it isn't, drop the `1` to apply the fix on every line. Then check for other occurrences with `grep -rn \"Instalation\" .`. Docs often repeat the misspelling in a table of contents or in anchor links such as `#instalation`. If you change the heading, update those links too, or they'll break.\n\nTo commit it:\n\n```\ngit commit -am \"Fix typo in README title: Instalation -> Installation\"\n```\n\nI haven't looked at the file or changed anything. If you want, I can make the edit for you.",
+            "withSkill": "Fix the title by changing \"Instalation\" to \"Installation\". The correct spelling has a double \"l\": In-stal-la-tion.\n\nHere's how to do it yourself:\n\n1. **Edit the README.** Open `README.md` and change the title line, for example from `# Instalation` to `# Installation`.\n2. **Check for other uses of the typo.** Run `grep -rni \"instalation\" .` from the repo root. The misspelling may also appear in other docs, in links, or in anchors like `#instalation`.\n3. **Update any anchors that point to it.** If a table of contents or another file links to `#instalation`, change those links to `#installation`. Otherwise they will break.\n4. **Commit the change.** For example: `git commit -am \"Fix typo in README title\"`.\n\nI haven't looked at the file, so I'm assuming the title is what you described. If you want me to make the edit, I can."
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 9113,
+              "costUsd": 0.017393099999999998,
+              "durationMs": 5618
+            },
+            "naturalSkill": {
+              "tokens": 9215,
+              "costUsd": 0.0177471,
+              "durationMs": 5111
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 4644,
+              "costUsd": 0.009573,
+              "durationMs": 5224
+            },
+            "judgeSkill": {
+              "tokens": 4635,
+              "costUsd": 0.0095136,
+              "durationMs": 9593
+            }
+          },
+          "baseline": 50,
+          "withSkill": 50,
+          "metrics": {
+            "tokens": 27607,
+            "costUsd": 0.05422679999999999,
+            "durationMs": 25546
+          },
+          "criteria": [
+            {
+              "text": "Says to fix it directly (Installation) without any multi-agent setup",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Says to directly change the title to Installation; no multi-agent setup."
+            },
+            {
+              "text": "Keeps the answer to a sentence or two",
+              "baseline": false,
+              "withSkill": false,
+              "note": "Answer has multiple steps and paragraphs, well beyond a sentence or two."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "Fix the title so \"Instalation\" becomes \"Installation\", with a double \"l\". I haven't opened the README, so I don't know which file or line it's on.\n\n1. Find it with `grep -n \"Instalation\" README.md`. Add `-r .` to search the whole repo, because the same typo may be in other docs or in anchor links like `#instalation`.\n2. Edit the heading. For example, `# Instalation` becomes `# Installation`.\n3. Check for links that point to the old heading. A table of contents or other docs may use `#instalation`. Those need to change to `#installation`, or they'll break.\n4. Commit it with a message like `docs: fix typo in README title (Instalation -> Installation)`.\n\nI can make the change for you if you want. I can also search the repo for other occurrences first.",
+            "withSkill": "Fix the title so it reads \"Installation\" (one extra \"l\" and an \"a\" in place of the second \"i\": \"Instalation\" → \"Installation\").\n\nHere's how to do it:\n\n1. Open the README (probably `README.md`) and find the title line, for example `# Instalation`.\n2. Change it to `# Installation`.\n3. Search for the same typo elsewhere. `grep -rn \"Instalation\" .` will find other copies, such as links or anchors like `#instalation` in a table of contents that point to that heading. If you fix the heading but not those anchors, the links will break.\n4. Commit with a short message, for example `Fix typo in README title: Instalation -> Installation`.\n\nI haven't touched any files, as you asked. I can make the change and commit it if you want."
+          }
+        }
+      ],
+      "errors": 0
+    }
+  ]
+}

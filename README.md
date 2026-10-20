@@ -7,7 +7,7 @@ Use your agent's native question form through `helen-reprompt` to clarify missin
 HELEN is a workflow kit for building projects with AI agents (Claude Code, Codex, Antigravity or any agent that reads `SKILL.md` folders):
 
 - **Prompts** (`docs/prompts`): <!--fact:prompts-->98<!--/fact--> English, lint-checked task prompts and flows (<!--fact:library-->105<!--/fact--> library documents in total), organized by project phase.
-- **Skills** (`skills/`): <!--fact:skills-->14<!--/fact--> bundled agent skills that load the right prompts automatically.
+- **Skills** (`skills/`): <!--fact:skills-->15<!--/fact--> bundled agent skills that load the right prompts automatically.
 - **Playbooks** (`helen apply`): detect the project phase and plan which prompts, skills and tools to use for a goal.
 - **Catalog** (`helen skills catalog`): <!--fact:catalog-->41<!--/fact--> vetted third-party skills, CLIs, MCP servers and references, with install commands HELEN prints but never runs.
 - **Team** (`helen team`): several agents on one plan without conflicts: parallel waves, claims with leases, handoffs and an autonomous runner. See [Orchestration](docs/ORCHESTRATION.md).
@@ -143,7 +143,7 @@ See the [inventory guide](docs/SKILLS-CATALOG.md) for bundled skills, project in
 
 The [reusable agent preset](docs/AGENT-PRESETS.md) connects HELEN to Codex, Claude Code and Antigravity while preserving existing configuration, and provides tracking helpers such as `$helen-resume` in Codex and `/helen-resume` in Claude Code.
 
-Bundled: `helen-apply` (entry point), `helen-router`, `helen-audit`, `helen-backend`, `helen-copy`, `helen-design`, `helen-security`, `helen-release`, `helen-strategy`, `helen-knowledge`, `helen-implementa`, `helen-reprompt`, `helen-team` (several agents on one plan) and `helen-assistant` (personal memory, reminders and lists).
+Bundled: `helen-apply` (entry point), `helen-router`, `helen-audit`, `helen-backend`, `helen-copy`, `helen-design`, `helen-security`, `helen-release`, `helen-strategy`, `helen-knowledge`, `helen-implementa`, `helen-reprompt`, `helen-debug` (root cause with evidence and a regression test), `helen-team` (several agents on one plan) and `helen-assistant` (personal memory, reminders and lists).
 
 | Target | Folder |
 |---|---|

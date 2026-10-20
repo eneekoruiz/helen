@@ -7,7 +7,8 @@
 - **Quality loops** (`helen loop`): rubric scoring (general, design, code, copy, security, release) with evidence rules, verdicts (continue, stalled, exhausted, converged) and an independent final score.
 - **Design directions and template check** (`helen design direction`, `helen design check`): seeded, distinct directions over seven curated axes with WCAG-checked palettes, and a deterministic detector of template tells.
 - **Personal assistant** (skill `helen-assistant`): memory, reminders, lists and agenda in `~/.helen`; Spanish and English dates (recurrence, DST, hours in words); a scheduler with desktop, ntfy/webhook and Telegram delivery and a daily briefing; `helen ask` and `helen chat`; `helen assistant serve` with a chat page, a token API, a Telegram bot and an Alexa endpoint with Amazon's request verification and native Echo reminders; an optional model (a local command or the Claude API with HELEN's tools); privacy rules for credentials and private items; MCP tools for coding agents. See `docs/ASSISTANT.md` and `docs/ALEXA.md`.
-- Eval suite: <!--fact:evalCases-->136<!--/fact--> cases across the bundled skills, with negative (must-not-trigger) cases for each.
+- Skill `helen-debug`: reproduce, narrow down (git bisect), prove the root cause, fix it at the cause and lock it with a regression test.
+- Eval suite: <!--fact:evalCases-->142<!--/fact--> cases across the bundled skills, with negative (must-not-trigger) cases for each.
 - `npm run docs:check` / `docs:sync`: numbers, file references and links in the documentation are checked against the repository in CI.
 - Release pipeline for real: release-please and npm trusted publishing with provenance (`release.yml`), a packaging check, a Docker image job and a portability matrix (Linux, macOS, Windows).
 

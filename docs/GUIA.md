@@ -195,6 +195,9 @@ La fase detectada por `helen apply` es una **estimación** basada en archivos (p
 | helen-knowledge | ADRs, contexto para IA, runbook |
 | helen-implementa | Implementación autónoma con verificación |
 | helen-reprompt | Aclarar y mejorar una petición antes de ejecutarla |
+| helen-debug | Encontrar la causa raíz de un fallo con evidencia y blindarlo con un test |
+| helen-team | Varios agentes sobre el mismo plan sin pisarse |
+| helen-assistant | Tu memoria, recordatorios, listas y agenda |
 
 ## 7. Herramientas de terceros (catálogo) y seguridad
 

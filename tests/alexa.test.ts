@@ -35,6 +35,8 @@ describe('certificate chain URL (Amazon\'s rules)', () => {
 });
 
 describe.skipIf(!hasOpenssl)('request verification', () => {
+  // The test certificates are valid from the moment they are generated, so this block runs on the real clock.
+  const NOW = new Date(Date.now() + 90_000); // after the certificates are generated
   let dir: string;
   let chain: string;
   let leafKey: crypto.KeyObject;

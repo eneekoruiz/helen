@@ -1,0 +1,60 @@
+{
+  "skill": "helen-debug",
+  "cases": [
+    {
+      "id": "ci-only-timezone",
+      "prompt": "Our test 'formats the due date' passes on my laptop in Madrid but fails in CI, which runs in UTC. How should I find and fix the cause? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Reproduces the failure locally by running the test with the CI time zone (for example TZ=UTC)",
+        "Identifies time zone dependence in the code or the test as the likely cause and checks it with evidence",
+        "Fixes the code or the test to be independent of the machine time zone instead of pinning CI to Madrid",
+        "Adds or keeps a regression test that runs under more than one time zone"
+      ]
+    },
+    {
+      "id": "regression-bisect",
+      "prompt": "A bug appeared somewhere between v1.4 and v1.5, about 200 commits apart. How do I find the commit that introduced it? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Uses git bisect between the good and bad versions",
+        "Automates it with git bisect run and a script or test that exits non-zero on the bug",
+        "Confirms the culprit, for example by reverting it locally and seeing the bug disappear"
+      ]
+    },
+    {
+      "id": "retry-hides-race",
+      "prompt": "Checkout sometimes charges customers twice. I added a retry and a 500 ms sleep and it happens less. Can we ship that? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Says the retry and sleep hide the problem instead of fixing it",
+        "Points at a concurrency or idempotency root cause, such as duplicate requests without an idempotency key",
+        "Proposes a fix at the cause and a test that reproduces concurrent or repeated requests"
+      ]
+    },
+    {
+      "id": "undefined-map",
+      "prompt": "The app crashes with TypeError: Cannot read properties of undefined (reading 'map') in UserList. What is the right fix? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Finds out when and why the list is undefined (first render before data arrives, a different API shape, an error path) before changing code",
+        "Fixes the cause, such as a proper initial or loading state or validating the response, rather than adding optional chaining everywhere",
+        "Adds a test for the empty or loading case"
+      ]
+    },
+    {
+      "id": "logo-negative",
+      "expectTrigger": false,
+      "prompt": "Give me three name ideas for a small bakery in Bilbao. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Gives three bakery name ideas",
+        "Does not talk about debugging, tests or bugs"
+      ]
+    },
+    {
+      "id": "complexity-negative",
+      "expectTrigger": false,
+      "prompt": "What is the time complexity of binary search? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Answers O(log n)",
+        "Does not start a debugging process"
+      ]
+    }
+  ]
+}

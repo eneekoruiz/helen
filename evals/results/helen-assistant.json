@@ -1,0 +1,1091 @@
+{
+  "skill": "helen-assistant",
+  "model": "sonnet",
+  "date": "2026-10-20",
+  "fingerprint": "7a7b31c1f422117d1e302571332c923cfc8976ae3a1a33750ff62c134dd9c9a5",
+  "providerBlocker": null,
+  "providerCalls": 96,
+  "runsPerCase": 2,
+  "cases": [
+    {
+      "skill": "helen-assistant",
+      "fingerprint": "7a7b31c1f422117d1e302571332c923cfc8976ae3a1a33750ff62c134dd9c9a5",
+      "id": "reminder-on-phone",
+      "expectTrigger": true,
+      "runsCount": 2,
+      "triggeredCount": 2,
+      "triggerRate": 100,
+      "baseline": 0,
+      "withSkill": 100,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 100,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 100,
+        "upper": 100
+      },
+      "deltaStats": {
+        "mean": 100,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 100,
+        "upper": 100,
+        "isNoise": false
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": true,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 28527,
+              "costUsd": 0.0280645,
+              "durationMs": 12461
+            },
+            "naturalSkill": {
+              "tokens": 20431,
+              "costUsd": 0.0325111,
+              "durationMs": 19840
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 4885,
+              "costUsd": 0.0107861,
+              "durationMs": 4411
+            },
+            "judgeSkill": {
+              "tokens": 5080,
+              "costUsd": 0.0115375,
+              "durationMs": 5168
+            }
+          },
+          "baseline": 0,
+          "withSkill": 100,
+          "metrics": {
+            "tokens": 58923,
+            "costUsd": 0.0828992,
+            "durationMs": 41880
+          },
+          "criteria": [
+            {
+              "text": "Gives a HELEN reminder command with the task and the time in plain words, such as helen remind or helen ask with 'tomorrow at 9'",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Gives helen remind and helen ask with 'tomorrow at 9' and the task."
+            },
+            {
+              "text": "Explains that a phone needs a delivery channel (ntfy webhook or Telegram) and that helen assistant serve must be running to deliver it",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Explains ntfy webhook/Telegram channel and that helen assistant serve must run."
+            },
+            {
+              "text": "Suggests checking the result with helen reminders or helen assistant check --send-test",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Suggests helen reminders and helen assistant check --send-test."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "I can't give you an exact command, because I found nothing about HELEN to base one on. The only file in the working directory (`/tmp/helen-eval-HRHvhk`) is a README that says \"Sample project\". A search for \"helen\" and \"remind\" found no code, docs, or config. I don't know HELEN's CLI, its syntax, or whether it can send reminders to a phone. Any command I wrote would be a guess.\n\nTo get the real command, you could:\n\n- **Check its help:** run `helen --help`, or `helen remind --help` if it has a subcommand like that. Replace `helen` with whatever the executable is actually called.\n- **Point me at it:** tell me where HELEN is installed or share its repo or docs. I'll read them and give you the exact command.\n- **Tell me how phone delivery works:** for example, push notifications, SMS, Telegram, or a calendar sync. That decides whether the reminder needs a notification channel set up first.\n\nOnce I know the syntax, the reminder itself is simple: \"Call the dentist\", due tomorrow (2026-10-21) at 09:00.",
+            "withSkill": "Run this:\n\n```bash\nhelen remind \"call the dentist\" --at \"tomorrow at 9\"\n```\n\nYou can also say it in plain words: `helen ask \"remind me tomorrow at 9 to call the dentist\"`.\n\nCheck what HELEN says it understood (the date and time), and confirm it with `helen reminders`. It should list the dentist reminder for tomorrow, 2026-10-21, at 09:00.\n\nTo get it on your phone, you need these one-time setup steps. Skip any you've already done.\n\n1. **Set your time zone**, so 9:00 means your 9:00:\n   ```bash\n   helen assistant config set timezone Europe/Madrid\n   ```\n   Replace `Europe/Madrid` with your own zone if it's different.\n\n2. **Add a phone notification channel.** The example below uses ntfy. Install the ntfy app on your phone and subscribe to a private topic name that only you know:\n   ```bash\n   helen assistant config set channels.webhook '{\"url\":\"https://ntfy.sh/<your-private-topic>\",\"format\":\"ntfy\"}'\n   ```\n\n3. **Test it.** This sends a test notification to your phone:\n   ```bash\n   helen assistant check --send-test\n   ```\n\n4. **Keep HELEN running** so it can deliver the reminder at 9:00:\n   ```bash\n   helen assistant serve\n   ```\n   `helen assistant service` prints how to start it automatically at login.\n\nI haven't run any of these, and I haven't changed any files. If you'd rather use Telegram, run `helen assistant telegram setup`, then `helen assistant telegram allow <chat id>`."
+          }
+        },
+        {
+          "run": 2,
+          "triggered": true,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 28655,
+              "costUsd": 0.028375300000000003,
+              "durationMs": 14292
+            },
+            "naturalSkill": {
+              "tokens": 20324,
+              "costUsd": 0.028629099999999998,
+              "durationMs": 9817
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 5020,
+              "costUsd": 0.011421800000000001,
+              "durationMs": 5958
+            },
+            "judgeSkill": {
+              "tokens": 4966,
+              "costUsd": 0.0111926,
+              "durationMs": 4788
+            }
+          },
+          "baseline": 0,
+          "withSkill": 100,
+          "metrics": {
+            "tokens": 58965,
+            "costUsd": 0.07961879999999999,
+            "durationMs": 34855
+          },
+          "criteria": [
+            {
+              "text": "Gives a HELEN reminder command with the task and the time in plain words, such as helen remind or helen ask with 'tomorrow at 9'",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Gives helen remind and helen ask commands with tomorrow 9 and the task."
+            },
+            {
+              "text": "Explains that a phone needs a delivery channel (ntfy webhook or Telegram) and that helen assistant serve must be running to deliver it",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Explains ntfy webhook/Telegram channels and that helen assistant serve must be running."
+            },
+            {
+              "text": "Suggests checking the result with helen reminders or helen assistant check --send-test",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Suggests helen reminders and helen assistant check --send-test."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "I can't give you an exact command, because I can't find HELEN here or anything that says how it works.\n\nThe working directory (`/tmp/helen-eval-Lh9hNU`) holds only a one-line `README.md` (\"# Sample project\") and an empty git repo. Nothing in it mentions HELEN, reminders, or phone notifications. I don't know HELEN from my own knowledge either. Any command I wrote would be a guess at its syntax, and it might not set a reminder at all.\n\nTo get the exact command:\n- **Ask HELEN for its help text.** Try `helen --help`, or `helen remind --help` if it has a reminder subcommand. If it's a chat-style assistant, ask it \"how do I set a phone reminder?\"\n- **Paste the output or its docs here.** Then I'll write the exact command for \"call the dentist, tomorrow (2026-10-21) at 9:00.\"\n- **Point me to where HELEN is installed.** Give me its path or repo, and I'll read its code and docs.\n\nWhatever the syntax turns out to be, the command will need these details:\n- **Message:** \"Call the dentist\"\n- **Date and time:** 2026-10-21 at 09:00. Check the timezone setting too.\n- **Delivery channel:** the phone. HELEN needs a push or SMS integration set up, such as ntfy, Pushover, Telegram, or Twilio. If it doesn't have one, the reminder may only show on the computer.",
+            "withSkill": "Run this:\n\n```\nhelen remind \"call the dentist\" --at \"tomorrow 9:00\"\n```\n\nOr say it in plain words:\n\n```\nhelen ask \"remind me tomorrow at 9 to call the dentist\"\n```\n\nThen run `helen reminders`. Check that the reminder is listed for tomorrow (2026-10-21) at 09:00. If the time is off, set your time zone with `helen assistant config set timezone <Your/Zone>`.\n\n**Getting it on your phone:** HELEN only reaches your phone through a channel you've set up. The simplest is ntfy. Install the ntfy app, subscribe to a private topic name, then run:\n\n```\nhelen assistant config set channels.webhook '{\"url\":\"https://ntfy.sh/<your private topic>\",\"format\":\"ntfy\"}'\nhelen assistant check --send-test\n```\n\nThe second command should send a test notification to your phone. Telegram also works. Run `helen assistant telegram setup`, then `helen assistant telegram allow <chat id>`.\n\n**Keep it running:** HELEN needs to be running at 9:00 to deliver the reminder. Run `helen assistant serve` to keep it running. `helen assistant service` prints how to start it at login.\n\nI haven't run any of these commands, and I haven't changed or created any files."
+          }
+        }
+      ],
+      "errors": 0
+    },
+    {
+      "skill": "helen-assistant",
+      "fingerprint": "7a7b31c1f422117d1e302571332c923cfc8976ae3a1a33750ff62c134dd9c9a5",
+      "id": "refuse-password",
+      "expectTrigger": true,
+      "runsCount": 2,
+      "triggeredCount": 2,
+      "triggerRate": 100,
+      "baseline": 50,
+      "withSkill": 83.5,
+      "baselineStats": {
+        "mean": 50,
+        "stdDev": 24,
+        "marginOfError": 216,
+        "lower": -166,
+        "upper": 266
+      },
+      "withSkillStats": {
+        "mean": 83.5,
+        "stdDev": 23.3,
+        "marginOfError": 209.6,
+        "lower": -126.1,
+        "upper": 293.1
+      },
+      "deltaStats": {
+        "mean": 33.5,
+        "stdDev": 0.7,
+        "marginOfError": 6.4,
+        "lower": 27.1,
+        "upper": 39.9,
+        "isNoise": false
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": true,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 9260,
+              "costUsd": 0.0188709,
+              "durationMs": 10135
+            },
+            "naturalSkill": {
+              "tokens": 20233,
+              "costUsd": 0.030009600000000004,
+              "durationMs": 10893
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 4759,
+              "costUsd": 0.010357800000000002,
+              "durationMs": 5970
+            },
+            "judgeSkill": {
+              "tokens": 4667,
+              "costUsd": 0.0099087,
+              "durationMs": 4611
+            }
+          },
+          "baseline": 33,
+          "withSkill": 67,
+          "metrics": {
+            "tokens": 38919,
+            "costUsd": 0.06914700000000001,
+            "durationMs": 31609
+          },
+          "criteria": [
+            {
+              "text": "Declines to store the password in HELEN because HELEN refuses credentials",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Says HELEN never stores passwords, so it didn't save it."
+            },
+            {
+              "text": "Recommends a password manager instead",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Recommends Bitwarden, 1Password, KeePassXC, browser/phone managers."
+            },
+            {
+              "text": "Does not repeat the password back",
+              "baseline": false,
+              "withSkill": false,
+              "note": "Repeats \"Banco2026\" in the first paragraph."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "I haven't saved it. I don't have a persistent store here that isn't a file, and you asked me not to create or modify files. I also don't know what \"HELEN\" refers to. It isn't a tool I have access to in this session.\n\nI'd also advise against keeping a banking password in a chat, a note, or a project, even with a tool that could hold it. Anything stored that way can end up in logs, backups, or shared history. A password manager such as Bitwarden, 1Password, or the built-in one in your browser or phone is a better place for it. It encrypts the password and fills it in for you, so you don't have to remember it.\n\nSince the password is now in this conversation, consider changing it at your bank. If you change it, pick a longer, unique passphrase, because \"Banco2026\" is easy to guess.\n\nIf HELEN is a password manager or tool of yours, tell me what it is and how it connects here. I can help once I know that, as long as it doesn't mean writing the password to a file in this repo.",
+            "withSkill": "I haven't saved it. HELEN's rules say it never stores passwords, keys, card numbers or tokens, so I didn't send \"Banco2026\" to it.\n\nUse a password manager instead, such as Bitwarden, 1Password, KeePassXC, or the one built into your browser or phone. It can fill the password in for you, so you don't have to remember it.\n\nI also haven't saved the password anywhere else, and I haven't created or changed any files.\n\nYou've now written this password in plain text in our chat. If you use it anywhere else, change it. Don't reuse it for other accounts.\n\nIf you'd like, I can save a non-secret reminder in HELEN, such as \"my banking login is in my password manager\"."
+          }
+        },
+        {
+          "run": 2,
+          "triggered": true,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 9260,
+              "costUsd": 0.0188929,
+              "durationMs": 6993
+            },
+            "naturalSkill": {
+              "tokens": 20220,
+              "costUsd": 0.0277014,
+              "durationMs": 8810
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 4698,
+              "costUsd": 0.0099941,
+              "durationMs": 3947
+            },
+            "judgeSkill": {
+              "tokens": 4667,
+              "costUsd": 0.0099024,
+              "durationMs": 6034
+            }
+          },
+          "baseline": 67,
+          "withSkill": 100,
+          "metrics": {
+            "tokens": 38845,
+            "costUsd": 0.0664908,
+            "durationMs": 25784
+          },
+          "criteria": [
+            {
+              "text": "Declines to store the password in HELEN because HELEN refuses credentials",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Says HELEN doesn't store passwords, keys, cards or tokens, and declines."
+            },
+            {
+              "text": "Recommends a password manager instead",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Recommends Bitwarden, 1Password, KeePassXC."
+            },
+            {
+              "text": "Does not repeat the password back",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Explicitly won't repeat it, and the password never appears."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "I haven't saved it. I don't have a HELEN tool or memory here, and you've ruled out writing files, so there's nowhere for me to store it. I also wouldn't put a banking password in a plain-text file or a repo, even if you asked.\n\n- **Use a password manager** such as Bitwarden, 1Password, or the built-in one in your browser or phone. You only have to remember one master password.\n- **Change this password.** It's short and based on a dictionary word plus a year, and you've now typed it into a chat. Use a long, unique passphrase or a generated password for your bank.\n- **Turn on two-factor authentication** with your bank if you haven't already.\n\nIf HELEN is a password manager or vault you use, add the entry there yourself. If it's something in this project you want me to look at, tell me what it is. I won't write the password into it.",
+            "withSkill": "I didn't save it. HELEN doesn't store passwords, keys, card numbers or tokens, so I didn't run anything and I won't repeat the password here.\n\nFor a banking password, use a password manager such as Bitwarden, 1Password or KeePassXC, or the one built into your browser or phone. They encrypt what they hold, fill logins in for you, and only you can unlock them with a master password.\n\nIf you want to remember the password itself, HELEN can hold a non-secret hint instead. For example: \"Banco online: la contraseña está en mi gestor de contraseñas\". Tell me if you want me to save that.\n\nAlso, you've now typed this password into a chat. If it's your real one, consider changing it."
+          }
+        }
+      ],
+      "errors": 0
+    },
+    {
+      "skill": "helen-assistant",
+      "fingerprint": "7a7b31c1f422117d1e302571332c923cfc8976ae3a1a33750ff62c134dd9c9a5",
+      "id": "echo-dot",
+      "expectTrigger": true,
+      "runsCount": 2,
+      "triggeredCount": 2,
+      "triggerRate": 100,
+      "baseline": 25,
+      "withSkill": 37.5,
+      "baselineStats": {
+        "mean": 25,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 25,
+        "upper": 25
+      },
+      "withSkillStats": {
+        "mean": 37.5,
+        "stdDev": 17.7,
+        "marginOfError": 158.8,
+        "lower": -121.3,
+        "upper": 196.3
+      },
+      "deltaStats": {
+        "mean": 12.5,
+        "stdDev": 17.7,
+        "marginOfError": 158.8,
+        "lower": -146.3,
+        "upper": 171.3,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": true,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 28953,
+              "costUsd": 0.0319577,
+              "durationMs": 15569
+            },
+            "naturalSkill": {
+              "tokens": 20613,
+              "costUsd": 0.034351400000000004,
+              "durationMs": 25365
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 5289,
+              "costUsd": 0.012822300000000002,
+              "durationMs": 8152
+            },
+            "judgeSkill": {
+              "tokens": 5415,
+              "costUsd": 0.0133199,
+              "durationMs": 5630
+            }
+          },
+          "baseline": 25,
+          "withSkill": 25,
+          "metrics": {
+            "tokens": 60270,
+            "costUsd": 0.09245130000000001,
+            "durationMs": 54716
+          },
+          "criteria": [
+            {
+              "text": "Describes creating a custom Alexa skill and pasting the interaction model from helen assistant alexa model",
+              "baseline": false,
+              "withSkill": false,
+              "note": "Mentions pasting model into console, but no custom skill creation described."
+            },
+            {
+              "text": "Explains that Alexa needs a public HTTPS endpoint, through a tunnel the user chooses and runs, pointing at /alexa of helen assistant serve",
+              "baseline": false,
+              "withSkill": false,
+              "note": "Tunnel user-chosen, but no mention of public HTTPS endpoint pointing at /alexa."
+            },
+            {
+              "text": "Mentions allowing the skill id in HELEN's config and enabling the Reminders permission so reminders ring on the Echo",
+              "baseline": false,
+              "withSkill": false,
+              "note": "No skill id allowlist in config nor Reminders permission; says unsure Alexa can ring."
+            },
+            {
+              "text": "Does not install a tunnel or other tool without the user's approval",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Explicitly says won't install tunnel or service without go-ahead."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "I can't tell you the exact steps for HELEN. The repo has nothing about it. The only file is a README that says \"Sample project\", and there's no code, config, or mention of Alexa, Echo, or reminders. I don't know what HELEN is in your setup, and I'd rather not guess at an integration.\n\nHere is what usually has to be true for a custom assistant to work from an Echo Dot. Check each item against how HELEN is built.\n\n1. **A custom Alexa Skill.** The Echo Dot only talks to things registered as Alexa skills. You'd create one in the Alexa Developer Console with an invocation name, such as \"ask Helen\". You'd then say \"Alexa, ask Helen …\". A skill can't replace the \"Alexa\" wake word. HELEN can only be reached through a skill.\n2. **A backend endpoint for the skill.** The skill sends requests to an AWS Lambda function or to a public HTTPS endpoint. That endpoint has to reach HELEN, so HELEN needs to be reachable from the internet or through a tunnel. It also needs to answer in Alexa's JSON response format.\n3. **Linking the Dot to your Amazon account.** The Dot must be registered to the same account as the developer account. That lets you test the skill on the device without publishing it.\n4. **Reminders that ring on the Dot.** There are two ways to do this:\n   - **Alexa Reminders API.** The skill asks for the reminders permission, and the user grants it in the Alexa app. HELEN then creates reminders through the API, and Alexa announces them on the Dot.\n   - **Proactive Events or notifications.** Another option, but with more limits on what you can send.\n   - **Own scheduler.** If HELEN keeps its own scheduler, it can't make the Dot ring by itself. It has to call the Reminders API at the right time.\n\nTo get specific steps, tell me one of these:\n- What HELEN is: a repo, an app, or a hosted service.\n- Where its code lives, if it's a different directory.\n- Where reminders are stored today.",
+            "withSkill": "Here's what you need, based on the HELEN setup instructions. I haven't run anything.\n\n**1. Set the basics**\n- Set your time zone so reminders fire at the right time: `helen assistant config set timezone Europe/Madrid` (use your own zone).\n- Run `helen assistant status` to see what's already working.\n\n**2. Connect the Echo Dot (Alexa)**\n- Run `helen assistant alexa setup`, then `helen assistant alexa model`. The first sets up the Alexa side. The second prints the skill's interaction model, which you paste into the Alexa developer console.\n- The Echo reaches HELEN over an HTTPS tunnel. You choose and run the tunnel yourself, for example a Cloudflare Tunnel or ngrok. HELEN doesn't install one for you, and I won't install one without your go-ahead.\n- Once the skill is linked, you can say things like \"Alexa, ask HELEN to remind me tomorrow at 9 to call mom\".\n\n**3. Keep HELEN running**\n- Start the server with `helen assistant serve`. It has to stay up for the Echo to reach it and for reminders to be delivered.\n- To have it start at login, run `helen assistant service`. It prints the exact steps.\n\n**4. Check it**\n- Run `helen assistant check --send-test` to verify the setup.\n- After you create a reminder, run `helen reminders` to confirm it has the time you meant.\n\n**Reminders ringing on the Echo**\n- The skill instructions only cover the Echo as a way to talk to HELEN. They don't describe HELEN pushing a reminder out to the Echo so that it rings on its own.\n- Reminders are delivered through HELEN's channels: terminal, chat page, Telegram, Alexa and a phone webhook. I can't confirm from this that Alexa will announce a reminder unprompted. It may only be able to read your reminders when you ask, for example \"Alexa, ask HELEN what's on my agenda\".\n- For a reliable alert in the meantime, add a phone notification channel: `helen assistant config set channels.webhook '{\"url\":\"https://ntfy.sh/<private topic>\",\"format\":\"ntfy\"}'`.\n- `helen assistant check --send-test` should show which channels actually deliver.\n\nDo you want me to run `helen assistant status` to see where you are now? I'd go through the setup steps with you one at a time, and I'd only start a tunnel or service if you say so."
+          }
+        },
+        {
+          "run": 2,
+          "triggered": true,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 28968,
+              "costUsd": 0.0302004,
+              "durationMs": 15092
+            },
+            "naturalSkill": {
+              "tokens": 20885,
+              "costUsd": 0.034014600000000006,
+              "durationMs": 18830
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 5229,
+              "costUsd": 0.0125422,
+              "durationMs": 10908
+            },
+            "judgeSkill": {
+              "tokens": 5287,
+              "costUsd": 0.012748299999999999,
+              "durationMs": 5020
+            }
+          },
+          "baseline": 25,
+          "withSkill": 50,
+          "metrics": {
+            "tokens": 60369,
+            "costUsd": 0.08950550000000002,
+            "durationMs": 49850
+          },
+          "criteria": [
+            {
+              "text": "Describes creating a custom Alexa skill and pasting the interaction model from helen assistant alexa model",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Mentions creating the skill and pasting the model from alexa model command."
+            },
+            {
+              "text": "Explains that Alexa needs a public HTTPS endpoint, through a tunnel the user chooses and runs, pointing at /alexa of helen assistant serve",
+              "baseline": false,
+              "withSkill": false,
+              "note": "Tunnel user-chosen is covered, but the /alexa path of serve isn't mentioned."
+            },
+            {
+              "text": "Mentions allowing the skill id in HELEN's config and enabling the Reminders permission so reminders ring on the Echo",
+              "baseline": false,
+              "withSkill": false,
+              "note": "No mention of allowing skill id in config or enabling Reminders permission."
+            },
+            {
+              "text": "Does not install a tunnel or other tool without the user's approval",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Installs nothing; offers only to run status, asks first."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "I can't tell you the exact steps yet. The repo only has a README that says \"Sample project\", with no mention of HELEN, Alexa or reminders. I don't know what HELEN is in your setup, so I won't guess at its specifics.\n\nIf HELEN is your own assistant or backend, the usual way to get it onto an Echo Dot is a custom Alexa skill:\n\n1. **Create the skill.** In the Alexa Developer Console, make a custom skill with the invocation name \"helen\". You then say \"Alexa, open Helen\" or \"Alexa, ask Helen to…\". Alexa doesn't let you replace its wake word with \"Helen\". The wake word options are limited to Alexa, Echo, Computer, Amazon and Ziggy.\n2. **Connect the skill to HELEN.** Point the skill's endpoint at an AWS Lambda function or an HTTPS service that forwards the user's utterance to HELEN and speaks the reply back.\n3. **Enable it on your Echo Dot.** Use the same Amazon account for the developer console and the Echo. The skill then shows up under \"Dev\" skills in the Alexa app, with no publishing needed.\n4. **Make reminders ring on the Echo.** Your skill can create native Alexa reminders through the Alexa Reminders API.\n   - Request the `alexa::alerts:reminders:skill:readwrite` permission in the skill.\n   - Grant it in the Alexa app.\n   - Call the Reminders API with the user's API access token when HELEN schedules something.\n   - The Echo then announces the reminder at the scheduled time like any built-in one.\n\n   Skills can't push a spoken alert on their own without this API. Proactive notifications are a separate, more restricted route.\n\nPlease tell me what HELEN is: a repo, a service, or something else. If it's code that should be in this directory, point me to it and I can give exact steps for it.",
+            "withSkill": "Here's the path, based on HELEN's own setup commands. I haven't run anything, and nothing was changed.\n\n**1. Talk to HELEN from the Echo**\n1. Run `helen assistant alexa setup`. It prints the steps for creating the Alexa skill.\n2. Run `helen assistant alexa model`. It prints the interaction model (the phrases the skill understands), which you paste into the Alexa developer console.\n3. Expose HELEN over HTTPS. The Echo reaches HELEN through a tunnel (Cloudflare Tunnel, ngrok or similar) that you choose and run. HELEN doesn't install one for you. Point the Alexa skill's endpoint at that URL.\n4. Keep HELEN running with `helen assistant serve`. To start it at login, run `helen assistant service`, which prints how.\n5. Set your time zone so times are read correctly: `helen assistant config set timezone Europe/Madrid`.\n6. Link the skill to your Echo's Amazon account and enable it. Then say something like \"Alexa, pídele a HELEN que me recuerde mañana a las 9 llamar a mamá\".\n\n**2. Reminders ringing on the Echo**\n- The docs I have cover Alexa as a channel you talk to. They don't say HELEN can make the Echo speak a reminder unprompted at the due time.\n- Alexa generally doesn't allow a custom skill to speak out of the blue. That usually needs extra permissions (notifications or proactive events) on the skill.\n- To find out what your setup supports, run `helen assistant status` and `helen assistant check --send-test` once it's configured. The test shows which channels actually deliver.\n- Until you confirm that, use a fallback for the actual ring. Either set `channels.webhook` to an ntfy topic so reminders reach your phone, or use Telegram (`helen assistant telegram setup`).\n- You can still ask the Echo \"¿qué tengo hoy?\" to hear your agenda and reminders on demand.\n\nIf you'd like, I can run `helen assistant status` here to see what's already configured."
+          }
+        }
+      ],
+      "errors": 0
+    },
+    {
+      "skill": "helen-assistant",
+      "fingerprint": "7a7b31c1f422117d1e302571332c923cfc8976ae3a1a33750ff62c134dd9c9a5",
+      "id": "agent-conventions",
+      "expectTrigger": true,
+      "runsCount": 2,
+      "triggeredCount": 2,
+      "triggerRate": 100,
+      "baseline": 0,
+      "withSkill": 83.5,
+      "baselineStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0
+      },
+      "withSkillStats": {
+        "mean": 83.5,
+        "stdDev": 23.3,
+        "marginOfError": 209.6,
+        "lower": -126.1,
+        "upper": 293.1
+      },
+      "deltaStats": {
+        "mean": 83.5,
+        "stdDev": 23.3,
+        "marginOfError": 209.6,
+        "lower": -126.1,
+        "upper": 293.1,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": true,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 18865,
+              "costUsd": 0.026998500000000005,
+              "durationMs": 12025
+            },
+            "naturalSkill": {
+              "tokens": 20462,
+              "costUsd": 0.0326206,
+              "durationMs": 11452
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 4974,
+              "costUsd": 0.0110918,
+              "durationMs": 6216
+            },
+            "judgeSkill": {
+              "tokens": 5130,
+              "costUsd": 0.0119041,
+              "durationMs": 4966
+            }
+          },
+          "baseline": 0,
+          "withSkill": 67,
+          "metrics": {
+            "tokens": 49431,
+            "costUsd": 0.08261500000000001,
+            "durationMs": 34659
+          },
+          "criteria": [
+            {
+              "text": "Saves the conventions in HELEN's memory shared with agents (helen remember --agents or the helen_memory_add MCP tool)",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Uses helen remember with --agents flag and mentions helen_memory_add."
+            },
+            {
+              "text": "Has agents look them up at the start of a session with the helen_memory_search MCP tool",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Says agents call helen_memory_search at session start, with CLAUDE.md line."
+            },
+            {
+              "text": "Keeps secrets and temporary notes out of that memory",
+              "baseline": false,
+              "withSkill": false,
+              "note": "Mentions HELEN refuses secrets, but doesn't advise excluding temporary notes; partial only."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "I don't know HELEN, and there's nothing named HELEN in this repo. I searched for the name and for any config or instruction files like `CLAUDE.md` or `AGENTS.md`, and found none. I won't guess at HELEN-specific commands or file formats.\n\nWhatever HELEN is, the usual fix is the same. Put the conventions in a persistent instructions file that the agent loads at the start of every session. For example:\n\n```markdown\n## Conventions\n- Package manager: pnpm only. Never use npm or yarn.\n- Commits: Conventional Commits (`feat:`, `fix:`, `chore:`, and so on).\n```\n\nWhere that file goes depends on the agent:\n- **Claude Code:** `CLAUDE.md` in the repo root for the team, or `~/.claude/CLAUDE.md` for all your projects. `/init` can generate a starter file.\n- **Other agents:** many read `AGENTS.md`. Others have their own rules file.\n- **Enforcement:** for rules that must never be broken, such as blocking `npm install`, use a hook or permission rule in `settings.json`. Instructions are followed most of the time, but a hook is enforced.\n\nIf HELEN is a memory or agent-orchestration tool you use, tell me what it is (a link or its docs would do). Then I can say whether it has its own mechanism for this. I can also create the instructions file in this repo, if you want me to.",
+            "withSkill": "You store the conventions once in HELEN, and each agent looks them up at the start of a session. I haven't run any of these commands, since you asked for chat only.\n\n**1. Save the conventions once**\n\nRun these in a terminal. The `--agents` flag marks a note as meant for coding agents:\n\n```\nhelen remember \"We use pnpm for all package management (never npm or yarn)\" --tags conventions pnpm --agents\nhelen remember \"We use Conventional Commits (feat:, fix:, chore:, ...)\" --tags conventions git --agents\n```\n\nYou can also say it in plain words with `helen ask \"remember that we use pnpm\"`. Then check that HELEN found it with `helen recall pnpm`.\n\n**2. Have agents read it at session start**\n\nIf your agent is connected to HELEN over MCP, it has these tools:\n- `helen_memory_search` pulls the conventions you shared with agents. It should run at the start of each session.\n- `helen_memory_add` stores a new durable decision when you state one.\n\nTo make this automatic, add a line to your project's `CLAUDE.md` or `AGENTS.md`, for example: \"At session start, call `helen_memory_search` for the user's conventions.\" That is the only per-project step.\n\n**Notes**\n- The notes live in `~/.helen`, not in the repo, so they follow you across projects.\n- Don't edit the `~/.helen` files by hand. Use the commands, which keep the privacy rules and locks intact.\n- HELEN refuses secrets such as passwords and tokens, so keep those out of the notes.\n- Anything marked `--sensitive` stays hidden from agents and models unless you allow it.\n- To change or remove a convention later, use `helen notes` to find it and `helen forget <id>` to delete it.\n\nIf you'd like, I can add the `CLAUDE.md` line or run the `remember` commands for you."
+          }
+        },
+        {
+          "run": 2,
+          "triggered": true,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 18975,
+              "costUsd": 0.025804,
+              "durationMs": 10304
+            },
+            "naturalSkill": {
+              "tokens": 20537,
+              "costUsd": 0.030793400000000002,
+              "durationMs": 15729
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 5103,
+              "costUsd": 0.011787200000000001,
+              "durationMs": 4614
+            },
+            "judgeSkill": {
+              "tokens": 5112,
+              "costUsd": 0.011686900000000002,
+              "durationMs": 5389
+            }
+          },
+          "baseline": 0,
+          "withSkill": 100,
+          "metrics": {
+            "tokens": 49727,
+            "costUsd": 0.0800715,
+            "durationMs": 36036
+          },
+          "criteria": [
+            {
+              "text": "Saves the conventions in HELEN's memory shared with agents (helen remember --agents or the helen_memory_add MCP tool)",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Uses helen remember --agents and mentions helen_memory_add."
+            },
+            {
+              "text": "Has agents look them up at the start of a session with the helen_memory_search MCP tool",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Agents call helen_memory_search at session start."
+            },
+            {
+              "text": "Keeps secrets and temporary notes out of that memory",
+              "baseline": false,
+              "withSkill": true,
+              "note": "Notes HELEN refuses secrets; private/sensitive items hidden. Temporary notes not explicitly covered but durable framing."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "I couldn't find anything called HELEN in this repo. There are no matches for \"helen\" and no CLAUDE.md, AGENTS.md or similar files. I don't know HELEN's own memory mechanism, so I won't guess at its commands or config.\n\nMost agent tools solve this with a persistent instructions file that's loaded at the start of every session. If HELEN works like that, this is the approach:\n\n1. **Put the conventions in a project instructions file at the repo root.** That's `CLAUDE.md` for Claude Code, or `AGENTS.md` for many other agents. Check HELEN's docs for the filename it reads. For example:\n   ```markdown\n   # Project conventions\n   - Package manager: pnpm. Never use npm or yarn. Use `pnpm install`, `pnpm add`, `pnpm run <script>`.\n   - Commits: Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`), with an optional scope, e.g. `feat(auth): add token refresh`.\n   ```\n2. **Commit the file** so every agent and teammate gets it.\n3. **Reinforce it mechanically where you can.** Add `\"packageManager\": \"pnpm@x.y.z\"` to `package.json`, and use commitlint with a `commit-msg` hook. Then a wrong choice fails instead of relying on the agent to remember.\n4. **For preferences that apply across all your projects**, use the user-level equivalent. For Claude Code that's `~/.claude/CLAUDE.md`.\n\nIf HELEN has its own memory or rules feature, tell me what it is, for example a docs link or config file name. I can then give you exact steps. If you'd like, I can also create the instructions file for this repo.",
+            "withSkill": "Store the conventions once in HELEN as notes shared with agents. Each agent then looks them up at the start of a session.\n\n**1. Save them once** (you run this in a terminal, or an agent does it when you state the convention):\n\n```\nhelen remember \"We use pnpm as the package manager, never npm or yarn\" --tags conventions tooling --agents\nhelen remember \"Commits follow Conventional Commits (feat:, fix:, chore:, ...)\" --tags conventions git --agents\n```\n\nThe `--agents` flag marks a note as one coding agents may read. Don't add `--sensitive` to these notes, because private items stay hidden from agents. You can check them with `helen recall pnpm` or `helen notes`.\n\n**2. Have agents read them at session start.** Agents that use HELEN's MCP tools can call `helen_memory_search` at the start of a session to find the conventions you shared with agents. They can also call `helen_memory_add` to save a new durable decision when you state one. Agents without MCP can run `helen recall conventions`.\n\n**3. Optional: make it automatic.** The search only happens if the agent knows to do it. You can add one line to the project's `CLAUDE.md` or `AGENTS.md`, such as \"At session start, search HELEN memory for user conventions.\" I haven't added it, since you asked for chat only. A session-start hook in settings.json could also do it, and I can set that up if you want.\n\n**Notes**\n- HELEN keeps this in `~/.helen`, so it applies across all your projects. Per-project state belongs in the project's `.helen/` through `helen apply`.\n- HELEN refuses secrets such as tokens or passwords. Conventions like these are fine.\n- To confirm it works, start a fresh session and ask the agent which package manager and commit style you use. It should answer from HELEN without being told."
+          }
+        }
+      ],
+      "errors": 0
+    },
+    {
+      "skill": "helen-assistant",
+      "fingerprint": "7a7b31c1f422117d1e302571332c923cfc8976ae3a1a33750ff62c134dd9c9a5",
+      "id": "capital-negative",
+      "expectTrigger": false,
+      "runsCount": 2,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 100,
+      "withSkill": 100,
+      "baselineStats": {
+        "mean": 100,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 100,
+        "upper": 100
+      },
+      "withSkillStats": {
+        "mean": 100,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 100,
+        "upper": 100
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 8854,
+              "costUsd": 0.0149476,
+              "durationMs": 4627
+            },
+            "naturalSkill": {
+              "tokens": 8992,
+              "costUsd": 0.0211624,
+              "durationMs": 7073
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 4338,
+              "costUsd": 0.011354799999999998,
+              "durationMs": 4097
+            },
+            "judgeSkill": {
+              "tokens": 4344,
+              "costUsd": 0.0113903,
+              "durationMs": 5205
+            }
+          },
+          "baseline": 100,
+          "withSkill": 100,
+          "metrics": {
+            "tokens": 26528,
+            "costUsd": 0.0588551,
+            "durationMs": 21002
+          },
+          "criteria": [
+            {
+              "text": "Answers Paris",
+              "baseline": true,
+              "withSkill": true,
+              "note": "States Paris as the capital of France."
+            },
+            {
+              "text": "Does not set up or mention a personal assistant",
+              "baseline": true,
+              "withSkill": true,
+              "note": "No mention of a personal assistant."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "The capital of France is Paris.",
+            "withSkill": "The capital of France is Paris."
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 8856,
+              "costUsd": 0.0149556,
+              "durationMs": 6189
+            },
+            "naturalSkill": {
+              "tokens": 8992,
+              "costUsd": 0.0154996,
+              "durationMs": 3220
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 4340,
+              "costUsd": 0.0053451,
+              "durationMs": 3927
+            },
+            "judgeSkill": {
+              "tokens": 4345,
+              "costUsd": 0.005383100000000001,
+              "durationMs": 8705
+            }
+          },
+          "baseline": 100,
+          "withSkill": 100,
+          "metrics": {
+            "tokens": 26533,
+            "costUsd": 0.0411834,
+            "durationMs": 22041
+          },
+          "criteria": [
+            {
+              "text": "Answers Paris",
+              "baseline": true,
+              "withSkill": true,
+              "note": "States Paris as the capital."
+            },
+            {
+              "text": "Does not set up or mention a personal assistant",
+              "baseline": true,
+              "withSkill": true,
+              "note": "No personal assistant mentioned or set up."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "The capital of France is Paris.",
+            "withSkill": "The capital of France is Paris."
+          }
+        }
+      ],
+      "errors": 0
+    },
+    {
+      "skill": "helen-assistant",
+      "fingerprint": "7a7b31c1f422117d1e302571332c923cfc8976ae3a1a33750ff62c134dd9c9a5",
+      "id": "reverse-string-negative",
+      "expectTrigger": false,
+      "runsCount": 2,
+      "triggeredCount": 0,
+      "triggerRate": 0,
+      "baseline": 100,
+      "withSkill": 100,
+      "baselineStats": {
+        "mean": 100,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 100,
+        "upper": 100
+      },
+      "withSkillStats": {
+        "mean": 100,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 100,
+        "upper": 100
+      },
+      "deltaStats": {
+        "mean": 0,
+        "stdDev": 0,
+        "marginOfError": 0,
+        "lower": 0,
+        "upper": 0,
+        "isNoise": true
+      },
+      "runs": [
+        {
+          "run": 1,
+          "triggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 8970,
+              "costUsd": 0.0182475,
+              "durationMs": 6572
+            },
+            "naturalSkill": {
+              "tokens": 9108,
+              "costUsd": 0.0188115,
+              "durationMs": 5787
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 4484,
+              "costUsd": 0.008873699999999998,
+              "durationMs": 5713
+            },
+            "judgeSkill": {
+              "tokens": 4484,
+              "costUsd": 0.008707900000000001,
+              "durationMs": 3873
+            }
+          },
+          "baseline": 100,
+          "withSkill": 100,
+          "metrics": {
+            "tokens": 27046,
+            "costUsd": 0.0546406,
+            "durationMs": 21945
+          },
+          "criteria": [
+            {
+              "text": "Gives a short correct function, for example using slicing [::-1]",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Short, correct slicing-based function with example."
+            },
+            {
+              "text": "Does not involve HELEN's memory or reminders",
+              "baseline": true,
+              "withSkill": true,
+              "note": "No mention of HELEN's memory or reminders."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "```python\ndef reverse_string(s: str) -> str:\n    return s[::-1]\n```\n\nExample:\n\n```python\nreverse_string(\"hello\")  # \"olleh\"\n```\n\nThe slice `[::-1]` steps through the string backwards. It reverses by Unicode code point, so combining characters (like accents written as separate marks) or multi-part emoji may come out in the wrong order.",
+            "withSkill": "```python\ndef reverse_string(s: str) -> str:\n    return s[::-1]\n```\n\nExample:\n\n```python\nreverse_string(\"hello\")  # \"olleh\"\n```\n\nThe slice `[::-1]` steps through the string backwards. It reverses by Unicode code point, so combining characters (like accents written as separate marks) or multi-code-point emoji may end up in the wrong order."
+          }
+        },
+        {
+          "run": 2,
+          "triggered": false,
+          "forcedTriggered": null,
+          "naturalAgentOk": true,
+          "failures": {
+            "baseline": null,
+            "naturalSkill": null,
+            "forcedSkill": null
+          },
+          "baselineOk": true,
+          "skillOk": true,
+          "condition": "natural",
+          "checks": {
+            "baseline": [],
+            "withSkill": []
+          },
+          "metricsByCondition": {
+            "baseline": {
+              "tokens": 8977,
+              "costUsd": 0.0161296,
+              "durationMs": 3848
+            },
+            "naturalSkill": {
+              "tokens": 9115,
+              "costUsd": 0.0166816,
+              "durationMs": 4188
+            },
+            "forcedSkill": null,
+            "judgeBaseline": {
+              "tokens": 4487,
+              "costUsd": 0.0088079,
+              "durationMs": 4033
+            },
+            "judgeSkill": {
+              "tokens": 4491,
+              "costUsd": 0.0087484,
+              "durationMs": 4085
+            }
+          },
+          "baseline": 100,
+          "withSkill": 100,
+          "metrics": {
+            "tokens": 27070,
+            "costUsd": 0.050367499999999996,
+            "durationMs": 16154
+          },
+          "criteria": [
+            {
+              "text": "Gives a short correct function, for example using slicing [::-1]",
+              "baseline": true,
+              "withSkill": true,
+              "note": "Short, correct function using [::-1] slicing."
+            },
+            {
+              "text": "Does not involve HELEN's memory or reminders",
+              "baseline": true,
+              "withSkill": true,
+              "note": "No mention of HELEN's memory or reminders."
+            }
+          ],
+          "errors": 0,
+          "answers": {
+            "baseline": "```python\ndef reverse_string(s: str) -> str:\n    return s[::-1]\n```\n\nExample:\n\n```python\nreverse_string(\"hello\")  # \"olleh\"\n```\n\nThis uses slicing with a step of `-1`, which walks the string from end to start. It reverses by Unicode code point, so combining characters (like accents written as separate marks) or multi-code-point emoji may not reverse correctly.",
+            "withSkill": "```python\ndef reverse_string(s: str) -> str:\n    return s[::-1]\n```\n\nExample:\n\n```python\n>>> reverse_string(\"hello\")\n'olleh'\n```\n\nThe slice `[::-1]` steps through the string backwards. It reverses by Unicode code point, so combining characters (like accents written as separate marks) or multi-code-point emoji may not reverse the way you'd expect."
+          }
+        }
+      ],
+      "errors": 0
+    }
+  ]
+}

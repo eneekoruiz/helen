@@ -1,6 +1,6 @@
 ---
 name: helen-team
-description: Coordinate several AI agents or subagents on one tracked HELEN plan without conflicts. Use when the user asks to split work, run things in parallel, use subagents or a swarm, or when more than one agent edits the same repository. Claims, leases, handoffs, parallel read-only waves and an autonomous runner.
+description: Coordinate several AI agents or subagents on one tracked HELEN plan without conflicts. Use when the user asks to split work, run things in parallel, use subagents or a swarm, when two agents may edit the same files, when an agent crashed while holding work, or when a worker wants to mark a checkpoint or quality gate done. Claims, leases, handoffs, parallel read-only waves, verified checkpoints and an autonomous runner.
 ---
 
 # HELEN Team
