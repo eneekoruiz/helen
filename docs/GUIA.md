@@ -251,9 +251,41 @@ Si ya usas husky o lefthook, quédate con uno solo. Los hooks se pueden saltar c
 - **Nueva skill**: añade también `evals/<nombre>.json` con 3 casos y criterios verificables.
 - Después ejecuta `helen lint` y `npm test`: validan frontmatter, secciones obligatorias, idioma, enlaces, índices, playbooks, skills y catálogo (avisa si una herramienta lleva más de 180 días sin verificar).
 
-## 12. Qué NO hace HELEN
+## 12. Varios agentes a la vez y calidad que no se queda en "aceptable"
 
-- No instala herramientas de terceros por ti.
+Detalle completo en [ORCHESTRATION.md](ORCHESTRATION.md) (en inglés).
+
+- `helen team graph`: el plan en **oleadas**. Los pasos de solo lectura seguidos van en paralelo; un paso que escribe, o un checkpoint, va solo y espera al anterior.
+- **Reclamar antes de trabajar**: `helen team claim --agent claude-1` da un *lease* (30 min, se renueva con `heartbeat`) y un token. Quien escribe declara sus rutas (`--paths src/api/**`) y HELEN rechaza solapes. Por MCP hace falta el token para completar, liberar o saltar: el nombre de otro agente no basta.
+- **Handoffs**: `helen team handoff --to role:reviewer --message "..."` deja contexto a otro agente o rol; `helen team inbox` lo lee.
+- **Que lo haga solo**: `helen team run launch --agent claude` (o `--command "<programa>"`; mira antes con `--dry-run`). Reclama, entrega a cada trabajador un brief completo, guarda su resultado para la siguiente oleada y verifica los checkpoints con los scripts del proyecto. Se para ante lo que requiere tu aprobación. Varias ejecuciones pueden compartir el plan, y Ctrl-C devuelve los claims.
+- **Bucles de calidad**: `helen loop start design --subject "landing"` y `helen loop score <id>` puntúan cada criterio de una rúbrica (0-5) **con evidencia concreta**. Hasta que otro agente lo confirma, no se da por terminado.
+- **Contra los diseños iguales**: `helen design direction --brief "panadería en Bilbao" --count 3` propone direcciones distintas y reproducibles, y `helen design check` detecta tics de plantilla (degradados morados, tres tarjetas, emojis como iconos, contraste bajo...).
+
+## 13. Tu asistente personal: memoria, recordatorios, Telegram y Alexa
+
+HELEN también puede ser **tu** asistente y tu memoria. Todo vive en `~/.helen` (o `HELEN_HOME`), con permisos solo para ti, nunca dentro de un proyecto. Guía completa en [ASSISTANT.md](ASSISTANT.md) y, para el Echo, en [ALEXA.md](ALEXA.md) (en inglés).
+
+```bash
+helen assistant config init --owner Eneko        # detecta tu zona horaria
+helen remember "El wifi de casa se llama Casa_5G"
+helen remind llamar a mamá mañana a las 9
+helen todo --list compra leche, huevos y pan
+helen agenda mañana
+helen ask "¿qué tengo hoy?"                       # cualquier frase, como en un chat
+helen chat
+```
+
+- **Entiende español e inglés corrientes**: "recuérdame los martes y jueves a las 21 sacar la basura", "el viernes por la tarde", "en 2 horas", "a las nueve y media", "pospónlo 10 minutos", "ya he comprado la leche", "¿cuándo es el dentista?". Si falta la hora, te la pregunta.
+- **Te avisa solo**: `helen assistant serve` entrega cada recordatorio una vez, avisa si llega tarde porque HELEN estaba apagado, y manda un resumen diario si configuras `briefing.time`. Los avisos llegan por terminal, escritorio, el móvil (ntfy), Slack, Discord o Telegram. `helen assistant service` explica cómo arrancarlo al iniciar sesión.
+- **Chat desde cualquier sitio**: página de chat en `http://127.0.0.1:8787` (con token), bot de Telegram propio (`helen assistant telegram setup`) y tu **Echo Dot** (`helen assistant alexa setup`): "Alexa, pídele a asistente helen que me recuerde mañana a las nueve llamar a mamá". El recordatorio suena también en el propio Echo.
+- **Modelo opcional** para preguntas libres: un comando local (`claude -p`) o la API de Claude con el modelo que elijas. Las reglas resuelven lo cotidiano sin modelo, al instante y sin conexión.
+- **Privacidad**: no guarda contraseñas ni claves (ni dichas con palabras: "la contraseña es..."). Lo privado (DNI, IBAN, códigos de puerta...) nunca se dice en voz alta, no se envía a un modelo salvo que lo permitas y no se muestra en canales que no autorices. Tus agentes de código solo ven las notas que compartas con `--agents`.
+
+## 14. Qué NO hace HELEN
+
+- No instala herramientas de terceros por ti (tampoco túneles ni bots: te da los comandos).
 - No garantiza que la fase detectada sea correcta: la propone con evidencia.
 - No sustituye la revisión humana ni los tests.
-- No ejecuta un modelo de IA por su cuenta: prepara, ordena y verifica; el trabajo lo hace tu IA.
+- En tus proyectos no ejecuta un modelo de IA por su cuenta: prepara, ordena y verifica, y `helen team run` lanza el agente que tú elijas. El asistente solo consulta un modelo si tú configuras uno.
+- No envía datos fuera de tu equipo salvo por los canales que configures (Telegram, Alexa, webhooks o un proveedor de modelo).

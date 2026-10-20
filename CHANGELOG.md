@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+### Added
+- **Team of agents** (`helen team`, skill `helen-team`, MCP `helen_team_*`): a work graph with parallel read-only waves; claims with leases, path scopes and secret tokens (MCP sessions must present them); handoffs between agents or roles; an event log; and `helen team run`, which drives a plan to the end with worker agents (`--agent claude` or any `--command`), verifies checkpoints with the project's own scripts, shares a plan with other runs, and gives claims back on Ctrl-C. See `docs/ORCHESTRATION.md`.
+- **Quality loops** (`helen loop`): rubric scoring (general, design, code, copy, security, release) with evidence rules, verdicts (continue, stalled, exhausted, converged) and an independent final score.
+- **Design directions and template check** (`helen design direction`, `helen design check`): seeded, distinct directions over seven curated axes with WCAG-checked palettes, and a deterministic detector of template tells.
+- **Personal assistant** (skill `helen-assistant`): memory, reminders, lists and agenda in `~/.helen`; Spanish and English dates (recurrence, DST, hours in words); a scheduler with desktop, ntfy/webhook and Telegram delivery and a daily briefing; `helen ask` and `helen chat`; `helen assistant serve` with a chat page, a token API, a Telegram bot and an Alexa endpoint with Amazon's request verification and native Echo reminders; an optional model (a local command or the Claude API with HELEN's tools); privacy rules for credentials and private items; MCP tools for coding agents. See `docs/ASSISTANT.md` and `docs/ALEXA.md`.
+- Eval suite: <!--fact:evalCases-->136<!--/fact--> cases across the bundled skills, with negative (must-not-trigger) cases for each.
+- `npm run docs:check` / `docs:sync`: numbers, file references and links in the documentation are checked against the repository in CI.
+- Release pipeline for real: release-please and npm trusted publishing with provenance (`release.yml`), a packaging check, a Docker image job and a portability matrix (Linux, macOS, Windows).
+
+### Fixed
+- Documentation claims that did not match the repository (missing workflows, counts, links) were corrected and are now enforced.
+- The MCP server confines tools to its allowed roots and refuses `force` unless the user enables it.
+- Git hooks come from one source, keep their executable bit, and `helen doctor --fix` repairs them.
+- Coordination hardening after an independent review: locks are only broken when their holder is gone, two runs never take the same item, claims cannot be completed or released by naming their holder, rotation cannot empty an inbox, notes cannot forge sections of `STATE.md`, and the runner never writes through symbolic links.
+
+### Changed
 - Add the optional project `setup --preset efficient` with additive MCP configuration and six native tracking skills for Codex, Claude Code and Antigravity.
 - Align setup and documentation with optional cost-aware delegation, verifiable acceptance and latency-conscious execution.
 - Clarify catalog versus installed skills, native question-based reprompting and partial versus full verification gates.
@@ -27,7 +43,7 @@ Wave 1 implementation: automated project bootstrap, machine-readable JSON output
   - Negative test case support (`expectTrigger: false`) to measure and report false positive trigger rates.
   - Eval runner CLI options: `--dry-run`, `--cases`, `--skill`, `--max-calls` budget enforcement, and run resumability.
   - Strict schema validation in `helen lint` and documentation in `evals/README.md`.
-  - Eval suite of <!--fact:evalCases-->130<!--/fact--> cases across the bundled skills, each with negative (must-not-trigger) cases.
+  - Eval suite across the bundled skills, each with negative (must-not-trigger) cases.
 - Publishing: `helen-cli` bin alias in `package.json`, `SECURITY.md` and `docs/RELEASING.md`. The npm publish and release-please workflows described in the first draft of this entry did not exist in the repository; they are added for real under Unreleased.
 - Windows portability: normalized CRLF vs LF in frontmatter parsing, unified forward-slash relative paths, and safe spawn handling.
 
