@@ -754,7 +754,7 @@ export function runFocusedChecks(
       );
     }
     const files = [...new Set(selection.files)].map((input) => {
-      if (!input || !/^[a-z0-9._/\\: -]+$/i.test(input))
+      if (!input || input.startsWith("-"))
         throw new Error(`Invalid focused test path: ${input}`);
       const absolute = path.resolve(cwd, input);
       if (!isSafeProjectPath(cwd, absolute) || !fs.existsSync(absolute))

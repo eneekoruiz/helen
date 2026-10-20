@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { randomUUID } from "node:crypto";
 import {
   gradeFixture,
   parseExecution,
@@ -16,6 +17,10 @@ import {
   repoEvalCases,
   repoImplementationHoldoutCases,
 } from "../scripts/lib/repoEvalCases.mjs";
+
+const supportsGrading = Number(process.versions.node.split(".")[0]) >= 22;
+// The CLI supports Node 20; permission-limited grading requires Node 22+.
+const test = it.runIf(supportsGrading);
 
 const independentPatch = `export function applyChanges(input, changes) {
   if (!Array.isArray(changes)) throw new Error('Invalid changes');
@@ -128,6 +133,27 @@ const holdoutArguments = (output: string) => [
 ];
 
 describe("Executable repository evaluation controls", () => {
+  it.skipIf(supportsGrading)(
+    "rejects live grading on Node 20 before native calls or output writes",
+    async () => {
+      const output = path.join(
+        os.tmpdir(),
+        "helen-unsupported-grading-" + randomUUID(),
+      );
+      const executable = vi.fn();
+      const run = vi.fn();
+      await expect(
+        runRepoEvaluations(holdoutArguments(output), {
+          executable,
+          run,
+          log: () => {},
+        }),
+      ).rejects.toThrow("requires Node 22+");
+      expect(executable).not.toHaveBeenCalled();
+      expect(run).not.toHaveBeenCalled();
+      expect(fs.existsSync(output)).toBe(false);
+    },
+  );
   it("validates the time budget before processes or output mutations and preserves the three-minute default", async () => {
     const executable = vi.fn();
     const run = vi.fn();
@@ -186,7 +212,7 @@ describe("Executable repository evaluation controls", () => {
     }
   });
 
-  it("applies and freezes the identical explicit timeout in both invocations and keeps timed-out answers unmeasured", async () => {
+  test("applies and freezes the identical explicit timeout in both invocations and keeps timed-out answers unmeasured", async () => {
     const outputRoot = fs.mkdtempSync(
       path.join(os.tmpdir(), "helen-repo-budget-test-"),
     );
@@ -208,7 +234,10 @@ describe("Executable repository evaluation controls", () => {
       expect(modelCalls.map((call) => call[5])).toEqual([360000, 360000]);
       expect(
         JSON.parse(fs.readFileSync(path.join(output, "manifest.json"), "utf8")),
-      ).toMatchObject({ maxMinutesPerAttempt: 6, timeoutMsPerAttempt: 360000 });
+      ).toMatchObject({
+        maxMinutesPerAttempt: 6,
+        timeoutMsPerAttempt: 360000,
+      });
       for (const observation of record.observations) {
         const attempt = JSON.parse(
           fs.readFileSync(
@@ -339,7 +368,7 @@ describe("Executable repository evaluation controls", () => {
     expect(neverRemove).not.toHaveBeenCalled();
   });
 
-  it("persists immutable grades before a permanent Windows cleanup failure and retains successful final outcomes", async () => {
+  test("persists immutable grades before a permanent Windows cleanup failure and retains successful final outcomes", async () => {
     const outputRoot = fs.mkdtempSync(
       path.join(os.tmpdir(), "helen-repo-progress-test-"),
     );
@@ -431,7 +460,7 @@ describe("Executable repository evaluation controls", () => {
     }
   });
 
-  it("keeps interrupted and preflight-blocked progress in immutable final snapshots without retrying", async () => {
+  test("keeps interrupted and preflight-blocked progress in immutable final snapshots without retrying", async () => {
     const outputRoot = fs.mkdtempSync(
       path.join(os.tmpdir(), "helen-repo-cancel-test-"),
     );
@@ -545,7 +574,7 @@ describe("Executable repository evaluation controls", () => {
   });
 
   for (const spec of repoEvalCases) {
-    it(`${spec.id}: rejects the original behavioral defect and accepts correct outcomes`, () => {
+    test(`${spec.id}: rejects the original behavioral defect and accepts correct outcomes`, () => {
       const dir = fs.mkdtempSync(
         path.join(os.tmpdir(), "helen-eval-controls-"),
       );

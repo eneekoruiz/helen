@@ -61,7 +61,7 @@ describe("focused check runs", () => {
   });
 
   it("accepts absolute test paths when the project root contains spaces", () => {
-    const nested = path.join(cwd, "project with spaces");
+    const nested = path.join(cwd, "project ~with spaces");
     fs.mkdirSync(path.join(nested, "tests"), { recursive: true });
     fs.copyFileSync(
       path.join(cwd, "package.json"),

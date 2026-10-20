@@ -97,6 +97,28 @@ describe("hook activation and Docker compatibility", () => {
     }
   });
 
+  it.skipIf(process.platform !== "win32")(
+    "activates hooks through a Windows directory alias of the worktree root",
+    async () => {
+      git("init", "-q");
+      await guardrailsModule.execute(context());
+      const original = cwd;
+      const alias = path.join(cwd, "worktree-alias");
+      fs.symlinkSync(cwd, alias, "junction");
+      try {
+        cwd = alias;
+        expect(activate().status).toBe(0);
+        expect(git("config", "--get", "core.hooksPath")).toBe(".githooks");
+        git("config", "--unset", "core.hooksPath");
+        expect(configureHelenHooksPath(alias).kind).toBe("unset");
+        expect(git("config", "--get", "core.hooksPath")).toBe(".githooks");
+      } finally {
+        cwd = original;
+        fs.unlinkSync(alias);
+      }
+    },
+  );
+
   it.each([".husky/_", "", "../shared hooks", ".githooks ", " .githooks"])(
     "the generated prepare script preserves a custom hooksPath %j",
     async (value) => {
