@@ -1,18 +1,34 @@
 import { heartbeatClaim } from './claims.js';
 import { readEvents } from './events.js';
-import type { McpToolHandler } from './mcpTypes.js';
+import type { McpSession, McpToolContext, McpToolHandler } from './mcpTypes.js';
 import {
   ackHandoff, buildWorkGraph, claimNextItem, claimWorkItem, completeWorkItem, createHandoff, formatItemBrief, readInbox, releaseWorkItem, skipWorkItem, type WorkRole,
 } from './orchestrate.js';
 
 const ROLES = ['planner', 'researcher', 'implementer', 'reviewer', 'verifier'];
-const AGENT = { type: 'string', description: 'Your agent name, for example claude-1 or codex-2. Stable for the whole session.' };
+const AGENT = { type: 'string', description: 'Your agent name, unique to this session, for example claude-1 or codex-2.' };
 const CWD = { type: 'string', description: 'Project directory (must be inside the allowed roots of the server; defaults to the first root)' };
+const TOKEN = { type: 'string', description: 'Claim token from helen_team_claim. Only needed when this session did not make the claim (for example after reconnecting).' };
 
 function role(value: unknown): WorkRole | undefined {
   if (value === undefined) return undefined;
   if (!ROLES.includes(String(value))) throw new Error(`Unknown role "${String(value)}". Roles: ${ROLES.join(', ')}.`);
   return value as WorkRole;
+}
+
+const key = (cwd: string, item: string): string => `${cwd}\u0000${item}`;
+
+/**
+ * MCP callers are strict: acting on a claim needs its token, which the session remembers from the claim.
+ * Knowing another agent's name is therefore not enough to complete, extend or release its work.
+ */
+function proof(args: Record<string, unknown>, { cwd, session }: McpToolContext): { token?: string; strict: true } {
+  const token = typeof args.token === 'string' ? args.token : session.claimTokens.get(key(cwd, String(args.item)));
+  return { ...(token !== undefined ? { token } : {}), strict: true };
+}
+
+function forget(session: McpSession, cwd: string, item: string): void {
+  session.claimTokens.delete(key(cwd, item));
 }
 
 /**
@@ -41,16 +57,23 @@ export const TEAM_TOOLS: McpToolHandler[] = [
           paths: { type: 'array', items: { type: 'string' }, description: 'Files or folders you will write; omit for read-only work' },
           ttlSeconds: { type: 'integer', description: 'Lease length in seconds (30 to 14400, default 1800). Extend it with helen_team_heartbeat.' },
           note: { type: 'string', description: 'What you plan to do' },
+          token: TOKEN,
         },
         required: ['agent'],
       },
     },
-    run: (args, { cwd }) => {
-      const options = { agent: String(args.agent), role: role(args.role), paths: args.paths as string[] | undefined, ttlSeconds: args.ttlSeconds as number | undefined, note: args.note as string | undefined };
+    run: (args, context) => {
+      const { cwd, session } = context;
+      const options = {
+        agent: String(args.agent), role: role(args.role), paths: args.paths as string[] | undefined, ttlSeconds: args.ttlSeconds as number | undefined, note: args.note as string | undefined,
+        strict: true as const, ...(typeof args.token === 'string' ? { token: args.token } : {}),
+        tokenFor: (item: string) => session.claimTokens.get(key(cwd, item)),
+      };
       const claimed = typeof args.item === 'string' ? claimWorkItem(cwd, args.item, options) : claimNextItem(cwd, options);
-      return claimed
-        ? { claimed: true, item: claimed.item, claim: claimed.claim, renewed: claimed.renewed, tookOverFrom: claimed.tookOverFrom?.agent }
-        : { claimed: false, message: 'Nothing is ready to claim. Check helen_team_graph: other agents may hold the remaining items.' };
+      if (!claimed) return { claimed: false, message: 'Nothing is ready to claim. Check helen_team_graph: other agents may hold the remaining items.' };
+      session.claimTokens.set(key(cwd, claimed.item.id), claimed.token);
+      const { tokenHash: _hash, ...claim } = claimed.claim;
+      return { claimed: true, item: claimed.item, claim, token: claimed.token, renewed: claimed.renewed, tookOverFrom: claimed.tookOverFrom?.agent };
     },
   },
   {
@@ -65,9 +88,12 @@ export const TEAM_TOOLS: McpToolHandler[] = [
     definition: {
       name: 'helen_team_heartbeat',
       description: 'Extend your lease on an item while you are still working, so it is not handed to someone else.',
-      inputSchema: { type: 'object', properties: { agent: AGENT, cwd: CWD, item: { type: 'string', description: 'Work item id' }, ttlSeconds: { type: 'integer', description: 'New lease length in seconds' } }, required: ['agent', 'item'] },
+      inputSchema: { type: 'object', properties: { agent: AGENT, cwd: CWD, item: { type: 'string', description: 'Work item id' }, ttlSeconds: { type: 'integer', description: 'New lease length in seconds' }, token: TOKEN }, required: ['agent', 'item'] },
     },
-    run: (args, { cwd }) => heartbeatClaim(cwd, String(args.item), String(args.agent), args.ttlSeconds as number | undefined),
+    run: (args, context) => {
+      const { tokenHash: _hash, ...claim } = heartbeatClaim(context.cwd, String(args.item), String(args.agent), { ttlSeconds: args.ttlSeconds as number | undefined, ...proof(args, context) });
+      return claim;
+    },
   },
   {
     definition: {
@@ -79,24 +105,29 @@ export const TEAM_TOOLS: McpToolHandler[] = [
           agent: AGENT, cwd: CWD, item: { type: 'string', description: 'Work item id' },
           note: { type: 'string', description: 'What you did and where the result is' },
           force: { type: 'boolean', description: 'Bypass the checkpoint gate. Disabled unless the user started the server with HELEN_MCP_ALLOW_FORCE=1.' },
+          token: TOKEN,
         },
         required: ['agent', 'item'],
       },
     },
-    run: (args, { cwd, policy }) => {
+    run: (args, context) => {
+      const { cwd, policy, session } = context;
       if (args.force === true && policy && !policy.allowForce) throw new Error('force is disabled for MCP clients: get a passing check, or ask the user to start the server with HELEN_MCP_ALLOW_FORCE=1.');
-      const graph = completeWorkItem(cwd, String(args.item), { agent: String(args.agent), note: args.note as string | undefined, force: args.force === true });
+      const graph = completeWorkItem(cwd, String(args.item), { agent: String(args.agent), note: args.note as string | undefined, force: args.force === true, ...proof(args, context) });
+      forget(session, cwd, String(args.item));
       return { completed: String(args.item), finished: graph.finished, ready: graph.ready, counts: graph.counts };
     },
   },
   {
     definition: {
       name: 'helen_team_skip',
-      description: 'Skip an item that does not apply, with the reason recorded.',
-      inputSchema: { type: 'object', properties: { agent: AGENT, cwd: CWD, item: { type: 'string', description: 'Work item id' }, reason: { type: 'string', description: 'Why it does not apply' } }, required: ['agent', 'item', 'reason'] },
+      description: 'Skip an item that does not apply, with the reason recorded. Checkpoints cannot be skipped unless the user enabled HELEN_MCP_ALLOW_FORCE=1.',
+      inputSchema: { type: 'object', properties: { agent: AGENT, cwd: CWD, item: { type: 'string', description: 'Work item id' }, reason: { type: 'string', description: 'Why it does not apply' }, token: TOKEN }, required: ['agent', 'item', 'reason'] },
     },
-    run: (args, { cwd }) => {
-      const graph = skipWorkItem(cwd, String(args.item), { agent: String(args.agent), reason: String(args.reason) });
+    run: (args, context) => {
+      const { cwd, policy, session } = context;
+      const graph = skipWorkItem(cwd, String(args.item), { agent: String(args.agent), reason: String(args.reason), allowCheckpoint: !policy || policy.allowForce === true, ...proof(args, context) });
+      forget(session, cwd, String(args.item));
       return { skipped: String(args.item), finished: graph.finished, ready: graph.ready };
     },
   },
@@ -104,9 +135,13 @@ export const TEAM_TOOLS: McpToolHandler[] = [
     definition: {
       name: 'helen_team_release',
       description: 'Give an item back (could not finish, needs another role or a human) so another agent can take it.',
-      inputSchema: { type: 'object', properties: { agent: AGENT, cwd: CWD, item: { type: 'string', description: 'Work item id' }, reason: { type: 'string', description: 'Why you are giving it back' } }, required: ['agent', 'item'] },
+      inputSchema: { type: 'object', properties: { agent: AGENT, cwd: CWD, item: { type: 'string', description: 'Work item id' }, reason: { type: 'string', description: 'Why you are giving it back' }, token: TOKEN }, required: ['agent', 'item'] },
     },
-    run: (args, { cwd }) => ({ released: releaseWorkItem(cwd, String(args.item), { agent: String(args.agent), reason: args.reason as string | undefined }) !== null }),
+    run: (args, context) => {
+      const released = releaseWorkItem(context.cwd, String(args.item), { agent: String(args.agent), reason: args.reason as string | undefined, ...proof(args, context) }) !== null;
+      forget(context.session, context.cwd, String(args.item));
+      return { released };
+    },
   },
   {
     definition: {
@@ -144,8 +179,9 @@ export const TEAM_TOOLS: McpToolHandler[] = [
     },
     run: (args, { cwd }) => {
       const agent = String(args.agent);
-      if (typeof args.ack === 'string') ackHandoff(cwd, args.ack, agent);
-      return { handoffs: readInbox(cwd, { agent, role: role(args.role) }, args.all === true) };
+      const asRole = role(args.role);
+      if (typeof args.ack === 'string') ackHandoff(cwd, args.ack, agent, asRole);
+      return { handoffs: readInbox(cwd, { agent, role: asRole }, args.all === true) };
     },
   },
   {

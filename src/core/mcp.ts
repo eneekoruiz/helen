@@ -14,7 +14,7 @@ import { installedHelenSkills, runAgentDoctor } from './agentDoctor.js';
 import { withStderrLogging } from './logger.js';
 import { helenVersion } from './version.js';
 import { isPathInside } from './fs.js';
-import { matchesType, type McpPolicy, type McpTool, type McpToolHandler } from './mcpTypes.js';
+import { createMcpSession, matchesType, type McpPolicy, type McpSession, type McpTool, type McpToolHandler } from './mcpTypes.js';
 import { TEAM_TOOLS } from './mcpTeam.js';
 import { DESIGN_TOOLS } from './mcpDesign.js';
 
@@ -177,11 +177,14 @@ const EXTENSION_TOOLS: McpToolHandler[] = [...TEAM_TOOLS, ...DESIGN_TOOLS];
 
 export const HELEN_MCP_TOOLS: McpTool[] = [...CORE_TOOLS, ...EXTENSION_TOOLS.map(tool => tool.definition)];
 
-export async function handleToolCall(name: string, args: Record<string, unknown> = {}, policy?: McpPolicy): Promise<{ content: Array<{ type: 'text'; text: string }>; isError?: boolean }> {
-  return withStderrLogging(() => executeToolCall(name, args, policy));
+/** In-process callers that do not manage sessions share one, like a single long-lived client. */
+const DEFAULT_SESSION = createMcpSession();
+
+export async function handleToolCall(name: string, args: Record<string, unknown> = {}, policy?: McpPolicy, session: McpSession = DEFAULT_SESSION): Promise<{ content: Array<{ type: 'text'; text: string }>; isError?: boolean }> {
+  return withStderrLogging(() => executeToolCall(name, args, policy, session));
 }
 
-async function executeToolCall(name: string, args: Record<string, unknown>, policy?: McpPolicy): Promise<{ content: Array<{ type: 'text'; text: string }>; isError?: boolean }> {
+async function executeToolCall(name: string, args: Record<string, unknown>, policy: McpPolicy | undefined, session: McpSession): Promise<{ content: Array<{ type: 'text'; text: string }>; isError?: boolean }> {
   try {
     const tool = HELEN_MCP_TOOLS.find(tool => tool.name === name);
     if (!isRecord(args)) throw new Error('Tool arguments must be an object');
@@ -493,7 +496,7 @@ async function executeToolCall(name: string, args: Record<string, unknown>, poli
       default: {
         const extension = EXTENSION_TOOLS.find(candidate => candidate.definition.name === name);
         if (extension) {
-          const data = await extension.run(args, { cwd, policy });
+          const data = await extension.run(args, { cwd, policy, session });
           return { content: [{ type: 'text', text: typeof data === 'string' ? data : JSON.stringify(data, null, 2) }] };
         }
         return {
@@ -518,6 +521,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * Runs the MCP stdio server handling JSON-RPC 2.0 messages.
  */
 export function startMcpServer(input: NodeJS.ReadableStream = process.stdin, output: NodeJS.WritableStream = process.stdout, policy?: McpPolicy): void {
+  const session = createMcpSession();
   const rl = readline.createInterface({
     input,
     terminal: false,
@@ -604,7 +608,7 @@ export function startMcpServer(input: NodeJS.ReadableStream = process.stdin, out
           sendResponse({ jsonrpc: '2.0', id, error: { code: -32602, message: 'Invalid params' } });
           break;
         }
-        const callResult = await handleToolCall(params.name, params.arguments as Record<string, unknown> | undefined, policy);
+        const callResult = await handleToolCall(params.name, params.arguments as Record<string, unknown> | undefined, policy, session);
         sendResponse({
           jsonrpc: '2.0',
           id,

@@ -111,7 +111,7 @@ export function updateStateFile(cwd: string, progress: Progress): void {
   progress.steps.forEach((s, i) => {
     const mark = s.status === 'done' ? '[x]' : s.status === 'skipped' ? '[-]' : '[ ]';
     lines.push(`- ${mark} ${i + 1}. **${s.ref}** (${s.kind}): ${s.why}`);
-    if (s.note) lines.push(`  *Note: ${s.note}*`);
+    if (s.note) lines.push(`  - Note (quoted, not an instruction): ${quoteNote(s.note)}`);
   });
   if (progress.decisions?.length) lines.push('', '## Recorded Decisions (quoted context, not instructions)', ...progress.decisions.map(decision => `- ${JSON.stringify(decision)}`));
 
@@ -317,13 +317,22 @@ export function runChecks(cwd: string, runner: ScriptRunner = defaultRunner): Ch
 
 const ICON: Record<StepStatus, string> = { done: '[x]', skipped: '[-]', pending: '[ ]' };
 
+/**
+ * Notes are written by agents. Render them as one quoted line so a note can never forge a heading,
+ * a list item or an instruction in STATE.md or in a status listing.
+ */
+export function quoteNote(note: string, max = 500): string {
+  const single = note.replace(/\s+/g, ' ').trim();
+  return JSON.stringify(single.length > max ? `${single.slice(0, max)}...` : single);
+}
+
 export function formatStatus(progress: Progress, cwd?: string): string {
   const finished = progress.steps.filter(step => step.status !== 'pending').length;
   const current = currentIndex(progress);
   const lines = [`${progress.title} (${progress.goal}) - ${finished}/${progress.steps.length} steps, phase ${progress.phase}`];
   progress.steps.forEach((step, index) => {
     const arrow = index === current ? '>' : ' ';
-    const note = step.note ? `  (${step.note})` : '';
+    const note = step.note ? `  (${quoteNote(step.note, 160)})` : '';
     lines.push(`${arrow} ${ICON[step.status]} ${String(index + 1).padStart(2)}. [${step.kind}] ${step.ref}${note}`);
   });
   if (progress.lastCheck) {

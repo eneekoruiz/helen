@@ -82,10 +82,12 @@ describe('coordination primitives', () => {
       const first = claimItem(tmp, { item: 's01-x', agent: 'a', now: t0, ttlSeconds: 60 });
       expect(first.renewed).toBe(false);
       expect(() => claimItem(tmp, { item: 's01-x', agent: 'b', now: at(10) })).toThrow(ClaimConflictError);
-      const again = claimItem(tmp, { item: 's01-x', agent: 'a', now: at(30), ttlSeconds: 60 });
+      const again = claimItem(tmp, { item: 's01-x', agent: 'a', now: at(30), ttlSeconds: 60, token: first.token });
       expect(again.renewed).toBe(true);
-      expect(again.claim.token).toBe(first.claim.token);
+      expect(again.token).toBe(first.token);
       expect(again.claim.expiresAt).toBe(at(90).toISOString());
+      // Only a hash is stored: the token itself never reaches the disk.
+      expect(fs.readFileSync(path.join(tmp, '.helen', 'claims', 's01-x.json'), 'utf8')).not.toContain(first.token);
     });
 
     it('lets another agent take over after the lease expired and records it', () => {
@@ -98,9 +100,9 @@ describe('coordination primitives', () => {
 
     it('heartbeat extends only for the holder and not after expiry', () => {
       claimItem(tmp, { item: 's01-x', agent: 'a', now: t0, ttlSeconds: 60 });
-      expect(heartbeatClaim(tmp, 's01-x', 'a', 120, at(30)).expiresAt).toBe(at(150).toISOString());
-      expect(() => heartbeatClaim(tmp, 's01-x', 'b', 60, at(31))).toThrow(ClaimConflictError);
-      expect(() => heartbeatClaim(tmp, 's01-x', 'a', 60, at(400))).toThrow(/expired/);
+      expect(heartbeatClaim(tmp, 's01-x', 'a', { ttlSeconds: 120, now: at(30) }).expiresAt).toBe(at(150).toISOString());
+      expect(() => heartbeatClaim(tmp, 's01-x', 'b', { ttlSeconds: 60, now: at(31) })).toThrow(ClaimConflictError);
+      expect(() => heartbeatClaim(tmp, 's01-x', 'a', { ttlSeconds: 60, now: at(400) })).toThrow(/expired/);
       expect(() => heartbeatClaim(tmp, 'nope', 'a')).toThrow(/no claim/);
     });
 
@@ -252,7 +254,8 @@ describe('coordination primitives', () => {
       expect(readInbox(tmp, { agent: 'claude-1', role: 'reviewer' }).map(h => h.id)).toEqual([first.id]);
       expect(readInbox(tmp, { agent: 'codex-2' })).toHaveLength(1);
       expect(readInbox(tmp, { agent: 'claude-1' })).toHaveLength(0);
-      ackHandoff(tmp, first.id, 'claude-1');
+      expect(() => ackHandoff(tmp, first.id, 'claude-1')).toThrow(/addressed to role:reviewer/);
+      ackHandoff(tmp, first.id, 'claude-1', 'reviewer');
       expect(readInbox(tmp, { agent: 'claude-1', role: 'reviewer' })).toHaveLength(0);
       expect(readInbox(tmp, { agent: 'claude-1', role: 'reviewer' }, true)[0]).toMatchObject({ acked: true, files: ['src/auth.ts'], next: 'review auth' });
       expect(() => ackHandoff(tmp, 'h-unknown', 'claude-1')).toThrow(/Unknown handoff/);
