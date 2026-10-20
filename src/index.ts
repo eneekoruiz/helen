@@ -19,6 +19,8 @@ import { validateCatalog } from './core/catalog.js';
 import { registerProgressCommands } from './commands/progressCmd.js';
 import { registerApplyCommand } from './commands/applyCmd.js';
 import { registerTeamCommands } from './commands/teamCmd.js';
+import { registerLoopCommands } from './commands/loopCmd.js';
+import { registerDesignCommands } from './commands/designCmd.js';
 import { runAgentDoctor } from './core/agentDoctor.js';
 import { readGuide } from './core/guide.js';
 import { setupProject, uninstallProject, detectInstalledAgents, type SetupAgent } from './core/setup.js';
@@ -31,6 +33,8 @@ import type { HelenContext } from './core/context.js';
 import { getInstallCommand } from './core/packageManager.js';
 import { runRollback } from './core/rollback.js';
 import { validateAllEvals } from './core/evals.js';
+import { validateAllRubrics } from './core/rubrics.js';
+import { validateDirectionData } from './core/direction.js';
 import { isJsonMode, setJsonMode, printJsonAndExit, clearJsonBuffers } from './core/jsonOutput.js';
 import { runInitProject } from './core/initProject.js';
 import { helenVersion } from './core/version.js';
@@ -155,11 +159,12 @@ export function runLint(): number {
   const playbookIssues = validatePlaybooks().map(issue => `playbooks.json: ${issue}`);
   const skillIssues = validateSkills().map(issue => `skills: ${issue}`);
   const evalIssues = validateAllEvals().map(issue => `evals: ${issue}`);
+  const rubricIssues = [...validateAllRubrics(), ...validateDirectionData()].map(issue => `design data: ${issue}`);
   const catalog = validateCatalog();
   const catalogErrors = catalog.filter(issue => issue.level === 'error').map(issue => `catalog ${issue.id}: ${issue.message}`);
   const catalogWarns = catalog.filter(issue => issue.level === 'warn').map(issue => `catalog ${issue.id}: ${issue.message}`);
 
-  const allErrors = [...promptIssues, ...playbookIssues, ...skillIssues, ...evalIssues, ...catalogErrors];
+  const allErrors = [...promptIssues, ...playbookIssues, ...skillIssues, ...evalIssues, ...rubricIssues, ...catalogErrors];
   const allWarnings = [...catalogWarns];
 
   if (isJsonMode()) {
@@ -180,7 +185,7 @@ export function runLint(): number {
   for (const issue of catalogWarns) logger.warn(`catalog: ${issue}`);
   for (const error of allErrors) logger.error(error);
   if (allErrors.length > 0) return 1;
-  logger.success('HELEN library is valid (prompts, indexes, playbooks, skills, catalog, evals).');
+  logger.success('HELEN library is valid (prompts, indexes, playbooks, skills, catalog, evals, rubrics).');
   return allWarnings.length > 0 ? 2 : 0;
 }
 
@@ -803,6 +808,8 @@ export function createProgram(): Command {
 
   registerApplyCommand(program);
   registerTeamCommands(program);
+  registerLoopCommands(program);
+  registerDesignCommands(program);
 
   // helen skills
   registerSkillsCommands(program);

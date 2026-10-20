@@ -28,6 +28,10 @@ Security is an uncompromising prerequisite for production software. `helen-secur
 - Confirm before major structural changes to network or auth architecture.
 - Never suppress or cosmetically bypass a security scanner to get a fake green pass.
 
+## Measured convergence
+
+Open `helen loop start security --subject "<scope>"` and score every criterion with evidence each round (`helen loop rubrics security`); evidence names where a secret lives, never its value. A critical criterion below 4 blocks convergence whatever the total. The final score comes from an agent other than the one who mitigated.
+
 ## Runtime-aware efficiency
 
 Use one agent for small cohesive tasks. Choose the cheapest available capable model when routing is supported; keep the current agent when finishing is cheaper than transferring context. Delegate only when expected expertise or context savings outweigh transfer, coordination, integration, verification and retries. Flash is optional when available and suitable. Keep shared instructions as a stable prefix and task facts after it; provider caching requires runtime support and measured cache hits. Prefer an available direct browser MCP. Use focused regressions during fixes and the full repository gate before completion. Never invent savings.

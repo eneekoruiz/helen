@@ -40,6 +40,10 @@ Decide if the project can be packaged as a release candidate (RC) or delivered t
 ```
 Prepare release artifacts within authorization; tags, publication and account transfers require existing explicit authorization.
 
+## Measured convergence
+
+Before a release verdict, open `helen loop start release --subject "<version>"` and score every criterion with evidence (`helen loop rubrics release`). Only `converged` supports a RELEASE READY verdict; `exhausted` means report what blocks it.
+
 ## Runtime-aware efficiency
 
 Use one agent for small cohesive tasks. Choose the cheapest available capable model when routing is supported; keep the current agent when finishing is cheaper than transferring context. Delegate only when expected expertise or context savings outweigh transfer, coordination, integration, verification and retries. Flash is optional when available and suitable. Keep shared instructions as a stable prefix and task facts after it; provider caching requires runtime support and measured cache hits. Prefer an available direct browser MCP. Use focused regressions during fixes and the full repository gate before completion. Never invent savings.

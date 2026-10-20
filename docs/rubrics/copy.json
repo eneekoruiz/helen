@@ -1,0 +1,32 @@
+{
+  "id": "copy",
+  "title": "Copy and claims",
+  "description": "Text that sounds like a person who knows the product, makes only claims it can support and moves the reader to act.",
+  "threshold": 86,
+  "minCritical": 4,
+  "maxIterations": 6,
+  "independentFinalScore": true,
+  "criteria": [
+    { "id": "specificity", "title": "Specific, not generic", "weight": 4, "critical": true,
+      "ask": "Replace the product name with a competitor's: does each sentence still read true? Concrete nouns, numbers and examples win.",
+      "evidence": "Three before/after rewrites that replaced a generic line with a specific one." },
+    { "id": "claims", "title": "Every claim is supportable", "weight": 4, "critical": true,
+      "ask": "Best, fastest, secure, trusted-by, guaranteed, AI-powered: can each be shown?",
+      "evidence": "Each claim with its source, or the safer wording that replaced it." },
+    { "id": "voice", "title": "One consistent voice", "weight": 2, "critical": false,
+      "ask": "Same person speaking on every page, in the language the audience uses?",
+      "evidence": "A voice description and the places checked." },
+    { "id": "clarity", "title": "Clear structure", "weight": 2, "critical": false,
+      "ask": "Can a skimmer get the point from headings and first lines alone?",
+      "evidence": "The heading outline read on its own." },
+    { "id": "ai-traces", "title": "No machine tells", "weight": 3, "critical": true,
+      "ask": "Staged run-ups, forced triples, inflated significance, 'unlock/elevate/seamless', symmetric filler?",
+      "evidence": "The phrases found and removed." },
+    { "id": "cta", "title": "Calls to action match intent", "weight": 2, "critical": false,
+      "ask": "Does each button say what happens next, and is there one primary action per view?",
+      "evidence": "Each CTA with its destination." },
+    { "id": "seo", "title": "Titles and descriptions", "weight": 1, "critical": false,
+      "ask": "Unique titles and descriptions that match the page, without keyword stuffing?",
+      "evidence": "The titles and descriptions checked." }
+  ]
+}

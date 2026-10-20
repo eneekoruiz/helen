@@ -21,6 +21,11 @@ High-converting copy is concrete, authentic, and human. Generic AI models genera
 3. **Conversion Path Optimization:** Form fields stripped to the essential minimum. Action-oriented CTA button text ("Download the SDK" instead of "Submit").
 4. **Truthful Social Proof:** Never invent testimonials, logos, metrics, or certifications. Replace absent social proof with radical product transparency.
 
+## HELEN tools
+
+- `helen design check` (MCP `helen_design_check`) lists cliches, placeholder text and customer counts without a visible source, with file and line. Clear every one or state why it stays.
+- Converge with `helen loop start copy --subject "<pages>"` and score each round with evidence (`helen loop rubrics copy`). Done means `converged`, with the final score from an agent other than the writer.
+
 ## Runtime-aware efficiency
 
 Use one agent for small cohesive tasks. Choose the cheapest available capable model when routing is supported; keep the current agent when finishing is cheaper than transferring context. Delegate only when expected expertise or context savings outweigh transfer, coordination, integration, verification and retries. Flash is optional when available and suitable. Keep shared instructions as a stable prefix and task facts after it; provider caching requires runtime support and measured cache hits. Prefer an available direct browser MCP. Use focused regressions during fixes and the full repository gate before completion. Never invent savings.

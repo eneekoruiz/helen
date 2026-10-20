@@ -19,6 +19,10 @@ Inspect repository evidence and existing instructions. Define observable accepta
 4. Apply actionable improvements and repeat verification and discovery without an arbitrary retry or iteration cap. Do not wait for the user to ask for more ideas.
 5. Finish when acceptance is met and a fresh discovery pass finds no additional actionable improvement within scope. If progress needs external access, missing input or authorization, report the concrete blocker and completed evidence; do not repeat unchanged failures. Respect cancellation and explicit resource limits.
 
+## Measured convergence
+
+For non-trivial work open a loop before editing: `helen loop start code --subject "<change>"` (or `general`, `copy`, `security`, `release`; see `helen loop rubrics`). After each round of work score every criterion with concrete evidence (`helen loop score <id>`). Act on the returned focus list; a regression means revert or rethink; `stalled` means change the approach. Done means `converged`, which needs the final score from a different agent (a reviewer subagent or another tool), never your own. For parallel or multi-agent work use `helen-team` (`helen team graph`, claims, `helen team run`).
+
 ## Verification
 
 Run build, typecheck, lint, relevant tests and locally reproducible CI commands. For affected UI, run Playwright Chromium at 375, 768 and 1440 px, exercising interactions, reduced motion, layout and browser errors. Label checks passed, failed, unavailable or not applicable; local commands do not prove hosted matrix execution. Add meaningful regression tests for defects and invariants; avoid vanity tests.

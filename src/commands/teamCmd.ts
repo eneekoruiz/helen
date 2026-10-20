@@ -20,7 +20,7 @@ export function parseDuration(value: string): number {
   return Math.round(Number(match[1]) * (unit === 'h' ? 3600 : unit === 'm' ? 60 : 1));
 }
 
-function agentName(value?: string): string {
+export function agentName(value?: string): string {
   const name = value ?? process.env.HELEN_AGENT;
   if (!name) throw new Error('Say who you are: pass --agent <name> or set HELEN_AGENT (for example claude-1, codex-2).');
   return name;
@@ -47,7 +47,7 @@ export function formatGraph(graph: WorkGraph): string {
   return lines.join('\n');
 }
 
-function handle(command: string, action: () => unknown, human: (data: any) => void): void {
+export function handle(command: string, action: () => unknown, human: (data: any) => void): void {
   try {
     const data = action();
     if (isJsonMode()) {
