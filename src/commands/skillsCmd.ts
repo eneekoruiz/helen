@@ -27,21 +27,23 @@ export function registerSkillsCommands(program: Command) {
 
   skills
     .command("list")
-    .description("List bundled skills (add --flows, --local or --all to view other collections)")
+    .description(
+      "List bundled skills (add --flows, --local or --all to view other collections)",
+    )
     .option("--flows", "Include executable prompt flows as skills", false)
     .option("--local", "Include local ECC and agent skills", false)
     .option("--all", "Include bundled, flow and local skills", false)
     .action((opts: { flows: boolean; local: boolean; all: boolean }) => {
       let skillsList;
       if (opts.all) {
-        skillsList = [...listAllSkills(), ...(opts.flows ? listFlowSkills() : [])];
+        skillsList = [
+          ...listAllSkills(),
+          ...(opts.flows ? listFlowSkills() : []),
+        ];
       } else if (opts.local) {
         skillsList = listLocalSkills();
       } else {
-        skillsList = [
-          ...listSkills(),
-          ...(opts.flows ? listFlowSkills() : []),
-        ];
+        skillsList = [...listSkills(), ...(opts.flows ? listFlowSkills() : [])];
       }
       if (isJsonMode()) {
         printJsonAndExit("skills:list", {
@@ -55,7 +57,10 @@ export function registerSkillsCommands(program: Command) {
         return;
       }
       for (const skill of skillsList) {
-        const sourceLabel = skill.sourceType && skill.sourceType !== "bundled" ? ` [${skill.sourceType}]` : "";
+        const sourceLabel =
+          skill.sourceType && skill.sourceType !== "bundled"
+            ? ` [${skill.sourceType}]`
+            : "";
         console.log(`${skill.name}${sourceLabel}`);
       }
     });

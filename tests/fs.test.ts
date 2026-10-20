@@ -10,8 +10,30 @@ import {
 import path from "node:path";
 import os from "node:os";
 import fs from "fs-extra";
+import { spawnSync } from "node:child_process";
+import { pathToFileURL } from "node:url";
 
 describe("File System Helpers", () => {
+  it.skipIf(process.platform !== "win32")(
+    "terminates for Windows paths with different capitalization",
+    () => {
+      const root = path.resolve(os.tmpdir(), "helen-Case-Root");
+      const module = pathToFileURL(path.resolve("dist/core/fs.js")).href;
+      const result = spawnSync(
+        process.execPath,
+        [
+          "--input-type=module",
+          "-e",
+          `import { isSafeProjectPath } from ${JSON.stringify(module)}; console.log(JSON.stringify([isSafeProjectPath(${JSON.stringify(root)}, ${JSON.stringify(root.toLowerCase())}), isSafeProjectPath(${JSON.stringify(root)}, ${JSON.stringify(path.join(root.toLowerCase(), "child.txt"))})]));`,
+        ],
+        { encoding: "utf8", timeout: 5000, windowsHide: true },
+      );
+      expect(result.error).toBeUndefined();
+      expect(result.status).toBe(0);
+      expect(JSON.parse(result.stdout)).toEqual([true, true]);
+    },
+  );
+
   it("checks path components rather than matching directory prefixes", () => {
     const root = path.resolve(os.tmpdir(), "helen-root");
     expect(isPathInside(root, path.join(root, "child.txt"))).toBe(true);
