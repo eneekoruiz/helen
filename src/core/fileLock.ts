@@ -1,7 +1,7 @@
-import crypto from 'node:crypto';
-import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
+import crypto from "node:crypto";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 export interface LockOptions {
   /** How long to wait for the lock before giving up. */
@@ -27,7 +27,7 @@ export function sleepSync(ms: number): void {
 
 function readRecord(file: string): LockRecord | null {
   try {
-    return JSON.parse(fs.readFileSync(file, 'utf8')) as LockRecord;
+    return JSON.parse(fs.readFileSync(file, "utf8")) as LockRecord;
   } catch {
     return null;
   }
@@ -39,7 +39,7 @@ function processAlive(pid: number): boolean {
     return true;
   } catch (error) {
     // EPERM: the process exists but belongs to someone else.
-    return (error as NodeJS.ErrnoException).code === 'EPERM';
+    return (error as NodeJS.ErrnoException).code === "EPERM";
   }
 }
 
@@ -48,8 +48,13 @@ function processAlive(pid: number): boolean {
  * on this machine that means its process is gone; elsewhere (shared folder) that it is older than staleMs.
  * Age alone is never enough on the same host, because a slow holder would then lose its lock.
  */
-function isAbandoned(record: LockRecord | null, ageMs: number, staleMs: number): boolean {
-  if (record && typeof record.pid === 'number' && record.host === HOST) return !processAlive(record.pid);
+function isAbandoned(
+  record: LockRecord | null,
+  ageMs: number,
+  staleMs: number,
+): boolean {
+  if (record && typeof record.pid === "number" && record.host === HOST)
+    return !processAlive(record.pid);
   return ageMs > staleMs;
 }
 
@@ -58,7 +63,11 @@ function isAbandoned(record: LockRecord | null, ageMs: number, staleMs: number):
  * Several agents may call HELEN at the same moment; without this, two read-modify-write
  * cycles on the same file silently lose one of the updates.
  */
-export function withLockSync<T>(lockFile: string, action: () => T, options: LockOptions = {}): T {
+export function withLockSync<T>(
+  lockFile: string,
+  action: () => T,
+  options: LockOptions = {},
+): T {
   const timeoutMs = options.timeoutMs ?? 10_000;
   const staleMs = options.staleMs ?? 30_000;
   const started = Date.now();
@@ -67,15 +76,25 @@ export function withLockSync<T>(lockFile: string, action: () => T, options: Lock
 
   for (;;) {
     if (Date.now() - started > timeoutMs) {
-      throw new Error(`Timed out after ${timeoutMs} ms waiting for ${path.basename(lockFile)}; another HELEN process is holding it.`);
+      throw new Error(
+        `Timed out after ${timeoutMs} ms waiting for ${path.basename(lockFile)}; another HELEN process is holding it.`,
+      );
     }
     try {
-      const fd = fs.openSync(lockFile, 'wx', 0o600);
-      fs.writeSync(fd, JSON.stringify({ token, pid: process.pid, host: HOST, at: new Date().toISOString() }));
+      const fd = fs.openSync(lockFile, "wx", 0o600);
+      fs.writeSync(
+        fd,
+        JSON.stringify({
+          token,
+          pid: process.pid,
+          host: HOST,
+          at: new Date().toISOString(),
+        }),
+      );
       fs.closeSync(fd);
       break;
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
     }
 
     let info: fs.Stats;
@@ -85,7 +104,9 @@ export function withLockSync<T>(lockFile: string, action: () => T, options: Lock
       continue; // released between the open and the stat
     }
     if (!info.isFile()) {
-      throw new Error(`${lockFile} is not a regular file (a symbolic link or folder). Remove it after checking nothing else uses it.`);
+      throw new Error(
+        `${lockFile} is not a regular file (a symbolic link or folder). Remove it after checking nothing else uses it.`,
+      );
     }
     const record = readRecord(lockFile);
     if (isAbandoned(record, Date.now() - info.mtimeMs, staleMs)) {
@@ -115,6 +136,7 @@ export function withLockSync<T>(lockFile: string, action: () => T, options: Lock
     return action();
   } finally {
     // Never delete a lock that someone else holds now.
-    if (readRecord(lockFile)?.token === token) fs.rmSync(lockFile, { force: true });
+    if (readRecord(lockFile)?.token === token)
+      fs.rmSync(lockFile, { force: true });
   }
 }

@@ -1,39 +1,41 @@
-import { recordFileResult } from '../results.js';
-import type { HelenModule } from '../types.js';
-import type { HelenContext, ModuleResult } from '../../core/context.js';
-import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe } from '../../core/fs.js';
-import path from 'node:path';
+import { recordFileResult } from "../results.js";
+import type { HelenModule } from "../types.js";
+import type { HelenContext, ModuleResult } from "../../core/context.js";
+import { createEmptyResult } from "../../core/context.js";
+import { writeFileSafe } from "../../core/fs.js";
+import path from "node:path";
 
-const meta: HelenModule['meta'] = {
-  id: 'gdpr',
-  name: 'GDPR Compliance',
-  category: 'Legal',
-  summary: 'Cookie consent banner + Privacy/Cookie/Terms policies',
-  description: 'Adds a React cookie consent banner, a consent context provider, and template legal policies (Privacy, Cookies, Terms of Service).',
-  problemItSolves: 'Compliance with GDPR/RGPD is legally required for most sites but often forgotten or implemented poorly.',
-  whenToUse: 'On any site collecting cookies or personal data.',
-  whenNotToUse: 'Purely internal tools with no tracking or data collection.',
+const meta: HelenModule["meta"] = {
+  id: "gdpr",
+  name: "GDPR Compliance",
+  category: "Legal",
+  summary: "Cookie consent banner + Privacy/Cookie/Terms policies",
+  description:
+    "Adds a React cookie consent banner, a consent context provider, and template legal policies (Privacy, Cookies, Terms of Service).",
+  problemItSolves:
+    "Compliance with GDPR/RGPD is legally required for most sites but often forgotten or implemented poorly.",
+  whenToUse: "On any site collecting cookies or personal data.",
+  whenNotToUse: "Purely internal tools with no tracking or data collection.",
   filesCreated: [
-    'src/components/CookieBanner.tsx',
-    'src/context/CookieContext.tsx',
-    'src/pages/legal/PrivacyPolicy.tsx',
-    'src/pages/legal/CookiePolicy.tsx',
-    'src/pages/legal/Terms.tsx'
+    "src/components/CookieBanner.tsx",
+    "src/context/CookieContext.tsx",
+    "src/pages/legal/PrivacyPolicy.tsx",
+    "src/pages/legal/CookiePolicy.tsx",
+    "src/pages/legal/Terms.tsx",
   ],
-  filesModified: ['src/App.tsx'],
+  filesModified: ["src/App.tsx"],
   runtimeDependencies: [],
   devDependencies: [],
-  requirements: ['React 18+'],
-  risks: ['Legal templates are placeholders and must be reviewed by a lawyer.'],
+  requirements: ["React 18+"],
+  risks: ["Legal templates are placeholders and must be reviewed by a lawyer."],
   nextSteps: [
-    'Review and customize legal policies',
-    'Wrap your app with <CookieProvider>',
-    'Add <CookieBanner /> to your main layout'
+    "Review and customize legal policies",
+    "Wrap your app with <CookieProvider>",
+    "Add <CookieBanner /> to your main layout",
   ],
-  riskLevel: 'medium',
-  recommendedLevel: 'beginner',
-  status: 'experimental',
+  riskLevel: "medium",
+  recommendedLevel: "beginner",
+  status: "experimental",
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {
@@ -140,19 +142,25 @@ export function useCookieConsent() {
 `;
 
   const files: Array<[string, string]> = [
-    ['src/components/CookieBanner.tsx', banner],
-    ['src/context/CookieContext.tsx', context],
-    ...(['PrivacyPolicy', 'CookiePolicy', 'Terms'] as const).map((name): [string, string] => [
-      `src/pages/legal/${name}.tsx`,
-      `/** Replace this placeholder with your reviewed policy before publishing. */
+    ["src/components/CookieBanner.tsx", banner],
+    ["src/context/CookieContext.tsx", context],
+    ...(["PrivacyPolicy", "CookiePolicy", "Terms"] as const).map(
+      (name): [string, string] => [
+        `src/pages/legal/${name}.tsx`,
+        `/** Replace this placeholder with your reviewed policy before publishing. */
 export function ${name}() {
-  return <main><h1>${name === 'Terms' ? 'Terms of Service' : name === 'PrivacyPolicy' ? 'Privacy Policy' : 'Cookie Policy'}</h1><p>Policy pending review. Add your organization, contact details, data processing purposes, retention periods and applicable rights here.</p></main>;
+  return <main><h1>${name === "Terms" ? "Terms of Service" : name === "PrivacyPolicy" ? "Privacy Policy" : "Cookie Policy"}</h1><p>Policy pending review. Add your organization, contact details, data processing purposes, retention periods and applicable rights here.</p></main>;
 }
 `,
-    ]),
+      ],
+    ),
   ];
   for (const [file, content] of files) {
-    const status = writeFileSafe(path.join(cwd, file), content, { dryRun, force, root: cwd });
+    const status = writeFileSafe(path.join(cwd, file), content, {
+      dryRun,
+      force,
+      root: cwd,
+    });
     recordFileResult(result, file, status);
   }
   result.nextSteps.push(...meta.nextSteps);

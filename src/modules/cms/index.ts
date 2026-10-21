@@ -1,41 +1,48 @@
-import { recordFileResult } from '../results.js';
-import type { HelenModule } from '../types.js';
-import type { HelenContext, ModuleResult } from '../../core/context.js';
-import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe, fileExists } from '../../core/fs.js';
-import { isModuleInstalled } from '../../core/config.js';
-import path from 'node:path';
+import { recordFileResult } from "../results.js";
+import type { HelenModule } from "../types.js";
+import type { HelenContext, ModuleResult } from "../../core/context.js";
+import { createEmptyResult } from "../../core/context.js";
+import { writeFileSafe, fileExists } from "../../core/fs.js";
+import { isModuleInstalled } from "../../core/config.js";
+import path from "node:path";
 
-const meta: HelenModule['meta'] = {
-  id: 'cms',
-  name: 'Visual CMS',
-  category: 'CMS',
-  summary: 'Visual WYSIWYG inline CMS with /admin routing and i18n adaptability',
-  description: 'Scaffolds an inline content management system directly inside the frontend. Clients can edit text and media directly on the page. Autodetects existing i18n configurations.',
-  problemItSolves: 'Headless CMS setups are complex and require external accounts. Long forms disconnect clients from their design. This allows true visual inline editing with zero learning curve.',
-  whenToUse: 'On user-facing React projects where clients need simple text/image editing capability.',
-  whenNotToUse: 'On purely programmatic backends or complex database projects requiring relational headless management.',
+const meta: HelenModule["meta"] = {
+  id: "cms",
+  name: "Visual CMS",
+  category: "CMS",
+  summary:
+    "Visual WYSIWYG inline CMS with /admin routing and i18n adaptability",
+  description:
+    "Scaffolds an inline content management system directly inside the frontend. Clients can edit text and media directly on the page. Autodetects existing i18n configurations.",
+  problemItSolves:
+    "Headless CMS setups are complex and require external accounts. Long forms disconnect clients from their design. This allows true visual inline editing with zero learning curve.",
+  whenToUse:
+    "On user-facing React projects where clients need simple text/image editing capability.",
+  whenNotToUse:
+    "On purely programmatic backends or complex database projects requiring relational headless management.",
   filesCreated: [
-    'src/cms/content.json',
-    'src/context/CMSContext.tsx',
-    'src/components/CMS/EditableText.tsx',
-    'src/components/CMS/EditableImage.tsx',
-    'src/components/CMS/EditableLink.tsx',
-    'src/components/CMS/CMSToolbar.tsx'
+    "src/cms/content.json",
+    "src/context/CMSContext.tsx",
+    "src/components/CMS/EditableText.tsx",
+    "src/components/CMS/EditableImage.tsx",
+    "src/components/CMS/EditableLink.tsx",
+    "src/components/CMS/CMSToolbar.tsx",
   ],
   filesModified: [],
   runtimeDependencies: [],
   devDependencies: [],
-  requirements: ['React 18+'],
-  risks: ['Persistence is currently localStorage-based. Changes should be serialized or exported to content.json for code commit.'],
-  nextSteps: [
-    'Wrap your main layout/App with <CMSProvider>',
-    'Place <CMSToolbar /> inside your main layout',
-    'Navigate to /admin in your browser to activate the editing interface'
+  requirements: ["React 18+"],
+  risks: [
+    "Persistence is currently localStorage-based. Changes should be serialized or exported to content.json for code commit.",
   ],
-  riskLevel: 'low',
-  recommendedLevel: 'beginner',
-  status: 'experimental',
+  nextSteps: [
+    "Wrap your main layout/App with <CMSProvider>",
+    "Place <CMSToolbar /> inside your main layout",
+    "Navigate to /admin in your browser to activate the editing interface",
+  ],
+  riskLevel: "low",
+  recommendedLevel: "beginner",
+  status: "experimental",
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {
@@ -43,53 +50,63 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
   const { cwd, dryRun, force } = ctx;
 
   // Audit if i18n is configured in the target project
-  const hasI18n = isModuleInstalled(cwd, 'i18n') || 
-                  fileExists(path.join(cwd, 'src/i18n/config.ts')) ||
-                  fileExists(path.join(cwd, 'src/i18n/config.js'));
+  const hasI18n =
+    isModuleInstalled(cwd, "i18n") ||
+    fileExists(path.join(cwd, "src/i18n/config.ts")) ||
+    fileExists(path.join(cwd, "src/i18n/config.js"));
 
   // 1. Initial content JSON
-  let contentJson = '';
+  let contentJson = "";
   if (hasI18n) {
-    contentJson = JSON.stringify({
-      translatable: {
-        en: {
-          welcome: "Welcome to HELEN",
-          description: "Fast, secure, production-ready setup",
-          ctaText: "Learn More"
+    contentJson = JSON.stringify(
+      {
+        translatable: {
+          en: {
+            welcome: "Welcome to HELEN",
+            description: "Fast, secure, production-ready setup",
+            ctaText: "Learn More",
+          },
+          es: {
+            welcome: "Bienvenido a HELEN",
+            description: "Setup rápido, seguro y listo para producción",
+            ctaText: "Más Información",
+          },
         },
-        es: {
-          welcome: "Bienvenido a HELEN",
-          description: "Setup rápido, seguro y listo para producción",
-          ctaText: "Más Información"
-        }
+        universal: {
+          phone: "+34 600 000 000",
+          email: "contact@example.com",
+          heroImage:
+            "https://images.unsplash.com/photo-1551434678-e076c223a692",
+          ctaUrl: "https://github.com/eneekoruiz/helen",
+        },
       },
-      universal: {
+      null,
+      2,
+    );
+  } else {
+    contentJson = JSON.stringify(
+      {
+        welcome: "Welcome to HELEN",
+        description: "Fast, secure, production-ready setup",
         phone: "+34 600 000 000",
         email: "contact@example.com",
         heroImage: "https://images.unsplash.com/photo-1551434678-e076c223a692",
-        ctaUrl: "https://github.com/eneekoruiz/helen"
-      }
-    }, null, 2);
-  } else {
-    contentJson = JSON.stringify({
-      welcome: "Welcome to HELEN",
-      description: "Fast, secure, production-ready setup",
-      phone: "+34 600 000 000",
-      email: "contact@example.com",
-      heroImage: "https://images.unsplash.com/photo-1551434678-e076c223a692",
-      ctaText: "Learn More",
-      ctaUrl: "https://github.com/eneekoruiz/helen"
-    }, null, 2);
+        ctaText: "Learn More",
+        ctaUrl: "https://github.com/eneekoruiz/helen",
+      },
+      null,
+      2,
+    );
   }
 
   // 2. CMS Context React Provider
-  let contextCode = '';
+  let contextCode = "";
   if (hasI18n) {
     contextCode = `import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import defaultContent from '../cms/content.json';
 
-type CMSContent = ${hasI18n ? '{ translatable: Record<string, Record<string, string>>; universal: Record<string, string> }' : 'Record<string, string>'};
+type CMSContent = ${hasI18n ? "{ translatable: Record<string, Record<string, string>>; universal: Record<string, string> }" : "Record<string, string>"};
 
 interface CMSContextType {
   isAdmin: boolean;
@@ -112,8 +129,12 @@ function isRecord(value: unknown): value is Record<string, string> {
 }
 
 function isContent(value: unknown): value is CMSContent {
-  ${hasI18n ? `if (typeof value !== 'object' || value === null || !('universal' in value) || !('translatable' in value)) return false;
-  return isRecord(value.universal) && typeof value.translatable === 'object' && value.translatable !== null && !Array.isArray(value.translatable) && Object.values(value.translatable).every(isRecord);` : 'return isRecord(value);'}
+  ${
+    hasI18n
+      ? `if (typeof value !== 'object' || value === null || !('universal' in value) || !('translatable' in value)) return false;
+  return isRecord(value.universal) && typeof value.translatable === 'object' && value.translatable !== null && !Array.isArray(value.translatable) && Object.values(value.translatable).every(isRecord);`
+      : "return isRecord(value);"
+  }
 }
 
 export function CMSProvider({ children }: { children: ReactNode }) {
@@ -210,7 +231,7 @@ export function useCMS() {
     contextCode = `import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import defaultContent from '../cms/content.json';
 
-type CMSContent = ${hasI18n ? '{ translatable: Record<string, Record<string, string>>; universal: Record<string, string> }' : 'Record<string, string>'};
+type CMSContent = ${hasI18n ? "{ translatable: Record<string, Record<string, string>>; universal: Record<string, string> }" : "Record<string, string>"};
 
 interface CMSContextType {
   isAdmin: boolean;
@@ -233,8 +254,12 @@ function isRecord(value: unknown): value is Record<string, string> {
 }
 
 function isContent(value: unknown): value is CMSContent {
-  ${hasI18n ? `if (typeof value !== 'object' || value === null || !('universal' in value) || !('translatable' in value)) return false;
-  return isRecord(value.universal) && typeof value.translatable === 'object' && value.translatable !== null && !Array.isArray(value.translatable) && Object.values(value.translatable).every(isRecord);` : 'return isRecord(value);'}
+  ${
+    hasI18n
+      ? `if (typeof value !== 'object' || value === null || !('universal' in value) || !('translatable' in value)) return false;
+  return isRecord(value.universal) && typeof value.translatable === 'object' && value.translatable !== null && !Array.isArray(value.translatable) && Object.values(value.translatable).every(isRecord);`
+      : "return isRecord(value);"
+  }
 }
 
 export function CMSProvider({ children }: { children: ReactNode }) {
@@ -615,15 +640,19 @@ export function CMSToolbar() {
 `;
 
   const files: Array<[string, string]> = [
-    ['src/cms/content.json', contentJson],
-    ['src/context/CMSContext.tsx', contextCode],
-    ['src/components/CMS/EditableText.tsx', textCode],
-    ['src/components/CMS/EditableImage.tsx', imgCode],
-    ['src/components/CMS/EditableLink.tsx', linkCode],
-    ['src/components/CMS/CMSToolbar.tsx', toolbarCode],
+    ["src/cms/content.json", contentJson],
+    ["src/context/CMSContext.tsx", contextCode],
+    ["src/components/CMS/EditableText.tsx", textCode],
+    ["src/components/CMS/EditableImage.tsx", imgCode],
+    ["src/components/CMS/EditableLink.tsx", linkCode],
+    ["src/components/CMS/CMSToolbar.tsx", toolbarCode],
   ];
   for (const [file, content] of files) {
-    const status = writeFileSafe(path.join(cwd, file), content, { dryRun, force, root: cwd });
+    const status = writeFileSafe(path.join(cwd, file), content, {
+      dryRun,
+      force,
+      root: cwd,
+    });
     recordFileResult(result, file, status);
   }
 

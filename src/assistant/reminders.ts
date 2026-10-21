@@ -1,16 +1,21 @@
-import crypto from 'node:crypto';
-import { z } from 'zod';
-import { findSecrets, looksSensitive, secretRefusal } from '../core/secrets.js';
-import { readCollection, updateCollection } from './store.js';
-import { oneLine, tokens } from './text.js';
-import { nextOccurrence, parseWhen, stripWhen, type Recurrence } from './when.js';
+import crypto from "node:crypto";
+import { z } from "zod";
+import { findSecrets, looksSensitive, secretRefusal } from "../core/secrets.js";
+import { readCollection, updateCollection } from "./store.js";
+import { oneLine, tokens } from "./text.js";
+import {
+  nextOccurrence,
+  parseWhen,
+  stripWhen,
+  type Recurrence,
+} from "./when.js";
 
 /**
  * Reminders: something to say at a given time, once or on a schedule. Times are stored in UTC and computed
  * from wall-clock time in the owner's time zone, so "every Monday at 8" stays at 8 across DST changes.
  */
 const RecurrenceSchema = z.object({
-  freq: z.enum(['daily', 'weekly', 'monthly', 'yearly']),
+  freq: z.enum(["daily", "weekly", "monthly", "yearly"]),
   interval: z.number().int().min(1).max(366),
   byDay: z.array(z.number().int().min(0).max(6)).optional(),
   dayOfMonth: z.number().int().min(1).max(31).optional(),
@@ -25,7 +30,7 @@ export const ReminderSchema = z.object({
   /** Next time it fires (UTC). */
   due: z.string().datetime(),
   recurrence: RecurrenceSchema.optional(),
-  status: z.enum(['pending', 'done', 'cancelled']),
+  status: z.enum(["pending", "done", "cancelled"]),
   created: z.string().datetime(),
   updated: z.string().datetime(),
   source: z.string().max(20),
@@ -41,7 +46,7 @@ export const ReminderSchema = z.object({
 
 export type Reminder = z.infer<typeof ReminderSchema>;
 
-const NAME = 'reminders';
+const NAME = "reminders";
 
 export interface ReminderContext {
   timezone: string;
@@ -51,22 +56,25 @@ export interface ReminderContext {
 }
 
 export class WhenNotUnderstoodError extends Error {
-  constructor(readonly lang: 'es' | 'en') {
-    super(lang === 'es'
-      ? 'No entiendo cuándo. Prueba con «mañana a las 9», «en 2 horas», «el viernes por la tarde» o «cada lunes a las 8».'
-      : 'I do not understand when. Try "tomorrow at 9am", "in 2 hours", "on Friday afternoon" or "every Monday at 8".');
-    this.name = 'WhenNotUnderstoodError';
+  constructor(readonly lang: "es" | "en") {
+    super(
+      lang === "es"
+        ? "No entiendo cuándo. Prueba con «mañana a las 9», «en 2 horas», «el viernes por la tarde» o «cada lunes a las 8»."
+        : 'I do not understand when. Try "tomorrow at 9am", "in 2 hours", "on Friday afternoon" or "every Monday at 8".',
+    );
+    this.name = "WhenNotUnderstoodError";
   }
 }
 
 function newId(existing: Reminder[]): string {
-  let id = '';
-  do id = `r${crypto.randomBytes(3).toString('hex')}`; while (existing.some(reminder => reminder.id === id));
+  let id = "";
+  do id = `r${crypto.randomBytes(3).toString("hex")}`;
+  while (existing.some((reminder) => reminder.id === id));
   return id;
 }
 
 function cleanText(text: string): string {
-  return oneLine(text).replace(/^(?:que|to|that)\s+/i, '');
+  return oneLine(text).replace(/^(?:que|to|that)\s+/i, "");
 }
 
 export interface AddReminderInput {
@@ -79,38 +87,79 @@ export interface AddReminderInput {
 }
 
 /** Parse "what" and "when" from natural language and store the reminder. */
-export function addReminder(home: string, input: AddReminderInput, context: ReminderContext): Reminder {
+export function addReminder(
+  home: string,
+  input: AddReminderInput,
+  context: ReminderContext,
+): Reminder {
   const now = context.now ?? new Date();
-  const lang = context.locale.startsWith('es') ? 'es' : 'en';
-  const options = { now, timezone: context.timezone, defaultTime: context.defaultTime, locale: context.locale };
+  const lang = context.locale.startsWith("es") ? "es" : "en";
+  const options = {
+    now,
+    timezone: context.timezone,
+    defaultTime: context.defaultTime,
+    locale: context.locale,
+  };
   const parsed = parseWhen(input.when ?? input.text, options);
   if (!parsed) throw new WhenNotUnderstoodError(lang);
-  const text = cleanText(input.when ? input.text : stripWhen(input.text, parsed.spans));
-  if (!text) throw new Error(lang === 'es' ? '¿Qué quieres que te recuerde?' : 'What should I remind you about?');
-  if (text.length > 500) throw new Error(lang === 'es' ? 'Es demasiado largo para un recordatorio; guárdalo como nota.' : 'Too long for a reminder; save it as a note.');
+  const text = cleanText(
+    input.when ? input.text : stripWhen(input.text, parsed.spans),
+  );
+  if (!text)
+    throw new Error(
+      lang === "es"
+        ? "¿Qué quieres que te recuerde?"
+        : "What should I remind you about?",
+    );
+  if (text.length > 500)
+    throw new Error(
+      lang === "es"
+        ? "Es demasiado largo para un recordatorio; guárdalo como nota."
+        : "Too long for a reminder; save it as a note.",
+    );
   const secrets = findSecrets(text);
   if (secrets.length > 0) throw new Error(secretRefusal(secrets, lang));
   if (parsed.due.getTime() <= now.getTime()) {
-    throw new Error(lang === 'es' ? 'Esa hora ya ha pasado. Dime otra.' : 'That time has already passed. Give me another one.');
+    throw new Error(
+      lang === "es"
+        ? "Esa hora ya ha pasado. Dime otra."
+        : "That time has already passed. Give me another one.",
+    );
   }
-  return updateCollection(home, NAME, ReminderSchema, items => {
+  return updateCollection(home, NAME, ReminderSchema, (items) => {
     const stamp = now.toISOString();
     const reminder: Reminder = {
-      id: newId(items), text, due: parsed.due.toISOString(), ...(parsed.recurrence ? { recurrence: parsed.recurrence } : {}),
-      status: 'pending', created: stamp, updated: stamp, source: (input.source ?? 'cli').replace(/[^a-z0-9-]/gi, '').slice(0, 20) || 'cli',
-      sensitive: input.sensitive ?? looksSensitive(text), fired: 0, failedAttempts: 0,
+      id: newId(items),
+      text,
+      due: parsed.due.toISOString(),
+      ...(parsed.recurrence ? { recurrence: parsed.recurrence } : {}),
+      status: "pending",
+      created: stamp,
+      updated: stamp,
+      source:
+        (input.source ?? "cli").replace(/[^a-z0-9-]/gi, "").slice(0, 20) ||
+        "cli",
+      sensitive: input.sensitive ?? looksSensitive(text),
+      fired: 0,
+      failedAttempts: 0,
     };
     items.push(reminder);
     return reminder;
   });
 }
 
-export function listReminders(home: string, filter: { status?: Reminder['status'] | 'all'; from?: Date; to?: Date } = {}): Reminder[] {
-  const status = filter.status ?? 'pending';
-  return readCollection(home, NAME, ReminderSchema).items
-    .filter(reminder => (status === 'all' || reminder.status === status)
-      && (!filter.from || Date.parse(reminder.due) >= filter.from.getTime())
-      && (!filter.to || Date.parse(reminder.due) < filter.to.getTime()))
+export function listReminders(
+  home: string,
+  filter: { status?: Reminder["status"] | "all"; from?: Date; to?: Date } = {},
+): Reminder[] {
+  const status = filter.status ?? "pending";
+  return readCollection(home, NAME, ReminderSchema)
+    .items.filter(
+      (reminder) =>
+        (status === "all" || reminder.status === status) &&
+        (!filter.from || Date.parse(reminder.due) >= filter.from.getTime()) &&
+        (!filter.to || Date.parse(reminder.due) < filter.to.getTime()),
+    )
     .sort((a, b) => a.due.localeCompare(b.due));
 }
 
@@ -120,14 +169,21 @@ export interface Occurrence {
 }
 
 /** Every time a pending reminder fires within [from, to), recurring ones expanded. */
-export function occurrencesBetween(home: string, from: Date, to: Date, timezone: string): Occurrence[] {
+export function occurrencesBetween(
+  home: string,
+  from: Date,
+  to: Date,
+  timezone: string,
+): Occurrence[] {
   const out: Occurrence[] = [];
   for (const reminder of listReminders(home)) {
     let at: Date | null = new Date(reminder.due);
     let guard = 0;
     while (at && at < to && guard < 400) {
       if (at >= from) out.push({ reminder, at });
-      at = reminder.recurrence ? nextOccurrence(reminder.recurrence, at, timezone) : null;
+      at = reminder.recurrence
+        ? nextOccurrence(reminder.recurrence, at, timezone)
+        : null;
       guard += 1;
     }
   }
@@ -138,34 +194,74 @@ export function occurrencesBetween(home: string, from: Date, to: Date, timezone:
  * Find a reminder by id or by what it says ("cancela el recordatorio de mamá"). Throws when nothing or
  * several equally good matches are found, so a voice command never cancels the wrong one.
  */
-export function findReminder(home: string, ref: string, lang: 'es' | 'en' = 'es'): Reminder {
+export function findReminder(
+  home: string,
+  ref: string,
+  lang: "es" | "en" = "es",
+): Reminder {
   const pending = listReminders(home);
-  const byId = pending.find(reminder => reminder.id === ref.trim());
+  const byId = pending.find((reminder) => reminder.id === ref.trim());
   if (byId) return byId;
-  return bestMatch(pending, ref, reminder => reminder.text, lang === 'es' ? 'recordatorio' : 'reminder', lang);
+  return bestMatch(
+    pending,
+    ref,
+    (reminder) => reminder.text,
+    lang === "es" ? "recordatorio" : "reminder",
+    lang,
+  );
 }
 
-export function bestMatch<T>(candidates: T[], ref: string, text: (item: T) => string, noun: string, lang: 'es' | 'en'): T {
+export function bestMatch<T>(
+  candidates: T[],
+  ref: string,
+  text: (item: T) => string,
+  noun: string,
+  lang: "es" | "en",
+): T {
   const wanted = new Set(tokens(ref));
   const scored = candidates
-    .map(item => {
+    .map((item) => {
       const words = tokens(text(item));
-      const hits = words.filter(word => wanted.has(word)).length;
-      return { item, score: hits === 0 ? 0 : hits / Math.max(wanted.size, 1) + hits / Math.max(words.length, 1) };
+      const hits = words.filter((word) => wanted.has(word)).length;
+      return {
+        item,
+        score:
+          hits === 0
+            ? 0
+            : hits / Math.max(wanted.size, 1) +
+              hits / Math.max(words.length, 1),
+      };
     })
-    .filter(entry => entry.score > 0)
+    .filter((entry) => entry.score > 0)
     .sort((a, b) => b.score - a.score);
-  if (scored.length === 0) throw new Error(lang === 'es' ? `No encuentro ningún ${noun} que encaje con «${ref}».` : `I cannot find a ${noun} matching "${ref}".`);
+  if (scored.length === 0)
+    throw new Error(
+      lang === "es"
+        ? `No encuentro ningún ${noun} que encaje con «${ref}».`
+        : `I cannot find a ${noun} matching "${ref}".`,
+    );
   if (scored.length > 1 && scored[1]!.score === scored[0]!.score) {
-    const options = scored.filter(entry => entry.score === scored[0]!.score).slice(0, 4).map(entry => `«${text(entry.item)}»`).join(', ');
-    throw new Error(lang === 'es' ? `Hay varios: ${options}. ¿Cuál?` : `There are several: ${options}. Which one?`);
+    const options = scored
+      .filter((entry) => entry.score === scored[0]!.score)
+      .slice(0, 4)
+      .map((entry) => `«${text(entry.item)}»`)
+      .join(", ");
+    throw new Error(
+      lang === "es"
+        ? `Hay varios: ${options}. ¿Cuál?`
+        : `There are several: ${options}. Which one?`,
+    );
   }
   return scored[0]!.item;
 }
 
-function mutate(home: string, id: string, change: (reminder: Reminder) => void): Reminder {
-  return updateCollection(home, NAME, ReminderSchema, items => {
-    const reminder = items.find(candidate => candidate.id === id);
+function mutate(
+  home: string,
+  id: string,
+  change: (reminder: Reminder) => void,
+): Reminder {
+  return updateCollection(home, NAME, ReminderSchema, (items) => {
+    const reminder = items.find((candidate) => candidate.id === id);
     if (!reminder) throw new Error(`No reminder with id ${id}.`);
     change(reminder);
     reminder.updated = new Date().toISOString();
@@ -174,54 +270,91 @@ function mutate(home: string, id: string, change: (reminder: Reminder) => void):
 }
 
 export function cancelReminder(home: string, id: string): Reminder {
-  return mutate(home, id, reminder => { reminder.status = 'cancelled'; });
+  return mutate(home, id, (reminder) => {
+    reminder.status = "cancelled";
+  });
 }
 
 export function completeReminder(home: string, id: string): Reminder {
-  return mutate(home, id, reminder => { reminder.status = 'done'; });
+  return mutate(home, id, (reminder) => {
+    reminder.status = "done";
+  });
 }
 
 /** Move a reminder: "10 minutos", "en una hora", "mañana a las 9". A bare number means minutes. */
-export function snoozeReminder(home: string, id: string, when: string, context: ReminderContext): Reminder {
+export function snoozeReminder(
+  home: string,
+  id: string,
+  when: string,
+  context: ReminderContext,
+): Reminder {
   const now = context.now ?? new Date();
-  const lang = context.locale.startsWith('es') ? 'es' : 'en';
-  const inWord = lang === 'es' ? 'en' : 'in';
+  const lang = context.locale.startsWith("es") ? "es" : "en";
+  const inWord = lang === "es" ? "en" : "in";
   let text = when.trim();
-  if (/^\d+$/.test(text)) text = `${inWord} ${text} ${lang === 'es' ? 'minutos' : 'minutes'}`;
-  else if (/^(?:\d+|un|una|media|an?|half)\s*(?:min|minutos?|minutes?|h|horas?|hours?|hora|hour|d[ií]as?|days?)\b/i.test(text)) text = `${inWord} ${text}`;
-  const parsed = parseWhen(text, { now, timezone: context.timezone, defaultTime: context.defaultTime, locale: context.locale });
+  if (/^\d+$/.test(text))
+    text = `${inWord} ${text} ${lang === "es" ? "minutos" : "minutes"}`;
+  else if (
+    /^(?:\d+|un|una|media|an?|half)\s*(?:min|minutos?|minutes?|h|horas?|hours?|hora|hour|d[ií]as?|days?)\b/i.test(
+      text,
+    )
+  )
+    text = `${inWord} ${text}`;
+  const parsed = parseWhen(text, {
+    now,
+    timezone: context.timezone,
+    defaultTime: context.defaultTime,
+    locale: context.locale,
+  });
   if (!parsed || parsed.due <= now) throw new WhenNotUnderstoodError(lang);
-  return mutate(home, id, reminder => {
+  return mutate(home, id, (reminder) => {
     reminder.due = parsed.due.toISOString();
-    reminder.status = 'pending';
+    reminder.status = "pending";
     reminder.failedAttempts = 0;
   });
 }
 
-export function attachAlexaToken(home: string, id: string, alertToken: string): Reminder {
-  return mutate(home, id, reminder => { reminder.alexaAlertToken = alertToken; });
+export function attachAlexaToken(
+  home: string,
+  id: string,
+  alertToken: string,
+): Reminder {
+  return mutate(home, id, (reminder) => {
+    reminder.alexaAlertToken = alertToken;
+  });
 }
 
 /** Pending reminders whose time has come. */
 export function dueReminders(home: string, now: Date = new Date()): Reminder[] {
-  return listReminders(home).filter(reminder => Date.parse(reminder.due) <= now.getTime());
+  return listReminders(home).filter(
+    (reminder) => Date.parse(reminder.due) <= now.getTime(),
+  );
 }
 
 /**
  * Record a delivery. A one-off reminder is done; a recurring one moves to its next occurrence after now,
  * so occurrences missed while HELEN was off are announced once, not one by one.
  */
-export function markDelivered(home: string, id: string, timezone: string, now: Date = new Date()): Reminder {
-  return mutate(home, id, reminder => {
+export function markDelivered(
+  home: string,
+  id: string,
+  timezone: string,
+  now: Date = new Date(),
+): Reminder {
+  return mutate(home, id, (reminder) => {
     reminder.fired += 1;
     reminder.lastFired = now.toISOString();
     reminder.failedAttempts = 0;
-    const next = reminder.recurrence ? nextOccurrence(reminder.recurrence as Recurrence, now, timezone) : null;
+    const next = reminder.recurrence
+      ? nextOccurrence(reminder.recurrence as Recurrence, now, timezone)
+      : null;
     if (next) reminder.due = next.toISOString();
-    else reminder.status = 'done';
+    else reminder.status = "done";
   });
 }
 
 export function markDeliveryFailed(home: string, id: string): Reminder {
-  return mutate(home, id, reminder => { reminder.failedAttempts += 1; });
+  return mutate(home, id, (reminder) => {
+    reminder.failedAttempts += 1;
+  });
 }

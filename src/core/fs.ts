@@ -1,16 +1,21 @@
-import fs from 'fs-extra';
-import path from 'node:path';
-import os from 'node:os';
-import { logger } from './logger.js';
-import Handlebars from 'handlebars';
-import { isDeepStrictEqual } from 'node:util';
-import { writeAtomicFile } from './operations.js';
-import { recordPlannedWrite, getPlannedContent } from './preview.js';
+import fs from "fs-extra";
+import path from "node:path";
+import os from "node:os";
+import { logger } from "./logger.js";
+import Handlebars from "handlebars";
+import { isDeepStrictEqual } from "node:util";
+import { writeAtomicFile, recordFileMutationFailure } from "./operations.js";
+import { recordPlannedWrite, getPlannedContent } from "./preview.js";
 
 /** Check directory boundaries and existing links before touching a project path. */
 export function isPathInside(root: string, candidate: string): boolean {
   const relative = path.relative(path.resolve(root), path.resolve(candidate));
-  return relative === '' || (!path.isAbsolute(relative) && relative !== '..' && !relative.startsWith(`..${path.sep}`));
+  return (
+    relative === "" ||
+    (!path.isAbsolute(relative) &&
+      relative !== ".." &&
+      !relative.startsWith(`..${path.sep}`))
+  );
 }
 
 export function isSafeProjectPath(root: string, candidate: string): boolean {
@@ -18,26 +23,32 @@ export function isSafeProjectPath(root: string, candidate: string): boolean {
   const resolvedCandidate = path.resolve(candidate);
   if (!isPathInside(resolvedRoot, resolvedCandidate)) return false;
   let current = resolvedCandidate;
-  while (current !== resolvedRoot) {
+  while (path.relative(resolvedRoot, current) !== "") {
     try {
       if (fs.lstatSync(current).isSymbolicLink()) return false;
     } catch (err) {
-      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') return false;
+      if ((err as NodeJS.ErrnoException).code !== "ENOENT") return false;
     }
-    current = path.dirname(current);
+    const parent = path.dirname(current);
+    if (parent === current) return false;
+    current = parent;
   }
   return true;
 }
 
 function isSafeFileDestination(filePath: string, root?: string): boolean {
   const absolute = path.resolve(filePath);
-  const allowed = (candidate: string): boolean => isSafeProjectPath(root ?? process.cwd(), candidate) ||
+  const allowed = (candidate: string): boolean =>
+    isSafeProjectPath(root ?? process.cwd(), candidate) ||
     (root === undefined && isSafeProjectPath(os.tmpdir(), candidate));
-  return allowed(absolute) && allowed(`${absolute}.helen-backup`) &&
+  return (
+    allowed(absolute) &&
+    allowed(`${absolute}.helen-backup`) &&
     (!fs.existsSync(absolute) || fs.lstatSync(absolute).isFile()) &&
-    (!fs.existsSync(`${absolute}.helen-backup`) || fs.lstatSync(`${absolute}.helen-backup`).isFile());
+    (!fs.existsSync(`${absolute}.helen-backup`) ||
+      fs.lstatSync(`${absolute}.helen-backup`).isFile())
+  );
 }
-
 
 /**
  * Check if a file exists at the given path.
@@ -47,7 +58,7 @@ export function fileExists(filePath: string): boolean {
 }
 
 function readText(file: string): string {
-  return getPlannedContent(file) ?? fs.readFileSync(file, 'utf8');
+  return getPlannedContent(file) ?? fs.readFileSync(file, "utf8");
 }
 
 /**
@@ -67,61 +78,90 @@ export function ensureDir(dirPath: string): void {
 export function writeFileSafe(
   filePath: string,
   content: string,
-  options: { dryRun?: boolean; force?: boolean; vars?: Record<string, any>; root?: string } = {},
-): 'created' | 'skipped' | 'overwritten' {
+  options: {
+    dryRun?: boolean;
+    force?: boolean;
+    vars?: Record<string, any>;
+    root?: string;
+  } = {},
+): "created" | "skipped" | "overwritten" {
   try {
-    const absolutePath = path.isAbsolute(filePath) ? filePath : path.resolve(process.cwd(), filePath);
-    
+    const absolutePath = path.isAbsolute(filePath)
+      ? filePath
+      : path.resolve(process.cwd(), filePath);
+
     // Safety check: Don't write outside the current working directory or temp dir (for tests)
     if (!isSafeFileDestination(absolutePath, options.root)) {
-      logger.error(`Path safety violation: Attempted to write outside project root: ${filePath}`);
-      return 'skipped';
+      if (!options.dryRun)
+        recordFileMutationFailure(
+          absolutePath,
+          new Error(`Unsafe file destination: ${filePath}`),
+        );
+      logger.error(
+        `Path safety violation: Attempted to write outside project root: ${filePath}`,
+      );
+      return "skipped";
     }
 
-
     const exists = fileExists(absolutePath);
-    
+
     let finalContent = content;
     if (options.vars) {
       try {
         const template = Handlebars.compile(content);
         finalContent = template(options.vars);
       } catch (err) {
-        logger.error(`Template error in ${filePath}: ${err instanceof Error ? err.message : String(err)}`);
-        return 'skipped';
+        if (!options.dryRun) recordFileMutationFailure(absolutePath, err);
+        logger.error(
+          `Template error in ${filePath}: ${err instanceof Error ? err.message : String(err)}`,
+        );
+        return "skipped";
       }
     }
 
     if (options.dryRun) {
       if (exists && !options.force) {
         logger.step(`[DRY-RUN] Would skip (exists): ${filePath}`);
-        return 'skipped';
+        return "skipped";
       }
-      logger.step(`[DRY-RUN] Would ${exists ? 'overwrite' : 'create'}: ${filePath}`);
-      recordPlannedWrite(absolutePath, exists ? readText(absolutePath) : null, finalContent, { backup: exists });
-      return exists ? 'overwritten' : 'created';
+      logger.step(
+        `[DRY-RUN] Would ${exists ? "overwrite" : "create"}: ${filePath}`,
+      );
+      recordPlannedWrite(
+        absolutePath,
+        exists ? readText(absolutePath) : null,
+        finalContent,
+        { backup: exists },
+      );
+      return exists ? "overwritten" : "created";
     }
 
     if (exists) {
       if (!options.force) {
         // Re-running a command over identical files is the normal idempotent case, not something to warn about.
-        if (readText(absolutePath) === finalContent) logger.step(`Unchanged: ${filePath}`);
-        else logger.warn(`File exists with different content, skipping: ${filePath}`);
-        return 'skipped';
+        if (readText(absolutePath) === finalContent)
+          logger.step(`Unchanged: ${filePath}`);
+        else
+          logger.warn(
+            `File exists with different content, skipping: ${filePath}`,
+          );
+        return "skipped";
       }
       backupFile(absolutePath, { root: options.root });
     }
 
     ensureDir(path.dirname(absolutePath));
     writeAtomicFile(absolutePath, finalContent);
-    logger.step(`${exists ? 'Overwritten' : 'Created'}: ${filePath}`);
-    return exists ? 'overwritten' : 'created';
+    logger.step(`${exists ? "Overwritten" : "Created"}: ${filePath}`);
+    return exists ? "overwritten" : "created";
   } catch (err) {
-    logger.error(`Failed to write file ${filePath}: ${err instanceof Error ? err.message : String(err)}`);
-    return 'skipped';
+    if (!options.dryRun) recordFileMutationFailure(filePath, err);
+    logger.error(
+      `Failed to write file ${filePath}: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return "skipped";
   }
 }
-
 
 /**
  * Copy a template file to a destination safely with interpolation support.
@@ -129,23 +169,33 @@ export function writeFileSafe(
 export function copyTemplate(
   templatePath: string,
   destPath: string,
-  options: { dryRun?: boolean; force?: boolean; vars?: Record<string, any>; root?: string } = {},
-): 'created' | 'skipped' | 'overwritten' {
+  options: {
+    dryRun?: boolean;
+    force?: boolean;
+    vars?: Record<string, any>;
+    root?: string;
+  } = {},
+): "created" | "skipped" | "overwritten" {
   if (!fileExists(templatePath)) {
+    if (!options.dryRun)
+      recordFileMutationFailure(
+        destPath,
+        new Error(`Template not found: ${templatePath}`),
+      );
     logger.error(`Template not found: ${templatePath}`);
-    return 'skipped';
+    return "skipped";
   }
 
-
-  const content = fs.readFileSync(templatePath, 'utf-8');
+  const content = fs.readFileSync(templatePath, "utf-8");
   return writeFileSafe(destPath, content, options);
 }
-
 
 /**
  * Read and parse a JSON file. Returns null if not found or invalid.
  */
-export function readJson<T = Record<string, unknown>>(filePath: string): T | null {
+export function readJson<T = Record<string, unknown>>(
+  filePath: string,
+): T | null {
   try {
     return JSON.parse(readText(filePath)) as T;
   } catch {
@@ -161,33 +211,51 @@ export function patchJson(
   filePath: string,
   patches: Record<string, unknown>,
   options: { dryRun?: boolean; root?: string } = {},
-): 'created' | 'modified' | 'skipped' {
+): "created" | "modified" | "skipped" {
   try {
     if (!isSafeFileDestination(filePath, options.root)) {
+      if (!options.dryRun)
+        recordFileMutationFailure(
+          filePath,
+          new Error(`Unsafe JSON destination: ${filePath}`),
+        );
       logger.error(`Unsafe JSON destination: ${filePath}`);
-      return 'skipped';
+      return "skipped";
     }
     const exists = fileExists(filePath);
-    const existing = exists ? JSON.parse(readText(filePath)) as unknown : {};
-    if (!existing || typeof existing !== 'object' || Array.isArray(existing)) {
+    const existing = exists ? (JSON.parse(readText(filePath)) as unknown) : {};
+    if (!existing || typeof existing !== "object" || Array.isArray(existing)) {
+      if (!options.dryRun)
+        recordFileMutationFailure(
+          filePath,
+          new Error(`JSON destination must contain an object: ${filePath}`),
+        );
       logger.error(`JSON destination must contain an object: ${filePath}`);
-      return 'skipped';
+      return "skipped";
     }
     const merged = deepMerge(existing as Record<string, unknown>, patches);
-    if (exists && isDeepStrictEqual(existing, merged)) return 'skipped';
+    if (exists && isDeepStrictEqual(existing, merged)) return "skipped";
     if (options.dryRun) {
       logger.step(`[DRY-RUN] Would patch: ${filePath}`);
-      recordPlannedWrite(filePath, exists ? readText(filePath) : null, `${JSON.stringify(merged, null, 2)}\n`, { backup: exists });
-      return exists ? 'modified' : 'created';
+      recordPlannedWrite(
+        filePath,
+        exists ? readText(filePath) : null,
+        `${JSON.stringify(merged, null, 2)}\n`,
+        { backup: exists },
+      );
+      return exists ? "modified" : "created";
     }
     if (exists) backupFile(filePath, { root: options.root });
     ensureDir(path.dirname(filePath));
     writeAtomicFile(filePath, `${JSON.stringify(merged, null, 2)}\n`);
     logger.step(`Patched: ${filePath}`);
-    return exists ? 'modified' : 'created';
+    return exists ? "modified" : "created";
   } catch (err) {
-    logger.error(`Failed to patch ${filePath}: ${err instanceof Error ? err.message : String(err)}`);
-    return 'skipped';
+    if (!options.dryRun) recordFileMutationFailure(filePath, err);
+    logger.error(
+      `Failed to patch ${filePath}: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return "skipped";
   }
 }
 
@@ -198,20 +266,28 @@ export function patchPackageJson(
   cwd: string,
   patches: Record<string, unknown>,
   options: { dryRun?: boolean } = {},
-): 'created' | 'modified' | 'skipped' {
-  return patchJson(path.join(cwd, 'package.json'), patches, { ...options, root: cwd });
+): "created" | "modified" | "skipped" {
+  return patchJson(path.join(cwd, "package.json"), patches, {
+    ...options,
+    root: cwd,
+  });
 }
 
 /**
  * Create a backup of a file before modifying it.
  * Preserves the initial file state by avoiding overwrites if a backup already exists.
  */
-export function backupFile(filePath: string, options: { root?: string } = {}): string | null {
+export function backupFile(
+  filePath: string,
+  options: { root?: string } = {},
+): string | null {
   if (!isSafeFileDestination(filePath, options.root)) return null;
   if (!fileExists(filePath)) return null;
   const backupPath = `${filePath}.helen-backup`;
   if (fileExists(backupPath)) return backupPath;
-  writeAtomicFile(backupPath, fs.readFileSync(filePath), { mode: fs.statSync(filePath).mode & 0o777 });
+  writeAtomicFile(backupPath, fs.readFileSync(filePath), {
+    mode: fs.statSync(filePath).mode & 0o777,
+  });
   logger.step(`Backup created: ${backupPath}`);
   return backupPath;
 }
@@ -224,36 +300,46 @@ export function appendOnce(
   marker: string,
   content: string,
   options: { dryRun?: boolean; root?: string } = {},
-): 'created' | 'modified' | 'skipped' {
+): "created" | "modified" | "skipped" {
   if (!isSafeFileDestination(filePath, options.root)) {
+    if (!options.dryRun)
+      recordFileMutationFailure(
+        filePath,
+        new Error(`Unsafe append destination: ${filePath}`),
+      );
     logger.error(`Unsafe append destination: ${filePath}`);
-    return 'skipped';
+    return "skipped";
   }
   const exists = fileExists(filePath);
-  if (exists && readText(filePath).includes(marker)) return 'skipped';
+  if (exists && readText(filePath).includes(marker)) return "skipped";
   if (options.dryRun) {
     logger.step(`[DRY-RUN] Would append to: ${filePath}`);
     const before = exists ? readText(filePath) : null;
-    recordPlannedWrite(filePath, before, before === null ? content : `${before}\n${content}`, { backup: exists });
-    return fileExists(filePath) ? 'modified' : 'created';
+    recordPlannedWrite(
+      filePath,
+      before,
+      before === null ? content : `${before}\n${content}`,
+      { backup: exists },
+    );
+    return fileExists(filePath) ? "modified" : "created";
   }
 
   if (!fileExists(filePath)) {
     ensureDir(path.dirname(filePath));
     writeAtomicFile(filePath, content);
-    return 'created';
+    return "created";
   }
 
-  const existing = fs.readFileSync(filePath, 'utf-8');
+  const existing = fs.readFileSync(filePath, "utf-8");
   if (existing.includes(marker)) {
     logger.warn(`Marker "${marker}" already present in ${filePath} — skipping`);
-    return 'skipped';
+    return "skipped";
   }
 
   backupFile(filePath, { root: options.root });
   writeAtomicFile(filePath, `${existing}\n${content}`);
   logger.step(`Appended to: ${filePath}`);
-  return 'modified';
+  return "modified";
 }
 
 /**
@@ -261,7 +347,7 @@ export function appendOnce(
  */
 export function detectConflict(filePath: string, newContent: string): boolean {
   if (!fileExists(filePath)) return false;
-  const existing = fs.readFileSync(filePath, 'utf-8');
+  const existing = fs.readFileSync(filePath, "utf-8");
   return existing !== newContent;
 }
 
@@ -275,7 +361,7 @@ function deepMerge(
   const result = { ...target };
   for (const key of Object.keys(source)) {
     // Security: avoid prototype pollution
-    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+    if (key === "__proto__" || key === "constructor" || key === "prototype") {
       continue;
     }
 
@@ -284,10 +370,10 @@ function deepMerge(
 
     if (
       sourceVal !== null &&
-      typeof sourceVal === 'object' &&
+      typeof sourceVal === "object" &&
       !Array.isArray(sourceVal) &&
       targetVal !== null &&
-      typeof targetVal === 'object' &&
+      typeof targetVal === "object" &&
       !Array.isArray(targetVal)
     ) {
       result[key] = deepMerge(
@@ -300,4 +386,3 @@ function deepMerge(
   }
   return result;
 }
-

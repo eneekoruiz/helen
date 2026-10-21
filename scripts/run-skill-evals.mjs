@@ -7,7 +7,7 @@
 // Requires the `claude` CLI logged in. Results: evals/results/<skill>.json + docs/SKILLS_QUALITY.md
 
 import { spawn } from 'node:child_process';
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -22,6 +22,7 @@ import {
 } from './lib/evalsStats.mjs';
 import { combineProviderMetrics, extractProviderMetrics, providerFailureCause, providerReportedFailure, renderEvidenceReport } from './lib/evalEvidence.mjs';
 import { parseJudgeResult, runAnswerChecks } from './lib/evalChecks.mjs';
+import { requireIncludedBilling, subscriptionEnvironment } from './lib/evalSubscription.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -62,6 +63,8 @@ const dryRun = hasFlag('dry-run');
 const force = hasFlag('force');
 const forceTrigger = hasFlag('force-trigger');
 const reportOnly = hasFlag('report-only');
+const subscriptionOnly = hasFlag('subscription-only');
+const claudeExtraUsageDisabled = hasFlag('claude-extra-usage-disabled');
 const unknownOption = args.find(a => a.startsWith('-'));
 if (unknownOption) throw new Error(`Unknown or repeated option: ${unknownOption}`);
 const only = args;
@@ -71,9 +74,48 @@ if (skillFilter && !only.includes(skillFilter)) {
 
 const evalDir = path.join(root, 'evals');
 const resultDir = path.join(evalDir, 'results');
+const liveLockFile = path.join(resultDir, '.run-skill-evals.lock');
+let liveLockFd = null;
+let liveLockToken = null;
+
+function releaseLiveLock() {
+  if (liveLockFd === null) return;
+  try { fs.closeSync(liveLockFd); } catch { /* The descriptor may already be closed. */ }
+  liveLockFd = null;
+  try {
+    const owner = JSON.parse(fs.readFileSync(liveLockFile, 'utf8'));
+    if (owner.token === liveLockToken) fs.unlinkSync(liveLockFile);
+  } catch { /* Preserve a lock that cannot be verified as ours. */ }
+}
+
+function acquireLiveLock() {
+  liveLockToken = randomUUID();
+  try {
+    liveLockFd = fs.openSync(liveLockFile, 'wx', 0o600);
+    fs.writeFileSync(liveLockFd, JSON.stringify({ pid: process.pid, token: liveLockToken }));
+    fs.fsyncSync(liveLockFd);
+    process.on('exit', releaseLiveLock);
+  } catch (error) {
+    if (liveLockFd !== null) releaseLiveLock();
+    if (error.code === 'EEXIST') {
+      let ownerText = '';
+      try {
+        const owner = JSON.parse(fs.readFileSync(liveLockFile, 'utf8'));
+        if (Number.isSafeInteger(owner.pid)) ownerText = ` Lock owner PID: ${owner.pid}.`;
+      } catch { /* The lock may have been created moments ago or left incomplete. */ }
+      console.error(`Another live evaluation is using ${resultDir}.${ownerText} If its process exited unexpectedly, confirm that PID is no longer running, then remove ${liveLockFile} and retry.`);
+      process.exit(1);
+    }
+    throw error;
+  }
+}
 
 function fingerprint(spec) {
   const hash = createHash('sha256').update(JSON.stringify(spec));
+  // A changed evaluator invalidates previous observations just like changed instructions.
+  for (const file of ['scripts/run-skill-evals.mjs', 'scripts/lib/evalsStats.mjs', 'scripts/lib/evalChecks.mjs', 'scripts/lib/evalEvidence.mjs', 'scripts/lib/evalSubscription.mjs']) {
+    hash.update(file).update(fs.readFileSync(path.join(root, file)));
+  }
   const skillDir = path.join(root, 'skills', spec.skill);
   function walk(dir) {
     for (const item of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
@@ -129,6 +171,7 @@ function runProcess(cmd, cmdArgs, cwd, timeoutMs = 300_000, input = '') {
     const resolved = resolveExecutable(cmd);
     const child = spawn(resolved.cmd, cmdArgs, {
       cwd,
+      env: cmd === 'claude' ? subscriptionEnvironment() : process.env,
       stdio: ['pipe', 'pipe', 'pipe'],
       shell: resolved.shell,
       windowsHide: true,
@@ -190,6 +233,7 @@ async function agent(prompt, skill, attempt = 0) {
       'claude',
       [
         '-p',
+        '--settings', JSON.stringify({ forceLoginMethod: 'claudeai' }),
         '--model', model,
         '--setting-sources', 'project',
         '--allowedTools', 'Skill', 'Read', 'Glob', 'Grep',
@@ -201,7 +245,7 @@ async function agent(prompt, skill, attempt = 0) {
       300_000,
       prompt
     );
-    const { text, triggered } = parseStreamJsonEvents(res.out);
+    const { text, triggered } = parseStreamJsonEvents(res.out, skill);
     const blocker = providerFailureCause(res.out, res.code, res.err);
     if (blocker && !providerBlocker) {
       providerBlocker = blocker;
@@ -241,7 +285,7 @@ ${criteria.map((c, i) => `${i + 1}. ${c}`).join('\n')}`;
   try {
     const res = await runProcess(
       'claude',
-      ['-p', '--model', model, '--setting-sources', 'project', '--tools', 'Read', '--output-format', 'json'],
+      ['-p', '--settings', JSON.stringify({ forceLoginMethod: 'claudeai' }), '--model', model, '--setting-sources', 'project', '--tools', 'Read', '--output-format', 'json'],
       cwd,
       300_000,
       judgePrompt
@@ -274,6 +318,43 @@ ${criteria.map((c, i) => `${i + 1}. ${c}`).join('\n')}`;
 
 const redact = (text) =>
   (text || '').replace(/(sk-(?:live|proj)-|AKIA|gh[pousr]_|xox[baprs]-)[A-Za-z0-9_-]{6,}/g, '$1[redacted]');
+
+function writeJsonAtomically(file, value) {
+  const temp = `${file}.${process.pid}.${Date.now()}.tmp`;
+  try {
+    fs.writeFileSync(temp, JSON.stringify(value, null, 2) + '\n', 'utf8');
+    fs.renameSync(temp, file);
+  } catch (error) {
+    try { fs.rmSync(temp, { force: true }); } catch { /* Ignore temp cleanup failures. */ }
+    throw error;
+  }
+}
+
+function summarizeCaseRuns(spec, c, runs, currentFingerprint) {
+  const baseScores = runs.map((r) => r.baseline).filter((n) => typeof n === 'number');
+  const skillScores = runs.map((r) => r.withSkill).filter((n) => typeof n === 'number');
+  const trigCount = runs.filter((r) => r.triggered).length;
+  const baseStats = baseScores.length ? confidenceInterval95(baseScores) : null;
+  const skillStats = skillScores.length ? confidenceInterval95(skillScores) : null;
+  const pairedRuns = runs.filter(r => typeof r.baseline === 'number' && typeof r.withSkill === 'number');
+  const deltaStats = pairedRuns.length ? pairedDeltaConfidenceInterval(pairedRuns.map(r => r.baseline), pairedRuns.map(r => r.withSkill)) : null;
+  return {
+    skill: spec.skill,
+    fingerprint: currentFingerprint,
+    id: c.id,
+    expectTrigger: c.expectTrigger ?? true,
+    runsCount: runs.length,
+    triggeredCount: trigCount,
+    triggerRate: Math.round((trigCount / runs.length) * 100),
+    baseline: baseStats?.mean ?? null,
+    withSkill: skillStats?.mean ?? null,
+    baselineStats: baseStats,
+    withSkillStats: skillStats,
+    deltaStats,
+    runs,
+    errors: runs.reduce((sum, r) => sum + r.errors, 0),
+  };
+}
 
 async function pool(tasks, size) {
   const results = [];
@@ -345,41 +426,53 @@ if (dryRun) {
 if (!reportOnly) {
   if (maxCalls === null) throw new Error('Live evaluations require --max-calls <N>. Use --dry-run to inspect the plan without provider calls.');
   if (maxCalls === 0) throw new Error('No provider calls permitted by --max-calls 0. Use --dry-run or --report-only.');
+  if (!subscriptionOnly) throw new Error('Live evaluations require --subscription-only; paid API fallback is not supported.');
+  requireIncludedBilling(claudeExtraUsageDisabled ? ['--claude-extra-usage-disabled'] : [], ['claude']);
+  fs.mkdirSync(resultDir, { recursive: true });
+  acquireLiveLock();
   // Local authentication check: never print account details or start a paid prompt to discover missing credentials.
   const auth = await runProcess('claude', ['auth', 'status'], root, 15_000);
   let authenticated = false;
-  try { authenticated = auth.code === 0 && JSON.parse(auth.out).loggedIn === true; } catch { /* missing/unsupported CLI */ }
+  try { const account = JSON.parse(auth.out); authenticated = auth.code === 0 && account.loggedIn === true && account.authMethod === 'claude.ai'; } catch { /* missing/unsupported CLI */ }
   if (!authenticated) {
-    console.error('Evaluation preflight failed: Claude CLI is unavailable, not authenticated, or does not support `claude auth status`. Install/update the CLI and run `claude auth login`; then retry with --max-calls. No evaluation prompts were sent.');
+    console.error('Evaluation preflight failed: Claude CLI is unavailable, not authenticated with claude.ai, or does not support `claude auth status`. Install/update the CLI and run `claude auth login`; then retry with --max-calls. API/cloud authentication is unsupported. No evaluation prompts were sent.');
     process.exit(1);
   }
-  fs.mkdirSync(resultDir, { recursive: true });
   const tasks = [];
   for (const file of specFiles) {
     const spec = JSON.parse(fs.readFileSync(path.join(evalDir, file), 'utf-8'));
     const resultFile = path.join(resultDir, `${spec.skill}.json`);
     const existingData = fs.existsSync(resultFile) ? JSON.parse(fs.readFileSync(resultFile, 'utf-8')) : null;
+    const currentFingerprint = fingerprint(spec);
+    const sameEvaluation = existingData?.model === model && existingData?.fingerprint === currentFingerprint;
 
     for (const c of spec.cases) {
       if (casesFilter && !casesFilter.includes(c.id)) continue;
 
-      // Resumability check: if already has sufficient runs and not --force, skip
-      if (!force && existingData?.model === model && existingData?.fingerprint === fingerprint(spec) && existingData?.cases) {
-        const existingCase = existingData.cases.find((ec) => ec.id === c.id);
-        if (existingCase && existingCase.runs?.filter(r => r.baselineOk && r.skillOk).length >= runsCount) {
-          console.log(`Skipping already completed case ${spec.skill}/${c.id} (runs: ${existingCase.runs.length})`);
-          continue;
-        }
+      // Count valid pairs toward the target while retaining every prior attempt,
+      // including failed attempts, for the same model and skill fingerprint.
+      const existingCase = sameEvaluation ? existingData?.cases?.find((ec) => ec.id === c.id) : null;
+      const existingRuns = !force && Array.isArray(existingCase?.runs) ? existingCase.runs : [];
+      const validExisting = existingRuns.filter(r => r.baselineOk && r.skillOk).length;
+      if (!force && validExisting >= runsCount) {
+        console.log(`Skipping already completed case ${spec.skill}/${c.id} (valid pairs: ${validExisting})`);
+        continue;
       }
 
       tasks.push(async () => {
         if (budgetExhausted || providerBlocker) return null;
-        console.log(`Evaluating ${spec.skill}/${c.id} (${runsCount} runs)...`);
+        const runsNeeded = force ? runsCount : Math.max(0, runsCount - validExisting);
+        console.log(`Evaluating ${spec.skill}/${c.id} (${runsNeeded} additional runs; target ${runsCount} valid pairs)...`);
         const caseRuns = [];
         const pct = (g) => (g ? Math.round((100 * g.filter(Boolean).length) / g.length) : null);
+        const usedRunNumbers = new Set(existingRuns.map(run => run.run).filter(Number.isSafeInteger));
+        let nextRunNumber = Math.max(0, ...usedRunNumbers) + 1;
 
-        for (let r = 1; r <= runsCount; r++) {
+        for (let attemptIndex = 0; attemptIndex < runsNeeded; attemptIndex++) {
           if (budgetExhausted || providerBlocker) break;
+          while (usedRunNumbers.has(nextRunNumber)) nextRunNumber++;
+          const runNumber = force ? attemptIndex + 1 : nextRunNumber++;
+          usedRunNumbers.add(runNumber);
 
           const [baseline, withSkill] = await Promise.all([
             agent(c.prompt, null),
@@ -404,7 +497,7 @@ if (!reportOnly) {
           const skillPct = skillGrades ? pct([...skillGrades.grades, ...(skillChecks ?? [])]) : null;
 
           caseRuns.push({
-            run: r,
+            run: runNumber,
             triggered: withSkill.triggered,
             forcedTriggered: forced ? forced.triggered : null,
             naturalAgentOk: withSkill.ok,
@@ -435,39 +528,15 @@ if (!reportOnly) {
               withSkill: redact(skillRun.text),
             },
           });
-          console.log(`  ${spec.skill}/${c.id} run ${r}/${runsCount}: baseline=${basePct ?? 'unmeasured'}, skill=${skillPct ?? 'unmeasured'}, naturalTrigger=${withSkill.ok ? withSkill.triggered : 'unmeasured'}`);
+          console.log(`  ${spec.skill}/${c.id} run ${runNumber} (additional ${attemptIndex + 1}/${runsNeeded}): baseline=${basePct ?? 'unmeasured'}, skill=${skillPct ?? 'unmeasured'}, naturalTrigger=${withSkill.ok ? withSkill.triggered : 'unmeasured'}`);
         }
 
         if (caseRuns.length === 0) return null;
-
-        const baseScores = caseRuns.map((r) => r.baseline).filter((n) => typeof n === 'number');
-        const skillScores = caseRuns.map((r) => r.withSkill).filter((n) => typeof n === 'number');
-        const trigCount = caseRuns.filter((r) => r.triggered).length;
-
-        const baseStats = baseScores.length ? confidenceInterval95(baseScores) : null;
-        const skillStats = skillScores.length ? confidenceInterval95(skillScores) : null;
-        const pairedRuns = caseRuns.filter(r => typeof r.baseline === 'number' && typeof r.withSkill === 'number');
-        const deltaStats = pairedRuns.length ? pairedDeltaConfidenceInterval(pairedRuns.map(r => r.baseline), pairedRuns.map(r => r.withSkill)) : null;
-
-        const row = {
-          skill: spec.skill,
-          fingerprint: fingerprint(spec),
-          id: c.id,
-          expectTrigger: c.expectTrigger ?? true,
-          runsCount: caseRuns.length,
-          triggeredCount: trigCount,
-          triggerRate: Math.round((trigCount / caseRuns.length) * 100),
-          baseline: baseStats?.mean ?? null,
-          withSkill: skillStats?.mean ?? null,
-          baselineStats: baseStats,
-          withSkillStats: skillStats,
-          deltaStats,
-          runs: caseRuns,
-          errors: caseRuns.reduce((sum, r) => sum + r.errors, 0),
-        };
+        const allRuns = [...existingRuns, ...caseRuns];
+        const row = summarizeCaseRuns(spec, c, allRuns, currentFingerprint);
 
         console.log(
-          `  -> ${spec.skill}/${c.id}: trigger=${trigCount}/${caseRuns.length} base=${row.baseline ?? 'unknown'} skill=${row.withSkill ?? 'unknown'} delta=${deltaStats?.mean ?? 'unknown'} (noise=${deltaStats?.isNoise ?? 'unmeasured'})`
+          `  -> ${spec.skill}/${c.id}: trigger=${row.triggeredCount}/${row.runsCount} base=${row.baseline ?? 'unknown'} skill=${row.withSkill ?? 'unknown'} delta=${row.deltaStats?.mean ?? 'unknown'} (noise=${row.deltaStats?.isNoise ?? 'unmeasured'})`
         );
         return row;
       });
@@ -485,22 +554,21 @@ if (!reportOnly) {
     const file = path.join(resultDir, `${skill}.json`);
     const oldData = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf-8')) : null;
     const currentFingerprint = cases[0].fingerprint;
-    if (oldData && (oldData.fingerprint !== currentFingerprint || oldData.model !== model)) {
+    if (oldData && (force || oldData.fingerprint !== currentFingerprint || oldData.model !== model)) {
       const archiveDir = path.join(resultDir, 'archive');
       fs.mkdirSync(archiveDir, { recursive: true });
       const identity = createHash('sha256').update(JSON.stringify(oldData)).digest('hex').slice(0, 16);
       const archiveFile = path.join(archiveDir, `${skill}-${identity}.json`);
-      if (!fs.existsSync(archiveFile)) fs.writeFileSync(archiveFile, JSON.stringify(oldData, null, 2) + '\n', 'utf8');
+      if (!fs.existsSync(archiveFile)) writeJsonAtomically(archiveFile, oldData);
     }
     const previous = oldData?.fingerprint === currentFingerprint && oldData?.model === model ? oldData.cases : [];
     for (const old of previous) {
       if (!cases.some((c) => c.id === old.id)) cases.push(old);
     }
-    fs.writeFileSync(
-      path.join(resultDir, `${skill}.json`),
-      JSON.stringify({ skill, model, date, fingerprint: currentFingerprint, providerBlocker, providerCalls: totalCallsMade, runsPerCase: runsCount, cases }, null, 2) + '\n',
-      'utf-8'
-    );
+    writeJsonAtomically(path.join(resultDir, `${skill}.json`), {
+      skill, model, date, fingerprint: currentFingerprint, providerBlocker,
+      providerCalls: totalCallsMade, runsPerCase: runsCount, cases,
+    });
   }
 
   if (budgetExhausted) {

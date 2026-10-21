@@ -1,5 +1,5 @@
 #!/bin/sh
-# HELEN pre-commit: fast checks on staged files only, no dependencies.
+# HELEN pre-commit: inspect staged blobs (paths with spaces included); fast checks on staged files only, no dependencies.
 # Skip once with: git commit --no-verify
 node --input-type=commonjs <<'HELEN_NODE'
 const { execFileSync } = require('node:child_process');

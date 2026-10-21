@@ -9,7 +9,7 @@ export interface McpTool {
   name: string;
   description: string;
   inputSchema: {
-    type: 'object';
+    type: "object";
     properties: Record<string, McpProperty>;
     required?: string[];
   };
@@ -42,12 +42,18 @@ export interface McpToolContext {
 /** A tool implemented outside mcp.ts: it receives validated arguments and the already-confined project directory. */
 export interface McpToolHandler {
   definition: McpTool;
-  run(args: Record<string, unknown>, context: McpToolContext): unknown | Promise<unknown>;
+  run(
+    args: Record<string, unknown>,
+    context: McpToolContext,
+  ): unknown | Promise<unknown>;
 }
 
 export function matchesType(value: unknown, type: string): boolean {
-  if (type === 'array') return Array.isArray(value);
-  if (type === 'integer') return Number.isInteger(value);
-  if (type === 'number') return typeof value === 'number' && Number.isFinite(value);
+  if (type === "array") return Array.isArray(value);
+  if (type === "object")
+    return value !== null && typeof value === "object" && !Array.isArray(value);
+  if (type === "integer") return Number.isInteger(value);
+  if (type === "number")
+    return typeof value === "number" && Number.isFinite(value);
   return typeof value === type;
 }

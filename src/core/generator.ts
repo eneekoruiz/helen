@@ -1,9 +1,9 @@
-import path from 'node:path';
-import { logger } from './logger.js';
-import { writeFileSafe } from './fs.js';
+import path from "node:path";
+import { logger } from "./logger.js";
+import { writeFileSafe } from "./fs.js";
 
 export interface GeneratorOptions {
-  type: 'component' | 'hook' | 'page' | 'entity';
+  type: "component" | "hook" | "page" | "entity";
   name: string;
   cwd: string;
   dryRun?: boolean;
@@ -12,24 +12,80 @@ export interface GeneratorOptions {
 /**
  * Generate project entities (components, hooks, etc.) based on templates.
  */
-export async function generateEntity(options: GeneratorOptions): Promise<boolean> {
+export async function generateEntity(
+  options: GeneratorOptions,
+): Promise<boolean> {
   const { type, name, cwd, dryRun } = options;
-  const reserved = new Set(['class', 'function', 'var', 'let', 'const', 'return', 'default', 'export', 'import', 'new', 'delete', 'interface', 'type', 'enum', 'extends', 'implements', 'yield', 'await', 'true', 'false', 'null', 'this', 'super', 'switch', 'case', 'throw', 'try', 'catch', 'finally', 'for', 'while', 'do', 'if', 'else', 'break', 'continue', 'with', 'in', 'instanceof', 'void', 'typeof', 'debugger']);
-  for (const word of ['arguments', 'eval', 'package', 'private', 'protected', 'public', 'static']) reserved.add(word);
+  const reserved = new Set([
+    "class",
+    "function",
+    "var",
+    "let",
+    "const",
+    "return",
+    "default",
+    "export",
+    "import",
+    "new",
+    "delete",
+    "interface",
+    "type",
+    "enum",
+    "extends",
+    "implements",
+    "yield",
+    "await",
+    "true",
+    "false",
+    "null",
+    "this",
+    "super",
+    "switch",
+    "case",
+    "throw",
+    "try",
+    "catch",
+    "finally",
+    "for",
+    "while",
+    "do",
+    "if",
+    "else",
+    "break",
+    "continue",
+    "with",
+    "in",
+    "instanceof",
+    "void",
+    "typeof",
+    "debugger",
+  ]);
+  for (const word of [
+    "arguments",
+    "eval",
+    "package",
+    "private",
+    "protected",
+    "public",
+    "static",
+  ])
+    reserved.add(word);
   if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(name) || reserved.has(name)) {
-    throw new Error('Name must be a valid TypeScript identifier (for example, Profile or useProfile).');
+    throw new Error(
+      "Name must be a valid TypeScript identifier (for example, Profile or useProfile).",
+    );
   }
-  
+
   // Basic path mapping
   const paths: Record<string, string> = {
-    component: 'src/components',
-    hook: 'src/hooks',
-    page: 'src/pages',
-    entity: 'src/domain/entities',
+    component: "src/components",
+    hook: "src/hooks",
+    page: "src/pages",
+    entity: "src/domain/entities",
   };
 
-  const targetDir = path.join(cwd, paths[type] || 'src');
-  const fileName = `${name}.${type === 'hook' || type === 'entity' ? 'ts' : 'tsx'}`;
+  const targetDir = path.join(cwd, paths[type] || "src");
+  const fileName = `${name}.${type === "hook" || type === "entity" ? "ts" : "tsx"}`;
   const filePath = path.join(targetDir, fileName);
 
   const templates: Record<string, string> = {
@@ -83,7 +139,6 @@ export function create${name}(data: Partial<${name}>): ${name} {
 `,
   };
 
-
   const content = templates[type];
   if (!content) {
     logger.error(`No template found for type: ${type}`);
@@ -91,7 +146,11 @@ export function create${name}(data: Partial<${name}>): ${name} {
   }
 
   logger.info(`Generating ${type}: ${name}...`);
-  const result = writeFileSafe(filePath, content, { dryRun, vars: { name }, root: cwd });
-  
-  return result !== 'skipped';
+  const result = writeFileSafe(filePath, content, {
+    dryRun,
+    vars: { name },
+    root: cwd,
+  });
+
+  return result !== "skipped";
 }

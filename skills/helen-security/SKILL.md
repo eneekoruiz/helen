@@ -1,6 +1,8 @@
 ---
 name: helen-security
 description: Master skill for auditing and hardening project security before public exposure, client delivery, or release; detecting secrets, injection vulnerabilities, dependency risks, and MCP server permissions in an autonomous convergence loop.
+metadata:
+  version: 2.1.0
 ---
 
 # Security Hardening (Security Master Skill)
@@ -9,9 +11,11 @@ Security is an uncompromising prerequisite for production software. `helen-secur
 
 ## Execution contract
 
+Ground each finding in the exact supplied code and attack boundary; verify its file and line before reporting. For shell remediation, check both shell interpretation and option/argument injection: argument arrays remove shell parsing, while attacker-controlled values may still be interpreted as flags; use the executable's supported end-of-options delimiter or a strict validated format when required. Preserve existing parameterized queries and trusted authentication boundaries rather than reporting them as missing controls.
+
 - Preserve intent, exclusions and authorization. Audit-only stays read-only. Reuse context; ask only for essential unknowns.
 - Define observable acceptance, baseline and verification before edits. Verify domain outcomes, compatibility and reproducible CI commands; report unavailable checks and residual risks.
-- Inspect → act → verify → re-audit → discover further evidence-backed improvements → repeat. After initial checks, find more actionable improvements without another user request. Apply when authorized, otherwise report. No arbitrary retry cap. Finish when acceptance passes and fresh discovery finds no further actionable improvement within scope, or disclose an external blocker. Change failing hypotheses; respect cancellation and explicit resource limits.
+- Inspect → act → verify → run one focused discovery pass for high-impact edge cases, security or correctness within authorized scope. Once criteria pass, synthesize results and report optional further recommendations rather than looping indefinitely. Change failing hypotheses; respect cancellation and resource limits.
 - Choose the cheapest available capable model when selectable; escalate only on evidenced failure or capability limits. Keep the current agent when a handoff costs more; do not pretend to switch unavailable models.
 - Use one agent unless specialist expertise or smaller independent contexts justify delegation overhead; when justified, assign exclusive ownership, integrate and verify. Reuse evidence, batch reads, avoid polling and duplicate output. Write concise English instructions; answer in the user's language. Measure tokens/cost; never claim fixed savings or perfection.
 ## Audit and Mitigation Criteria
@@ -32,8 +36,16 @@ Security is an uncompromising prerequisite for production software. `helen-secur
 
 Open `helen loop start security --subject "<scope>"` and score every criterion with evidence each round (`helen loop rubrics security`); evidence names where a secret lives, never its value. A critical criterion below 4 blocks convergence whatever the total. The final score comes from an agent other than the one who mitigated.
 
+## Native clarification
+
+Before implementation or evaluation, check whether a missing preference, constraint or acceptance decision materially affects the result. If it does, invoke the application's available native structured question tool (such as `request_user_input_async`, an available `request_user_input`, or `AskUserQuestion`), with concise task-specific choices and free text. Reuse existing answers and continue independent work while waiting. If the tool is unavailable in the current mode, ask conversationally; do not create a separate visual artifact or invent answers. If context suffices, proceed without a questionnaire.
+
 ## Runtime-aware efficiency
 
-Use one agent for small cohesive tasks. Choose the cheapest available capable model when routing is supported; keep the current agent when finishing is cheaper than transferring context. Delegate only when expected expertise or context savings outweigh transfer, coordination, integration, verification and retries. Flash is optional when available and suitable. Keep shared instructions as a stable prefix and task facts after it; provider caching requires runtime support and measured cache hits. Prefer an available direct browser MCP. Use focused regressions during fixes and the full repository gate before completion. Never invent savings.
+Use one agent for small cohesive tasks. Choose the cheapest available capable model when routing is supported; keep the current agent when finishing is cheaper than transferring context. Delegate only when expected specialist expertise or context savings outweigh transfer, coordination, integration, verification and retries. Prefer an available direct browser MCP. Use focused regressions during fixes and the full repository gate before completion. Never invent savings.
 
 Minimize time to a verified result: retrieve only missing evidence, batch independent reads and checks, preserve dependencies, avoid repeated planning and polling, and answer concisely. Never trade acceptance or required checks for speed, guess missing facts, or lower reasoning effort automatically.
+
+## Project records
+
+When HELEN is available, inspect `helen work list` and reuse the relevant `helen work brief <id>` before acting or handing off. Preserve its exclusions, acceptance and decisions. Record material questions and the actual human answer in that dossier; use native forms when available without claiming UI verification from metadata. Relevant learning matches remain advisory; for visual or written deliverables read `helen creative show` and respect explicit user/template choices. If these tools are unavailable, use supplied scope and report the continuity limitation.

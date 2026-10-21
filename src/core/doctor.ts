@@ -1,12 +1,12 @@
-import pc from 'picocolors';
-import { detectProject, type ProjectInfo } from './projectDetector.js';
-import { logger } from './logger.js';
-import { listOperations } from './operations.js';
-import { hooksStatus } from './gitHooks.js';
+import pc from "picocolors";
+import { detectProject, type ProjectInfo } from "./projectDetector.js";
+import { logger } from "./logger.js";
+import { listOperations } from "./operations.js";
+import { hooksStatus } from "./gitHooks.js";
 
 export interface DoctorCheck {
   label: string;
-  status: 'ok' | 'warn' | 'error';
+  status: "ok" | "warn" | "error";
   message: string;
 }
 
@@ -18,77 +18,102 @@ export function runDoctor(cwd: string): DoctorCheck[] {
   const checks: DoctorCheck[] = [];
   try {
     const pending = listOperations(cwd);
-    checks.push({ label: 'Operation recovery', status: pending.length ? 'error' : 'ok',
-      message: pending.length ? `Unfinished ${pending[0]!.kind}. Run: ${pending[0]!.recoveryCommand}` : 'No unfinished operations' });
+    checks.push({
+      label: "Operation recovery",
+      status: pending.length ? "error" : "ok",
+      message: pending.length
+        ? `Unfinished ${pending[0]!.kind}. Run: ${pending[0]!.recoveryCommand}`
+        : "No unfinished operations",
+    });
   } catch (error) {
-    checks.push({ label: 'Operation recovery', status: 'error', message: error instanceof Error ? error.message : String(error) });
+    checks.push({
+      label: "Operation recovery",
+      status: "error",
+      message: error instanceof Error ? error.message : String(error),
+    });
   }
 
   // package.json
   checks.push({
-    label: 'package.json',
-    status: project.hasPackageJson ? 'ok' : 'error',
-    message: project.hasPackageJson ? 'Found' : 'Missing — run npm init first',
+    label: "package.json",
+    status: project.hasPackageJson ? "ok" : "error",
+    message: project.hasPackageJson ? "Found" : "Missing — run npm init first",
   });
 
   // Git
   checks.push({
-    label: 'Git repository',
-    status: project.hasGit ? 'ok' : 'warn',
-    message: project.hasGit ? 'Initialized' : 'No .git directory — run git init',
+    label: "Git repository",
+    status: project.hasGit ? "ok" : "warn",
+    message: project.hasGit
+      ? "Initialized"
+      : "No .git directory — run git init",
   });
 
   // Git hooks: only checked when the project has them. A hook git cannot execute protects nothing.
   const hooks = hooksStatus(cwd);
   if (hooks.directory) {
     const problems = [
-      ...hooks.notExecutable.map(name => `.githooks/${name} is not executable (git ignores it)`),
-      ...(hooks.hooksPathActive === false ? ['core.hooksPath is not .githooks, so git does not run them'] : []),
+      ...hooks.notExecutable.map(
+        (name) => `.githooks/${name} is not executable (git ignores it)`,
+      ),
+      ...(hooks.hooksPathActive === false
+        ? ["core.hooksPath is not .githooks, so git does not run them"]
+        : []),
     ];
     checks.push({
-      label: 'Git hooks',
-      status: problems.length ? 'warn' : 'ok',
-      message: problems.length ? `${problems.join('; ')} — run helen doctor --fix` : `${hooks.present.length} hook(s) active`,
+      label: "Git hooks",
+      status: problems.length ? "warn" : "ok",
+      message: problems.length
+        ? `${problems.join("; ")} — run helen doctor --fix`
+        : `${hooks.present.length} hook(s) active`,
     });
   }
 
   // src directory
   checks.push({
-    label: 'Source directory (src/)',
-    status: project.hasSrc ? 'ok' : 'warn',
-    message: project.hasSrc ? 'Found' : 'Missing — some modules expect a src/ directory',
+    label: "Source directory (src/)",
+    status: project.hasSrc ? "ok" : "warn",
+    message: project.hasSrc
+      ? "Found"
+      : "Missing — some modules expect a src/ directory",
   });
 
   // TypeScript
   checks.push({
-    label: 'TypeScript',
-    status: project.hasTypeScript ? 'ok' : 'warn',
-    message: project.hasTypeScript ? 'Configured' : 'Not detected — recommended for HELEN modules',
+    label: "TypeScript",
+    status: project.hasTypeScript ? "ok" : "warn",
+    message: project.hasTypeScript
+      ? "Configured"
+      : "Not detected — recommended for HELEN modules",
   });
 
   // Framework
   checks.push({
-    label: 'Framework',
-    status: project.framework !== 'unknown' ? 'ok' : 'warn',
-    message: project.framework !== 'unknown'
-      ? `Detected: ${project.framework}`
-      : 'No framework detected — HELEN targets React + Vite primarily',
+    label: "Framework",
+    status: project.framework !== "unknown" ? "ok" : "warn",
+    message:
+      project.framework !== "unknown"
+        ? `Detected: ${project.framework}`
+        : "No framework detected — HELEN targets React + Vite primarily",
   });
 
   // React
   checks.push({
-    label: 'React',
-    status: project.hasReact ? 'ok' : 'warn',
-    message: project.hasReact ? 'Installed' : 'Not found — some UI modules require React',
+    label: "React",
+    status: project.hasReact ? "ok" : "warn",
+    message: project.hasReact
+      ? "Installed"
+      : "Not found — some UI modules require React",
   });
 
   // Package manager
   checks.push({
-    label: 'Package manager',
-    status: project.packageManager !== 'unknown' ? 'ok' : 'warn',
-    message: project.packageManager !== 'unknown'
-      ? `Detected: ${project.packageManager}`
-      : 'No lock file found — will default to npm',
+    label: "Package manager",
+    status: project.packageManager !== "unknown" ? "ok" : "warn",
+    message:
+      project.packageManager !== "unknown"
+        ? `Detected: ${project.packageManager}`
+        : "No lock file found — will default to npm",
   });
 
   return checks;
@@ -97,25 +122,28 @@ export function runDoctor(cwd: string): DoctorCheck[] {
 /**
  * Print doctor results to the console.
  */
-export function printDoctorResults(checks: DoctorCheck[], project: ProjectInfo): void {
-  logger.section('Project Health Check');
+export function printDoctorResults(
+  checks: DoctorCheck[],
+  project: ProjectInfo,
+): void {
+  logger.section("Project Health Check");
   logger.info(`Project: ${pc.bold(project.name)}`);
   logger.blank();
 
   for (const check of checks) {
     const icon =
-      check.status === 'ok'
-        ? pc.green('✓')
-        : check.status === 'warn'
-          ? pc.yellow('⚠')
-          : pc.red('✗');
+      check.status === "ok"
+        ? pc.green("✓")
+        : check.status === "warn"
+          ? pc.yellow("⚠")
+          : pc.red("✗");
 
     console.log(`  ${icon} ${pc.bold(check.label)}: ${check.message}`);
   }
 
-  const errors = checks.filter((c) => c.status === 'error');
-  const warnings = checks.filter((c) => c.status === 'warn');
-  const ok = checks.filter((c) => c.status === 'ok');
+  const errors = checks.filter((c) => c.status === "error");
+  const warnings = checks.filter((c) => c.status === "warn");
+  const ok = checks.filter((c) => c.status === "ok");
 
   logger.blank();
   console.log(
@@ -123,11 +151,11 @@ export function printDoctorResults(checks: DoctorCheck[], project: ProjectInfo):
   );
 
   if (errors.length > 0) {
-    logger.error('Fix errors before running HELEN modules.');
+    logger.error("Fix errors before running HELEN modules.");
   } else if (warnings.length > 0) {
-    logger.warn('Some warnings detected. Modules may still work.');
+    logger.warn("Some warnings detected. Modules may still work.");
   } else {
-    logger.success('Project looks great! Ready for HELEN modules.');
+    logger.success("Project looks great! Ready for HELEN modules.");
   }
 
   logger.blank();

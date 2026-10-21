@@ -1,13 +1,13 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { execFile } from 'node:child_process';
-import { detectProject } from './projectDetector.js';
-import { readProgress, currentIndex } from './progress.js';
-import { detectPhase } from './apply.js';
-import { runDoctor } from './doctor.js';
-import { runAgentDoctor, installedHelenSkills } from './agentDoctor.js';
-import { isSafeProjectPath } from './fs.js';
-import { writeAtomicFile } from './operations.js';
+import fs from "node:fs";
+import path from "node:path";
+import { execFile } from "node:child_process";
+import { detectProject } from "./projectDetector.js";
+import { readProgress, currentIndex } from "./progress.js";
+import { detectPhase } from "./apply.js";
+import { runDoctor } from "./doctor.js";
+import { runAgentDoctor, installedHelenSkills } from "./agentDoctor.js";
+import { isSafeProjectPath } from "./fs.js";
+import { writeAtomicFile } from "./operations.js";
 
 export interface HelenReportData {
   generatedAt: string;
@@ -48,30 +48,36 @@ export interface HelenReportData {
   }>;
 }
 
-export function generateReportData(cwd: string = process.cwd()): HelenReportData {
+export function generateReportData(
+  cwd: string = process.cwd(),
+): HelenReportData {
   const project = detectProject(cwd);
   const progress = readProgress(cwd);
   const detected = detectPhase(cwd);
   const doctorChecks = [...runDoctor(cwd), ...runAgentDoctor(cwd)];
   const installedSkills = installedHelenSkills(cwd);
 
-  const passed = doctorChecks.filter(c => c.status === 'ok').length;
-  const warnings = doctorChecks.filter(c => c.status === 'warn').length;
-  const errors = doctorChecks.filter(c => c.status === 'error').length;
+  const passed = doctorChecks.filter((c) => c.status === "ok").length;
+  const warnings = doctorChecks.filter((c) => c.status === "warn").length;
+  const errors = doctorChecks.filter((c) => c.status === "error").length;
 
   let progressPercentage = 0;
-  let steps: HelenReportData['steps'] = [];
+  let steps: HelenReportData["steps"] = [];
 
   if (progress && progress.steps.length > 0) {
-    const completedCount = progress.steps.filter(s => s.status === 'done').length;
-    progressPercentage = Math.round((completedCount / progress.steps.length) * 100);
+    const completedCount = progress.steps.filter(
+      (s) => s.status === "done",
+    ).length;
+    progressPercentage = Math.round(
+      (completedCount / progress.steps.length) * 100,
+    );
     steps = progress.steps.map((s, idx) => ({
       number: idx + 1,
       kind: s.kind,
       ref: s.ref,
       why: s.why,
       status: s.status,
-      isCheckpoint: s.kind === 'checkpoint',
+      isCheckpoint: s.kind === "checkpoint",
     }));
   }
 
@@ -100,13 +106,13 @@ export function generateReportData(cwd: string = process.cwd()): HelenReportData
       passed,
       warnings,
       errors,
-      checks: doctorChecks.map(c => ({
+      checks: doctorChecks.map((c) => ({
         label: c.label,
         status: c.status,
         message: c.message,
       })),
     },
-    skills: installedSkills.map(s => ({
+    skills: installedSkills.map((s) => ({
       name: s.name,
       dir: s.dir,
       outdated: s.outdated,
@@ -115,10 +121,24 @@ export function generateReportData(cwd: string = process.cwd()): HelenReportData
 }
 
 export function renderReportHtml(data: HelenReportData): string {
-  const escapeHtml = (value: string): string => value.replace(/[&<>"']/g, char => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  })[char]!);
-  const healthBadgeColor = data.health.errors > 0 ? '#ef4444' : data.health.warnings > 0 ? '#f59e0b' : '#10b981';
+  const escapeHtml = (value: string): string =>
+    value.replace(
+      /[&<>"']/g,
+      (char) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[char]!,
+    );
+  const healthBadgeColor =
+    data.health.errors > 0
+      ? "#ef4444"
+      : data.health.warnings > 0
+        ? "#f59e0b"
+        : "#10b981";
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -221,35 +241,47 @@ export function renderReportHtml(data: HelenReportData): string {
       </div>
     </div>
 
-    ${data.steps.length > 0 ? `
+    ${
+      data.steps.length > 0
+        ? `
     <div class="card" style="margin-bottom: 2rem;">
       <h2>Playbook Steps (${data.steps.length} total)</h2>
       <ul class="list">
-        ${data.steps.map(s => `
+        ${data.steps
+          .map(
+            (s) => `
           <li class="list-item">
             <div>
-              <span class="step-badge ${s.status === 'done' ? 'step-done' : 'step-pending'}">${s.status === 'done' ? '✓' : s.number}</span>
+              <span class="step-badge ${s.status === "done" ? "step-done" : "step-pending"}">${s.status === "done" ? "✓" : s.number}</span>
               <strong>[${escapeHtml(s.kind)}] ${escapeHtml(s.ref)}</strong>
               <span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 0.5rem;">${escapeHtml(s.why)}</span>
             </div>
-            <span style="font-size: 0.85rem; color: var(--text-muted);">${s.isCheckpoint ? 'Checkpoint' : 'Task'}</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">${s.isCheckpoint ? "Checkpoint" : "Task"}</span>
           </li>
-        `).join('')}
+        `,
+          )
+          .join("")}
       </ul>
     </div>
-    ` : ''}
+    `
+        : ""
+    }
 
     <div class="card">
       <h2>System & Repository Health</h2>
       <ul class="list">
-        ${data.health.checks.map(c => `
+        ${data.health.checks
+          .map(
+            (c) => `
           <li class="list-item">
             <span><strong>${escapeHtml(c.label)}</strong>: ${escapeHtml(c.message)}</span>
-            <span class="status-${c.status === 'ok' ? 'ok' : c.status === 'warn' ? 'warn' : 'error'}">
-              ${c.status === 'ok' ? '✓ Pass' : c.status === 'warn' ? '⚠ Warn' : '✗ Fail'}
+            <span class="status-${c.status === "ok" ? "ok" : c.status === "warn" ? "warn" : "error"}">
+              ${c.status === "ok" ? "✓ Pass" : c.status === "warn" ? "⚠ Warn" : "✗ Fail"}
             </span>
           </li>
-        `).join('')}
+        `,
+          )
+          .join("")}
       </ul>
     </div>
   </div>
@@ -257,14 +289,22 @@ export function renderReportHtml(data: HelenReportData): string {
 </html>`;
 }
 
-export function writeReport(cwd: string = process.cwd()): { data: HelenReportData; filePath: string } {
-  const filePath = path.join(cwd, '.helen', 'report.html');
-  if (!isSafeProjectPath(cwd, filePath) || (fs.existsSync(filePath) && !fs.lstatSync(filePath).isFile())) {
-    throw new Error('Report file must be a regular file inside the project directory');
+export function writeReport(cwd: string = process.cwd()): {
+  data: HelenReportData;
+  filePath: string;
+} {
+  const filePath = path.join(cwd, ".helen", "report.html");
+  if (
+    !isSafeProjectPath(cwd, filePath) ||
+    (fs.existsSync(filePath) && !fs.lstatSync(filePath).isFile())
+  ) {
+    throw new Error(
+      "Report file must be a regular file inside the project directory",
+    );
   }
   const data = generateReportData(cwd);
   const html = renderReportHtml(data);
-  const helenDir = path.join(cwd, '.helen');
+  const helenDir = path.join(cwd, ".helen");
   if (!fs.existsSync(helenDir)) {
     fs.mkdirSync(helenDir, { recursive: true });
   }
@@ -273,8 +313,13 @@ export function writeReport(cwd: string = process.cwd()): { data: HelenReportDat
 }
 
 export function openInBrowser(filePath: string): void {
-  const command = process.platform === 'win32' ? 'explorer.exe' : process.platform === 'darwin' ? 'open' : 'xdg-open';
-  execFile(command, [path.resolve(filePath)], error => {
+  const command =
+    process.platform === "win32"
+      ? "explorer.exe"
+      : process.platform === "darwin"
+        ? "open"
+        : "xdg-open";
+  execFile(command, [path.resolve(filePath)], (error) => {
     if (error) console.error(`Could not open report: ${error.message}`);
   });
 }

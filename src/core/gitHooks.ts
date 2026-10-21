@@ -1,13 +1,18 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { spawnSync } from 'node:child_process';
+import fs from "node:fs";
+import { writeAtomicFile } from "./operations.js";
+import {
+  hooksPathPrepareScript,
+  readHooksPath,
+} from "../modules/guardrails/hooksPath.js";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
 
 /** Portable on cmd.exe, PowerShell and POSIX shells, and harmless outside a git repository. */
-export const PREPARE_SCRIPT = `node -e "require('node:child_process').spawnSync('git',['config','core.hooksPath','.githooks'],{stdio:'ignore',windowsHide:true})"`;
+export const PREPARE_SCRIPT = hooksPathPrepareScript;
 
 /** The single source of the hooks HELEN installs. The guardrails module, doctor --fix and this repository all use it. */
 export const PRE_COMMIT_HOOK = `#!/bin/sh
-# HELEN pre-commit: fast checks on staged files only, no dependencies.
+# HELEN pre-commit: inspect staged blobs (paths with spaces included); fast checks on staged files only, no dependencies.
 # Skip once with: git commit --no-verify
 node --input-type=commonjs <<'HELEN_NODE'
 const { execFileSync } = require('node:child_process');
@@ -49,20 +54,24 @@ done
 `;
 
 export const HOOK_FILES: Record<string, string> = {
-  'pre-commit': PRE_COMMIT_HOOK,
-  'pre-push': PRE_PUSH_HOOK,
+  "pre-commit": PRE_COMMIT_HOOK,
+  "pre-push": PRE_PUSH_HOOK,
 };
 
-const IS_WINDOWS = process.platform === 'win32';
+const IS_WINDOWS = process.platform === "win32";
 
 function git(cwd: string, args: string[]): { ok: boolean; out: string } {
-  const result = spawnSync('git', ['-C', cwd, ...args], { encoding: 'utf8', timeout: 10000, windowsHide: true });
-  return { ok: result.status === 0, out: (result.stdout ?? '').trim() };
+  const result = spawnSync("git", ["-C", cwd, ...args], {
+    encoding: "utf8",
+    timeout: 10000,
+    windowsHide: true,
+  });
+  return { ok: result.status === 0, out: (result.stdout ?? "").trim() };
 }
 
 /** True when `cwd` is the top level of a git work tree (not a folder inside a parent repository). */
 export function isGitRoot(cwd: string): boolean {
-  const top = git(cwd, ['rev-parse', '--show-toplevel']);
+  const top = git(cwd, ["rev-parse", "--show-toplevel"]);
   if (!top.ok) return false;
   try {
     return fs.realpathSync(top.out) === fs.realpathSync(cwd);
@@ -82,18 +91,34 @@ export interface HooksStatus {
 }
 
 export function hooksStatus(cwd: string): HooksStatus {
-  const dir = path.join(cwd, '.githooks');
+  const dir = path.join(cwd, ".githooks");
   const directory = fs.existsSync(dir) && fs.statSync(dir).isDirectory();
-  const present = directory ? fs.readdirSync(dir).filter(name => fs.statSync(path.join(dir, name)).isFile()).sort() : [];
-  const missing = Object.keys(HOOK_FILES).filter(name => !present.includes(name));
-  const notExecutable = IS_WINDOWS ? [] : present.filter(name => (fs.statSync(path.join(dir, name)).mode & 0o111) === 0);
-  const hooksPathActive = isGitRoot(cwd) ? git(cwd, ['config', '--local', 'core.hooksPath']).out === '.githooks' : null;
+  const present = directory
+    ? fs
+        .readdirSync(dir)
+        .filter((name) => fs.statSync(path.join(dir, name)).isFile())
+        .sort()
+    : [];
+  const missing = Object.keys(HOOK_FILES).filter(
+    (name) => !present.includes(name),
+  );
+  const notExecutable = IS_WINDOWS
+    ? []
+    : present.filter(
+        (name) => (fs.statSync(path.join(dir, name)).mode & 0o111) === 0,
+      );
+  const hooksPathActive = isGitRoot(cwd)
+    ? git(cwd, ["config", "--local", "core.hooksPath"]).out === ".githooks"
+    : null;
   return { directory, present, missing, notExecutable, hooksPathActive };
 }
 
 /** Write the hooks that are missing and set the executable bit on every hook. Existing content is never replaced. */
-export function ensureHooks(cwd: string, options: { dryRun?: boolean } = {}): { created: string[]; madeExecutable: string[] } {
-  const dir = path.join(cwd, '.githooks');
+export function ensureHooks(
+  cwd: string,
+  options: { dryRun?: boolean } = {},
+): { created: string[]; madeExecutable: string[] } {
+  const dir = path.join(cwd, ".githooks");
   const created: string[] = [];
   const madeExecutable: string[] = [];
   for (const [name, content] of Object.entries(HOOK_FILES)) {
@@ -102,25 +127,47 @@ export function ensureHooks(cwd: string, options: { dryRun?: boolean } = {}): { 
     created.push(name);
     if (!options.dryRun) {
       fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(file, content, { mode: 0o755 });
+      writeAtomicFile(file, content, { mode: 0o755 });
     }
   }
   if (!IS_WINDOWS && fs.existsSync(dir)) {
     for (const name of fs.readdirSync(dir)) {
       const file = path.join(dir, name);
-      if (!fs.statSync(file).isFile() || (fs.statSync(file).mode & 0o111) !== 0) continue;
+      if (!fs.statSync(file).isFile() || (fs.statSync(file).mode & 0o111) !== 0)
+        continue;
       madeExecutable.push(name);
-      if (!options.dryRun) fs.chmodSync(file, 0o755);
+      if (!options.dryRun)
+        writeAtomicFile(file, fs.readFileSync(file), {
+          mode: fs.statSync(file).mode | 0o111,
+        });
     }
   }
   return { created, madeExecutable };
 }
 
 /** Point git at .githooks, but only for the repository whose root is `cwd` (a parent repo would be affected too). */
-export function activateHooks(cwd: string, options: { dryRun?: boolean } = {}): { active: boolean; changed: boolean; note?: string } {
-  if (!isGitRoot(cwd)) return { active: false, changed: false, note: 'Not the root of a git repository; hooks path left unchanged.' };
-  if (git(cwd, ['config', '--local', 'core.hooksPath']).out === '.githooks') return { active: true, changed: false };
+export function activateHooks(
+  cwd: string,
+  options: { dryRun?: boolean } = {},
+): { active: boolean; changed: boolean; note?: string } {
+  if (!isGitRoot(cwd))
+    return {
+      active: false,
+      changed: false,
+      note: "Not the root of a git repository; hooks path left unchanged.",
+    };
+  const state = readHooksPath(cwd);
+  if (state.kind === "owned") return { active: true, changed: false };
+  // Another hook manager (husky, lefthook, a global hooksPath) owns the hooks: never replace it.
+  if (state.kind === "custom")
+    return {
+      active: false,
+      changed: false,
+      note: `Kept the existing core.hooksPath ${JSON.stringify(state.value)}; HELEN hooks stay inactive.`,
+    };
   if (options.dryRun) return { active: false, changed: true };
-  const set = git(cwd, ['config', '--local', 'core.hooksPath', '.githooks']);
-  return set.ok ? { active: true, changed: true } : { active: false, changed: false, note: 'Could not set core.hooksPath.' };
+  const set = git(cwd, ["config", "--local", "core.hooksPath", ".githooks"]);
+  return set.ok
+    ? { active: true, changed: true }
+    : { active: false, changed: false, note: "Could not set core.hooksPath." };
 }

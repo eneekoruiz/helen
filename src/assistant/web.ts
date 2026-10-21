@@ -3,18 +3,22 @@
  * it asks once for the API token (kept in this browser only) and talks to /chat. Replies are inserted as text,
  * never as HTML.
  */
-export function chatPage(nonce: string, lang: 'es' | 'en'): string {
-  const es = lang === 'es';
+export function chatPage(nonce: string, lang: "es" | "en"): string {
+  const es = lang === "es";
   const t = {
-    title: 'HELEN',
-    placeholder: es ? 'Escribe o pregunta algo…' : 'Type or ask something…',
-    send: es ? 'Enviar' : 'Send',
-    tokenLabel: es ? 'Token de acceso (helen assistant token --show)' : 'Access token (helen assistant token --show)',
-    save: es ? 'Guardar' : 'Save',
-    forget: es ? 'Olvidar token' : 'Forget token',
-    chips: es ? ['¿Qué tengo hoy?', 'Lista de la compra', 'Recordatorios', 'Ayuda'] : ['What do I have today?', 'Shopping list', 'My reminders', 'Help'],
-    offline: es ? 'No puedo conectar con HELEN.' : 'Cannot reach HELEN.',
-    denied: es ? 'Token incorrecto.' : 'Wrong token.',
+    title: "HELEN",
+    placeholder: es ? "Escribe o pregunta algo…" : "Type or ask something…",
+    send: es ? "Enviar" : "Send",
+    tokenLabel: es
+      ? "Token de acceso (helen assistant token --show)"
+      : "Access token (helen assistant token --show)",
+    save: es ? "Guardar" : "Save",
+    forget: es ? "Olvidar token" : "Forget token",
+    chips: es
+      ? ["¿Qué tengo hoy?", "Lista de la compra", "Recordatorios", "Ayuda"]
+      : ["What do I have today?", "Shopping list", "My reminders", "Help"],
+    offline: es ? "No puedo conectar con HELEN." : "Cannot reach HELEN.",
+    denied: es ? "Token incorrecto." : "Wrong token.",
   };
   return `<!doctype html>
 <html lang="${lang}">
@@ -57,7 +61,7 @@ form button { border: 0; background: var(--ink); color: var(--bg); border-radius
     <button type="submit">${t.save}</button>
   </form>
   <div id="chat" hidden>
-    <div class="chips">${t.chips.map(chip => `<button type="button" data-say="${chip}">${chip}</button>`).join('')}</div>
+    <div class="chips">${t.chips.map((chip) => `<button type="button" data-say="${chip}">${chip}</button>`).join("")}</div>
     <form id="ask"><input id="text" autocomplete="off" aria-label="${t.placeholder}" placeholder="${t.placeholder}" maxlength="4000"><button type="submit">${t.send}</button></form>
     <button type="button" class="link" id="forget">${t.forget}</button>
   </div>

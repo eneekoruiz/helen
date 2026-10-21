@@ -1,18 +1,18 @@
-import type { HelenModule } from './types.js';
-import { qualityModule } from './quality/index.js';
-import { testingModule } from './testing/index.js';
-import { dockerModule } from './docker/index.js';
-import { ciModule } from './ci/index.js';
-import { seoModule } from './seo/index.js';
-import { securityModule } from './security/index.js';
-import { dxModule } from './dx/index.js';
-import { themeModule } from './theme/index.js';
-import { gdprModule } from './gdpr/index.js';
-import { pwaModule } from './pwa/index.js';
-import { i18nModule } from './i18n/index.js';
-import { sentryModule } from './sentry/index.js';
-import { cmsModule } from './cms/index.js';
-import { guardrailsModule } from './guardrails/index.js';
+import type { HelenModule } from "./types.js";
+import { qualityModule } from "./quality/index.js";
+import { testingModule } from "./testing/index.js";
+import { dockerModule } from "./docker/index.js";
+import { ciModule } from "./ci/index.js";
+import { seoModule } from "./seo/index.js";
+import { securityModule } from "./security/index.js";
+import { dxModule } from "./dx/index.js";
+import { themeModule } from "./theme/index.js";
+import { gdprModule } from "./gdpr/index.js";
+import { pwaModule } from "./pwa/index.js";
+import { i18nModule } from "./i18n/index.js";
+import { sentryModule } from "./sentry/index.js";
+import { cmsModule } from "./cms/index.js";
+import { guardrailsModule } from "./guardrails/index.js";
 // Note: `tailwind` and `shadcn` are not registered by default yet.
 
 /**
@@ -49,7 +49,6 @@ register(guardrailsModule);
 // Do not register Tailwind / Shadcn here to keep the stable set of modules
 // registered by default. They can be added later when promoted from planned.
 
-
 /**
  * Get a module by id.
  */
@@ -68,14 +67,20 @@ export function getAllModules(): HelenModule[] {
  * Get all stable modules (status: 'stable').
  */
 export function getStableModules(): HelenModule[] {
-  return Array.from(modules.values()).filter(mod => mod.meta.status === 'stable');
+  return Array.from(modules.values()).filter(
+    (mod) => mod.meta.status === "stable",
+  );
 }
 
 /**
  * Get modules by status.
  */
-export function getModulesByStatus(status: 'stable' | 'experimental' | 'planned' | 'deprecated'): HelenModule[] {
-  return Array.from(modules.values()).filter(mod => mod.meta.status === status);
+export function getModulesByStatus(
+  status: "stable" | "experimental" | "planned" | "deprecated",
+): HelenModule[] {
+  return Array.from(modules.values()).filter(
+    (mod) => mod.meta.status === status,
+  );
 }
 
 /**
@@ -89,7 +94,7 @@ export function getAllModuleIds(): string[] {
  * Get stable module ids only.
  */
 export function getStableModuleIds(): string[] {
-  return getStableModules().map(mod => mod.meta.id);
+  return getStableModules().map((mod) => mod.meta.id);
 }
 
 /**
@@ -110,10 +115,10 @@ export function getModulesByCategory(): Map<string, HelenModule[]> {
  * These are future ideas or experimental modules not ready for public use.
  */
 export const PLANNED_MODULES = [
-  'tailwind',
-  'shadcn',
-  'analytics',
-  'bundle-analyzer',
-  'lighthouse',
-  'clean-architecture',
+  "tailwind",
+  "shadcn",
+  "analytics",
+  "bundle-analyzer",
+  "lighthouse",
+  "clean-architecture",
 ] as const;

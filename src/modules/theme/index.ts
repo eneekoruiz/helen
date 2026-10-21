@@ -1,29 +1,39 @@
-import { recordFileResult } from '../results.js';
-import type { HelenModule } from '../types.js';
-import type { HelenContext, ModuleResult } from '../../core/context.js';
-import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe } from '../../core/fs.js';
-import path from 'node:path';
+import { recordFileResult } from "../results.js";
+import type { HelenModule } from "../types.js";
+import type { HelenContext, ModuleResult } from "../../core/context.js";
+import { createEmptyResult } from "../../core/context.js";
+import { writeFileSafe } from "../../core/fs.js";
+import path from "node:path";
 
-const meta: HelenModule['meta'] = {
-  id: 'theme',
-  name: 'Theme System',
-  category: 'UI',
-  summary: 'ThemeProvider + useTheme hook + ThemeToggle component',
-  description: 'Creates a complete dark/light/system theme system with React context, a custom hook, and a toggle component.',
-  problemItSolves: 'Dark mode is expected in modern apps. This provides a clean, reusable implementation.',
-  whenToUse: 'On any user-facing application that should support dark mode.',
-  whenNotToUse: 'Backend-only projects or if you use a UI library with built-in theming.',
-  filesCreated: ['src/components/ThemeProvider.tsx', 'src/hooks/useTheme.ts', 'src/components/ThemeToggle.tsx'],
+const meta: HelenModule["meta"] = {
+  id: "theme",
+  name: "Theme System",
+  category: "UI",
+  summary: "ThemeProvider + useTheme hook + ThemeToggle component",
+  description:
+    "Creates a complete dark/light/system theme system with React context, a custom hook, and a toggle component.",
+  problemItSolves:
+    "Dark mode is expected in modern apps. This provides a clean, reusable implementation.",
+  whenToUse: "On any user-facing application that should support dark mode.",
+  whenNotToUse:
+    "Backend-only projects or if you use a UI library with built-in theming.",
+  filesCreated: [
+    "src/components/ThemeProvider.tsx",
+    "src/hooks/useTheme.ts",
+    "src/components/ThemeToggle.tsx",
+  ],
   filesModified: [],
   runtimeDependencies: [],
   devDependencies: [],
-  requirements: ['React 18+'],
+  requirements: ["React 18+"],
   risks: [],
-  nextSteps: ['Wrap your app with <ThemeProvider>', 'Add ThemeToggle to your navbar'],
-  riskLevel: 'low',
-  recommendedLevel: 'beginner',
-  status: 'stable',
+  nextSteps: [
+    "Wrap your app with <ThemeProvider>",
+    "Add ThemeToggle to your navbar",
+  ],
+  riskLevel: "low",
+  recommendedLevel: "beginner",
+  status: "stable",
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {
@@ -97,8 +107,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 }
 `;
-  const r1 = writeFileSafe(path.join(cwd, 'src/components/ThemeProvider.tsx'), provider, { dryRun, force, root: cwd });
-  recordFileResult(result, 'src/components/ThemeProvider.tsx', r1);
+  const r1 = writeFileSafe(
+    path.join(cwd, "src/components/ThemeProvider.tsx"),
+    provider,
+    { dryRun, force, root: cwd },
+  );
+  recordFileResult(result, "src/components/ThemeProvider.tsx", r1);
 
   // useTheme hook
   const hook = `import { useContext } from 'react';
@@ -112,8 +126,12 @@ export function useTheme() {
   return ctx;
 }
 `;
-  const r2 = writeFileSafe(path.join(cwd, 'src/hooks/useTheme.ts'), hook, { dryRun, force, root: cwd });
-  recordFileResult(result, 'src/hooks/useTheme.ts', r2);
+  const r2 = writeFileSafe(path.join(cwd, "src/hooks/useTheme.ts"), hook, {
+    dryRun,
+    force,
+    root: cwd,
+  });
+  recordFileResult(result, "src/hooks/useTheme.ts", r2);
 
   // ThemeToggle component
   const toggle = `import { useTheme } from '../hooks/useTheme';
@@ -154,11 +172,15 @@ export function ThemeToggle() {
   );
 }
 `;
-  const r3 = writeFileSafe(path.join(cwd, 'src/components/ThemeToggle.tsx'), toggle, { dryRun, force, root: cwd });
-  recordFileResult(result, 'src/components/ThemeToggle.tsx', r3);
+  const r3 = writeFileSafe(
+    path.join(cwd, "src/components/ThemeToggle.tsx"),
+    toggle,
+    { dryRun, force, root: cwd },
+  );
+  recordFileResult(result, "src/components/ThemeToggle.tsx", r3);
 
-  result.nextSteps.push('Wrap app with <ThemeProvider>');
-  result.nextSteps.push('Add <ThemeToggle /> to your navbar');
+  result.nextSteps.push("Wrap app with <ThemeProvider>");
+  result.nextSteps.push("Add <ThemeToggle /> to your navbar");
   return result;
 }
 

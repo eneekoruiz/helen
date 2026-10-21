@@ -1,24 +1,26 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { describe, expect, it } from "vitest";
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SKIP_DIRS = new Set(['.git', '.npm-cache', 'dist', 'node_modules']);
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const SKIP_DIRS = new Set([".git", ".npm-cache", "dist", "node_modules"]);
 const TEXT_EXTENSIONS = new Set([
-  '.json',
-  '.md',
-  '.rc',
-  '.sh',
-  '.ts',
-  '.tsx',
-  '.yaml',
-  '.yml',
+  ".json",
+  ".md",
+  ".rc",
+  ".sh",
+  ".ts",
+  ".tsx",
+  ".yaml",
+  ".yml",
 ]);
 
 function isTextFile(filePath: string): boolean {
   const basename = path.basename(filePath);
-  return basename.startsWith('.') || TEXT_EXTENSIONS.has(path.extname(filePath));
+  return (
+    basename.startsWith(".") || TEXT_EXTENSIONS.has(path.extname(filePath))
+  );
 }
 
 function walkFiles(dir: string): string[] {
@@ -35,14 +37,16 @@ function walkFiles(dir: string): string[] {
   return files;
 }
 
-describe('encoding hygiene', () => {
-  it('does not contain mojibake or replacement characters in repository text files', () => {
+describe("encoding hygiene", () => {
+  it("does not contain mojibake or replacement characters in repository text files", () => {
     const offenders: string[] = [];
 
     for (const file of walkFiles(ROOT)) {
-      const content = fs.readFileSync(file, 'utf8');
-      const withoutUrls = content.replace(/https?:\/\/\S+/g, '');
-      const hasMojibake = /[\u00C2\u00C3]|\u00E2[\u0080-\u00BF]|\uFFFD/.test(content);
+      const content = fs.readFileSync(file, "utf8");
+      const withoutUrls = content.replace(/https?:\/\/\S+/g, "");
+      const hasMojibake = /[\u00C2\u00C3]|\u00E2[\u0080-\u00BF]|\uFFFD/.test(
+        content,
+      );
       const hasQuestionMarkAccentLoss = /\p{L}\?\p{L}/u.test(withoutUrls);
 
       if (hasMojibake || hasQuestionMarkAccentLoss) {

@@ -1,37 +1,38 @@
-import { recordFileResult } from '../results.js';
-import type { HelenModule } from '../types.js';
-import type { HelenContext, ModuleResult } from '../../core/context.js';
-import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe, patchPackageJson } from '../../core/fs.js';
-import path from 'node:path';
+import { recordFileResult } from "../results.js";
+import type { HelenModule } from "../types.js";
+import type { HelenContext, ModuleResult } from "../../core/context.js";
+import { createEmptyResult } from "../../core/context.js";
+import { writeFileSafe, patchPackageJson } from "../../core/fs.js";
+import path from "node:path";
 
-const meta: HelenModule['meta'] = {
-  id: 'quality',
-  name: 'Code Quality',
-  category: 'Quality',
-  summary: 'ESLint + Prettier + TypeScript strict mode + scripts',
+const meta: HelenModule["meta"] = {
+  id: "quality",
+  name: "Code Quality",
+  category: "Quality",
+  summary: "ESLint + Prettier + TypeScript strict mode + scripts",
   description:
-    'Sets up ESLint with TypeScript plugin, Prettier for auto-formatting, and a strict tsconfig. Adds lint, format, and typecheck scripts to package.json.',
+    "Sets up ESLint with TypeScript plugin, Prettier for auto-formatting, and a strict tsconfig. Adds lint, format, and typecheck scripts to package.json.",
   problemItSolves:
-    'Without consistent linting and formatting, codebases accumulate inconsistencies, bugs slip through, and PRs become harder to review.',
-  whenToUse: 'On every new project. This is foundational.',
-  whenNotToUse: 'If you already have a fully configured ESLint + Prettier setup you are happy with.',
-  filesCreated: ['.eslintrc.json', '.prettierrc', '.prettierignore'],
-  filesModified: ['package.json'],
+    "Without consistent linting and formatting, codebases accumulate inconsistencies, bugs slip through, and PRs become harder to review.",
+  whenToUse: "On every new project. This is foundational.",
+  whenNotToUse:
+    "If you already have a fully configured ESLint + Prettier setup you are happy with.",
+  filesCreated: [".eslintrc.json", ".prettierrc", ".prettierignore"],
+  filesModified: ["package.json"],
   runtimeDependencies: [],
   devDependencies: [
-    'eslint',
-    '@typescript-eslint/eslint-plugin',
-    '@typescript-eslint/parser',
-    'prettier',
-    'eslint-config-prettier',
+    "eslint",
+    "@typescript-eslint/eslint-plugin",
+    "@typescript-eslint/parser",
+    "prettier",
+    "eslint-config-prettier",
   ],
-  requirements: ['Node.js >= 18', 'TypeScript project recommended'],
-  risks: ['May conflict with existing ESLint config'],
-  nextSteps: ['Run npm run lint to check', 'Run npm run format to auto-fix'],
-  riskLevel: 'low',
-  recommendedLevel: 'beginner',
-  status: 'stable',
+  requirements: ["Node.js >= 18", "TypeScript project recommended"],
+  risks: ["May conflict with existing ESLint config"],
+  nextSteps: ["Run npm run lint to check", "Run npm run format to auto-fix"],
+  riskLevel: "low",
+  recommendedLevel: "beginner",
+  status: "stable",
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {
@@ -44,28 +45,35 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
       root: true,
       env: { browser: true, es2022: true, node: true },
       extends: [
-        'eslint:recommended',
-        'plugin:@typescript-eslint/recommended',
-        'prettier',
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "prettier",
       ],
-      parser: '@typescript-eslint/parser',
+      parser: "@typescript-eslint/parser",
       parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
+        ecmaVersion: "latest",
+        sourceType: "module",
       },
-      plugins: ['@typescript-eslint'],
+      plugins: ["@typescript-eslint"],
       rules: {
-        '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-        '@typescript-eslint/no-explicit-any': 'warn',
-        'no-console': ['warn', { allow: ['warn', 'error'] }],
+        "@typescript-eslint/no-unused-vars": [
+          "warn",
+          { argsIgnorePattern: "^_" },
+        ],
+        "@typescript-eslint/no-explicit-any": "warn",
+        "no-console": ["warn", { allow: ["warn", "error"] }],
       },
-      ignorePatterns: ['dist/', 'node_modules/', 'coverage/'],
+      ignorePatterns: ["dist/", "node_modules/", "coverage/"],
     },
     null,
     2,
   );
-  const eslintResult = writeFileSafe(path.join(cwd, '.eslintrc.json'), eslintConfig, { dryRun, force, root: cwd });
-  recordFileResult(result, '.eslintrc.json', eslintResult);
+  const eslintResult = writeFileSafe(
+    path.join(cwd, ".eslintrc.json"),
+    eslintConfig,
+    { dryRun, force, root: cwd },
+  );
+  recordFileResult(result, ".eslintrc.json", eslintResult);
 
   // .prettierrc
   const prettierConfig = JSON.stringify(
@@ -73,17 +81,21 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
       semi: true,
       singleQuote: true,
       tabWidth: 2,
-      trailingComma: 'all',
+      trailingComma: "all",
       printWidth: 100,
       bracketSpacing: true,
-      arrowParens: 'always',
-      endOfLine: 'lf',
+      arrowParens: "always",
+      endOfLine: "lf",
     },
     null,
     2,
   );
-  const prettierResult = writeFileSafe(path.join(cwd, '.prettierrc'), prettierConfig, { dryRun, force, root: cwd });
-  recordFileResult(result, '.prettierrc', prettierResult);
+  const prettierResult = writeFileSafe(
+    path.join(cwd, ".prettierrc"),
+    prettierConfig,
+    { dryRun, force, root: cwd },
+  );
+  recordFileResult(result, ".prettierrc", prettierResult);
 
   // .prettierignore
   const prettierIgnore = `dist/
@@ -94,23 +106,31 @@ coverage/
 pnpm-lock.yaml
 package-lock.json
 `;
-  const ignoreResult = writeFileSafe(path.join(cwd, '.prettierignore'), prettierIgnore, { dryRun, force, root: cwd });
-  recordFileResult(result, '.prettierignore', ignoreResult);
+  const ignoreResult = writeFileSafe(
+    path.join(cwd, ".prettierignore"),
+    prettierIgnore,
+    { dryRun, force, root: cwd },
+  );
+  recordFileResult(result, ".prettierignore", ignoreResult);
 
   // Patch package.json scripts
-  const patchResult = patchPackageJson(cwd, {
-    scripts: {
-      lint: 'eslint src/ --ext .ts,.tsx --max-warnings=0',
-      'lint:fix': 'eslint src/ --ext .ts,.tsx --fix',
-      format: 'prettier --write "src/**/*.{ts,tsx,css,json}"',
-      'format:check': 'prettier --check "src/**/*.{ts,tsx,css,json}"',
-      typecheck: 'tsc -b --noEmit',
+  const patchResult = patchPackageJson(
+    cwd,
+    {
+      scripts: {
+        lint: "eslint src/ --ext .ts,.tsx --max-warnings=0",
+        "lint:fix": "eslint src/ --ext .ts,.tsx --fix",
+        format: 'prettier --write "src/**/*.{ts,tsx,css,json}"',
+        "format:check": 'prettier --check "src/**/*.{ts,tsx,css,json}"',
+        typecheck: "tsc -b --noEmit",
+      },
     },
-  }, { dryRun });
-  recordFileResult(result, 'package.json', patchResult);
+    { dryRun },
+  );
+  recordFileResult(result, "package.json", patchResult);
 
-  result.nextSteps.push('Run npm run lint to check for issues');
-  result.nextSteps.push('Run npm run format to auto-format code');
+  result.nextSteps.push("Run npm run lint to check for issues");
+  result.nextSteps.push("Run npm run format to auto-format code");
 
   return result;
 }

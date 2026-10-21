@@ -1,32 +1,37 @@
-import { recordFileResult, addMissingDependencies } from '../results.js';
-import type { HelenModule } from '../types.js';
-import type { HelenContext, ModuleResult } from '../../core/context.js';
-import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe } from '../../core/fs.js';
-import path from 'node:path';
+import { recordFileResult, addMissingDependencies } from "../results.js";
+import type { HelenModule } from "../types.js";
+import type { HelenContext, ModuleResult } from "../../core/context.js";
+import { createEmptyResult } from "../../core/context.js";
+import { writeFileSafe } from "../../core/fs.js";
+import path from "node:path";
 
-const meta: HelenModule['meta'] = {
-  id: 'sentry',
-  name: 'Sentry Error Tracking',
-  category: 'Infrastructure',
-  summary: '@sentry/react setup + session replay + data redaction',
-  description: 'Integrates Sentry for real-time error tracking and session replays. Includes pre-configured privacy filters to redact sensitive user data from breadcrumbs and replays.',
-  problemItSolves: 'Errors in production are invisible without tracking. Sentry makes debugging production issues possible by capturing state and user actions.',
-  whenToUse: 'Any production-ready application.',
-  whenNotToUse: 'Small experiments or projects with strict local-only data requirements.',
-  filesCreated: ['src/lib/sentry.ts'],
-  filesModified: ['src/main.tsx', 'package.json', '.env.example'],
-  runtimeDependencies: ['@sentry/react'],
+const meta: HelenModule["meta"] = {
+  id: "sentry",
+  name: "Sentry Error Tracking",
+  category: "Infrastructure",
+  summary: "@sentry/react setup + session replay + data redaction",
+  description:
+    "Integrates Sentry for real-time error tracking and session replays. Includes pre-configured privacy filters to redact sensitive user data from breadcrumbs and replays.",
+  problemItSolves:
+    "Errors in production are invisible without tracking. Sentry makes debugging production issues possible by capturing state and user actions.",
+  whenToUse: "Any production-ready application.",
+  whenNotToUse:
+    "Small experiments or projects with strict local-only data requirements.",
+  filesCreated: ["src/lib/sentry.ts"],
+  filesModified: ["src/main.tsx", "package.json", ".env.example"],
+  runtimeDependencies: ["@sentry/react"],
   devDependencies: [],
-  requirements: ['Sentry DSN'],
-  risks: ['Can impact performance slightly; requires careful sampling configuration.'],
-  nextSteps: [
-    'Add your Sentry DSN to .env.local',
-    'Import src/lib/sentry.ts in your main.tsx'
+  requirements: ["Sentry DSN"],
+  risks: [
+    "Can impact performance slightly; requires careful sampling configuration.",
   ],
-  riskLevel: 'medium',
-  recommendedLevel: 'intermediate',
-  status: 'experimental',
+  nextSteps: [
+    "Add your Sentry DSN to .env.local",
+    "Import src/lib/sentry.ts in your main.tsx",
+  ],
+  riskLevel: "medium",
+  recommendedLevel: "intermediate",
+  status: "experimental",
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {
@@ -67,15 +72,23 @@ export function initSentry() {
 }
 `;
 
-  const fileStatus = writeFileSafe(path.join(cwd, 'src/lib/sentry.ts'), sentryTs, { dryRun, force, root: cwd });
-  recordFileResult(result, 'src/lib/sentry.ts', fileStatus);
+  const fileStatus = writeFileSafe(
+    path.join(cwd, "src/lib/sentry.ts"),
+    sentryTs,
+    { dryRun, force, root: cwd },
+  );
+  recordFileResult(result, "src/lib/sentry.ts", fileStatus);
 
-  const packageStatus = addMissingDependencies(cwd, {
-    dependencies: {
-      '@sentry/react': '^8.0.0'
-    }
-  }, { dryRun });
-  recordFileResult(result, 'package.json', packageStatus);
+  const packageStatus = addMissingDependencies(
+    cwd,
+    {
+      dependencies: {
+        "@sentry/react": "^8.0.0",
+      },
+    },
+    { dryRun },
+  );
+  recordFileResult(result, "package.json", packageStatus);
   result.nextSteps.push(...meta.nextSteps);
 
   return result;

@@ -107,7 +107,7 @@ export function renderEvidenceReport(summaries, fingerprints = {}) {
     const judgeTokens = knownMetric(runs.flatMap(r => [r.metricsByCondition?.judgeBaseline?.tokens, r.metricsByCondition?.judgeSkill?.tokens])) ?? 'unknown';
     lines.push(`| ${summary.skill} | ${metric('baseline')} | ${metric('naturalSkill')} | ${forcedTokens} | ${judgeTokens} |`);
   }
-  lines.push('', 'Historical files for retired skills and archived previous versions remain in `evals/results`; they are excluded from the current-skill table.', '', 'Acceptance criteria and the live evaluation procedure: [EVALUATION_PLAN.md](EVALUATION_PLAN.md).', '');
+  lines.push('', 'Historical files for retired skills and archived previous versions remain in `evals/results`; they are excluded from the current-skill table.', '', 'Acceptance criteria and the live evaluation procedure: [EVALUATION_PLAN.md](EVALUATION_PLAN.md).', '', 'Executable repository outcomes and interactive clarification are separate evidence tracks: [REPOSITORY_EVALS.md](REPOSITORY_EVALS.md). Chat-only grades do not certify either track.', '');
   const blocked = [...clean.values()].map(summary => ({ skill: summary.skill, cause: summarizeEvidence(summary, fingerprints[summary.skill]).blocker })).filter(item => item.cause);
   if (blocked.length) {
     lines.push('## Provider blockers', '', ...blocked.map(item => `- ${item.skill}: **${item.cause}**. Resolve the provider quota or authentication before rerunning; authentication status alone does not establish usable quota.`), '',

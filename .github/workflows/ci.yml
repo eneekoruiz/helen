@@ -33,9 +33,15 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
-      - run: npm run test
+      - run: npm run format:check
+      - run: npm run docs:check
+      - run: npm run test -- --maxWorkers=2
       - run: npm run build
       - run: node dist/cli.js lint
+      - name: Validate frozen evaluation plans without provider calls
+        run: |
+          node scripts/run-specialty-evals.mjs --dry-run
+          node scripts/run-repo-evals.mjs --suite implementation-holdout
       - run: node scripts/check-pack.mjs
       - run: npm audit --audit-level=high
 
@@ -64,8 +70,34 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - run: npm test
+      - run: npm test -- --maxWorkers=2
       - run: node dist/cli.js lint
+
+  installed-package:
+    name: Installed npm package (${{ matrix.os }}, Node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, node: 20 }
+          - { os: ubuntu-latest, node: 22 }
+          - { os: ubuntu-latest, node: 24 }
+          - { os: windows-latest, node: 22 }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          lfs: false
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - name: Verify an actual installed tarball outside the checkout
+        run: node scripts/verify-package.mjs
 
   docker:
     name: Docker image

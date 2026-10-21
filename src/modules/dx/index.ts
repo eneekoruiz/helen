@@ -1,29 +1,41 @@
-import { recordFileResult } from '../results.js';
-import type { HelenModule } from '../types.js';
-import type { HelenContext, ModuleResult } from '../../core/context.js';
-import { createEmptyResult } from '../../core/context.js';
-import { writeFileSafe } from '../../core/fs.js';
-import path from 'node:path';
+import { recordFileResult } from "../results.js";
+import type { HelenModule } from "../types.js";
+import type { HelenContext, ModuleResult } from "../../core/context.js";
+import { createEmptyResult } from "../../core/context.js";
+import { writeFileSafe } from "../../core/fs.js";
+import path from "node:path";
 
-const meta: HelenModule['meta'] = {
-  id: 'dx',
-  name: 'Developer Experience',
-  category: 'DX',
-  summary: 'VS Code settings + extensions + .env.example + cinematic HELEN terminal art',
-  description: 'Sets up VS Code workspace settings, recommended extensions, a documented .env.example template, and a self-contained cinematic HELEN terminal art sequence.',
-  problemItSolves: 'New team members waste time configuring editors and projects often ship generic terminal branding. This standardizes the DX and provides a restrained, accessible HELEN identity.',
-  whenToUse: 'On every project. Zero cost, high value.',
-  whenNotToUse: 'If the team exclusively uses a different editor (rare).',
-  filesCreated: ['.vscode/settings.json', '.vscode/extensions.json', '.env.example', 'scripts/easter-egg.ts'],
+const meta: HelenModule["meta"] = {
+  id: "dx",
+  name: "Developer Experience",
+  category: "DX",
+  summary:
+    "VS Code settings + extensions + .env.example + cinematic HELEN terminal art",
+  description:
+    "Sets up VS Code workspace settings, recommended extensions, a documented .env.example template, and a self-contained cinematic HELEN terminal art sequence.",
+  problemItSolves:
+    "New team members waste time configuring editors and projects often ship generic terminal branding. This standardizes the DX and provides a restrained, accessible HELEN identity.",
+  whenToUse: "On every project. Zero cost, high value.",
+  whenNotToUse: "If the team exclusively uses a different editor (rare).",
+  filesCreated: [
+    ".vscode/settings.json",
+    ".vscode/extensions.json",
+    ".env.example",
+    "scripts/easter-egg.ts",
+  ],
   filesModified: [],
   runtimeDependencies: [],
   devDependencies: [],
   requirements: [],
   risks: [],
-  nextSteps: ['Copy .env.example to .env.local', 'Install recommended VS Code extensions', 'Run npx tsx scripts/easter-egg.ts to view the animated brand banner'],
-  riskLevel: 'low',
-  recommendedLevel: 'beginner',
-  status: 'stable',
+  nextSteps: [
+    "Copy .env.example to .env.local",
+    "Install recommended VS Code extensions",
+    "Run npx tsx scripts/easter-egg.ts to view the animated brand banner",
+  ],
+  riskLevel: "low",
+  recommendedLevel: "beginner",
+  status: "stable",
 };
 
 async function execute(ctx: HelenContext): Promise<ModuleResult> {
@@ -31,35 +43,51 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
   const { cwd, dryRun, force } = ctx;
 
   // VS Code settings
-  const settings = JSON.stringify({
-    'editor.formatOnSave': true,
-    'editor.defaultFormatter': 'esbenp.prettier-vscode',
-    'editor.codeActionsOnSave': {
-      'source.fixAll.eslint': 'explicit',
+  const settings = JSON.stringify(
+    {
+      "editor.formatOnSave": true,
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+      "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit",
+      },
+      "typescript.preferences.importModuleSpecifier": "relative",
+      "typescript.tsdk": "node_modules/typescript/lib",
+      "files.eol": "\n",
+      "files.trimTrailingWhitespace": true,
+      "files.insertFinalNewline": true,
     },
-    'typescript.preferences.importModuleSpecifier': 'relative',
-    'typescript.tsdk': 'node_modules/typescript/lib',
-    'files.eol': '\n',
-    'files.trimTrailingWhitespace': true,
-    'files.insertFinalNewline': true,
-  }, null, 2);
-  const r1 = writeFileSafe(path.join(cwd, '.vscode/settings.json'), settings, { dryRun, force, root: cwd });
-  recordFileResult(result, '.vscode/settings.json', r1);
+    null,
+    2,
+  );
+  const r1 = writeFileSafe(path.join(cwd, ".vscode/settings.json"), settings, {
+    dryRun,
+    force,
+    root: cwd,
+  });
+  recordFileResult(result, ".vscode/settings.json", r1);
 
   // VS Code extensions
-  const extensions = JSON.stringify({
-    recommendations: [
-      'esbenp.prettier-vscode',
-      'dbaeumer.vscode-eslint',
-      'bradlc.vscode-tailwindcss',
-      'formulahendry.auto-rename-tag',
-      'christian-kohler.path-intellisense',
-      'ms-vscode.vscode-typescript-next',
-      'streetsidesoftware.code-spell-checker',
-    ],
-  }, null, 2);
-  const r2 = writeFileSafe(path.join(cwd, '.vscode/extensions.json'), extensions, { dryRun, force, root: cwd });
-  recordFileResult(result, '.vscode/extensions.json', r2);
+  const extensions = JSON.stringify(
+    {
+      recommendations: [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "bradlc.vscode-tailwindcss",
+        "formulahendry.auto-rename-tag",
+        "christian-kohler.path-intellisense",
+        "ms-vscode.vscode-typescript-next",
+        "streetsidesoftware.code-spell-checker",
+      ],
+    },
+    null,
+    2,
+  );
+  const r2 = writeFileSafe(
+    path.join(cwd, ".vscode/extensions.json"),
+    extensions,
+    { dryRun, force, root: cwd },
+  );
+  recordFileResult(result, ".vscode/extensions.json", r2);
 
   // .env.example
   const envExample = `# ── App ──────────────────────────────────────────
@@ -79,8 +107,12 @@ VITE_APP_NAME=My App
 # ── API (optional) ──────────────────────────────
 # VITE_API_URL=https://api.example.com
 `;
-  const r3 = writeFileSafe(path.join(cwd, '.env.example'), envExample, { dryRun, force, root: cwd });
-  recordFileResult(result, '.env.example', r3);
+  const r3 = writeFileSafe(path.join(cwd, ".env.example"), envExample, {
+    dryRun,
+    force,
+    root: cwd,
+  });
+  recordFileResult(result, ".env.example", r3);
 
   // scripts/easter-egg.ts (self-contained HELEN terminal art)
   const easterEggTs = `/**
@@ -184,12 +216,18 @@ main().catch(error => {
   process.exitCode = 1;
 });
 `;
-  const r4 = writeFileSafe(path.join(cwd, 'scripts/easter-egg.ts'), easterEggTs, { dryRun, force, root: cwd });
-  recordFileResult(result, 'scripts/easter-egg.ts', r4);
+  const r4 = writeFileSafe(
+    path.join(cwd, "scripts/easter-egg.ts"),
+    easterEggTs,
+    { dryRun, force, root: cwd },
+  );
+  recordFileResult(result, "scripts/easter-egg.ts", r4);
 
-  result.nextSteps.push('Copy .env.example to .env.local');
-  result.nextSteps.push('Install recommended VS Code extensions');
-  result.nextSteps.push('Run npx tsx scripts/easter-egg.ts to view the animated brand banner');
+  result.nextSteps.push("Copy .env.example to .env.local");
+  result.nextSteps.push("Install recommended VS Code extensions");
+  result.nextSteps.push(
+    "Run npx tsx scripts/easter-egg.ts to view the animated brand banner",
+  );
   return result;
 }
 

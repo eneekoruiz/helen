@@ -30,54 +30,48 @@
 // Every pixel is intentional. Every transition is choreographed.
 // ═══════════════════════════════════════════════════════════════════════════
 
-const ESC = '\x1b[';
-const RESET = ESC + '0m';
-const HIDE_CURSOR = ESC + '?25l';
-const SHOW_CURSOR = ESC + '?25h';
-const CLEAR_SCREEN = ESC + '2J' + ESC + 'H';
-const CLEAR_BELOW = ESC + 'J';
+const ESC = "\x1b[";
+const RESET = ESC + "0m";
+const HIDE_CURSOR = ESC + "?25l";
+const SHOW_CURSOR = ESC + "?25h";
+const CLEAR_SCREEN = ESC + "2J" + ESC + "H";
+const CLEAR_BELOW = ESC + "J";
 
 // ───── Pixel-exact aligned wordmarks ─────
 
 const HELEN_LARGE = [
-  '██   ██  ███████  ██       ███████  ██    ██',
-  '██   ██  ██       ██       ██       ███   ██',
-  '███████  █████    ██       █████    ██ █  ██',
-  '██   ██  ██       ██       ██       ██  █ ██',
-  '██   ██  ███████  ███████  ███████  ██   ███',
+  "██   ██  ███████  ██       ███████  ██    ██",
+  "██   ██  ██       ██       ██       ███   ██",
+  "███████  █████    ██       █████    ██ █  ██",
+  "██   ██  ██       ██       ██       ██  █ ██",
+  "██   ██  ███████  ███████  ███████  ██   ███",
 ];
 
 const HELEN_COMPACT = [
-  '█  █  ███  █     ███  █▄ █',
-  '████  ██   █     ██   ████',
-  '█  █  ███  ████  ███  █ ▀█',
+  "█  █  ███  █     ███  █▄ █",
+  "████  ██   █     ██   ████",
+  "█  █  ███  ████  ███  █ ▀█",
 ];
 
 const HELEN_ASCII = [
-  'H   H  EEEEE  L      EEEEE  N   N',
-  'H   H  E      L      E      NN  N',
-  'HHHHH  EEEE   L      EEEE   N N N',
-  'H   H  E      L      E      N  NN',
-  'H   H  EEEEE  LLLLL  EEEEE  N   N',
+  "H   H  EEEEE  L      EEEEE  N   N",
+  "H   H  E      L      E      NN  N",
+  "HHHHH  EEEE   L      EEEE   N N N",
+  "H   H  E      L      E      N  NN",
+  "H   H  EEEEE  LLLLL  EEEEE  N   N",
 ];
 
 const ENEKO_RUIZ_LARGE = [
-  '███████  ██    ██  ███████  ██   ██   █████      ██████   ██   ██  ██  ███████',
-  '██       ███   ██  ██       ██  ██   ██   ██     ██   ██  ██   ██  ██     ██  ',
-  '█████    ██ █  ██  █████    █████    ██   ██     ██████   ██   ██  ██    ██   ',
-  '██       ██  █ ██  ██       ██  ██   ██   ██     ██  ██   ██   ██  ██   ██    ',
-  '███████  ██   ███  ███████  ██   ██   █████      ██   ██   █████   ██  ███████',
+  "███████  ██    ██  ███████  ██   ██   █████      ██████   ██   ██  ██  ███████",
+  "██       ███   ██  ██       ██  ██   ██   ██     ██   ██  ██   ██  ██     ██  ",
+  "█████    ██ █  ██  █████    █████    ██   ██     ██████   ██   ██  ██    ██   ",
+  "██       ██  █ ██  ██       ██  ██   ██   ██     ██  ██   ██   ██  ██   ██    ",
+  "███████  ██   ███  ███████  ██   ██   █████      ██   ██   █████   ██  ███████",
 ];
 
-const ENEKO_RUIZ_COMPACT = [
-  'E N E K O   R U I Z',
-  '─ ─ ─ ─ ─   ─ ─ ─ ─',
-];
+const ENEKO_RUIZ_COMPACT = ["E N E K O   R U I Z", "─ ─ ─ ─ ─   ─ ─ ─ ─"];
 
-const ENEKO_RUIZ_ASCII = [
-  'ENEKO RUIZ',
-  '----------',
-];
+const ENEKO_RUIZ_ASCII = ["ENEKO RUIZ", "----------"];
 
 const BRAILLE_BITS = [
   [0x01, 0x08],
@@ -93,8 +87,9 @@ const BRAILLE_SUB = [
   [6, 7],
 ] as const;
 
-type IdentityName = 'helen' | 'eneko-ruiz';
-type Layer = 'empty' | 'halo' | 'field' | 'frame' | 'spark' | 'wordmark' | 'attribution';
+type IdentityName = "helen" | "eneko-ruiz";
+type Layer =
+  "empty" | "halo" | "field" | "frame" | "spark" | "wordmark" | "attribution";
 
 interface Identity {
   name: IdentityName;
@@ -129,15 +124,15 @@ export interface TerminalCapabilities {
 
 const IDENTITIES: Record<IdentityName, Identity> = {
   helen: {
-    name: 'helen',
+    name: "helen",
     large: HELEN_LARGE,
     compact: HELEN_COMPACT,
     ascii: HELEN_ASCII,
     minimumLargeWidth: HELEN_LARGE[0].length + 4,
     tempo: 1,
   },
-  'eneko-ruiz': {
-    name: 'eneko-ruiz',
+  "eneko-ruiz": {
+    name: "eneko-ruiz",
     large: ENEKO_RUIZ_LARGE,
     compact: ENEKO_RUIZ_COMPACT,
     ascii: ENEKO_RUIZ_ASCII,
@@ -177,10 +172,14 @@ function lerpVec(
   ];
 }
 
-function paint(glyph: string, color: readonly number[], enabled: boolean): string {
-  if (!enabled || glyph === ' ') return glyph;
+function paint(
+  glyph: string,
+  color: readonly number[],
+  enabled: boolean,
+): string {
+  if (!enabled || glyph === " ") return glyph;
   const [r, g, b] = color.map(Math.round);
-  return ESC + '38;2;' + r + ';' + g + ';' + b + 'm' + glyph + RESET;
+  return ESC + "38;2;" + r + ";" + g + ";" + b + "m" + glyph + RESET;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -195,18 +194,24 @@ function hash21(x: number, y: number): number {
 
 /** Quintic-interpolated value noise (Ken Perlin's improved interpolant). */
 function valueNoise(x: number, y: number): number {
-  const ix = Math.floor(x), iy = Math.floor(y);
-  const fx = x - ix, fy = y - iy;
+  const ix = Math.floor(x),
+    iy = Math.floor(y);
+  const fx = x - ix,
+    fy = y - iy;
   const ux = fx * fx * fx * (fx * (fx * 6 - 15) + 10);
   const uy = fy * fy * fy * (fy * (fy * 6 - 15) + 10);
-  const a = hash21(ix, iy), b = hash21(ix + 1, iy);
-  const c = hash21(ix, iy + 1), d = hash21(ix + 1, iy + 1);
+  const a = hash21(ix, iy),
+    b = hash21(ix + 1, iy);
+  const c = hash21(ix, iy + 1),
+    d = hash21(ix + 1, iy + 1);
   return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy;
 }
 
 /** Multi-octave fBm for organic, cloud-like patterns. */
 function fbm(x: number, y: number, octaves: number): number {
-  let value = 0, amplitude = 0.5, frequency = 1;
+  let value = 0,
+    amplitude = 0.5,
+    frequency = 1;
   for (let i = 0; i < octaves; i++) {
     value += amplitude * valueNoise(x * frequency, y * frequency);
     amplitude *= 0.5;
@@ -220,8 +225,13 @@ function fbm(x: number, y: number, octaves: number): number {
  * organic swirling patterns (the technique behind Inigo Quilez's
  * famous "Painting with Math" shader art).
  */
-function warpedFbm(x: number, y: number, time: number, octaves: number): number {
-  const wx = fbm(x + time * 0.15, y + time * 0.10, octaves);
+function warpedFbm(
+  x: number,
+  y: number,
+  time: number,
+  octaves: number,
+): number {
+  const wx = fbm(x + time * 0.15, y + time * 0.1, octaves);
   const wy = fbm(x + 5.2 + time * 0.12, y + 1.3 + time * 0.08, octaves);
   return fbm(x + wx * 2.8, y + wy * 2.8, octaves);
 }
@@ -233,20 +243,33 @@ function warpedFbm(x: number, y: number, time: number, octaves: number): number 
 function createCanvas(w: number, h: number): Cell[][] {
   return Array.from({ length: h }, () =>
     Array.from({ length: w }, (): Cell => ({
-      glyph: ' ', layer: 'empty', energy: 0, depth: Infinity,
+      glyph: " ",
+      layer: "empty",
+      energy: 0,
+      depth: Infinity,
     })),
   );
 }
 
 /** Priority-aware cell writer. Wordmark is sacrosanct (priority 6). */
 function put(
-  canvas: Cell[][], x: number, y: number,
-  glyph: string, layer: Layer, energy: number, depth = Infinity,
+  canvas: Cell[][],
+  x: number,
+  y: number,
+  glyph: string,
+  layer: Layer,
+  energy: number,
+  depth = Infinity,
 ): void {
   if (y < 0 || y >= canvas.length || x < 0 || x >= canvas[y].length) return;
   const priority: Record<Layer, number> = {
-    empty: 0, halo: 1, field: 2, frame: 3,
-    spark: 4, attribution: 5, wordmark: 6,
+    empty: 0,
+    halo: 1,
+    field: 2,
+    frame: 3,
+    spark: 4,
+    attribution: 5,
+    wordmark: 6,
   };
   if (priority[layer] < priority[canvas[y][x].layer]) return;
   canvas[y][x] = { glyph, layer, energy: clamp(energy, 0, 1), depth };
@@ -258,17 +281,25 @@ function put(
 //     establishing the "deep space" environment.
 // ═══════════════════════════════════════════════════════════════
 
-function drawStarField(canvas: Cell[][], progress: number, ascii: boolean): void {
-  const presence = smoothstep(0.0, 0.06, progress) * (1 - smoothstep(0.58, 0.78, progress));
+function drawStarField(
+  canvas: Cell[][],
+  progress: number,
+  ascii: boolean,
+): void {
+  const presence =
+    smoothstep(0.0, 0.06, progress) * (1 - smoothstep(0.58, 0.78, progress));
   if (presence <= 0) return;
 
-  const W = canvas[0].length, H = canvas.length;
+  const W = canvas[0].length,
+    H = canvas.length;
   const layers = [
     { density: 0.012, twinkle: 1.17, maxBright: 0.15 },
     { density: 0.007, twinkle: 2.73, maxBright: 0.26 },
     { density: 0.003, twinkle: 4.91, maxBright: 0.46 },
   ];
-  const glyphs = ascii ? ['.', '+', '*'] as const : ['·', '∙', '✦'] as const;
+  const glyphs = ascii
+    ? ([".", "+", "*"] as const)
+    : (["·", "∙", "✦"] as const);
 
   for (let li = 0; li < layers.length; li++) {
     const l = layers[li];
@@ -280,11 +311,13 @@ function drawStarField(canvas: Cell[][], progress: number, ascii: boolean): void
         // avoids the uniform on-off pulsing of a single sinusoid
         const phase = h * 127;
         const tw1 = Math.sin(progress * l.twinkle * Math.PI * 2 + phase) * 0.38;
-        const tw2 = Math.sin(progress * l.twinkle * 1.618 * Math.PI + phase * 0.73) * 0.22;
-        const tw = clamp(tw1 + tw2 + 0.40, 0, 1);
+        const tw2 =
+          Math.sin(progress * l.twinkle * 1.618 * Math.PI + phase * 0.73) *
+          0.22;
+        const tw = clamp(tw1 + tw2 + 0.4, 0, 1);
         const energy = l.maxBright * tw * presence;
         if (energy < 0.03) continue;
-        put(canvas, x, y, glyphs[li], 'halo', energy);
+        put(canvas, x, y, glyphs[li], "halo", energy);
       }
     }
   }
@@ -298,17 +331,23 @@ function drawStarField(canvas: Cell[][], progress: number, ascii: boolean): void
 // ═══════════════════════════════════════════════════════════════
 
 function drawNebula(
-  canvas: Cell[][], progress: number, identity: Identity, ascii: boolean,
+  canvas: Cell[][],
+  progress: number,
+  identity: Identity,
+  ascii: boolean,
 ): void {
-  const presence = smoothstep(0.03, 0.16, progress) * (1 - smoothstep(0.42, 0.65, progress));
+  const presence =
+    smoothstep(0.03, 0.16, progress) * (1 - smoothstep(0.42, 0.65, progress));
   if (presence <= 0) return;
 
-  const W = canvas[0].length, H = canvas.length;
-  const cx = W / 2, cy = H / 2;
+  const W = canvas[0].length,
+    H = canvas.length;
+  const cx = W / 2,
+    cy = H / 2;
   const time = progress * identity.tempo * 2;
   const glyphs = ascii
-    ? ['.', ':', '+', '*'] as const
-    : ['·', '∙', '∴', '∷'] as const;
+    ? ([".", ":", "+", "*"] as const)
+    : (["·", "∙", "∴", "∷"] as const);
 
   for (let y = 1; y < H - 1; y++) {
     for (let x = 1; x < W - 1; x++) {
@@ -317,15 +356,20 @@ function drawNebula(
 
       // Asymmetric radial mask: broken by noise so it's not a perfect circle.
       // A perfect radial screams "computer generated" — this feels geological.
-      const dx = (x - cx) / cx, dy = (y - cy) / cy;
+      const dx = (x - cx) / cx,
+        dy = (y - cy) / cy;
       const radialNoise = valueNoise(x * 0.12 + time * 0.1, y * 0.18) * 0.25;
       const dist = Math.sqrt(dx * dx + dy * dy) + radialNoise;
-      const radial = smoothstep(1.35, 0.38, dist) * smoothstep(0.04, 0.22, dist);
+      const radial =
+        smoothstep(1.35, 0.38, dist) * smoothstep(0.04, 0.22, dist);
 
       const energy = clamp(val * radial * presence * 1.15, 0, 0.48);
       if (energy < 0.07) continue;
-      const gi = Math.min(glyphs.length - 1, Math.floor(energy * glyphs.length * 1.8));
-      put(canvas, x, y, glyphs[gi], 'halo', energy);
+      const gi = Math.min(
+        glyphs.length - 1,
+        Math.floor(energy * glyphs.length * 1.8),
+      );
+      put(canvas, x, y, glyphs[gi], "halo", energy);
     }
   }
 }
@@ -336,36 +380,61 @@ function drawNebula(
 //     ring — a dramatic opening beat.
 // ═══════════════════════════════════════════════════════════════
 
-function drawSingularity(canvas: Cell[][], progress: number, ascii: boolean): void {
+function drawSingularity(
+  canvas: Cell[][],
+  progress: number,
+  ascii: boolean,
+): void {
   if (progress > 0.28) return;
   const centerX = Math.floor(canvas[0].length / 2);
   const centerY = Math.floor(canvas.length / 2);
   const glyph = ascii
-    ? (progress < 0.04 ? '.' : progress < 0.10 ? 'o' : progress < 0.18 ? '*' : '#')
-    : (progress < 0.04 ? '·' : progress < 0.10 ? '◦' : progress < 0.18 ? '◇' : '◆');
-  const energy = smoothstep(0, 0.05, progress) * (1 - smoothstep(0.18, 0.28, progress));
-  put(canvas, centerX, centerY, glyph, 'spark', energy);
+    ? progress < 0.04
+      ? "."
+      : progress < 0.1
+        ? "o"
+        : progress < 0.18
+          ? "*"
+          : "#"
+    : progress < 0.04
+      ? "·"
+      : progress < 0.1
+        ? "◦"
+        : progress < 0.18
+          ? "◇"
+          : "◆";
+  const energy =
+    smoothstep(0, 0.05, progress) * (1 - smoothstep(0.18, 0.28, progress));
+  put(canvas, centerX, centerY, glyph, "spark", energy);
 
   // Halo glow radiating from the singularity
   if (energy > 0.15) {
-    const haloG = ascii ? '.' : '·';
+    const haloG = ascii ? "." : "·";
     for (let dy = -1; dy <= 1; dy++) {
       for (let dx = -3; dx <= 3; dx++) {
         if (dx === 0 && dy === 0) continue;
         const d = Math.sqrt(dx * dx + dy * dy * 4);
-        const he = energy * 0.35 / Math.max(d, 0.5);
-        if (he > 0.02) put(canvas, centerX + dx, centerY + dy, haloG, 'halo', he);
+        const he = (energy * 0.35) / Math.max(d, 0.5);
+        if (he > 0.02)
+          put(canvas, centerX + dx, centerY + dy, haloG, "halo", he);
       }
     }
   }
 }
 
-function drawShockwave(canvas: Cell[][], progress: number, ascii: boolean): void {
-  const presence = smoothstep(0.05, 0.09, progress) * (1 - smoothstep(0.18, 0.30, progress));
+function drawShockwave(
+  canvas: Cell[][],
+  progress: number,
+  ascii: boolean,
+): void {
+  const presence =
+    smoothstep(0.05, 0.09, progress) * (1 - smoothstep(0.18, 0.3, progress));
   if (presence <= 0) return;
 
-  const W = canvas[0].length, H = canvas.length;
-  const cx = W / 2, cy = H / 2;
+  const W = canvas[0].length,
+    H = canvas.length;
+  const cx = W / 2,
+    cy = H / 2;
   const aspect = 2.0;
   const maxRadius = Math.min(W * 0.45, H * 0.75);
   const ringRadius = smoothstep(0.05, 0.28, progress) * maxRadius;
@@ -373,18 +442,26 @@ function drawShockwave(canvas: Cell[][], progress: number, ascii: boolean): void
 
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
-      const dx = (x - cx) / aspect, dy = y - cy;
+      const dx = (x - cx) / aspect,
+        dy = y - cy;
       const dist = Math.sqrt(dx * dx + dy * dy);
       // Break the ring's perfect circularity with angular noise:
       // real shockwaves have turbulent, ragged edges.
       const angle = Math.atan2(dy, dx);
-      const edgeNoise = valueNoise(angle * 3 + progress * 5, progress * 8) * 1.2;
+      const edgeNoise =
+        valueNoise(angle * 3 + progress * 5, progress * 8) * 1.2;
       const ringDist = Math.abs(dist - ringRadius - edgeNoise);
       if (ringDist > ringWidth) continue;
-      const energy = presence * (1 - ringDist / ringWidth) * 0.50;
+      const energy = presence * (1 - ringDist / ringWidth) * 0.5;
       if (energy < 0.04) continue;
-      const glyph = ascii ? (energy > 0.22 ? '*' : '.') : (energy > 0.22 ? '∷' : '·');
-      put(canvas, x, y, glyph, 'spark', energy);
+      const glyph = ascii
+        ? energy > 0.22
+          ? "*"
+          : "."
+        : energy > 0.22
+          ? "∷"
+          : "·";
+      put(canvas, x, y, glyph, "spark", energy);
     }
   }
 }
@@ -409,50 +486,72 @@ function drawShockwave(canvas: Cell[][], progress: number, ascii: boolean): void
 // ═══════════════════════════════════════════════════════════════
 
 function drawHeroRibbon(
-  canvas: Cell[][], progress: number, identity: Identity, ascii: boolean,
+  canvas: Cell[][],
+  progress: number,
+  identity: Identity,
+  ascii: boolean,
 ): void {
   // Smooth lifecycle — gentle curves, no hard cuts
   const entrance = smoothstep(0.03, 0.22, progress);
-  const exit     = 1 - smoothstep(0.40, 0.64, progress);
-  const opacity  = entrance * exit;
+  const exit = 1 - smoothstep(0.4, 0.64, progress);
+  const opacity = entrance * exit;
   if (opacity <= 0) return;
 
-  const W = canvas[0].length, H = canvas.length;
-  const pixW = W * 2, pixH = H * 4;           // Braille sub-pixel canvas
-  const pcx = pixW / 2, pcy = pixH / 2;
+  const W = canvas[0].length,
+    H = canvas.length;
+  const pixW = W * 2,
+    pixH = H * 4; // Braille sub-pixel canvas
+  const pcx = pixW / 2,
+    pcy = pixH / 2;
   const scale = Math.min(pixW, pixH) * 0.38;
-  const D = 2.8;                               // perspective focal distance
+  const D = 2.8; // perspective focal distance
   const TWO_PI = Math.PI * 2;
 
   // ── Per-subpixel z-buffer + energy accumulator ──
-  const masks      = Array.from({ length: H }, () => new Int32Array(W));
-  const subZ       = Array.from({ length: H }, () =>
-    Array.from({ length: W }, () => new Float64Array(8).fill(Infinity)));
-  const cellZ      = Array.from({ length: H }, () => new Float64Array(W).fill(Infinity));
-  const cellEnergy = Array.from({ length: H }, () => new Float64Array(W).fill(0));
+  const masks = Array.from({ length: H }, () => new Int32Array(W));
+  const subZ = Array.from({ length: H }, () =>
+    Array.from({ length: W }, () => new Float64Array(8).fill(Infinity)),
+  );
+  const cellZ = Array.from({ length: H }, () =>
+    new Float64Array(W).fill(Infinity),
+  );
+  const cellEnergy = Array.from({ length: H }, () =>
+    new Float64Array(W).fill(0),
+  );
 
   // ── Dual-axis rotation with organic wobble ──
   //    Golden-ratio-derived frequencies guarantee the motion
   //    NEVER exactly repeats — it always feels alive, not looped.
   //    φ = 1.6180339887... used as the frequency multiplier.
   const PHI = 1.6180339887;
-  const time    = progress * identity.tempo;
-  const rotY    = time * Math.PI * (1 + PHI);                                   // ~2.618π
-  const rotX    = Math.PI / 5.7 + Math.sin(time * PHI * 1.17) * 0.11           // tilt wobble
-                + Math.sin(time * PHI * 2.91) * 0.03;                           // micro-wobble
-  const rotZ    = Math.sin(time * PHI * 1.67 + 0.4) * 0.055                    // primary roll
-                + Math.sin(time * 3.73) * 0.018;                                // asymmetric micro-roll
-  const breathe = 1 + Math.sin(time * Math.PI * PHI * 2.1) * 0.032 * entrance  // organic scale pulse
-                + Math.sin(time * 5.19) * 0.008 * entrance;                     // secondary pulse
+  const time = progress * identity.tempo;
+  const rotY = time * Math.PI * (1 + PHI); // ~2.618π
+  const rotX =
+    Math.PI / 5.7 +
+    Math.sin(time * PHI * 1.17) * 0.11 + // tilt wobble
+    Math.sin(time * PHI * 2.91) * 0.03; // micro-wobble
+  const rotZ =
+    Math.sin(time * PHI * 1.67 + 0.4) * 0.055 + // primary roll
+    Math.sin(time * 3.73) * 0.018; // asymmetric micro-roll
+  const breathe =
+    1 +
+    Math.sin(time * Math.PI * PHI * 2.1) * 0.032 * entrance + // organic scale pulse
+    Math.sin(time * 5.19) * 0.008 * entrance; // secondary pulse
 
   // Pre-computed trig
-  const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
-  const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
-  const cosZ = Math.cos(rotZ), sinZ = Math.sin(rotZ);
+  const cosY = Math.cos(rotY),
+    sinY = Math.sin(rotY);
+  const cosX = Math.cos(rotX),
+    sinX = Math.sin(rotX);
+  const cosZ = Math.cos(rotZ),
+    sinZ = Math.sin(rotZ);
 
   /** Apply Z→Y→X rotation (with optional breathing scale). */
   function rotate(
-    xL: number, yL: number, zL: number, applyBreathe: boolean,
+    xL: number,
+    yL: number,
+    zL: number,
+    applyBreathe: boolean,
   ): [number, number, number] {
     const x0 = applyBreathe ? xL * breathe : xL;
     const y0 = applyBreathe ? yL * breathe : yL;
@@ -471,17 +570,30 @@ function drawHeroRibbon(
 
   /** Perspective projection from view-space coordinates. */
   function project(
-    vx: number, vy: number, vz: number,
+    vx: number,
+    vy: number,
+    vz: number,
   ): { px: number; py: number; z3: number } | null {
     const denom = D - vz;
     if (denom <= 0.05) return null;
-    return { px: pcx + (vx * scale) / denom, py: pcy + (vy * scale) / denom, z3: vz };
+    return {
+      px: pcx + (vx * scale) / denom,
+      py: pcy + (vy * scale) / denom,
+      z3: vz,
+    };
   }
 
   /** Plot a sub-pixel dot into the Braille z-buffer. */
-  function plotBraille(px: number, py: number, z: number, energy: number): void {
-    const ipx = Math.round(px), ipy = Math.round(py);
-    const gx = Math.floor(ipx / 2), gy = Math.floor(ipy / 4);
+  function plotBraille(
+    px: number,
+    py: number,
+    z: number,
+    energy: number,
+  ): void {
+    const ipx = Math.round(px),
+      ipy = Math.round(py);
+    const gx = Math.floor(ipx / 2),
+      gy = Math.floor(ipy / 4);
     if (gx < 0 || gx >= W || gy < 0 || gy >= H) return;
     const sr = ((ipy % 4) + 4) % 4;
     const sc = ((ipx % 2) + 2) % 2;
@@ -502,37 +614,50 @@ function drawHeroRibbon(
   const lightZ = Math.sin(lightAngle) * 0.6 - 0.5;
 
   function phong(
-    vx: number, vy: number, vz: number,
-    nx: number, ny: number, nz: number,
+    vx: number,
+    vy: number,
+    vz: number,
+    nx: number,
+    ny: number,
+    nz: number,
   ): number {
     // Light direction
-    let lx = lightX - vx, ly = lightY - vy, lz = lightZ - vz;
+    let lx = lightX - vx,
+      ly = lightY - vy,
+      lz = lightZ - vz;
     const ll = Math.sqrt(lx * lx + ly * ly + lz * lz) || 1;
-    lx /= ll; ly /= ll; lz /= ll;
+    lx /= ll;
+    ly /= ll;
+    lz /= ll;
     // Diffuse
     const diff = Math.max(0, nx * lx + ny * ly + nz * lz);
     // Blinn-Phong specular (view along -Z)
-    const hx = lx, hy = ly, hz = lz - 1;
+    const hx = lx,
+      hy = ly,
+      hz = lz - 1;
     const hl = Math.sqrt(hx * hx + hy * hy + hz * hz) || 1;
     const spec = Math.pow(Math.max(0, (nx * hx + ny * hy + nz * hz) / hl), 28);
     // Rim light (edge glow for dramatic silhouette)
     const rim = Math.pow(1 - Math.abs(nz), 3) * 0.25;
-    return clamp(0.10 + 0.48 * diff + 0.30 * spec + rim, 0, 1);
+    return clamp(0.1 + 0.48 * diff + 0.3 * spec + rim, 0, 1);
   }
 
   // ── Knot parameters ──
-  const P = 2, Q = 3;
-  const R = 0.55, r = 0.22, tubeR = 0.058;
+  const P = 2,
+    Q = 3;
+  const R = 0.55,
+    r = 0.22,
+    tubeR = 0.058;
   const sampleCount = 640;
   const tubeSeg = 10;
 
   // Noise displacement — intensity scales with lifecycle
-  const noiseAmp  = 0.032 * entrance * (0.5 + 0.5 * exit);
+  const noiseAmp = 0.032 * entrance * (0.5 + 0.5 * exit);
   const noiseTime = time * 1.3;
 
   // Continuous gradient tail (comet-like luminous trail)
   const tailArc = TWO_PI * 0.38;
-  const headT   = (time * 1.2) % 1;
+  const headT = (time * 1.2) % 1;
 
   for (let i = 0; i < sampleCount; i++) {
     const tNorm = i / sampleCount;
@@ -541,15 +666,19 @@ function drawHeroRibbon(
     // ── Gradient tail fade ──
     //    The non-tail "ambient" glow uses noise instead of a flat floor,
     //    so every part of the ribbon has slightly different brightness.
-    const tdist = ((tNorm - headT) % 1 + 1) % 1;
-    const ambientGlow = 0.14 + 0.10 * valueNoise(t * 1.3 + time * 2, tNorm * 6 + time);
-    const tailFade = tdist < (tailArc / TWO_PI)
-      ? smoothstep(tailArc / TWO_PI, 0, tdist)
-      : ambientGlow;
+    const tdist = (((tNorm - headT) % 1) + 1) % 1;
+    const ambientGlow =
+      0.14 + 0.1 * valueNoise(t * 1.3 + time * 2, tNorm * 6 + time);
+    const tailFade =
+      tdist < tailArc / TWO_PI
+        ? smoothstep(tailArc / TWO_PI, 0, tdist)
+        : ambientGlow;
 
     // ── Base knot centerline ──
-    const cosQt = Math.cos(Q * t), sinQt = Math.sin(Q * t);
-    const cosPt = Math.cos(P * t), sinPt = Math.sin(P * t);
+    const cosQt = Math.cos(Q * t),
+      sinQt = Math.sin(Q * t);
+    const cosPt = Math.cos(P * t),
+      sinPt = Math.sin(P * t);
     let kx = (R + r * cosQt) * cosPt;
     let ky = (R + r * cosQt) * sinPt;
     let kz = r * sinQt;
@@ -564,29 +693,46 @@ function drawHeroRibbon(
     // ── Frenet frame ──
     const dt = 0.004;
     const t2 = t + dt;
-    const cosQt2 = Math.cos(Q * t2), sinQt2 = Math.sin(Q * t2);
-    const cosPt2 = Math.cos(P * t2), sinPt2 = Math.sin(P * t2);
+    const cosQt2 = Math.cos(Q * t2),
+      sinQt2 = Math.sin(Q * t2);
+    const cosPt2 = Math.cos(P * t2),
+      sinPt2 = Math.sin(P * t2);
     let fkx2 = (R + r * cosQt2) * cosPt2;
     let fky2 = (R + r * cosQt2) * sinPt2;
     let fkz2 = r * sinQt2;
-    const nv2 = fbm((t + dt) * 2.5 + noiseTime,
-      ((i + 1) / sampleCount) * 4 + noiseTime * 0.7, 3) - 0.5;
+    const nv2 =
+      fbm(
+        (t + dt) * 2.5 + noiseTime,
+        ((i + 1) / sampleCount) * 4 + noiseTime * 0.7,
+        3,
+      ) - 0.5;
     const rl2 = Math.sqrt(fkx2 * fkx2 + fky2 * fky2) || 1;
     fkx2 += (fkx2 / rl2) * nv2 * noiseAmp;
     fky2 += (fky2 / rl2) * nv2 * noiseAmp;
     fkz2 += nv2 * noiseAmp * 0.5;
 
     // Tangent
-    let tanX = fkx2 - kx, tanY = fky2 - ky, tanZ = fkz2 - kz;
+    let tanX = fkx2 - kx,
+      tanY = fky2 - ky,
+      tanZ = fkz2 - kz;
     const tLen = Math.sqrt(tanX * tanX + tanY * tanY + tanZ * tanZ) || 1;
-    tanX /= tLen; tanY /= tLen; tanZ /= tLen;
+    tanX /= tLen;
+    tanY /= tLen;
+    tanZ /= tLen;
 
     // Binormal = tangent × (0,0,1) with fallback
     const bz = 0;
-    let bx = tanY, by = -tanX;
+    let bx = tanY,
+      by = -tanX;
     let bLen = Math.sqrt(bx * bx + by * by);
-    if (bLen < 0.001) { bx = 1; by = 0; bLen = 1; }
-    else { bx /= bLen; by /= bLen; }
+    if (bLen < 0.001) {
+      bx = 1;
+      by = 0;
+      bLen = 1;
+    } else {
+      bx /= bLen;
+      by /= bLen;
+    }
 
     // Normal = tangent × binormal
     const nnx = tanY * bz - tanZ * by;
@@ -599,7 +745,8 @@ function drawHeroRibbon(
     // ── Render tube cross-section with Phong shading ──
     for (let s = 0; s < tubeSeg; s++) {
       const a = (s / tubeSeg) * TWO_PI;
-      const ca = Math.cos(a), sa = Math.sin(a);
+      const ca = Math.cos(a),
+        sa = Math.sin(a);
       const ox = kx + localTubeR * (ca * bx + sa * nnx);
       const oy = ky + localTubeR * (ca * by + sa * nny);
       const oz = kz + localTubeR * (ca * bz + sa * nnz);
@@ -621,11 +768,18 @@ function drawHeroRibbon(
       const finalEnergy = opacity * tailFade * phongE;
 
       if (ascii) {
-        const cx2 = Math.round(proj.px / 2), cy2 = Math.round(proj.py / 4);
+        const cx2 = Math.round(proj.px / 2),
+          cy2 = Math.round(proj.py / 4);
         if (cx2 < 0 || cx2 >= W || cy2 < 0 || cy2 >= H) continue;
-        const g = finalEnergy > 0.5 ? '@' : finalEnergy > 0.3 ? '#'
-          : finalEnergy > 0.15 ? 'o' : '.';
-        const layer: Layer = proj.z3 > 0 ? 'field' : 'spark';
+        const g =
+          finalEnergy > 0.5
+            ? "@"
+            : finalEnergy > 0.3
+              ? "#"
+              : finalEnergy > 0.15
+                ? "o"
+                : ".";
+        const layer: Layer = proj.z3 > 0 ? "field" : "spark";
         put(canvas, cx2, cy2, g, layer, finalEnergy, proj.z3);
       } else {
         plotBraille(proj.px, proj.py, proj.z3, finalEnergy);
@@ -643,9 +797,9 @@ function drawHeroRibbon(
     const s3 = hash21(i * 23.3, i * 19.7);
 
     const orbitR = 0.72 + s1 * 0.38;
-    const tilt   = s2 * Math.PI;
-    const speed  = 0.4 + s3 * 0.7;
-    const phase  = (i / numParticles) * TWO_PI + s1 * TWO_PI;
+    const tilt = s2 * Math.PI;
+    const speed = 0.4 + s3 * 0.7;
+    const phase = (i / numParticles) * TWO_PI + s1 * TWO_PI;
 
     const pt = phase + time * speed * TWO_PI;
     let px = orbitR * Math.cos(pt);
@@ -664,10 +818,19 @@ function drawHeroRibbon(
     if (brightness < 0.04) continue;
 
     if (ascii) {
-      const cx2 = Math.round(proj.px / 2), cy2 = Math.round(proj.py / 4);
+      const cx2 = Math.round(proj.px / 2),
+        cy2 = Math.round(proj.py / 4);
       if (cx2 >= 0 && cx2 < W && cy2 >= 0 && cy2 < H) {
-        const layer: Layer = proj.z3 > 0 ? 'field' : 'spark';
-        put(canvas, cx2, cy2, brightness > 0.25 ? '*' : '.', layer, brightness, proj.z3);
+        const layer: Layer = proj.z3 > 0 ? "field" : "spark";
+        put(
+          canvas,
+          cx2,
+          cy2,
+          brightness > 0.25 ? "*" : ".",
+          layer,
+          brightness,
+          proj.z3,
+        );
       }
     } else {
       plotBraille(proj.px, proj.py, proj.z3, brightness);
@@ -681,7 +844,7 @@ function drawHeroRibbon(
         if (masks[y][x] === 0) continue;
         const braille = String.fromCodePoint(0x2800 + masks[y][x]);
         const energy = cellEnergy[y][x];
-        const layer: Layer = cellZ[y][x] > 0 ? 'field' : 'spark';
+        const layer: Layer = cellZ[y][x] > 0 ? "field" : "spark";
         put(canvas, x, y, braille, layer, energy, cellZ[y][x]);
       }
     }
@@ -694,28 +857,37 @@ function drawHeroRibbon(
 //     ribbon dissolution) — a signature cinematic touch.
 // ═══════════════════════════════════════════════════════════════
 
-function drawLensFlare(canvas: Cell[][], progress: number, ascii: boolean): void {
-  const flare1 = smoothstep(0.07, 0.11, progress) * (1 - smoothstep(0.14, 0.20, progress));
-  const flare2 = smoothstep(0.53, 0.59, progress) * (1 - smoothstep(0.63, 0.71, progress)) * 0.45;
+function drawLensFlare(
+  canvas: Cell[][],
+  progress: number,
+  ascii: boolean,
+): void {
+  const flare1 =
+    smoothstep(0.07, 0.11, progress) * (1 - smoothstep(0.14, 0.2, progress));
+  const flare2 =
+    smoothstep(0.53, 0.59, progress) *
+    (1 - smoothstep(0.63, 0.71, progress)) *
+    0.45;
   const intensity = Math.max(flare1, flare2);
   if (intensity <= 0.01) return;
 
-  const W = canvas[0].length, H = canvas.length;
+  const W = canvas[0].length,
+    H = canvas.length;
   // Slight vertical drift so the streak isn't perfectly centered — feels organic
   const cy = Math.floor(H / 2) + (progress > 0.5 ? -1 : 0);
-  const glyph = ascii ? '-' : '─';
+  const glyph = ascii ? "-" : "─";
 
   // Asymmetric Gaussian: slightly wider to the right (anamorphic lens asymmetry)
   for (let x = 0; x < W; x++) {
     const dx = (x - W / 2) / (W / 2);
-    const asym = dx > 0 ? 1.6 : 2.0;  // tighter fall-off on the left
+    const asym = dx > 0 ? 1.6 : 2.0; // tighter fall-off on the left
     const energy = intensity * Math.exp(-dx * dx * asym) * 0.38;
     if (energy < 0.03) continue;
-    put(canvas, x, cy, glyph, 'spark', energy);
+    put(canvas, x, cy, glyph, "spark", energy);
     if (energy > 0.09) {
-      const faintE = energy * 0.20;
-      put(canvas, x, cy - 1, ascii ? '.' : '·', 'halo', faintE);
-      put(canvas, x, cy + 1, ascii ? '.' : '·', 'halo', faintE * 0.7); // bottom streak dimmer
+      const faintE = energy * 0.2;
+      put(canvas, x, cy - 1, ascii ? "." : "·", "halo", faintE);
+      put(canvas, x, cy + 1, ascii ? "." : "·", "halo", faintE * 0.7); // bottom streak dimmer
     }
   }
 }
@@ -729,12 +901,15 @@ function computeBloom(canvas: Cell[][], W: number, H: number): Float64Array[] {
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
       const c = canvas[y][x];
-      if (c.energy < 0.30 || (c.layer !== 'spark' && c.layer !== 'field')) continue;
+      if (c.energy < 0.3 || (c.layer !== "spark" && c.layer !== "field"))
+        continue;
       // Extended kernel: radius 3 horizontal × 2 vertical (aspect-aware)
       for (let dy = -2; dy <= 2; dy++) {
         for (let dx = -3; dx <= 3; dx++) {
-          const ny = y + dy, nx = x + dx;
-          if (ny < 0 || ny >= H || nx < 0 || nx >= W || (dx === 0 && dy === 0)) continue;
+          const ny = y + dy,
+            nx = x + dx;
+          if (ny < 0 || ny >= H || nx < 0 || nx >= W || (dx === 0 && dy === 0))
+            continue;
           const dist = Math.sqrt(dx * dx + dy * dy * 4); // aspect-corrected
           bloom[ny][nx] += c.energy * Math.exp(-dist * 0.55) * 0.07;
         }
@@ -749,33 +924,48 @@ function computeBloom(canvas: Cell[][], W: number, H: number): Float64Array[] {
 // ═══════════════════════════════════════════════════════════════
 
 function drawEditorialFrame(
-  canvas: Cell[][], progress: number, identity: Identity, ascii: boolean,
+  canvas: Cell[][],
+  progress: number,
+  identity: Identity,
+  ascii: boolean,
 ): void {
-  const W = canvas[0].length, H = canvas.length;
+  const W = canvas[0].length,
+    H = canvas.length;
   if (W < 48 || H < 11) return;
   const presence = smoothstep(0.32, 0.58, progress);
   if (presence <= 0) return;
 
   const mx = W >= 92 ? 6 : 3;
-  const top = 1, bottom = H - 2, left = mx, right = W - mx - 1;
+  const top = 1,
+    bottom = H - 2,
+    left = mx,
+    right = W - mx - 1;
   const drawLen = Math.floor((right - left) * presence);
-  const rail = ascii ? '-' : progress < 0.9 ? '─' : '━';
-  const corner = ascii ? '+' : progress < 0.9 ? '╴' : '╸';
+  const rail = ascii ? "-" : progress < 0.9 ? "─" : "━";
+  const corner = ascii ? "+" : progress < 0.9 ? "╴" : "╸";
 
   for (let i = 0; i <= drawLen; i++) {
     const edgeE = i > drawLen - 3 ? 0.44 : 0.22;
-    put(canvas, left + i, top, i === drawLen ? corner : rail, 'frame', edgeE);
-    put(canvas, right - i, bottom, i === drawLen ? (ascii ? '+' : '╶') : rail, 'frame', edgeE);
+    put(canvas, left + i, top, i === drawLen ? corner : rail, "frame", edgeE);
+    put(
+      canvas,
+      right - i,
+      bottom,
+      i === drawLen ? (ascii ? "+" : "╶") : rail,
+      "frame",
+      edgeE,
+    );
   }
 
-  const ticks = identity.name === 'helen'
-    ? ['SYSTEM', 'COMPOSED', 'READY']
-    : ['AUTHOR', 'ENEKO', 'RUIZ'];
-  const caption = ` ${ticks.join('  /  ')} `;
+  const ticks =
+    identity.name === "helen"
+      ? ["SYSTEM", "COMPOSED", "READY"]
+      : ["AUTHOR", "ENEKO", "RUIZ"];
+  const caption = ` ${ticks.join("  /  ")} `;
   if (caption.length + 2 < right - left && progress > 0.66) {
     const cl = Math.floor((W - caption.length) / 2);
     Array.from(caption).forEach((g, i) => {
-      if (g !== ' ') put(canvas, cl + i, top, g, 'frame', 0.5);
+      if (g !== " ") put(canvas, cl + i, top, g, "frame", 0.5);
     });
   }
 }
@@ -785,28 +975,41 @@ function drawEditorialFrame(
 // ═══════════════════════════════════════════════════════════════
 
 function drawWordmark(
-  canvas: Cell[][], progress: number, identity: Identity, ascii: boolean,
+  canvas: Cell[][],
+  progress: number,
+  identity: Identity,
+  ascii: boolean,
 ): void {
   if (progress < 0.18) return;
-  const W = canvas[0].length, H = canvas.length;
-  const wm = ascii ? identity.ascii
-    : W >= identity.minimumLargeWidth ? identity.large : identity.compact;
-  const logoW = Math.max(...wm.map(l => l.length));
+  const W = canvas[0].length,
+    H = canvas.length;
+  const wm = ascii
+    ? identity.ascii
+    : W >= identity.minimumLargeWidth
+      ? identity.large
+      : identity.compact;
+  const logoW = Math.max(...wm.map((l) => l.length));
   const left = Math.max(0, Math.floor((W - logoW) / 2));
   const top = Math.max(1, Math.floor((H - wm.length) / 2));
   const reveal = easeInOutCubic(clamp((progress - 0.18) / 0.52, 0, 1));
   const revealX = reveal * (logoW + 10) - 5;
 
-  wm.forEach((line, y) => Array.from(line).forEach((ch, x) => {
-    if (ch === ' ') return;
-    const d = revealX - x - Math.sin(y * 1.35 + x * 0.21) * 2;
-    if (d < -2) return;
-    if (d < -0.2)      put(canvas, left + x, top + y, ascii ? '.' : '·', 'wordmark', 0.25);
-    else if (d < 1.15) put(canvas, left + x, top + y, ascii ? ':' : '░', 'wordmark', 0.5);
-    else if (d < 2.5)  put(canvas, left + x, top + y, ascii ? '+' : '▒', 'wordmark', 0.8);
-    else if (d < 4)    put(canvas, left + x, top + y, ascii ? '#' : '▓', 'wordmark', 1);
-    else               put(canvas, left + x, top + y, ch, 'wordmark', 0.78);
-  }));
+  wm.forEach((line, y) =>
+    Array.from(line).forEach((ch, x) => {
+      if (ch === " ") return;
+      const d = revealX - x - Math.sin(y * 1.35 + x * 0.21) * 2;
+      if (d < -2) return;
+      if (d < -0.2)
+        put(canvas, left + x, top + y, ascii ? "." : "·", "wordmark", 0.25);
+      else if (d < 1.15)
+        put(canvas, left + x, top + y, ascii ? ":" : "░", "wordmark", 0.5);
+      else if (d < 2.5)
+        put(canvas, left + x, top + y, ascii ? "+" : "▒", "wordmark", 0.8);
+      else if (d < 4)
+        put(canvas, left + x, top + y, ascii ? "#" : "▓", "wordmark", 1);
+      else put(canvas, left + x, top + y, ch, "wordmark", 0.78);
+    }),
+  );
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -814,27 +1017,39 @@ function drawWordmark(
 // ═══════════════════════════════════════════════════════════════
 
 function drawAttribution(
-  canvas: Cell[][], progress: number, identity: Identity, ascii: boolean,
+  canvas: Cell[][],
+  progress: number,
+  identity: Identity,
+  ascii: boolean,
 ): void {
-  if (identity.name !== 'helen' || progress < 0.62) return;
-  const W = canvas[0].length, H = canvas.length;
-  const wm = ascii ? identity.ascii
-    : W >= identity.minimumLargeWidth ? identity.large : identity.compact;
+  if (identity.name !== "helen" || progress < 0.62) return;
+  const W = canvas[0].length,
+    H = canvas.length;
+  const wm = ascii
+    ? identity.ascii
+    : W >= identity.minimumLargeWidth
+      ? identity.large
+      : identity.compact;
   const top = Math.max(1, Math.floor((H - wm.length) / 2));
   const y = top + wm.length + 1;
   if (y >= H) return;
 
-  const preferred = 'B Y   E N E K O   R U I Z';
-  const label = W >= preferred.length + 2 ? preferred : 'BY ENEKO RUIZ';
+  const preferred = "B Y   E N E K O   R U I Z";
+  const label = W >= preferred.length + 2 ? preferred : "BY ENEKO RUIZ";
   const left = Math.max(0, Math.floor((W - label.length) / 2));
   const reveal = smoothstep(0.62, 0.82, progress) * (label.length + 3);
 
   Array.from(label).forEach((g, x) => {
-    if (g === ' ' || x > reveal) return;
+    if (g === " " || x > reveal) return;
     const edge = reveal - x;
-    put(canvas, left + x, y,
-      edge < 1.5 ? (ascii ? '.' : '·') : g,
-      'attribution', edge < 1.5 ? 0.3 : 0.72);
+    put(
+      canvas,
+      left + x,
+      y,
+      edge < 1.5 ? (ascii ? "." : "·") : g,
+      "attribution",
+      edge < 1.5 ? 0.3 : 0.72,
+    );
   });
 }
 
@@ -846,13 +1061,13 @@ function drawAttribution(
 
 /** Holographic gradient: blue → cyan → violet → magenta → rose → gold → blue */
 const IRIDESCENT: readonly (readonly number[])[] = [
-  [30, 110, 255],    // electric blue
-  [0, 205, 235],     // cyan
-  [115, 95, 255],    // violet
-  [195, 85, 255],    // magenta
-  [255, 150, 190],   // rose
-  [255, 200, 115],   // warm gold
-  [30, 110, 255],    // loop back
+  [30, 110, 255], // electric blue
+  [0, 205, 235], // cyan
+  [115, 95, 255], // violet
+  [195, 85, 255], // magenta
+  [255, 150, 190], // rose
+  [255, 200, 115], // warm gold
+  [30, 110, 255], // loop back
 ];
 
 function iridescentAt(t: number): [number, number, number] {
@@ -867,119 +1082,193 @@ function iridescentAt(t: number): [number, number, number] {
 }
 
 function colorize(
-  canvas: Cell[][], bloom: Float64Array[], progress: number, color: boolean,
+  canvas: Cell[][],
+  bloom: Float64Array[],
+  progress: number,
+  color: boolean,
 ): string {
-  const W = canvas[0].length, H = canvas.length;
-  const revealSweep    = easeInOutCubic(clamp((progress - 0.16) / 0.48, 0, 1)) * (W + 14) - 7;
-  const signatureSweep = easeInOutCubic(clamp((progress - 0.58) / 0.22, 0, 1)) * (W + 18) - 9;
+  const W = canvas[0].length,
+    H = canvas.length;
+  const revealSweep =
+    easeInOutCubic(clamp((progress - 0.16) / 0.48, 0, 1)) * (W + 14) - 7;
+  const signatureSweep =
+    easeInOutCubic(clamp((progress - 0.58) / 0.22, 0, 1)) * (W + 18) - 9;
 
   // Palette constants
   const titanium = [245, 245, 247] as const;
-  const graphite = [50, 55, 68]    as const;
-  const silver   = [164, 170, 184] as const;
-  const gold     = [255, 210, 80]  as const;
-  const ember    = [255, 196, 126] as const;
+  const graphite = [50, 55, 68] as const;
+  const silver = [164, 170, 184] as const;
+  const gold = [255, 210, 80] as const;
+  const ember = [255, 196, 126] as const;
 
   // Film grain frame seed
   const grainFrame = Math.floor(progress * 200);
 
-  return canvas.map((row, y) => row.map((cell, x) => {
-    // ── Anamorphic vignette (heavier top/bottom, lighter sides) ──
-    const dcx = (x - W / 2) / (W / 2);
-    const dcy = (y - H / 2) / (H / 2);
-    const vig = 1
-      - smoothstep(0.45, 1.3, Math.abs(dcy)) * 0.3
-      - smoothstep(0.75, 1.5, Math.abs(dcx)) * 0.12;
+  return canvas
+    .map((row, y) =>
+      row
+        .map((cell, x) => {
+          // ── Anamorphic vignette (heavier top/bottom, lighter sides) ──
+          const dcx = (x - W / 2) / (W / 2);
+          const dcy = (y - H / 2) / (H / 2);
+          const vig =
+            1 -
+            smoothstep(0.45, 1.3, Math.abs(dcy)) * 0.3 -
+            smoothstep(0.75, 1.5, Math.abs(dcx)) * 0.12;
 
-    // ── Film grain: subtle deterministic noise texture ──
-    const grain = color ? (hash21(x * 73 + grainFrame, y * 157) - 0.5) * 5 : 0;
+          // ── Film grain: subtle deterministic noise texture ──
+          const grain = color
+            ? (hash21(x * 73 + grainFrame, y * 157) - 0.5) * 5
+            : 0;
 
-    // ── Empty cell: render bloom glow ──
-    if (cell.layer === 'empty') {
-      const b = bloom[y]?.[x] ?? 0;
-      if (b > 0.04 && color) {
-        const gc = iridescentAt((x / W + progress * 0.4) % 1);
-        return paint('·', [
-          gc[0] * b * vig * 0.50 + grain,
-          gc[1] * b * vig * 0.50 + grain,
-          gc[2] * b * vig * 0.50 + grain,
-        ], true);
-      }
-      return ' ';
-    }
+          // ── Empty cell: render bloom glow ──
+          if (cell.layer === "empty") {
+            const b = bloom[y]?.[x] ?? 0;
+            if (b > 0.04 && color) {
+              const gc = iridescentAt((x / W + progress * 0.4) % 1);
+              return paint(
+                "·",
+                [
+                  gc[0] * b * vig * 0.5 + grain,
+                  gc[1] * b * vig * 0.5 + grain,
+                  gc[2] * b * vig * 0.5 + grain,
+                ],
+                true,
+              );
+            }
+            return " ";
+          }
 
-    // ── Star field / atmospheric nebula ──
-    if (cell.layer === 'halo') {
-      const sc = iridescentAt((x / W + y / H * 0.5 + progress * 0.3) % 1);
-      return paint(cell.glyph, lerpVec(graphite, sc, cell.energy * 0.45 * vig), color);
-    }
+          // ── Star field / atmospheric nebula ──
+          if (cell.layer === "halo") {
+            const sc = iridescentAt(
+              (x / W + (y / H) * 0.5 + progress * 0.3) % 1,
+            );
+            return paint(
+              cell.glyph,
+              lerpVec(graphite, sc, cell.energy * 0.45 * vig),
+              color,
+            );
+          }
 
-    // ── 3D ribbon (field = back faces, spark = front faces) ──
-    if (cell.layer === 'field' || cell.layer === 'spark') {
-      const depthComponent = cell.depth !== Infinity ? cell.depth * 0.25 : 0;
-      const iridT = (x / W * 0.7 + depthComponent + progress * 0.5) % 1;
-      const base = iridescentAt(iridT);
-      const brightness = cell.energy * vig;
+          // ── 3D ribbon (field = back faces, spark = front faces) ──
+          if (cell.layer === "field" || cell.layer === "spark") {
+            const depthComponent =
+              cell.depth !== Infinity ? cell.depth * 0.25 : 0;
+            const iridT = ((x / W) * 0.7 + depthComponent + progress * 0.5) % 1;
+            const base = iridescentAt(iridT);
+            const brightness = cell.energy * vig;
 
-      // Chromatic aberration: R-shift right, B-shift left
-      const aber = Math.abs(dcx) * 0.15;
-      const cr = base[0] * brightness + (dcx > 0 ? aber * 50 : 0);
-      const cg = base[1] * brightness;
-      const cb = base[2] * brightness + (dcx < 0 ? aber * 50 : 0);
+            // Chromatic aberration: R-shift right, B-shift left
+            const aber = Math.abs(dcx) * 0.15;
+            const cr = base[0] * brightness + (dcx > 0 ? aber * 50 : 0);
+            const cg = base[1] * brightness;
+            const cb = base[2] * brightness + (dcx < 0 ? aber * 50 : 0);
 
-      // Bloom brightness boost + film grain
-      const bb = (bloom[y]?.[x] ?? 0) * 0.35;
+            // Bloom brightness boost + film grain
+            const bb = (bloom[y]?.[x] ?? 0) * 0.35;
 
-      return paint(cell.glyph, [
-        clamp(cr + bb * base[0] + grain, 0, 255),
-        clamp(cg + bb * base[1] + grain, 0, 255),
-        clamp(cb + bb * base[2] + grain, 0, 255),
-      ], color);
-    }
+            return paint(
+              cell.glyph,
+              [
+                clamp(cr + bb * base[0] + grain, 0, 255),
+                clamp(cg + bb * base[1] + grain, 0, 255),
+                clamp(cb + bb * base[2] + grain, 0, 255),
+              ],
+              color,
+            );
+          }
 
-    // ── Frame: warm gold → amber ──
-    if (cell.layer === 'frame') {
-      const warmth = (x / Math.max(1, W) + progress * 0.25) % 1;
-      const fc = warmth < 0.5
-        ? lerpVec(graphite, gold, cell.energy * 0.7 * vig)
-        : lerpVec(graphite, ember, cell.energy * 0.65 * vig);
-      return paint(cell.glyph, [fc[0] + grain, fc[1] + grain, fc[2] + grain], color);
-    }
+          // ── Frame: warm gold → amber ──
+          if (cell.layer === "frame") {
+            const warmth = (x / Math.max(1, W) + progress * 0.25) % 1;
+            const fc =
+              warmth < 0.5
+                ? lerpVec(graphite, gold, cell.energy * 0.7 * vig)
+                : lerpVec(graphite, ember, cell.energy * 0.65 * vig);
+            return paint(
+              cell.glyph,
+              [fc[0] + grain, fc[1] + grain, fc[2] + grain],
+              color,
+            );
+          }
 
-    // ── Attribution: silver ──
-    if (cell.layer === 'attribution') {
-      return paint(cell.glyph, lerpVec(graphite, silver, cell.energy * vig), color);
-    }
+          // ── Attribution: silver ──
+          if (cell.layer === "attribution") {
+            return paint(
+              cell.glyph,
+              lerpVec(graphite, silver, cell.energy * vig),
+              color,
+            );
+          }
 
-    // ── Wordmark: multi-stage cinematic reveal ──
-    if (progress >= 0.94) return paint(cell.glyph, titanium, color);
+          // ── Wordmark: multi-stage cinematic reveal ──
+          if (progress >= 0.94) return paint(cell.glyph, titanium, color);
 
-    const revealD = Math.abs(x - revealSweep);
-    const sigD    = Math.abs(x - signatureSweep);
+          const revealD = Math.abs(x - revealSweep);
+          const sigD = Math.abs(x - signatureSweep);
 
-    // Signature sweep: iridescent leading edge → titanium
-    if (sigD < 2.4) return paint(cell.glyph, lerpVec(gold, titanium, 0.8), color);
-    if (sigD < 5)   return paint(cell.glyph, iridescentAt((sigD / 5 + progress) % 1), color);
-    if (sigD < 9)   return paint(cell.glyph, lerpVec([115, 95, 255], [30, 110, 255], (sigD - 5) / 4), color);
+          // Signature sweep: iridescent leading edge → titanium
+          if (sigD < 2.4)
+            return paint(cell.glyph, lerpVec(gold, titanium, 0.8), color);
+          if (sigD < 5)
+            return paint(
+              cell.glyph,
+              iridescentAt((sigD / 5 + progress) % 1),
+              color,
+            );
+          if (sigD < 9)
+            return paint(
+              cell.glyph,
+              lerpVec([115, 95, 255], [30, 110, 255], (sigD - 5) / 4),
+              color,
+            );
 
-    // Reveal sweep: cyan pulse → titanium
-    if (revealD < 3)  return paint(cell.glyph, lerpVec([0, 205, 235], [30, 110, 255], revealD / 3), color);
-    if (revealD < 8)  return paint(cell.glyph, lerpVec([30, 110, 255], titanium, (revealD - 3) / 5), color);
-    if (revealD < 14) return paint(cell.glyph, lerpVec(titanium, silver, (revealD - 8) / 6), color);
-    return paint(cell.glyph, lerpVec(graphite, silver, cell.energy * vig), color);
-  }).join('').replace(/\s+$/, '')).join('\n');
+          // Reveal sweep: cyan pulse → titanium
+          if (revealD < 3)
+            return paint(
+              cell.glyph,
+              lerpVec([0, 205, 235], [30, 110, 255], revealD / 3),
+              color,
+            );
+          if (revealD < 8)
+            return paint(
+              cell.glyph,
+              lerpVec([30, 110, 255], titanium, (revealD - 3) / 5),
+              color,
+            );
+          if (revealD < 14)
+            return paint(
+              cell.glyph,
+              lerpVec(titanium, silver, (revealD - 8) / 6),
+              color,
+            );
+          return paint(
+            cell.glyph,
+            lerpVec(graphite, silver, cell.energy * vig),
+            color,
+          );
+        })
+        .join("")
+        .replace(/\s+$/, ""),
+    )
+    .join("\n");
 }
 
 // ═══════════════════════════════════════════════════════════════
 // §14  Render Pipeline
 // ═══════════════════════════════════════════════════════════════
 
-export function shouldAnimateCinematicArt(capabilities: TerminalCapabilities): boolean {
-  return capabilities.isTTY
-    && capabilities.inputTTY !== false
-    && !capabilities.reducedMotion
-    && !capabilities.ci
-    && capabilities.term !== 'dumb';
+export function shouldAnimateCinematicArt(
+  capabilities: TerminalCapabilities,
+): boolean {
+  return (
+    capabilities.isTTY &&
+    capabilities.inputTTY !== false &&
+    !capabilities.reducedMotion &&
+    !capabilities.ci &&
+    capabilities.term !== "dumb"
+  );
 }
 
 export function renderCinematicFrame(
@@ -988,9 +1277,9 @@ export function renderCinematicFrame(
   options: CinematicArtOptions = {},
 ): string {
   const identity = IDENTITIES[identityName];
-  const width  = clamp(options.width ?? 80, 20, 120);
+  const width = clamp(options.width ?? 80, 20, 120);
   const height = clamp(options.height ?? 18, 7, 26);
-  const ascii  = options.ascii ?? false;
+  const ascii = options.ascii ?? false;
   const canvas = createCanvas(width, height);
 
   // 1. Deep space
@@ -1021,31 +1310,34 @@ export function renderCinematicFrame(
 }
 
 export function renderHelenWordmark(options: CinematicArtOptions = {}): string {
-  return renderCinematicFrame('helen', 1, options);
+  return renderCinematicFrame("helen", 1, options);
 }
 
-export function renderEnekoRuizWordmark(options: CinematicArtOptions = {}): string {
-  return renderCinematicFrame('eneko-ruiz', 1, options);
+export function renderEnekoRuizWordmark(
+  options: CinematicArtOptions = {},
+): string {
+  return renderCinematicFrame("eneko-ruiz", 1, options);
 }
 
 // ═══════════════════════════════════════════════════════════════
 // §15  Animation Loop
 // ═══════════════════════════════════════════════════════════════
 
-const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 function reducedMotionRequested(): boolean {
   const v = process.env.HELEN_MOTION?.toLowerCase();
-  return v === 'reduce' || v === 'off';
+  return v === "reduce" || v === "off";
 }
 
 export function shouldUseAsciiArt(): boolean {
-  if (process.env.HELEN_ASCII === '1') return true;
-  if (process.env.HELEN_ASCII === '0') return false;
-  if (process.platform !== 'win32') return false;
+  if (process.env.HELEN_ASCII === "1") return true;
+  if (process.env.HELEN_ASCII === "0") return false;
+  if (process.platform !== "win32") return false;
   if (process.env.WT_SESSION || process.env.TERM_PROGRAM) return false;
   return !/utf-?8/i.test(
-    `${process.env.LANG ?? ''} ${process.env.LC_ALL ?? ''} ${process.env.LC_CTYPE ?? ''}`,
+    `${process.env.LANG ?? ""} ${process.env.LC_ALL ?? ""} ${process.env.LC_CTYPE ?? ""}`,
   );
 }
 
@@ -1059,8 +1351,8 @@ export interface CinematicInput {
   isRaw?: boolean;
   readableFlowing: boolean | null;
   setRawMode?: (enabled: boolean) => unknown;
-  on(event: 'data', listener: () => void): unknown;
-  removeListener(event: 'data', listener: () => void): unknown;
+  on(event: "data", listener: () => void): unknown;
+  removeListener(event: "data", listener: () => void): unknown;
   resume(): unknown;
   pause(): unknown;
 }
@@ -1078,25 +1370,27 @@ export async function playCinematicSequence(
   let changedRaw = false;
   const wasRaw = Boolean(input.isRaw);
   const wasFlowing = input.readableFlowing === true;
-  const onKey = () => { skipped = true; };
+  const onKey = () => {
+    skipped = true;
+  };
   const frames = brief ? 16 : 64;
   try {
     if (input.isTTY && input.setRawMode) {
       input.setRawMode(true);
       changedRaw = true;
-      input.on('data', onKey);
+      input.on("data", onKey);
       attached = true;
       input.resume();
     }
     write(HIDE_CURSOR + CLEAR_SCREEN);
     for (let frame = 0; frame < frames && !skipped; frame++) {
-      write(ESC + 'H' + CLEAR_BELOW + render(frame / (frames - 1)) + RESET);
+      write(ESC + "H" + CLEAR_BELOW + render(frame / (frames - 1)) + RESET);
       await wait(brief ? 30 : 24);
     }
     if (!skipped) await wait(brief ? 80 : 420);
-    write('\n');
+    write("\n");
   } finally {
-    if (attached) input.removeListener('data', onKey);
+    if (attached) input.removeListener("data", onKey);
     try {
       if (changedRaw) input.setRawMode?.(wasRaw);
     } finally {
@@ -1106,11 +1400,14 @@ export async function playCinematicSequence(
   }
 }
 
-async function runIdentity(identity: IdentityName, options: CinematicPlaybackOptions = {}): Promise<void> {
-  const width  = clamp(process.stdout.columns ?? 80, 20, 120);
+async function runIdentity(
+  identity: IdentityName,
+  options: CinematicPlaybackOptions = {},
+): Promise<void> {
+  const width = clamp(process.stdout.columns ?? 80, 20, 120);
   const height = clamp((process.stdout.rows ?? 22) - 1, 7, 26);
-  const color  = process.env.NO_COLOR === undefined;
-  const ascii  = shouldUseAsciiArt();
+  const color = process.env.NO_COLOR === undefined;
+  const ascii = shouldUseAsciiArt();
   const animate = shouldAnimateCinematicArt({
     isTTY: Boolean(process.stdout.isTTY),
     inputTTY: Boolean(process.stdin.isTTY && process.stdin.setRawMode),
@@ -1120,44 +1417,66 @@ async function runIdentity(identity: IdentityName, options: CinematicPlaybackOpt
   });
 
   if (!animate) {
-    console.log(renderCinematicFrame(identity, 1, {
-      width, height: Math.min(height, 14), color, ascii,
-    }));
+    console.log(
+      renderCinematicFrame(identity, 1, {
+        width,
+        height: Math.min(height, 14),
+        color,
+        ascii,
+      }),
+    );
     return;
   }
 
   await playCinematicSequence(
-    text => process.stdout.write(text), process.stdin,
-    progress => renderCinematicFrame(identity, progress, { width, height, color, ascii }),
+    (text) => process.stdout.write(text),
+    process.stdin,
+    (progress) =>
+      renderCinematicFrame(identity, progress, { width, height, color, ascii }),
     options.brief,
   );
 }
 
-export async function runHelenArt(options: CinematicPlaybackOptions = {}): Promise<void> {
-  await runIdentity('helen', options);
+export async function runHelenArt(
+  options: CinematicPlaybackOptions = {},
+): Promise<void> {
+  await runIdentity("helen", options);
 }
 
-export async function runEnekoRuizArt(options: CinematicPlaybackOptions = {}): Promise<void> {
-  await runIdentity('eneko-ruiz', options);
+export async function runEnekoRuizArt(
+  options: CinematicPlaybackOptions = {},
+): Promise<void> {
+  await runIdentity("eneko-ruiz", options);
 }
 
 export function startupWelcomeIdentity(
   options: { welcome?: string; animation?: boolean },
   runtime = {
-    inputTTY: Boolean(process.stdin.isTTY), welcome: process.env.HELEN_WELCOME,
+    inputTTY: Boolean(process.stdin.isTTY),
+    welcome: process.env.HELEN_WELCOME,
     capabilities: {
-      isTTY: Boolean(process.stdout.isTTY), reducedMotion: reducedMotionRequested(),
-      ci: Boolean(process.env.CI), term: process.env.TERM,
+      isTTY: Boolean(process.stdout.isTTY),
+      reducedMotion: reducedMotionRequested(),
+      ci: Boolean(process.env.CI),
+      term: process.env.TERM,
     } as TerminalCapabilities,
   },
-): 'helen' | 'signature' | null {
-  if (options.animation === false || !runtime.inputTTY || !shouldAnimateCinematicArt(runtime.capabilities)) return null;
-  const selected = options.welcome ?? runtime.welcome ?? 'off';
-  return selected === 'helen' || selected === 'signature' ? selected : null;
+): "helen" | "signature" | null {
+  if (
+    options.animation === false ||
+    !runtime.inputTTY ||
+    !shouldAnimateCinematicArt(runtime.capabilities)
+  )
+    return null;
+  const selected = options.welcome ?? runtime.welcome ?? "off";
+  return selected === "helen" || selected === "signature" ? selected : null;
 }
 
-export async function runStartupWelcome(options: { welcome?: string; animation?: boolean }): Promise<void> {
+export async function runStartupWelcome(options: {
+  welcome?: string;
+  animation?: boolean;
+}): Promise<void> {
   const identity = startupWelcomeIdentity(options);
-  if (identity === 'signature') await runEnekoRuizArt({ brief: true });
-  if (identity === 'helen') await runHelenArt({ brief: true });
+  if (identity === "signature") await runEnekoRuizArt({ brief: true });
+  if (identity === "helen") await runHelenArt({ brief: true });
 }

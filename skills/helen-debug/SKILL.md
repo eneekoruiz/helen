@@ -1,6 +1,8 @@
 ---
 name: helen-debug
 description: Find and fix the root cause of a bug, failing test, crash, flaky behavior or regression with evidence - reproduce first, narrow it down, prove the cause, fix it minimally and lock it with a regression test. Use when something "does not work", a test or CI fails, an error or stack trace appears, behavior changed between versions, or an earlier fix did not hold.
+metadata:
+  version: 2.1.0
 ---
 
 # HELEN Debug

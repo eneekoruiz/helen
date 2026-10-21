@@ -42,13 +42,16 @@ export function formatJsonEnvelope<T = unknown>(
     ok?: boolean;
     warnings?: string[];
     errors?: string[];
-  }
+  },
 ): JsonEnvelope<T> {
   const warnings = [...globalWarnings, ...(options?.warnings ?? [])];
   const errors = [...globalErrors, ...(options?.errors ?? [])];
   const ok = options?.ok !== undefined ? options.ok : errors.length === 0;
   // An agent reading ok:false must always find out why.
-  if (!ok && errors.length === 0) errors.push('The command finished with a failing status; see data for details.');
+  if (!ok && errors.length === 0)
+    errors.push(
+      "The command finished with a failing status; see data for details.",
+    );
 
   return {
     ok,
@@ -67,10 +70,10 @@ export function printJsonAndExit<T = unknown>(
     warnings?: string[];
     errors?: string[];
     exitCode?: number;
-  }
+  },
 ): void {
   const envelope = formatJsonEnvelope(command, data, options);
-  process.stdout.write(JSON.stringify(envelope, null, 2) + '\n');
+  process.stdout.write(JSON.stringify(envelope, null, 2) + "\n");
 
   if (options?.exitCode !== undefined) {
     process.exitCode = options.exitCode;

@@ -1,6 +1,8 @@
 ---
 name: helen-assistant
 description: Use HELEN as the user's personal assistant and long-term memory. Use when the user asks to remember something, be reminded ("recuérdame", "remind me"), keep a shopping or to-do list, see their agenda, recall what they said before, or reach HELEN from Telegram, a phone or an Alexa/Echo device. Also for coding agents that should remember the user's conventions across sessions.
+metadata:
+  version: 2.1.0
 ---
 
 # HELEN Assistant

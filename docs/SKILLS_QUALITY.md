@@ -1,5 +1,7 @@
 # Skill quality
 
+The generated tables below describe the original answer-evaluation track. They are not a summary of the newer executable repository and frozen specialty pilots. See the dated observations at the end of this document and [the current closure](CIERRE-2026-10-08.md) for their distinct outcomes and limitations.
+
 Generated from stored observations; report generation makes no provider calls.
 Quality is **unmeasured** when execution or judging fails. Historical observations do not certify the current skill version.
 Activation counts exclude failed observations and remain separate from answer effectiveness. Forced activation is not natural routing.
@@ -103,9 +105,33 @@ Historical files for retired skills and archived previous versions remain in `ev
 
 Acceptance criteria and the live evaluation procedure: [EVALUATION_PLAN.md](EVALUATION_PLAN.md).
 
+Executable repository outcomes and interactive clarification are separate evidence tracks: [REPOSITORY_EVALS.md](REPOSITORY_EVALS.md). Chat-only grades do not certify either track.
+
 ## Provider blockers
 
 - helen-reprompt: **quota**. Resolve the provider quota or authentication before rerunning; authentication status alone does not establish usable quota.
 
 Inspect the plan without provider calls: `npm run evals -- helen-reprompt --dry-run`.
 After access changes, rerun the same bounded experiment: `npm run evals -- helen-reprompt --model haiku --runs 3 --cases question-remains-question,explicit-exclusion-preserved --max-calls 28 --concurrency 2 --force`.
+
+## Frozen specialty observations, 2026-10-07–08
+
+These are supplied-source, tool-disabled answers with literal skill-text injection, not native skill selection or actual repository repairs. Each run freezes its own skill and grader hashes. The skills have subsequently changed; historical scores do not certify the latest instructions. Completed responses that fail the rubric remain failures, rather than infrastructure errors or observations removed from the denominator.
+
+| Provider/run | Cases | Baseline accepted | Skill accepted | Comparable native pairs | Interpretation |
+| --- | --- | --- | --- | --- | --- |
+| Claude `15360487-2b4b-475b-a8c8-1f7768cffb79` | Audit, security, fully specified reprompt | 2/3 | 1/3 | 3, native `claude-sonnet-5` | This small pilot shows no advantage. Audit duplicated a defect and security cited the wrong source line. |
+| Codex `f50e0d6e-4ec2-4ef5-b36d-8097453299b7` | Same three acceptance cases | 2/3 | 1/3 | 0; actual model identity unavailable in native envelopes | Six completed graded answers; no eligible comparative model pairs and no superiority claim. |
+| Claude `acbe6969-ed5c-4d1b-b553-73c4cc315a06` | Reserved audit, ambiguous reprompt, recovery runbook | 0/3 | 1/3 | 3, native `claude-sonnet-5` | The ambiguous reprompt passes with skill and fails without it. Audit/documentation scores require the grading review described below. |
+
+The Codex run used 76,637 native input/output tokens across all six attempts, with zero tool events and no observed writes. The planned model `gpt-6.1-sol` is configuration evidence, not a verified native model identity. Its intentionally disabled Code Mode startup notice is retained separately from errors. Security passed in both conditions. Audit reported premature success and swallowed failure separately even though one awaited failure-propagating correction removes both symptoms. The reprompt skill response retained the requested behaviors in acceptance, but its goal field only named the retry fix and omitted the charge/idempotency outcome; the frozen field-specific rubric rejected it. This grading limitation is visible and the result remains unchanged.
+
+The audit and reprompt instructions were narrowly revised to check overlapping failure paths and put an observable behavior in the goal. That is an implemented correction to guidance, not evidence that future agents will comply. Frozen fixtures and prior reports were preserved. The earlier Claude run used 52,518 normalized native tokens; cache fields were included according to Claude's separate input counters. Human assistance and monetary spending are not inferred from these counters.
+
+Local immutable report folders are `.helen/audit-results/specialty-v1-2026-10-07T13-05-54.548Z-15360487-2b4b-475b-a8c8-1f7768cffb79` and `.helen/audit-results/specialty-v1-2026-10-07T22-13-07.267Z-f50e0d6e-4ec2-4ef5-b36d-8097453299b7`. They are private checkout evidence and excluded from the npm package. The outcome importer validates bounded snapshots and native traces before recording results, keeps unknown models as null and excludes them from matching pairs. Same-owner files and hashes do not independently authenticate an execution.
+
+Actual editing results remain a separate track in [REPOSITORY_EVALS.md](REPOSITORY_EVALS.md). Actual foreground native-question behavior remains a separate track in [CAPABILITIES.md](CAPABILITIES.md). No pilot establishes the effectiveness of all twelve skills or a statistical quality/cost improvement.
+
+The second Claude pilot used 50,012 normalized native tokens. Its ambiguous case is one favorable frozen-rubric comparison, with higher measured token use in the skill condition; it establishes neither token savings nor general effectiveness. Two grading confounds were found by examining the actual responses: both recovery runbooks explicitly state that `--force` and `--all` do not exist, but the forbidden-substring check treats that caution as a recommendation. The audit skill response has the correct two findings, locations and severity, yet its phrase "verify containment" fails a verb regex requiring "reject", "check" or "validate". These are limitations of the evaluator, not independently established agent defects. The original failing grades remain immutable and visible. A separately versioned supplemental review identifies these constrained cases as **needs-review**, without converting them into accepted outcomes or changing the frozen rubric.
+
+Second-pilot evidence: `.helen/audit-results/specialty-v1-2026-10-07T22-40-14.976Z-acbe6969-ed5c-4d1b-b553-73c4cc315a06`, fingerprint `f278d402d481ea9c63ae5aa6924c349d96290d1a65df90f67861052e31b4fc00`. Eighteen observations from the three completed pilots are imported into the private outcome store with original grades and unknowns preserved. The aggregate describes frozen rubric acceptance; pending review prevents interpreting every failed rubric grade as failed real-world quality.

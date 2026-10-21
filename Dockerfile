@@ -18,6 +18,7 @@ COPY templates ./templates
 COPY skills ./skills
 COPY docs ./docs
 COPY evals ./evals
+COPY scripts ./scripts
 # Run as the unprivileged "node" user against the project mounted at /workspace:
 #   docker run --rm -v "$PWD":/workspace helen setup
 USER node

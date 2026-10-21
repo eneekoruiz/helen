@@ -1,7 +1,7 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import type { z } from 'zod';
-import { withHomeLock, writePrivate } from './home.js';
+import fs from "node:fs";
+import path from "node:path";
+import type { z } from "zod";
+import { withHomeLock, writePrivate } from "./home.js";
 
 /**
  * Small JSON collections in the personal home (reminders.json, tasks.json). Every change happens under the
@@ -22,16 +22,27 @@ function collectionFile(home: string, name: string): string {
   return path.join(home, `${name}.json`);
 }
 
-export function readCollection<T>(home: string, name: string, schema: z.ZodType<T, z.ZodTypeDef, unknown>): LoadedCollection<T> {
+export function readCollection<T>(
+  home: string,
+  name: string,
+  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+): LoadedCollection<T> {
   const file = collectionFile(home, name);
   if (!fs.existsSync(file)) return { version: 1, items: [], invalid: [] };
   let raw: unknown;
   try {
-    raw = JSON.parse(fs.readFileSync(file, 'utf8'));
+    raw = JSON.parse(fs.readFileSync(file, "utf8"));
   } catch (error) {
-    throw new Error(`${file} is not valid JSON (${(error as Error).message}). Fix it or move it away; HELEN will not overwrite it.`);
+    throw new Error(
+      `${file} is not valid JSON (${(error as Error).message}). Fix it or move it away; HELEN will not overwrite it.`,
+    );
   }
-  const entries = raw && typeof raw === 'object' && Array.isArray((raw as { items?: unknown }).items) ? (raw as { items: unknown[] }).items : [];
+  const entries =
+    raw &&
+    typeof raw === "object" &&
+    Array.isArray((raw as { items?: unknown }).items)
+      ? (raw as { items: unknown[] }).items
+      : [];
   const items: T[] = [];
   const invalid: unknown[] = [];
   for (const entry of entries) {
@@ -43,11 +54,19 @@ export function readCollection<T>(home: string, name: string, schema: z.ZodType<
 }
 
 /** Read, change and write a collection atomically. Invalid entries are written back as they were. */
-export function updateCollection<T, R>(home: string, name: string, schema: z.ZodType<T, z.ZodTypeDef, unknown>, change: (items: T[]) => R): R {
+export function updateCollection<T, R>(
+  home: string,
+  name: string,
+  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+  change: (items: T[]) => R,
+): R {
   return withHomeLock(home, () => {
     const loaded = readCollection(home, name, schema);
     const result = change(loaded.items);
-    writePrivate(collectionFile(home, name), `${JSON.stringify({ version: 1, items: [...loaded.items, ...loaded.invalid] }, null, 2)}\n`);
+    writePrivate(
+      collectionFile(home, name),
+      `${JSON.stringify({ version: 1, items: [...loaded.items, ...loaded.invalid] }, null, 2)}\n`,
+    );
     return result;
   });
 }
