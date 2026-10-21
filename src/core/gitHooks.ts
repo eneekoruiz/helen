@@ -74,7 +74,7 @@ export function isGitRoot(cwd: string): boolean {
   const top = git(cwd, ["rev-parse", "--show-toplevel"]);
   if (!top.ok) return false;
   try {
-    return fs.realpathSync(top.out) === fs.realpathSync(cwd);
+    return fs.realpathSync.native(top.out) === fs.realpathSync.native(cwd);
   } catch {
     return false;
   }
