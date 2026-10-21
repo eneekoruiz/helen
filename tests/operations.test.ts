@@ -12,6 +12,7 @@ import {
   recoverOperation,
   writeAtomicFile,
   removeTrackedFile,
+  sealJournal,
 } from "../src/core/operations.js";
 import { writeFileSafe, patchJson, appendOnce } from "../src/core/fs.js";
 import { withPreview, getPlannedContent } from "../src/core/preview.js";
@@ -644,7 +645,7 @@ describe("Durable project operations", () => {
       before: null,
       hashes: [null],
     });
-    fs.writeFileSync(manifest, JSON.stringify(journal));
+    fs.writeFileSync(manifest, JSON.stringify(sealJournal(journal)));
     expect(() => recoverOperation(cwd, failed.operation!.id)).toThrow(
       "Unsafe operation file",
     );
@@ -673,7 +674,7 @@ describe("Durable project operations", () => {
     const journal = JSON.parse(fs.readFileSync(journalFile, "utf8"));
     journal.entries[0].before =
       Buffer.from("corrupted snapshot").toString("base64");
-    fs.writeFileSync(journalFile, JSON.stringify(journal));
+    fs.writeFileSync(journalFile, JSON.stringify(sealJournal(journal)));
     expect(() => recoverOperation(cwd, failed.operation!.id)).toThrow(
       "Invalid original snapshot",
     );

@@ -1,13 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
-import { spawnSync } from "node:child_process";
+import { spawnSync, type SpawnSyncOptions } from "node:child_process";
 import { detectProject } from "./projectDetector.js";
 import { parseFrontmatter } from "./frontmatter.js";
 import { readPrompt } from "./prompts.js";
 import { getCatalogItem } from "./catalog.js";
 import type { ApplyPlan, StepKind } from "./apply.js";
-import { isJsonMode } from "./jsonOutput.js";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { logger } from "./logger.js";
@@ -384,21 +383,27 @@ export type FocusedScriptRunner = (
   args: string[],
 ) => boolean;
 
+/**
+ * Project scripts must never write to our stdout (it is the MCP/JSON protocol channel) or read our stdin
+ * (the protocol input). Their output goes to stderr, and a hung script is stopped after ten minutes.
+ */
+const SCRIPT_TIMEOUT_MS = 10 * 60 * 1000;
+const scriptOptions = (cwd: string): SpawnSyncOptions => ({
+  cwd,
+  stdio: ["ignore", process.stderr.fd, process.stderr.fd],
+  windowsHide: true,
+  timeout: SCRIPT_TIMEOUT_MS,
+  killSignal: "SIGKILL",
+});
+
 const defaultRunner: ScriptRunner = (cwd, packageManager, script) =>
   (process.platform === "win32"
     ? spawnSync(
         "cmd.exe",
         ["/d", "/s", "/c", `${packageManager} run ${script}`],
-        {
-          cwd,
-          stdio: isJsonMode() ? ["ignore", "ignore", "inherit"] : "inherit",
-          windowsHide: true,
-        },
+        scriptOptions(cwd),
       )
-    : spawnSync(packageManager, ["run", script], {
-        cwd,
-        stdio: isJsonMode() ? ["ignore", "ignore", "inherit"] : "inherit",
-      })
+    : spawnSync(packageManager, ["run", script], scriptOptions(cwd))
   ).status === 0;
 
 /** Run the project's own typecheck, lint, test and build scripts (those that exist) as a gate. */
@@ -588,16 +593,9 @@ const defaultFocusedRunner: FocusedScriptRunner = (
       ? spawnSync(
           "cmd.exe",
           ["/d", "/s", "/c", `${packageManager} ${cmdArgs.join(" ")}`],
-          {
-            cwd,
-            stdio: isJsonMode() ? ["ignore", "ignore", "inherit"] : "inherit",
-            windowsHide: true,
-          },
+          scriptOptions(cwd),
         )
-      : spawnSync(packageManager, cmdArgs, {
-          cwd,
-          stdio: isJsonMode() ? ["ignore", "ignore", "inherit"] : "inherit",
-        })
+      : spawnSync(packageManager, cmdArgs, scriptOptions(cwd))
     ).status === 0
   );
 };
@@ -678,11 +676,7 @@ function runVerifiedFocusedVitest(cwd: string, args: string[]): boolean {
   const result = spawnSync(
     process.execPath,
     [vitestEntry, "run", ...options, "--run", ...filters],
-    {
-      cwd,
-      stdio: isJsonMode() ? ["ignore", "ignore", "inherit"] : "inherit",
-      windowsHide: true,
-    },
+    scriptOptions(cwd),
   );
   if (result.error || result.status === null) {
     throw new Error(
