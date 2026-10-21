@@ -18,6 +18,15 @@
 - Git hooks come from one source, keep their executable bit, and `helen doctor --fix` repairs them.
 - Coordination hardening after an independent review: locks are only broken when their holder is gone, two runs never take the same item, claims cannot be completed or released by naming their holder, rotation cannot empty an inbox, notes cannot forge sections of `STATE.md`, and the runner never writes through symbolic links.
 
+- Feature workspace (`helen work`, MCP `helen_work_*`): feature dossiers, tasks with checkpoints, and verification gates whose receipts are signed with a per-user key kept outside the project; detached background jobs (`helen job`, MCP `helen_job_*`, which MCP clients may only use when the user sets `HELEN_MCP_ALLOW_JOBS=1`); outcomes, repository and specialty evals, `verify-package`, and a durable operations journal with crash recovery.
+- The assistant understands moving a reminder ("cambia el recordatorio de mamá a las 10"), deleting by name ("borra lo de la leche"), the time before the verb ("todos los lunes a las 8 recuérdame…"), and questions about notes ("dónde dejé las llaves").
+
+### Fixed (audit of the workspace and operations layers)
+- Project scripts run by `helen check` no longer inherit the MCP stdout/stdin and are killed after ten minutes.
+- Operation journals are authenticated, so a journal planted in a repository is never replayed, and targets inside `.git` are refused.
+- A checkpoint task cannot be downgraded through the record tool.
+- Tests use the real temporary path so macOS symlinks do not break path comparisons.
+
 ### Changed
 - Preserve personal and modified skills during uninstall using per-file ownership hashes and conservative legacy cleanup.
 - Resume evaluation cases without discarding completed observations; archive evidence before explicit replacement.
