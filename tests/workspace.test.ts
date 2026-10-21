@@ -1225,7 +1225,7 @@ describe("Observed current gates and mutation races", () => {
         "verify",
         successfulRunner,
       );
-      const key = path.join(cwd, ".helen", "verification-key");
+      const key = workspaceApi.gateKeyPath(cwd);
       if (mode === "corrupt") fs.writeFileSync(key, "not-a-verification-key");
       else {
         fs.unlinkSync(key);

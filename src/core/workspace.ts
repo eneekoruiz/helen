@@ -1,6 +1,7 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
-import { randomUUID, randomBytes, createHmac } from "node:crypto";
+import { randomUUID, randomBytes, createHmac, createHash } from "node:crypto";
 import { z } from "zod";
 import { isSafeProjectPath } from "./fs.js";
 import { runProjectOperationSync, writeAtomicFile } from "./operations.js";
@@ -25,15 +26,29 @@ import type {
 
 const LIMIT = 2 * 1024 * 1024;
 const now = () => new Date().toISOString();
+/**
+ * The key lives with the user, not in the project: an agent that can only touch the repository (or call MCP tools)
+ * cannot read it, so it cannot forge a gate receipt.
+ */
+export function gateKeyPath(cwd: string): string {
+  const home = path.resolve(
+    process.env.HELEN_HOME || path.join(os.homedir(), ".helen"),
+  );
+  const id = createHash("sha256")
+    .update(fs.realpathSync(path.resolve(cwd)))
+    .digest("hex")
+    .slice(0, 32);
+  return path.join(home, "gate-keys", `${id}.key`);
+}
 function gateKey(cwd: string, create = false): string | null {
-  const location = path.join(path.resolve(cwd), ".helen", "verification-key");
-  if (!isSafeProjectPath(cwd, location))
-    throw new Error("Unsafe verification key path");
+  const location = gateKeyPath(cwd);
   if (!fs.existsSync(location)) {
     if (!create) return null;
-    fs.mkdirSync(path.dirname(location), { recursive: true });
-    writeAtomicFile(location, randomBytes(32).toString("hex"));
-    fs.chmodSync(location, 0o600);
+    fs.mkdirSync(path.dirname(location), { recursive: true, mode: 0o700 });
+    fs.writeFileSync(location, randomBytes(32).toString("hex"), {
+      mode: 0o600,
+      flag: "wx",
+    });
   }
   const info = fs.lstatSync(location);
   if (!info.isFile() || info.size > 100)

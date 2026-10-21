@@ -137,10 +137,13 @@ function atomicWrite(
           (code === "EPERM" || code === "EBUSY" || code === "EACCES") &&
           attempt < 7
         ) {
-          const end = Date.now() + (attempt + 1) * 15;
-          while (Date.now() < end) {
-            // Wait for Windows file lock to clear.
-          }
+          // Sleep (no CPU spin) while the Windows file lock clears.
+          Atomics.wait(
+            new Int32Array(new SharedArrayBuffer(4)),
+            0,
+            0,
+            (attempt + 1) * 15,
+          );
           continue;
         }
         throw error;
