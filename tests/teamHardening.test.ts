@@ -735,6 +735,10 @@ describe("red-team regressions", () => {
         child.on("close", resolve),
       );
       expect(code).toBe(143);
+      // tsx relays the signal to the real CLI and can exit before that process has finished giving the claims back.
+      const settled = Date.now() + 15_000;
+      while (listClaims(tmp).active.length > 0 && Date.now() < settled)
+        await new Promise((resolve) => setTimeout(resolve, 100));
       expect(listClaims(tmp).active).toEqual([]);
     },
     40_000,
