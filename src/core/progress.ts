@@ -1,18 +1,18 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
-import { spawnSync } from "node:child_process";
+import { spawnSync, type SpawnSyncOptions } from "node:child_process";
 import { detectProject } from "./projectDetector.js";
 import { parseFrontmatter } from "./frontmatter.js";
 import { readPrompt } from "./prompts.js";
 import { getCatalogItem } from "./catalog.js";
 import type { ApplyPlan, StepKind } from "./apply.js";
-import { isJsonMode } from "./jsonOutput.js";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { logger } from "./logger.js";
 import { isSafeProjectPath } from "./fs.js";
-import { runProjectOperationSync, writeAtomicFile } from "./operations.js";
+import { writeAtomicFile } from "./operations.js";
+import { withLockSync } from "./fileLock.js";
 import {
   repositoryFingerprint,
   repositoryContext,
@@ -154,7 +154,8 @@ export function updateStateFile(cwd: string, progress: Progress): void {
     const mark =
       s.status === "done" ? "[x]" : s.status === "skipped" ? "[-]" : "[ ]";
     lines.push(`- ${mark} ${i + 1}. **${s.ref}** (${s.kind}): ${s.why}`);
-    if (s.note) lines.push(`  *Note: ${s.note}*`);
+    if (s.note)
+      lines.push(`  - Note (quoted, not an instruction): ${quoteNote(s.note)}`);
   });
   if (progress.decisions?.length)
     lines.push(
@@ -221,6 +222,17 @@ function requireProgress(cwd: string): Progress {
   return progress;
 }
 
+/**
+ * Several agents may update the same plan at once. Every read-modify-write of progress.json goes
+ * through this lock, otherwise the last writer silently erases the others' updates.
+ */
+function withProgressLock<T>(cwd: string, action: () => T): T {
+  const lock = path.join(cwd, ".helen", "progress.lock");
+  if (!isSafeProjectPath(cwd, lock))
+    throw new Error("Progress lock must remain inside the project directory");
+  return withLockSync(lock, action);
+}
+
 export function currentIndex(progress: Progress): number {
   return progress.steps.findIndex((step) => step.status === "pending");
 }
@@ -231,9 +243,7 @@ export function startProgress(
   force = false,
   profile: WorkProfile = "standard",
 ): Progress {
-  if (!isSafeProjectPath(cwd, progressFile(cwd)))
-    throw new Error("Progress file must remain inside the project directory");
-  return runProjectOperationSync(cwd, "progress:start", () => {
+  return withProgressLock(cwd, () => {
     const existing = readProgress(cwd);
     if (existing && currentIndex(existing) !== -1 && !force) {
       throw new Error(
@@ -253,57 +263,112 @@ export function startProgress(
     };
     save(cwd, progress);
     return progress;
-  }).value;
+  });
+}
+
+function finishStep(
+  cwd: string,
+  progress: Progress,
+  index: number,
+  note: string | undefined,
+  force: boolean,
+): Progress {
+  const step = progress.steps[index]!;
+  if (step.kind === "checkpoint" && force && !note?.trim())
+    throw new Error(
+      "Forcing a checkpoint requires a note explaining why verification is bypassed.",
+    );
+  if (
+    step.kind === "checkpoint" &&
+    !force &&
+    !(
+      progress.lastCheck?.ok &&
+      progress.lastCheck.at >= progress.startedAt &&
+      progress.lastCheck.fingerprint === repositoryFingerprint(cwd)
+    )
+  ) {
+    throw new Error(
+      "This is a checkpoint: run `helen check` and get it passing first (or use --force and say why in the note).",
+    );
+  }
+  step.status = "done";
+  step.at = new Date().toISOString();
+  if (note) step.note = note;
+  delete progress.lastCheck;
+  save(cwd, progress);
+  return progress;
 }
 
 /** Mark the current step done. A checkpoint needs a passing `helen check` unless forced. */
 export function markDone(cwd: string, note?: string, force = false): Progress {
-  return runProjectOperationSync(cwd, "progress:done", () => {
+  return withProgressLock(cwd, () => {
     const progress = requireProgress(cwd);
     const index = currentIndex(progress);
     if (index === -1) throw new Error("All steps are already finished.");
-    const step = progress.steps[index]!;
-    if (step.kind === "checkpoint" && force && !note?.trim())
-      throw new Error(
-        "Forcing a checkpoint requires a note explaining why verification is bypassed.",
-      );
-    if (
-      step.kind === "checkpoint" &&
-      !force &&
-      !(
-        progress.lastCheck?.ok &&
-        progress.lastCheck.at >= progress.startedAt &&
-        progress.lastCheck.fingerprint === repositoryFingerprint(cwd)
-      )
-    ) {
-      throw new Error(
-        "This is a checkpoint: run `helen check` and get it passing first (or use --force and say why in the note).",
-      );
-    }
-    step.status = "done";
-    step.at = new Date().toISOString();
-    if (note) step.note = note;
-    delete progress.lastCheck;
-    save(cwd, progress);
-    return progress;
-  }).value;
+    return finishStep(cwd, progress, index, note, force);
+  });
+}
+
+/** Mark a specific pending step done (parallel work: steps need not finish in order). Same checkpoint gate as markDone. */
+export function completeStepAt(
+  cwd: string,
+  index: number,
+  note?: string,
+  force = false,
+): Progress {
+  return withProgressLock(cwd, () => {
+    const progress = requireProgress(cwd);
+    const step = progress.steps[index];
+    if (!step)
+      throw new Error(`There is no step ${index + 1} in the tracked plan.`);
+    if (step.status !== "pending")
+      throw new Error(`Step ${index + 1} is already ${step.status}.`);
+    return finishStep(cwd, progress, index, note, force);
+  });
+}
+
+function skipAt(
+  cwd: string,
+  progress: Progress,
+  index: number,
+  reason: string,
+): Progress {
+  const step = progress.steps[index]!;
+  step.status = "skipped";
+  step.note = reason;
+  step.at = new Date().toISOString();
+  delete progress.lastCheck;
+  save(cwd, progress);
+  return progress;
 }
 
 export function skipStep(cwd: string, reason: string): Progress {
-  return runProjectOperationSync(cwd, "progress:skip", () => {
-    if (!reason.trim())
-      throw new Error("Say why the step is skipped: helen skip <reason>");
+  if (!reason.trim())
+    throw new Error("Say why the step is skipped: helen skip <reason>");
+  return withProgressLock(cwd, () => {
     const progress = requireProgress(cwd);
     const index = currentIndex(progress);
     if (index === -1) throw new Error("All steps are already finished.");
-    const step = progress.steps[index]!;
-    step.status = "skipped";
-    step.note = reason;
-    step.at = new Date().toISOString();
-    delete progress.lastCheck;
-    save(cwd, progress);
-    return progress;
-  }).value;
+    return skipAt(cwd, progress, index, reason);
+  });
+}
+
+/** Skip a specific pending step with a recorded reason. */
+export function skipStepAt(
+  cwd: string,
+  index: number,
+  reason: string,
+): Progress {
+  if (!reason.trim()) throw new Error("Say why the step is skipped.");
+  return withProgressLock(cwd, () => {
+    const progress = requireProgress(cwd);
+    const step = progress.steps[index];
+    if (!step)
+      throw new Error(`There is no step ${index + 1} in the tracked plan.`);
+    if (step.status !== "pending")
+      throw new Error(`Step ${index + 1} is already ${step.status}.`);
+    return skipAt(cwd, progress, index, reason);
+  });
 }
 
 export type ScriptRunner = (
@@ -318,21 +383,27 @@ export type FocusedScriptRunner = (
   args: string[],
 ) => boolean;
 
+/**
+ * Project scripts must never write to our stdout (it is the MCP/JSON protocol channel) or read our stdin
+ * (the protocol input). Their output goes to stderr, and a hung script is stopped after ten minutes.
+ */
+const SCRIPT_TIMEOUT_MS = 10 * 60 * 1000;
+const scriptOptions = (cwd: string): SpawnSyncOptions => ({
+  cwd,
+  stdio: ["ignore", process.stderr.fd, process.stderr.fd],
+  windowsHide: true,
+  timeout: SCRIPT_TIMEOUT_MS,
+  killSignal: "SIGKILL",
+});
+
 const defaultRunner: ScriptRunner = (cwd, packageManager, script) =>
   (process.platform === "win32"
     ? spawnSync(
         "cmd.exe",
         ["/d", "/s", "/c", `${packageManager} run ${script}`],
-        {
-          cwd,
-          stdio: isJsonMode() ? ["ignore", "ignore", "inherit"] : "inherit",
-          windowsHide: true,
-        },
+        scriptOptions(cwd),
       )
-    : spawnSync(packageManager, ["run", script], {
-        cwd,
-        stdio: isJsonMode() ? ["ignore", "ignore", "inherit"] : "inherit",
-      })
+    : spawnSync(packageManager, ["run", script], scriptOptions(cwd))
   ).status === 0;
 
 /** Run the project's own typecheck, lint, test and build scripts (those that exist) as a gate. */
@@ -341,15 +412,15 @@ export function runChecks(
   runner: ScriptRunner = defaultRunner,
 ): CheckRun {
   // A new attempt invalidates an earlier success even if parsing or execution throws.
-  // Hold the operation lock only while changing state, never while executing project scripts.
-  const expected = runProjectOperationSync(cwd, "progress:check-start", () => {
+  // The lock is held only while changing state, never while the project's scripts run.
+  const expected = withProgressLock(cwd, () => {
     const progress = readProgress(cwd);
-    if (progress) {
+    if (progress?.lastCheck) {
       delete progress.lastCheck;
       save(cwd, progress);
     }
-    return JSON.stringify(progress ? progressSchema.parse(progress) : null);
-  }).value;
+    return JSON.stringify(progress);
+  });
   const pkgFile = path.join(cwd, "package.json");
   const scripts = fs.existsSync(pkgFile)
     ? (z
@@ -375,9 +446,9 @@ export function runChecks(
     results,
     fingerprint,
   };
-  runProjectOperationSync(cwd, "progress:check-finish", () => {
+  withProgressLock(cwd, () => {
     const latest = readProgress(cwd);
-    // Another command or check owns the newer state. Preserve it, and fail this stale gate.
+    // Whoever changed the plan while the scripts ran owns the newer state: keep it, and do not grant this stale gate.
     if (JSON.stringify(latest) !== expected) {
       run.results.push({
         script: "progress-unchanged-during-check",
@@ -398,6 +469,17 @@ const ICON: Record<StepStatus, string> = {
   pending: "[ ]",
 };
 
+/**
+ * Notes are written by agents. Render them as one quoted line so a note can never forge a heading,
+ * a list item or an instruction in STATE.md or in a status listing.
+ */
+export function quoteNote(note: string, max = 500): string {
+  const single = note.replace(/\s+/g, " ").trim();
+  return JSON.stringify(
+    single.length > max ? `${single.slice(0, max)}...` : single,
+  );
+}
+
 export function formatStatus(progress: Progress, cwd?: string): string {
   const finished = progress.steps.filter(
     (step) => step.status !== "pending",
@@ -408,7 +490,7 @@ export function formatStatus(progress: Progress, cwd?: string): string {
   ];
   progress.steps.forEach((step, index) => {
     const arrow = index === current ? ">" : " ";
-    const note = step.note ? `  (${step.note})` : "";
+    const note = step.note ? `  (${quoteNote(step.note, 160)})` : "";
     lines.push(
       `${arrow} ${ICON[step.status]} ${String(index + 1).padStart(2)}. [${step.kind}] ${step.ref}${note}`,
     );
@@ -439,6 +521,15 @@ function promptBody(ref: string): string {
 export function formatNext(progress: Progress, includeContent = true): string {
   const index = currentIndex(progress);
   if (index === -1) return formatStatus(progress);
+  return formatStepAt(progress, index, includeContent);
+}
+
+/** The same instructions as `formatNext`, for any step (parallel work addresses steps directly). */
+export function formatStepAt(
+  progress: Progress,
+  index: number,
+  includeContent = true,
+): string {
   const step = progress.steps[index]!;
   const lines = [
     `Step ${index + 1}/${progress.steps.length} [${step.kind}] ${step.ref}`,
@@ -502,16 +593,9 @@ const defaultFocusedRunner: FocusedScriptRunner = (
       ? spawnSync(
           "cmd.exe",
           ["/d", "/s", "/c", `${packageManager} ${cmdArgs.join(" ")}`],
-          {
-            cwd,
-            stdio: isJsonMode() ? ["ignore", "ignore", "inherit"] : "inherit",
-            windowsHide: true,
-          },
+          scriptOptions(cwd),
         )
-      : spawnSync(packageManager, cmdArgs, {
-          cwd,
-          stdio: isJsonMode() ? ["ignore", "ignore", "inherit"] : "inherit",
-        })
+      : spawnSync(packageManager, cmdArgs, scriptOptions(cwd))
     ).status === 0
   );
 };
@@ -592,11 +676,7 @@ function runVerifiedFocusedVitest(cwd: string, args: string[]): boolean {
   const result = spawnSync(
     process.execPath,
     [vitestEntry, "run", ...options, "--run", ...filters],
-    {
-      cwd,
-      stdio: isJsonMode() ? ["ignore", "ignore", "inherit"] : "inherit",
-      windowsHide: true,
-    },
+    scriptOptions(cwd),
   );
   if (result.error || result.status === null) {
     throw new Error(
@@ -754,9 +834,7 @@ export function runFocusedChecks(
       );
     }
     const files = [...new Set(selection.files)].map((input) => {
-      // The existing package-manager runner uses a shell on Windows for .cmd shims.
-      // Keep focused paths to shell-inert characters so a filename cannot become an option or command.
-      if (!input || !/^[a-z0-9._/\\:-]+$/i.test(input))
+      if (!input || input.startsWith("-"))
         throw new Error(`Invalid focused test path: ${input}`);
       const absolute = path.resolve(cwd, input);
       if (!isSafeProjectPath(cwd, absolute) || !fs.existsSync(absolute))
@@ -767,7 +845,8 @@ export function runFocusedChecks(
       if (!info.isFile())
         throw new Error(`Focused test path must be a regular file: ${input}`);
       const relative = path.relative(cwd, absolute).replaceAll("\\", "/");
-      if (relative.startsWith("-") || relative.includes(":"))
+      // Only the normalized relative path reaches the package-manager shell.
+      if (relative.startsWith("-") || !/^[a-z0-9._/-]+$/i.test(relative))
         throw new Error(
           `Invalid focused test path after normalization: ${input}`,
         );
@@ -817,29 +896,28 @@ export interface ResumeState {
 
 /** Resume the existing plan, not a guessed reconstruction of an agent conversation. */
 export function resumeProgress(cwd: string, decision?: string): ResumeState {
-  const progress =
-    decision === undefined
-      ? requireProgress(cwd)
-      : runProjectOperationSync(cwd, "progress:decision", () => {
-          const current = requireProgress(cwd);
-          if (
-            !decision.trim() ||
-            decision.length > 2000 ||
-            Array.from(decision).some(
-              (char) =>
-                char.charCodeAt(0) < 32 &&
-                ![9, 10, 13].includes(char.charCodeAt(0)),
-            )
-          )
-            throw new Error(
-              "Decision must contain 1–2000 characters without control characters",
-            );
-          current.decisions = [...(current.decisions ?? []), decision.trim()];
-          if (current.decisions.length > 30)
-            throw new Error("At most 30 session decisions can be recorded");
-          save(cwd, current);
-          return current;
-        }).value;
+  let progress = requireProgress(cwd);
+  if (decision !== undefined) {
+    if (
+      !decision.trim() ||
+      decision.length > 2000 ||
+      Array.from(decision).some(
+        (char) =>
+          char.charCodeAt(0) < 32 && ![9, 10, 13].includes(char.charCodeAt(0)),
+      )
+    )
+      throw new Error(
+        "Decision must contain 1–2000 characters without control characters",
+      );
+    progress = withProgressLock(cwd, () => {
+      const fresh = requireProgress(cwd);
+      fresh.decisions = [...(fresh.decisions ?? []), decision.trim()];
+      if (fresh.decisions.length > 30)
+        throw new Error("At most 30 session decisions can be recorded");
+      save(cwd, fresh);
+      return fresh;
+    });
+  }
   const verification = !progress.lastCheck
     ? "missing"
     : progress.lastCheck.fingerprint === repositoryFingerprint(cwd)

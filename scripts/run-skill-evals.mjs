@@ -13,10 +13,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  calculateGrade,
   confidenceInterval95,
-  falsePositiveRate,
-  mean,
   pairedDeltaConfidenceInterval,
   parseStreamJsonEvents,
 } from './lib/evalsStats.mjs';

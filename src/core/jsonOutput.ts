@@ -47,6 +47,11 @@ export function formatJsonEnvelope<T = unknown>(
   const warnings = [...globalWarnings, ...(options?.warnings ?? [])];
   const errors = [...globalErrors, ...(options?.errors ?? [])];
   const ok = options?.ok !== undefined ? options.ok : errors.length === 0;
+  // An agent reading ok:false must always find out why.
+  if (!ok && errors.length === 0)
+    errors.push(
+      "The command finished with a failing status; see data for details.",
+    );
 
   return {
     ok,

@@ -21,9 +21,11 @@
   },
   "files": [
     "dist",
+    "!dist/**/*.map",
     "templates",
     "skills",
     "docs",
+    "!docs/archive",
     "evals/*.json",
     "evals/README.md",
     "scripts/run-skill-evals.mjs",
@@ -31,7 +33,16 @@
     "scripts/run-repo-evals.mjs",
     "scripts/run-specialty-evals.mjs",
     "scripts/review-specialty-rubric.mjs",
-    "scripts/import-specialty-outcomes.mjs"
+    "scripts/import-specialty-outcomes.mjs",
+    "!docs/ECC-LOCAL-SKILLS-*.json",
+    "!docs/AUDIT-*.md",
+    "!docs/CIERRE-*.md",
+    "!docs/IDEAS-100.md",
+    "!docs/REPORT-*.md",
+    "!docs/FINAL-VERIFICATION-*.md",
+    "!docs/IMPROVEMENTS-*.md",
+    "!docs/FOLLOWUP*.md",
+    "!docs/QUALITY-*.md"
   ],
   "scripts": {
     "dev": "tsx src/cli.ts",
@@ -41,7 +52,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:json": "vitest run --reporter=json --outputFile=test-results.json",
-    "lint": "eslint src/ tests/ --ext .ts",
+    "lint": "eslint src/ tests/ --ext .ts && eslint scripts/ --ext .mjs",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
     "clean": "node -e \"const fs=require('fs');fs.rmSync('dist',{recursive:true,force:true});\"",
@@ -52,7 +63,9 @@
     "outcomes:import": "node scripts/import-specialty-outcomes.mjs",
     "verify:package": "npm run build && node scripts/verify-package.mjs",
     "prompt:powerpoint": "node dist/cli.js prompts show presentaciones --cache-ready",
-    "prepare": "node -e \"const {spawnSync}=require('node:child_process');const path=require('node:path');const opts={encoding:'utf8',windowsHide:true};const current=spawnSync('git',['config','--get','core.hooksPath'],opts);const value=(current.stdout||'').replace(/\\r?\\n$/,'');if(current.status===1||(current.status===0&&value!==''&&path.resolve(value)===path.resolve('.githooks'))){spawnSync('git',['config','--local','core.hooksPath','.githooks'],{stdio:'ignore',windowsHide:true});}\""
+    "prepare": "node -e \"const {spawnSync}=require('node:child_process');const path=require('node:path');const fs=require('node:fs');const realpath=fs.realpathSync.native||fs.realpathSync;const opts={encoding:'utf8',windowsHide:true,timeout:5000};const root=spawnSync('git',['rev-parse','--show-toplevel'],opts);if(process.env.npm_config_ignore_scripts!=='true'&&root.status===0&&path.relative(realpath(process.cwd()),realpath(root.stdout.trim()))===''){const current=spawnSync('git',['config','--get','core.hooksPath'],opts);const value=(current.stdout||'').replace(/\\r?\\n$/,'');if(current.status===1||(current.status===0&&value!==''&&path.resolve(value)===path.resolve('.githooks'))){const result=spawnSync('git',['config','--local','core.hooksPath','.githooks'],opts);if(result.error||result.status!==0){console.error(result.stderr||String(result.error));process.exitCode=1;}}}\"",
+    "docs:check": "tsc && node scripts/docs-facts.mjs check",
+    "docs:sync": "tsc && node scripts/docs-facts.mjs sync"
   },
   "keywords": [
     "cli",
@@ -71,6 +84,7 @@
   "author": "eneekoruiz",
   "license": "MIT",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "@clack/prompts": "^0.11.0",
     "cli-progress": "^3.12.0",
     "commander": "^12.1.0",

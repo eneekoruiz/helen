@@ -1,79 +1,44 @@
-# Release & Publishing Guide
+# Releasing HELEN
 
-HELEN uses **Release Please** for automated changelog generation and version tagging from Conventional Commits, combined with **npm Trusted Publishing (OIDC)** and GitHub Actions for cryptographic provenance.
+Releases are automated from Conventional Commits. `.github/workflows/release.yml` does three things:
 
----
+1. On every push to `main`, **release-please** opens or updates a *Release PR* that bumps `package.json`, `.release-please-manifest.json` and `.claude-plugin/plugin.json`, and prepends the changelog.
+2. Merging the Release PR creates the tag and the GitHub release.
+3. The `publish` job in the same workflow reruns every gate (`typecheck`, `lint`, `test`, `build`, `helen lint`, `scripts/check-pack.mjs`, `npm audit`) and publishes `helen-cli` to npm with provenance.
 
-## 1. Automated Workflow Overview
+The commit-msg hook enforces the Conventional Commits format locally (`feat`, `fix`, `docs`, `refactor`, `test`, `chore`…). Use `feat!:` or a `BREAKING CHANGE:` footer for major bumps.
 
-1. When pull requests with Conventional Commits (`feat:`, `fix:`, `chore:`, etc.) are merged into `main`, the **Release Please** workflow automatically opens or updates a "Release PR".
-2. When the maintainer merges the Release PR into `main`, Release Please tags the repository (e.g. `v2.1.0`) and creates a GitHub Release.
-3. Pushing the `v*` tag triggers `.github/workflows/publish.yml`, which runs all quality gates (`typecheck`, `lint`, `test`, `build`, `helen lint`, `npm pack --dry-run`) and publishes `helen-cli` to npm with `--provenance`.
+## One-time setup (only the repository owner can do this)
 
----
+HELEN cannot do these steps for you: they need your npm and GitHub accounts.
 
-## 2. Manual Setup Steps (Owner Only)
+1. **First publish.** npm only lets you configure trusted publishing for a package that already exists, so publish the first version by hand from your machine:
+   ```bash
+   npm ci && npm run build && node scripts/check-pack.mjs
+   npm login
+   npm publish --access public
+   ```
+2. **Trusted publishing.** On npmjs.com open `helen-cli` → *Settings* → *Trusted Publisher* → *GitHub Actions* and enter owner `eneekoruiz`, repository `helen`, workflow filename `release.yml`, environment `npm`. From then on the workflow publishes without any token.
+3. **GitHub settings.** *Settings → Actions → General → Workflow permissions*: read and write, and tick *Allow GitHub Actions to create and approve pull requests* (release-please needs it).
+4. **Environment `npm`.** *Settings → Environments → New environment* named `npm`. Add yourself as a required reviewer if you want a manual approval before every publish.
+5. **Optional: CI on the Release PR.** Pull requests opened with the default token do not trigger workflows. Create a fine-grained personal access token (contents and pull requests: read/write) and store it as the secret `RELEASE_PLEASE_TOKEN`; the workflow uses it automatically.
+6. **Branch protection on `main`.** Require pull requests and the checks `Quality Gates`, `CLI Sandbox Integration Smoke Test` and `Docker image`. Without required checks GitHub merges as soon as a PR is mergeable, whatever CI says.
 
-These steps require administrative credentials on npmjs.com and GitHub and must be executed by the repository owner (`eneekoruiz`).
+## Fallback: classic token
 
-### A. npm Account & Package Reservation
-1. Log in to [npmjs.com](https://www.npmjs.com).
-2. If `helen-cli` has not been published yet:
-   - Run the initial manual publish once from a local machine:
-     ```bash
-     npm login
-     npm publish --access public
-     ```
-   - Verify that you are listed as the package owner.
+If you prefer a token over trusted publishing, add a granular npm token as the secret `NPM_TOKEN` and set `NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}` on the publish step of `release.yml`.
 
-### B. Configure npm Trusted Publishing (Recommended - OIDC)
-1. On [npmjs.com](https://www.npmjs.com), navigate to:
-   `https://www.npmjs.com/package/helen-cli/access`
-2. Under **Publishing Access** → **Trusted Publishers**, click **Add trusted publisher**.
-3. Select **GitHub Actions**:
-   - **Repository Owner**: `eneekoruiz`
-   - **Repository Name**: `helen`
-   - **Workflow filename**: `publish.yml`
-   - **Environment name**: (leave blank or `production` if using GitHub environments)
-4. Save the configuration. This enables tokenless publishing with verifiable provenance.
+## Republishing
 
-### C. (Alternative) Classic Token Fallback
-If not using OIDC trusted publishing:
-1. In npm, generate a **Granular Access Token** or **Automation Token** with read and write permissions for `helen-cli`.
-2. In GitHub (`eneekoruiz/helen`), go to **Settings** → **Secrets and variables** → **Actions**.
-3. Create a repository secret named `NPM_TOKEN` with the token value.
+If the publish job failed after the tag exists, run the *Release* workflow manually (*Actions → Release → Run workflow*) and enter the tag, for example `v2.2.0`.
 
-### D. GitHub Actions Permissions
-1. In the GitHub repository settings (`eneekoruiz/helen`), navigate to:
-   **Settings** → **Actions** → **General** → **Workflow permissions**.
-2. Select:
-   - **Read and write permissions**.
-   - Check the box: **Allow GitHub Actions to create and approve pull requests** (required for `release-please` to open Release PRs).
-3. Click **Save**.
-
----
-
-## 3. Local Verification Before Release
-
-Verify the package contents and binary behavior before publishing:
+## Check a build locally
 
 ```bash
-# 1. Run all gates
-npm run typecheck
-npm run lint
-npm test
-npm run build
+npm run typecheck && npm run lint && npm test && npm run build
 node dist/cli.js lint
-
-# 2. Audit package contents
-npm pack --dry-run
-
-# 3. Test local tarball install in a temporary directory
-npm pack
-# Generates helen-cli-2.1.0.tgz
-cd $(mktemp -d)
-npm init -y
-npm install /path/to/helen-cli-2.1.0.tgz
-npx helen --help
-npx helen-cli --help
+node scripts/check-pack.mjs        # what would be published: required files present, nothing private
+npm run docs:check                 # documentation numbers and file references match the repository
+npm pack                           # then, in an empty directory:
+npm init -y && npm install /path/to/helen-cli-<version>.tgz && npx helen --version
 ```

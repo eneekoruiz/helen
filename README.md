@@ -20,10 +20,13 @@ For a polished PowerPoint talk, use [the presentation prompt](docs/prompts/03-fi
 
 HELEN is a workflow kit for building projects with AI agents (Claude Code, Codex, Antigravity or any agent that reads `SKILL.md` folders):
 
-- **Prompts** (`docs/prompts`): 98 English, lint-checked task prompts and flows (105 total library documents), organized by project phase.
-- **Skills** (`skills/`): 12 bundled agent skills that load the right prompts automatically.
+- **Prompts** (`docs/prompts`): <!--fact:prompts-->99<!--/fact--> English, lint-checked task prompts and flows (<!--fact:library-->106<!--/fact--> library documents in total), organized by project phase.
+- **Skills** (`skills/`): <!--fact:skills-->16<!--/fact--> bundled agent skills that load the right prompts automatically.
 - **Playbooks** (`helen apply`): detect the project phase and plan which prompts, skills and tools to use for a goal.
-- **Catalog** (`helen skills catalog`): 41 vetted third-party skills, CLIs, MCP servers and references, with install commands HELEN prints but never runs.
+- **Catalog** (`helen skills catalog`): <!--fact:catalog-->41<!--/fact--> vetted third-party skills, CLIs, MCP servers and references, with install commands HELEN prints but never runs.
+- **Team** (`helen team`): several agents on one plan without conflicts: parallel waves, claims with leases, handoffs and an autonomous runner. See [Orchestration](docs/ORCHESTRATION.md).
+- **Quality loops** (`helen loop`, `helen design`): rubric scoring with evidence until the work meets the bar, distinct design directions and a template detector.
+- **Personal assistant** (`helen remember`, `helen remind`, `helen ask`, `helen assistant serve`): your memory, reminders, lists and agenda, on the terminal, a chat page, Telegram and Alexa. See [Assistant](docs/ASSISTANT.md).
 - **Scaffolding**: optional modules for React + Vite + TypeScript projects (`helen init`, `helen add`).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg?style=flat-square)](LICENSE)
@@ -103,6 +106,10 @@ Standard exit codes: `0` (Success), `1` (Error), `2` (Warnings present), `3` (Ch
 | Catalog | `helen skills catalog [--category <c>] [--kind skill\|cli\|mcp\|plugin\|reference\|service] [--json]` · `helen skills external <id> [--json]` |
 | Library quality | `helen lint [--json]` (prompts, indexes, playbooks, skills, catalog, evals) · `npm run evals` (multi-run skill quality with 95% CI) |
 | Guardrails | `helen add guardrails`: dependency-free pre-commit (blocks `.env`, secrets, conflict markers, huge files) and pre-push (typecheck, lint, test, build) hooks + grouped weekly Dependabot |
+| Team of agents | `helen team graph` · `helen team claim [item] --agent <name> [--paths ...]` · `helen team brief <item>` · `helen team complete\|skip\|release <item>` · `helen team handoff --to <agent\|role:...>` · `helen team inbox` · `helen team events` · `helen team run [goal] --agent claude\|--command "<cmd>" [--dry-run]` |
+| Quality loops and design | `helen loop rubrics [name]` · `helen loop start <rubric> --subject <text>` · `helen loop score <id> --file <scores.json>` · `helen loop status [id]` · `helen design direction --brief <text> [--count n]` · `helen design check [path]` |
+| Personal assistant | `helen remember <text>` · `helen recall <words>` · `helen notes` · `helen forget <id>` · `helen remind <text>` · `helen reminders [cancel\|snooze\|done]` · `helen todo [text] [--list compra]` · `helen agenda [hoy\|mañana\|semana]` · `helen ask <text>` · `helen chat` |
+| Assistant setup | `helen assistant status\|config\|check\|token\|export` · `helen assistant serve` · `helen assistant telegram setup\|allow` · `helen assistant alexa setup\|model` · `helen assistant service` |
 | Scaffolding | `helen init` · `helen create <name>` · `helen add <modules...>` · `helen modules` · `helen explain <module>` · `helen update` · `helen eject <module>` · `helen rollback` |
 | Change previews and recovery | `helen add <modules...> --preview [--force]` · `helen update --preview` · `helen init --preview` · `helen generate <type> <name> --preview` · `helen recover [id] [--dry-run]` |
 
@@ -165,7 +172,7 @@ See the [inventory guide](docs/SKILLS-CATALOG.md) for bundled skills, project in
 
 The [reusable agent preset](docs/AGENT-PRESETS.md) connects HELEN to Codex, Claude Code and Antigravity while preserving existing configuration, and provides tracking helpers such as `$helen-resume` in Codex and `/helen-resume` in Claude Code.
 
-Bundled: `helen-apply` (entry point), `helen-router`, `helen-audit`, `helen-backend`, `helen-copy`, `helen-design`, `helen-security`, `helen-release`, `helen-strategy`, `helen-knowledge`, `helen-implementa`, `helen-reprompt`.
+Bundled: `helen-apply` (entry point), `helen-router`, `helen-audit`, `helen-backend`, `helen-copy`, `helen-design`, `helen-security`, `helen-release`, `helen-strategy`, `helen-knowledge`, `helen-implementa`, `helen-reprompt`, `helen-arena` (competing ideas and an elimination bracket; needs Python 3.8+), `helen-debug` (root cause with evidence and a regression test), `helen-team` (several agents on one plan) and `helen-assistant` (personal memory, reminders and lists).
 
 | Target | Folder |
 |---|---|
@@ -179,9 +186,11 @@ For executable repository outcomes with Codex and Claude Code, run `npm run eval
 
 ## Zero Telemetry Guarantee
 
-HELEN does not collect or transmit telemetry or analytics. Parsing, reports, progress tracking, and the MCP server run locally. The optional `npm run evals` command invokes your authenticated Claude CLI and sends evaluation prompts and answers to its model provider; it stores results locally in `evals/results`. An explicitly enabled `npm run evals:repo -- --live ...` invokes the selected authenticated Codex/Claude CLIs and stores local traces in `.helen/repo-evals`. Neither evaluation command is run automatically by HELEN.
+HELEN does not collect or transmit telemetry or analytics. Parsing, reports, progress tracking, the personal assistant and the MCP server run locally. The optional `npm run evals` command invokes your authenticated Claude CLI and sends evaluation prompts and answers to its model provider; it stores results locally in `evals/results`. An explicitly enabled `npm run evals:repo -- --live ...` invokes the selected authenticated Codex/Claude CLIs and stores local traces in `.helen/repo-evals`. Neither evaluation command is run automatically by HELEN.
 
 Explicit `helen jobs start`/`resume` invocations also send task context to the selected native model provider; read-only research tools can contact search/fetch endpoints. Job records and logs stay locally under `.helen/jobs`. Listing, inspecting and stopping a job do not start model calls.
+
+The assistant sends data only through what you configure: a model provider receives the questions sent to it (secrets redacted, private items withheld unless you allow them), and Telegram, Alexa or a webhook carry the messages you exchange through them. All of them are off by default; see [Privacy](docs/ASSISTANT.md#privacy).
 
 ## Third-party tools
 
@@ -189,7 +198,7 @@ Explicit `helen jobs start`/`resume` invocations also send task context to the s
 
 ## Architecture
 
-`src/core` holds the library logic (frontmatter parsing, prompt resolution, lint, playbooks, progress tracking, skills, catalog, doctor, mcp). `src/commands` contains the modular CLI command logic, and `src/index.ts` acts as the command entry point loader. The scaffolding modules write templates with dry-run, backups and a `.helenrc` manifest for rollback.
+`src/core` holds the library logic (frontmatter parsing, prompt resolution, lint, playbooks, progress tracking, skills, catalog, doctor, mcp, team coordination, loops and design checks). `src/assistant` is the personal assistant (dates, memory, reminders, lists, the brain, delivery, server, Telegram and Alexa). `src/commands` contains the modular CLI command logic, and `src/index.ts` acts as the command entry point loader. The scaffolding modules write templates with dry-run, backups and a `.helenrc` manifest for rollback.
 
 ## License
 

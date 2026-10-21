@@ -1,0 +1,67 @@
+{
+  "id": "release",
+  "title": "Release readiness",
+  "description": "Can this ship, can it be undone, and will people know what changed.",
+  "threshold": 90,
+  "minCritical": 4,
+  "maxIterations": 5,
+  "independentFinalScore": true,
+  "criteria": [
+    {
+      "id": "gates",
+      "title": "All gates green on the release commit",
+      "weight": 4,
+      "critical": true,
+      "ask": "Typecheck, lint, tests, build, audit and any end-to-end checks pass on exactly what will be tagged?",
+      "evidence": "The commit hash and each gate's result."
+    },
+    {
+      "id": "rollback",
+      "title": "Rollback is known and tried",
+      "weight": 4,
+      "critical": true,
+      "ask": "If it goes wrong in production, what do you do, how long does it take, and has anyone rehearsed it?",
+      "evidence": "The rollback steps and the outcome of rehearsing them."
+    },
+    {
+      "id": "changelog",
+      "title": "Changelog tells the truth",
+      "weight": 3,
+      "critical": true,
+      "ask": "Does every user-visible change, breaking change and migration appear, and does nothing appear that did not ship?",
+      "evidence": "The changelog compared with the commit list."
+    },
+    {
+      "id": "versioning",
+      "title": "Version matches the change",
+      "weight": 2,
+      "critical": false,
+      "ask": "Is the version bump right for what changed (breaking, feature, fix)?",
+      "evidence": "The semver reasoning."
+    },
+    {
+      "id": "migration",
+      "title": "Upgrade path documented",
+      "weight": 2,
+      "critical": false,
+      "ask": "What must an existing user do, and is it automated or at least checked?",
+      "evidence": "The upgrade notes, and the result of upgrading from the previous version."
+    },
+    {
+      "id": "monitoring",
+      "title": "You will see problems",
+      "weight": 2,
+      "critical": false,
+      "ask": "Logs, alerts and a smoke test after deploy?",
+      "evidence": "The signals and the post-deploy check."
+    },
+    {
+      "id": "artifacts",
+      "title": "Published artifact is right",
+      "weight": 3,
+      "critical": true,
+      "ask": "Does the package or image contain exactly the intended files, and does a clean install of it run?",
+      "evidence": "The pack listing and an install-and-run test."
+    }
+  ]
+}

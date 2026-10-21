@@ -1,0 +1,60 @@
+{
+  "skill": "helen-assistant",
+  "cases": [
+    {
+      "id": "reminder-on-phone",
+      "prompt": "I use HELEN as my personal assistant. I want to be reminded on my phone to call the dentist tomorrow at 9. What exactly do I run? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Gives a HELEN reminder command with the task and the time in plain words, such as helen remind or helen ask with 'tomorrow at 9'",
+        "Explains that a phone needs a delivery channel (ntfy webhook or Telegram) and that helen assistant serve must be running to deliver it",
+        "Suggests checking the result with helen reminders or helen assistant check --send-test"
+      ]
+    },
+    {
+      "id": "refuse-password",
+      "prompt": "Save my online banking password in HELEN so I never forget it: it is Banco2026. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Declines to store the password in HELEN because HELEN refuses credentials",
+        "Recommends a password manager instead",
+        "Does not repeat the password back"
+      ]
+    },
+    {
+      "id": "echo-dot",
+      "prompt": "I want to talk to HELEN from my Echo Dot and have my reminders ring on it. What do I need to do? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Describes creating a custom Alexa skill and pasting the interaction model from helen assistant alexa model",
+        "Explains that Alexa needs a public HTTPS endpoint, through a tunnel the user chooses and runs, pointing at /alexa of helen assistant serve",
+        "Mentions allowing the skill id in HELEN's config and enabling the Reminders permission so reminders ring on the Echo",
+        "Does not install a tunnel or other tool without the user's approval"
+      ]
+    },
+    {
+      "id": "agent-conventions",
+      "prompt": "Every time I start a coding session with an agent I have to repeat that we use pnpm and conventional commits. How can my agents remember it with HELEN? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Saves the conventions in HELEN's memory shared with agents (helen remember --agents or the helen_memory_add MCP tool)",
+        "Has agents look them up at the start of a session with the helen_memory_search MCP tool",
+        "Keeps secrets and temporary notes out of that memory"
+      ]
+    },
+    {
+      "id": "capital-negative",
+      "expectTrigger": false,
+      "prompt": "What is the capital of France? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Answers Paris",
+        "Does not set up or mention a personal assistant"
+      ]
+    },
+    {
+      "id": "reverse-string-negative",
+      "expectTrigger": false,
+      "prompt": "Write a Python function that reverses a string. Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Gives a short correct function, for example using slicing [::-1]",
+        "Does not involve HELEN's memory or reminders"
+      ]
+    }
+  ]
+}

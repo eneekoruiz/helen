@@ -23,6 +23,11 @@ High-converting copy is concrete, authentic, and human. Generic AI models genera
 3. **Conversion Path Optimization:** Form fields stripped to the essential minimum. Action-oriented CTA button text ("Download the SDK" instead of "Submit").
 4. **Truthful Social Proof:** Never invent testimonials, logos, metrics, or certifications. Replace absent social proof with radical product transparency.
 
+## HELEN tools
+
+- `helen design check` (MCP `helen_design_check`) lists cliches, placeholder text and customer counts without a visible source, with file and line. Clear every one or state why it stays.
+- Converge with `helen loop start copy --subject "<pages>"` and score each round with evidence (`helen loop rubrics copy`). Done means `converged`, with the final score from an agent other than the writer.
+
 ## Native clarification
 
 Before implementation or evaluation, check whether a missing preference, constraint or acceptance decision materially affects the result. If it does, invoke the application's available native structured question tool (such as `request_user_input_async`, an available `request_user_input`, or `AskUserQuestion`), with concise task-specific choices and free text. Reuse existing answers and continue independent work while waiting. If the tool is unavailable in the current mode, ask conversationally; do not create a separate visual artifact or invent answers. If context suffices, proceed without a questionnaire.

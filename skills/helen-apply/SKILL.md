@@ -45,6 +45,12 @@ One entry point for everything in HELEN. The user does not need to know which pr
 | connect-tools | connecting MCP servers safely (browser, docs, GitHub, hosting, database) |
 | safe-install | vetting third-party skills |
 
+## Parallel and measured work
+
+- Several independent read-only steps, or several agents: use `helen-team` (`helen team graph`, claims, `helen team run <goal> --agent claude`).
+- Before calling a goal done, converge with `helen loop` against the matching rubric; the final score comes from a different agent.
+- Design goals start with `helen design direction` and gate on `helen design check`.
+
 ## Rules
 
 Follow the execution contract above. Preparing a release does not authorize tagging, publishing or transferring credentials. Never invent metrics, logos or claims.

@@ -1,0 +1,32 @@
+{
+  "id": "general",
+  "title": "General work product",
+  "description": "Default rubric for any deliverable: does it meet what was asked, is that proven, and is it honest about what is not.",
+  "threshold": 85,
+  "minCritical": 4,
+  "maxIterations": 6,
+  "independentFinalScore": true,
+  "criteria": [
+    { "id": "acceptance-met", "title": "Acceptance criteria are met", "weight": 4, "critical": true,
+      "ask": "Take each acceptance criterion defined before the work started. Is every one observably true now?",
+      "evidence": "A checklist of the original criteria, each with the command output, file or behavior that shows it holds." },
+    { "id": "verified", "title": "Verified, not asserted", "weight": 3, "critical": true,
+      "ask": "Did you run the project's own checks and exercise the changed behavior for real, rather than reasoning that it should work?",
+      "evidence": "Commands run with their actual result (pass/fail counts), plus a manual or browser check of the changed behavior." },
+    { "id": "no-regressions", "title": "Nothing else broke", "weight": 3, "critical": true,
+      "ask": "What could this change have broken? Did you look there?",
+      "evidence": "The full gate (typecheck, lint, tests, build) result and the neighboring behavior you re-checked." },
+    { "id": "scope", "title": "Scope respected", "weight": 2, "critical": true,
+      "ask": "Does the diff contain only what the task needs? Was anything unrequested changed, deleted or installed?",
+      "evidence": "The list of changed files, each tied to a requirement." },
+    { "id": "simplicity", "title": "As simple as it can be", "weight": 2, "critical": false,
+      "ask": "Is there dead code, a needless abstraction, a duplicated helper or a clever trick a maintainer would have to decode?",
+      "evidence": "What you removed or deliberately kept, and why." },
+    { "id": "honesty", "title": "Honest about gaps", "weight": 2, "critical": true,
+      "ask": "Does the report state what was not verified, what is still risky and what was deferred?",
+      "evidence": "The residual-risks list as written in the report." },
+    { "id": "next-actions", "title": "Useful next step", "weight": 1, "critical": false,
+      "ask": "Can the reader act on the result without asking you anything?",
+      "evidence": "The concrete next actions listed." }
+  ]
+}

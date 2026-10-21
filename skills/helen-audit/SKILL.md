@@ -44,6 +44,10 @@ Choose the cheapest available capable model when selection is supported; escalat
 
 Decide whether specialist contracts/backend, security, QA/recovery, visual/accessibility or claims sweeps improve acceptance enough to justify delegation overhead; otherwise perform focused passes in the primary agent. Provide relevant files, acceptance criteria and read-only or exclusive-write boundaries. Reuse compact evidence and integrate findings; run sequentially if agents are unavailable. Use concise English technical instructions and answer in the user's language. Measure tokens and cost before claiming savings.
 
+## Measured verification
+
+When fixes are authorized, verify them with a loop: `helen loop start <code|design|copy|security|general> --subject "<scope>"` and score each round with evidence. For front ends, run `helen design check` as a deterministic first pass. Independent read-only audits of one plan can run in parallel with `helen-team`.
+
 ## Output
 
 Report scope and criteria; prioritized findings with files, evidence, impact, fix and effort; changes applied when authorized; check results marked passed, failed, unavailable or not applicable; additional opportunities discovered; residual risks and blockers. No perfection score or guaranteed zero defects.

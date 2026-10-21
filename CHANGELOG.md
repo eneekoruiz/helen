@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+### Added
+- **Team of agents** (`helen team`, skill `helen-team`, MCP `helen_team_*`): a work graph with parallel read-only waves; claims with leases, path scopes and secret tokens (MCP sessions must present them); handoffs between agents or roles; an event log; and `helen team run`, which drives a plan to the end with worker agents (`--agent claude` or any `--command`), verifies checkpoints with the project's own scripts, shares a plan with other runs, and gives claims back on Ctrl-C. See `docs/ORCHESTRATION.md`.
+- **Quality loops** (`helen loop`): rubric scoring (general, design, code, copy, security, release) with evidence rules, verdicts (continue, stalled, exhausted, converged) and an independent final score.
+- **Design directions and template check** (`helen design direction`, `helen design check`): seeded, distinct directions over seven curated axes with WCAG-checked palettes, and a deterministic detector of template tells.
+- **Personal assistant** (skill `helen-assistant`): memory, reminders, lists and agenda in `~/.helen`; Spanish and English dates (recurrence, DST, hours in words); a scheduler with desktop, ntfy/webhook and Telegram delivery and a daily briefing; `helen ask` and `helen chat`; `helen assistant serve` with a chat page, a token API, a Telegram bot and an Alexa endpoint with Amazon's request verification and native Echo reminders; an optional model (a local command or the Claude API with HELEN's tools); privacy rules for credentials and private items; MCP tools for coding agents. See `docs/ASSISTANT.md` and `docs/ALEXA.md`.
+- Skill `helen-debug`: reproduce, narrow down (git bisect), prove the root cause, fix it at the cause and lock it with a regression test.
+- Eval suite: <!--fact:evalCases-->142<!--/fact--> cases across the bundled skills, with negative (must-not-trigger) cases for each.
+- `npm run docs:check` / `docs:sync`: numbers, file references and links in the documentation are checked against the repository in CI.
+- Release pipeline for real: release-please and npm trusted publishing with provenance (`release.yml`), a packaging check, a Docker image job and a portability matrix (Linux, macOS, Windows).
+
+### Fixed
+- Documentation claims that did not match the repository (missing workflows, counts, links) were corrected and are now enforced.
+- The MCP server confines tools to its allowed roots and refuses `force` unless the user enables it.
+- Git hooks come from one source, keep their executable bit, and `helen doctor --fix` repairs them.
+- Coordination hardening after an independent review: locks are only broken when their holder is gone, two runs never take the same item, claims cannot be completed or released by naming their holder, rotation cannot empty an inbox, notes cannot forge sections of `STATE.md`, and the runner never writes through symbolic links.
+
+- Feature workspace (`helen work`, MCP `helen_work_*`): feature dossiers, tasks with checkpoints, and verification gates whose receipts are signed with a per-user key kept outside the project; detached background jobs (`helen job`, MCP `helen_job_*`, which MCP clients may only use when the user sets `HELEN_MCP_ALLOW_JOBS=1`); outcomes, repository and specialty evals, `verify-package`, and a durable operations journal with crash recovery.
+- The assistant understands moving a reminder ("cambia el recordatorio de mamá a las 10"), deleting by name ("borra lo de la leche"), the time before the verb ("todos los lunes a las 8 recuérdame…"), and questions about notes ("dónde dejé las llaves").
+
+### Fixed (audit of the workspace and operations layers)
+- Project scripts run by `helen check` no longer inherit the MCP stdout/stdin and are killed after ten minutes.
+- Operation journals are authenticated, so a journal planted in a repository is never replayed, and targets inside `.git` are refused.
+- A checkpoint task cannot be downgraded through the record tool.
+- Tests use the real temporary path so macOS symlinks do not break path comparisons.
+
+### Changed
 - Preserve personal and modified skills during uninstall using per-file ownership hashes and conservative legacy cleanup.
 - Resume evaluation cases without discarding completed observations; archive evidence before explicit replacement.
 - Generate self-contained React testing configuration, including automatic JSX for Next-style TypeScript projects.
@@ -34,16 +60,12 @@ Wave 1 implementation: automated project bootstrap, machine-readable JSON output
   - Negative test case support (`expectTrigger: false`) to measure and report false positive trigger rates.
   - Eval runner CLI options: `--dry-run`, `--cases`, `--skill`, `--max-calls` budget enforcement, and run resumability.
   - Strict schema validation in `helen lint` and documentation in `evals/README.md`.
-  - Expanded eval suite to 90 cases (6 per skill, including 2 negative cases each).
-- Publishing and Release Pipeline:
-  - npm trusted publishing with provenance via OIDC (`.github/workflows/publish.yml`).
-  - Automated versioning and changelog with Release Please (`.github/workflows/release-please.yml`, `release-please-config.json`, `.release-please-manifest.json`).
-  - Added `helen-cli` bin alias in `package.json` for seamless `npx helen-cli` usage.
-  - Added `SECURITY.md` (vulnerability disclosure policy) and `docs/RELEASING.md` (maintainer release checklist).
+  - Eval suite across the bundled skills, each with negative (must-not-trigger) cases.
+- Publishing: `helen-cli` bin alias in `package.json`, `SECURITY.md` and `docs/RELEASING.md`. The npm publish and release-please workflows described in the first draft of this entry did not exist in the repository; they are added for real under Unreleased.
 - Windows portability: normalized CRLF vs LF in frontmatter parsing, unified forward-slash relative paths, and safe spawn handling.
 
 ### Changed
-- Skill trigger descriptions tuned with concrete user trigger phrasing across all 15 skills to improve autonomous AI agent invocation.
+- Skill trigger descriptions tuned with concrete user trigger phrasing across the bundled skills to improve autonomous AI agent invocation.
 
 ## 2.0.0 — 2026-09-30
 

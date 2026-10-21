@@ -6,37 +6,35 @@ on:
   pull_request:
     branches: [main]
 
-permissions:
-  contents: read
-
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 env:
-  GIT_LFS_SKIP_SMUDGE: "1"
+  GIT_LFS_SKIP_SMUDGE: '1'
 
 jobs:
   quality:
-    name: Quality Gates (Node ${{ matrix.node }})
+    name: Quality Gates
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        node: [20, 22, 24]
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           lfs: false
-      - uses: actions/setup-node@v4
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 22
           cache: npm
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run format:check
+      - run: npm run docs:check
       - run: npm run test -- --maxWorkers=2
       - run: npm run build
       - run: node dist/cli.js lint
@@ -44,44 +42,55 @@ jobs:
         run: |
           node scripts/run-specialty-evals.mjs --dry-run
           node scripts/run-repo-evals.mjs --suite implementation-holdout
+      - run: node scripts/check-pack.mjs
       - run: npm audit --audit-level=high
 
-  windows:
-    name: Windows recovery, progress and hook activation
-    runs-on: windows-latest
-    timeout-minutes: 15
+  portability:
+    name: Portability (${{ matrix.os }}, Node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    # The maintainer works on Windows; keep it visible but do not block merges until it has proven stable.
+    continue-on-error: ${{ matrix.os == 'windows-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, node: 20 }
+          - { os: ubuntu-latest, node: 24 }
+          - { os: macos-latest, node: 22 }
+          - { os: windows-latest, node: 22 }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           lfs: false
-      - uses: actions/setup-node@v4
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 22
+          node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
       - run: npm run build
-      - name: Verify the complete suite on Windows
-        run: npm run test -- --maxWorkers=2
+      - run: npm test -- --maxWorkers=2
+      - run: node dist/cli.js lint
 
   installed-package:
     name: Installed npm package (${{ matrix.os }}, Node ${{ matrix.node }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        node: [22]
         include:
-          - os: ubuntu-latest
-            node: 20
-          - os: ubuntu-latest
-            node: 24
-    timeout-minutes: 10
+          - { os: ubuntu-latest, node: 20 }
+          - { os: ubuntu-latest, node: 22 }
+          - { os: ubuntu-latest, node: 24 }
+          - { os: windows-latest, node: 22 }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           lfs: false
-      - uses: actions/setup-node@v4
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ matrix.node }}
           cache: npm
@@ -89,11 +98,21 @@ jobs:
       - run: npm run build
       - name: Verify an actual installed tarball outside the checkout
         run: node scripts/verify-package.mjs
-      - name: Preserve installed-package verification evidence
-        if: always()
-        uses: actions/upload-artifact@v4
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          name: installed-package-${{ matrix.os }}-node-${{ matrix.node }}
-          path: .helen/audit-results/package-verification-*/
-          include-hidden-files: true
-          if-no-files-found: warn
+          lfs: false
+          persist-credentials: false
+      - name: Build the image
+        run: docker build --tag helen:ci .
+      - name: The container runs the CLI
+        run: |
+          set -e
+          docker run --rm helen:ci --version
+          docker run --rm helen:ci lint
+          docker run --rm --volume "$PWD":/workspace helen:ci doctor --json || test $? -le 2

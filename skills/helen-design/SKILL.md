@@ -29,6 +29,12 @@ Generative coding tools systematically converge on identical design templates: g
    - Ground animations in physical reality: spring physics, subtle hover state transitions, and immediate interaction feedback instead of continuous floating loops.
    - Replace fuzzy colored glows with crisp, physical 1px borders or subtle drop shadows with real optical weight.
 
+## HELEN tools: measure instead of guessing
+
+1. **Diverge before building.** `helen design direction --brief "<what, for whom, how it should feel>"` (MCP `helen_design_direction`) returns distinct directions with typefaces, a tested palette as CSS tokens, layout, motion, imagery and voice. Pick one, borrow at most one element from another, and record the choice and the rejected directions in DESIGN.md.
+2. **Gate the tells.** `helen design check` (MCP `helen_design_check`) finds default typefaces, purple gradients, uniform cards, cliche copy, placeholder or unsourced claims, contrast failures, missing alt text and motion without a reduced-motion path. No errors may remain; fix each warning or state why it is intended.
+3. **Converge with evidence.** `helen loop start design --subject "<page>"`, then `helen loop score` each round with evidence for every criterion (`helen loop rubrics design`). Work the focus list it returns; on `stalled`, change the approach rather than polishing. Finish only on `converged`, which requires a final score from an agent other than the author.
+
 ## Typography & Layout Hierarchy
 
 1. **Hierarchy First**: Check spacing, alignment, typography scale, contrast, density, and interaction feedback before adding decorative effects.

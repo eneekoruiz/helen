@@ -1,0 +1,1341 @@
+{
+  "version": 1,
+  "purpose": "Curated, mutually distinct design choices. `helen design direction` combines them with a seed so two projects do not converge on the same look. Tags express affinity; the generator keeps each direction coherent and different from the others.",
+  "toneTags": {
+    "luxury": [
+      "quiet",
+      "refined",
+      "serious"
+    ],
+    "premium": [
+      "quiet",
+      "refined"
+    ],
+    "boutique": [
+      "refined",
+      "warm"
+    ],
+    "lujo": [
+      "quiet",
+      "refined",
+      "serious"
+    ],
+    "craft": [
+      "warm",
+      "tactile",
+      "humane"
+    ],
+    "handmade": [
+      "warm",
+      "tactile",
+      "humane"
+    ],
+    "artisan": [
+      "warm",
+      "tactile"
+    ],
+    "artesanal": [
+      "warm",
+      "tactile",
+      "humane"
+    ],
+    "ceramic": [
+      "warm",
+      "tactile"
+    ],
+    "ceramica": [
+      "warm",
+      "tactile"
+    ],
+    "cerámica": [
+      "warm",
+      "tactile"
+    ],
+    "playful": [
+      "playful",
+      "loud"
+    ],
+    "fun": [
+      "playful"
+    ],
+    "kids": [
+      "playful",
+      "friendly"
+    ],
+    "divertido": [
+      "playful",
+      "friendly"
+    ],
+    "technical": [
+      "technical",
+      "precise"
+    ],
+    "developer": [
+      "technical",
+      "precise"
+    ],
+    "api": [
+      "technical",
+      "precise"
+    ],
+    "técnico": [
+      "technical",
+      "precise"
+    ],
+    "data": [
+      "technical",
+      "curious"
+    ],
+    "bold": [
+      "loud",
+      "confident"
+    ],
+    "startup": [
+      "confident",
+      "loud"
+    ],
+    "audaz": [
+      "loud",
+      "confident"
+    ],
+    "calm": [
+      "quiet",
+      "cool"
+    ],
+    "wellness": [
+      "quiet",
+      "warm",
+      "humane"
+    ],
+    "health": [
+      "clear",
+      "humane"
+    ],
+    "salud": [
+      "clear",
+      "humane"
+    ],
+    "editorial": [
+      "text-led",
+      "serious"
+    ],
+    "magazine": [
+      "text-led",
+      "serious"
+    ],
+    "blog": [
+      "text-led",
+      "curious"
+    ],
+    "news": [
+      "text-led",
+      "serious"
+    ],
+    "portfolio": [
+      "confident",
+      "refined"
+    ],
+    "photography": [
+      "quiet",
+      "refined"
+    ],
+    "fotografía": [
+      "quiet",
+      "refined"
+    ],
+    "finance": [
+      "precise",
+      "serious",
+      "cool"
+    ],
+    "legal": [
+      "serious",
+      "quiet"
+    ],
+    "law": [
+      "serious",
+      "quiet"
+    ],
+    "food": [
+      "warm",
+      "tactile",
+      "friendly"
+    ],
+    "restaurant": [
+      "warm",
+      "tactile"
+    ],
+    "café": [
+      "warm",
+      "humane"
+    ],
+    "cafe": [
+      "warm",
+      "humane"
+    ],
+    "music": [
+      "dramatic",
+      "loud"
+    ],
+    "film": [
+      "dramatic",
+      "immersive"
+    ],
+    "game": [
+      "playful",
+      "dramatic"
+    ],
+    "nonprofit": [
+      "humane",
+      "clear"
+    ],
+    "education": [
+      "curious",
+      "clear",
+      "humane"
+    ],
+    "science": [
+      "curious",
+      "precise"
+    ],
+    "city": [
+      "clear",
+      "civic"
+    ],
+    "transport": [
+      "clear",
+      "civic"
+    ]
+  },
+  "bannedDefaults": [
+    "Purple, indigo or violet-to-pink gradients on backgrounds or headlines",
+    "Inter, Roboto, Arial or the system font as the only typeface",
+    "Three equal feature cards, each with an icon, a heading and two lines",
+    "A centered hero with a blurred gradient blob behind it",
+    "Glassmorphism (blur plus translucent white) as the default surface",
+    "Emoji used as icons",
+    "The same large corner radius and soft shadow on every surface",
+    "Stock imagery of handshakes, laptops on desks or abstract globes",
+    "Words like elevate, unlock, seamless, supercharge, revolutionize, next-generation, all-in-one, welcome to",
+    "Invented testimonials, logos or counts of customers",
+    "Neon glow on dark as the only personality",
+    "The sticky nav, hero, logo cloud, feature triad, pricing triad sequence copied unchanged"
+  ],
+  "axes": {
+    "concept": [
+      {
+        "id": "editorial-broadsheet",
+        "name": "Editorial broadsheet",
+        "summary": "A reading experience first: columns, rules, bylines, datelines, a clear front page.",
+        "tags": [
+          "serious",
+          "text-led",
+          "warm",
+          "refined"
+        ],
+        "signature": [
+          "A drop cap and a running folio on every page",
+          "Pull quotes set in the display face between columns",
+          "A colophon footer that credits typefaces and people"
+        ],
+        "risks": [
+          "Dense text needs a strict measure and spacing scale",
+          "Needs real headlines, not marketing slogans"
+        ]
+      },
+      {
+        "id": "swiss-grid",
+        "name": "Swiss grid",
+        "summary": "International typographic style: a strict grid, flush-left ragged-right text, scale contrast, almost no decoration.",
+        "tags": [
+          "precise",
+          "cool",
+          "confident",
+          "clear"
+        ],
+        "signature": [
+          "Oversized section numerals anchored to the grid",
+          "One accent color used only for the single action per view",
+          "Asymmetric blocks that always snap to the same columns"
+        ],
+        "risks": [
+          "Can read cold without warm copy",
+          "Alignment bugs are very visible"
+        ]
+      },
+      {
+        "id": "technical-blueprint",
+        "name": "Technical blueprint",
+        "summary": "Drawing sheets: hairlines, dimensions, labeled parts, coordinates, a title block.",
+        "tags": [
+          "technical",
+          "precise",
+          "cool",
+          "curious"
+        ],
+        "signature": [
+          "Callout lines that label real parts of the product",
+          "A title block footer with revision and date",
+          "Section marks like A-A and detail views"
+        ],
+        "risks": [
+          "Annotations must be true or the metaphor becomes decoration",
+          "Thin lines need care for contrast"
+        ]
+      },
+      {
+        "id": "craft-studio",
+        "name": "Craft studio",
+        "summary": "Made by hand: paper, ink, small irregularities, process shown honestly.",
+        "tags": [
+          "warm",
+          "tactile",
+          "humane",
+          "friendly"
+        ],
+        "signature": [
+          "Photographs of the actual workbench with handwritten captions",
+          "A batch or maker's mark on each product",
+          "Process steps shown as a contact sheet"
+        ],
+        "risks": [
+          "Fake roughness looks worse than none",
+          "Needs real photography"
+        ]
+      },
+      {
+        "id": "museum-catalogue",
+        "name": "Museum catalogue",
+        "summary": "Plates with captions, catalogue numbers, generous space, one object at a time.",
+        "tags": [
+          "quiet",
+          "serious",
+          "refined",
+          "clear"
+        ],
+        "signature": [
+          "Catalogue numbers and dimensions as captions",
+          "One object per viewport with wall-text beside it",
+          "An index of plates at the end"
+        ],
+        "risks": [
+          "Very sparse pages need excellent images",
+          "Easy to hide the call to action"
+        ]
+      },
+      {
+        "id": "field-notebook",
+        "name": "Field notebook",
+        "summary": "Notes from the field: marginalia, sketches, timestamps, observations in order.",
+        "tags": [
+          "curious",
+          "humane",
+          "warm",
+          "text-led"
+        ],
+        "signature": [
+          "Margin notes that react to the main text",
+          "Dated entries instead of sections",
+          "Sketched diagrams over photographs"
+        ],
+        "risks": [
+          "Handwriting fonts overused turn into costume",
+          "Chronology must match what the user needs"
+        ]
+      },
+      {
+        "id": "brutalist-poster",
+        "name": "Brutalist poster",
+        "summary": "Raw and loud: huge type, hard edges, few colors, nothing hidden.",
+        "tags": [
+          "loud",
+          "confident",
+          "raw",
+          "dramatic"
+        ],
+        "signature": [
+          "One headline that fills the first viewport",
+          "Visible borders and unstyled form controls kept deliberately",
+          "Link underlines as the only decoration"
+        ],
+        "risks": [
+          "Accessibility and readability must not suffer for attitude",
+          "Wrong for conservative audiences"
+        ]
+      },
+      {
+        "id": "retro-terminal",
+        "name": "Retro terminal",
+        "summary": "Monospaced text, command-line motifs, status lines, a calm phosphor palette.",
+        "tags": [
+          "technical",
+          "playful",
+          "nostalgic",
+          "curious"
+        ],
+        "signature": [
+          "A status line with real information",
+          "Navigation as commands that actually work",
+          "Output-style tables for pricing or specs"
+        ],
+        "risks": [
+          "A cliche unless content is genuinely technical",
+          "Long monospaced text tires readers"
+        ]
+      },
+      {
+        "id": "transit-signage",
+        "name": "Transit signage",
+        "summary": "Wayfinding: bold color blocks, arrows, pictograms, a line map of the product.",
+        "tags": [
+          "clear",
+          "civic",
+          "loud",
+          "precise"
+        ],
+        "signature": [
+          "A line-map of the user journey as navigation",
+          "Pictograms drawn to one grid",
+          "Destination boards for key facts"
+        ],
+        "risks": [
+          "Needs a consistent pictogram set",
+          "Color coding must not be the only signal"
+        ]
+      },
+      {
+        "id": "packaging-label",
+        "name": "Packaging label",
+        "summary": "The page is the label: ingredients, batch numbers, stamps, honest small print.",
+        "tags": [
+          "tactile",
+          "honest",
+          "playful",
+          "warm"
+        ],
+        "signature": [
+          "An ingredients or materials list as a feature",
+          "Stamps and seals that carry real facts",
+          "Batch or edition numbers"
+        ],
+        "risks": [
+          "Small print must stay legible",
+          "Works best for physical goods"
+        ]
+      },
+      {
+        "id": "cinematic-storyboard",
+        "name": "Cinematic storyboard",
+        "summary": "Scenes and frames: letterboxed images, subtitles as copy, scroll as editing.",
+        "tags": [
+          "dramatic",
+          "dark",
+          "immersive",
+          "quiet"
+        ],
+        "signature": [
+          "Subtitle-style captions for the key sentences",
+          "Frame numbers and a progress line",
+          "Hard cuts between scenes instead of fades"
+        ],
+        "risks": [
+          "Heavy media needs a performance budget",
+          "Scroll hijacking harms usability"
+        ]
+      },
+      {
+        "id": "letterpress-stationery",
+        "name": "Letterpress stationery",
+        "summary": "Cream stock, deep impressions, hairlines, small caps, correspondence.",
+        "tags": [
+          "quiet",
+          "refined",
+          "warm",
+          "serious"
+        ],
+        "signature": [
+          "Small caps and ligatures in headings",
+          "Hairline rules and a monogram",
+          "Copy written as a letter, signed"
+        ],
+        "risks": [
+          "Low contrast hairlines on cream",
+          "Can feel precious for utilitarian products"
+        ]
+      },
+      {
+        "id": "data-atlas",
+        "name": "Data atlas",
+        "summary": "Maps and charts are the interface: annotated visualizations carry the story.",
+        "tags": [
+          "curious",
+          "technical",
+          "cool",
+          "precise"
+        ],
+        "signature": [
+          "A hero visualization of the product's own data",
+          "Annotations written like map legends",
+          "Small multiples instead of paragraphs"
+        ],
+        "risks": [
+          "Charts must be accessible with text alternatives",
+          "Needs real data"
+        ]
+      },
+      {
+        "id": "sticker-sheet",
+        "name": "Sticker sheet",
+        "summary": "A collage of bold shapes and labels, slightly rotated, playful but organized.",
+        "tags": [
+          "playful",
+          "loud",
+          "friendly"
+        ],
+        "signature": [
+          "Die-cut shaped badges for features",
+          "A peel-off interaction on one element",
+          "Hand-placed overlaps on a clear underlying grid"
+        ],
+        "risks": [
+          "Rotation and overlap break on small screens",
+          "Can look childish for serious products"
+        ]
+      }
+    ],
+    "type": [
+      {
+        "id": "fraunces-instrument",
+        "name": "Soft serif with a clean sans",
+        "display": "Fraunces",
+        "text": "Instrument Sans",
+        "tags": [
+          "warm",
+          "humane",
+          "refined",
+          "friendly"
+        ],
+        "notes": "Fraunces has optical-size and softness axes; use high softness only for large display."
+      },
+      {
+        "id": "instrument-hanken",
+        "name": "Quiet serif display with a neutral sans",
+        "display": "Instrument Serif",
+        "text": "Hanken Grotesk",
+        "tags": [
+          "quiet",
+          "refined",
+          "text-led",
+          "serious"
+        ],
+        "notes": "Instrument Serif has one weight; build hierarchy with size and spacing."
+      },
+      {
+        "id": "newsreader-schibsted",
+        "name": "Newspaper serif with a news grotesque",
+        "display": "Newsreader",
+        "text": "Schibsted Grotesk",
+        "tags": [
+          "serious",
+          "text-led",
+          "clear"
+        ],
+        "notes": "Use Newsreader for headlines and long reading, the grotesque for interface and captions."
+      },
+      {
+        "id": "bricolage-literata",
+        "name": "Quirky grotesque with a reading serif",
+        "display": "Bricolage Grotesque",
+        "text": "Literata",
+        "tags": [
+          "playful",
+          "humane",
+          "warm",
+          "curious"
+        ],
+        "notes": "Bricolage has strong personality at display sizes; keep body text in Literata."
+      },
+      {
+        "id": "archivo-source-serif",
+        "name": "Wide and condensed grotesque with a book serif",
+        "display": "Archivo",
+        "text": "Source Serif 4",
+        "tags": [
+          "loud",
+          "confident",
+          "raw",
+          "serious"
+        ],
+        "notes": "Archivo's width axis allows poster-scale condensed headlines."
+      },
+      {
+        "id": "plex-mono-sans",
+        "name": "Mono and sans from one family",
+        "display": "IBM Plex Mono",
+        "text": "IBM Plex Sans",
+        "tags": [
+          "technical",
+          "precise",
+          "clear"
+        ],
+        "notes": "One family keeps rhythm consistent; use mono for labels, numerals and headings."
+      },
+      {
+        "id": "space-mono-rethink",
+        "name": "Quirky mono with a friendly sans",
+        "display": "Space Mono",
+        "text": "Rethink Sans",
+        "tags": [
+          "playful",
+          "technical",
+          "nostalgic",
+          "friendly"
+        ],
+        "notes": "Space Mono is strongly characterful; avoid it for long text."
+      },
+      {
+        "id": "dm-mono-instrument",
+        "name": "Mono labels with a serif voice",
+        "display": "Instrument Serif",
+        "text": "DM Mono",
+        "tags": [
+          "technical",
+          "refined",
+          "curious"
+        ],
+        "notes": "Serif for statements, mono for data and captions: a deliberate contrast."
+      },
+      {
+        "id": "gloock-albert",
+        "name": "High-contrast display serif with a plain sans",
+        "display": "Gloock",
+        "text": "Albert Sans",
+        "tags": [
+          "dramatic",
+          "refined",
+          "quiet"
+        ],
+        "notes": "Gloock is for large sizes only; thin strokes vanish small."
+      },
+      {
+        "id": "young-serif-figtree",
+        "name": "Sturdy friendly serif with a geometric sans",
+        "display": "Young Serif",
+        "text": "Figtree",
+        "tags": [
+          "warm",
+          "friendly",
+          "playful",
+          "humane"
+        ],
+        "notes": "A single-weight display serif that stays approachable."
+      },
+      {
+        "id": "syne-hanken",
+        "name": "Wide expressive display with a neutral sans",
+        "display": "Syne",
+        "text": "Hanken Grotesk",
+        "tags": [
+          "loud",
+          "playful",
+          "confident"
+        ],
+        "notes": "Syne ExtraBold is very wide; test headlines at 375 px."
+      },
+      {
+        "id": "unbounded-plex",
+        "name": "Rounded wide display with a technical sans",
+        "display": "Unbounded",
+        "text": "IBM Plex Sans",
+        "tags": [
+          "loud",
+          "technical",
+          "confident"
+        ],
+        "notes": "Unbounded works for short headlines and numerals only."
+      },
+      {
+        "id": "caslon-epilogue",
+        "name": "Old-style serif with a modern grotesque",
+        "display": "Libre Caslon Text",
+        "text": "Epilogue",
+        "tags": [
+          "quiet",
+          "serious",
+          "refined",
+          "warm"
+        ],
+        "notes": "Caslon gives gravitas; pair with a restrained sans for interface."
+      },
+      {
+        "id": "spectral-familjen",
+        "name": "Screen serif with a humanist grotesque",
+        "display": "Spectral",
+        "text": "Familjen Grotesk",
+        "tags": [
+          "serious",
+          "humane",
+          "text-led",
+          "curious"
+        ],
+        "notes": "Spectral is designed for screen reading; use light weights for display."
+      },
+      {
+        "id": "crimson-jetbrains",
+        "name": "Bookish serif with a code mono",
+        "display": "Crimson Pro",
+        "text": "JetBrains Mono",
+        "tags": [
+          "curious",
+          "technical",
+          "warm",
+          "text-led"
+        ],
+        "notes": "Good for notebook-like pages mixing prose and code."
+      },
+      {
+        "id": "anton-source-serif",
+        "name": "Poster condensed with a book serif",
+        "display": "Anton",
+        "text": "Source Serif 4",
+        "tags": [
+          "loud",
+          "raw",
+          "dramatic",
+          "confident"
+        ],
+        "notes": "Anton for one huge headline per view, never for body."
+      }
+    ],
+    "color": [
+      {
+        "id": "paper-and-ink",
+        "name": "Paper and ink with terracotta",
+        "palette": {
+          "background": "#F5F0E6",
+          "surface": "#EBE4D6",
+          "ink": "#1C1A17",
+          "accent": "#B5472A",
+          "muted": "#6F675B"
+        },
+        "tags": [
+          "warm",
+          "humane",
+          "tactile",
+          "refined"
+        ]
+      },
+      {
+        "id": "cream-ink-blue-tomato",
+        "name": "Cream, ink blue and tomato",
+        "palette": {
+          "background": "#F4EFE0",
+          "surface": "#E9E2CE",
+          "ink": "#13294B",
+          "accent": "#B8340F",
+          "muted": "#5A6578"
+        },
+        "tags": [
+          "serious",
+          "text-led",
+          "confident",
+          "warm"
+        ]
+      },
+      {
+        "id": "forest-and-bone",
+        "name": "Forest and bone",
+        "palette": {
+          "background": "#EFEBDD",
+          "surface": "#E2DCC8",
+          "ink": "#12231B",
+          "accent": "#2E6B4F",
+          "muted": "#5E6B62"
+        },
+        "tags": [
+          "quiet",
+          "serious",
+          "humane",
+          "refined"
+        ]
+      },
+      {
+        "id": "mono-plus-signal",
+        "name": "Near-monochrome with one signal color",
+        "palette": {
+          "background": "#FAFAF7",
+          "surface": "#EFEFEA",
+          "ink": "#0E0E0E",
+          "accent": "#C73A0A",
+          "muted": "#5C5C57"
+        },
+        "tags": [
+          "loud",
+          "confident",
+          "technical",
+          "precise",
+          "clear"
+        ]
+      },
+      {
+        "id": "midnight-amber",
+        "name": "Midnight and amber",
+        "palette": {
+          "background": "#0F1115",
+          "surface": "#171A21",
+          "ink": "#ECE7DB",
+          "accent": "#F2A541",
+          "muted": "#9A978F"
+        },
+        "tags": [
+          "dramatic",
+          "technical",
+          "nostalgic",
+          "dark"
+        ]
+      },
+      {
+        "id": "acid-on-black",
+        "name": "Acid green on black",
+        "palette": {
+          "background": "#0B0B0B",
+          "surface": "#161616",
+          "ink": "#F2F2F2",
+          "accent": "#C6FF3D",
+          "muted": "#A0A0A0"
+        },
+        "tags": [
+          "loud",
+          "raw",
+          "playful",
+          "dark"
+        ]
+      },
+      {
+        "id": "peach-and-pine",
+        "name": "Peach, plum ink and pine",
+        "palette": {
+          "background": "#F9E3D6",
+          "surface": "#F2D2C0",
+          "ink": "#2B2231",
+          "accent": "#0F6B55",
+          "muted": "#6B5A66"
+        },
+        "tags": [
+          "playful",
+          "friendly",
+          "warm"
+        ]
+      },
+      {
+        "id": "cobalt-on-warm-white",
+        "name": "Cobalt and ink on warm white",
+        "palette": {
+          "background": "#F6F4EE",
+          "surface": "#ECE9E0",
+          "ink": "#101B4D",
+          "accent": "#1F3FFF",
+          "muted": "#5A6086"
+        },
+        "tags": [
+          "loud",
+          "playful",
+          "confident",
+          "friendly"
+        ]
+      },
+      {
+        "id": "clay-and-sage",
+        "name": "Clay and sage",
+        "palette": {
+          "background": "#F2EBE3",
+          "surface": "#E7DDD1",
+          "ink": "#2A2522",
+          "accent": "#94472F",
+          "muted": "#5A6657"
+        },
+        "tags": [
+          "warm",
+          "tactile",
+          "humane",
+          "quiet"
+        ]
+      },
+      {
+        "id": "navy-signage-yellow",
+        "name": "Navy and signage yellow",
+        "palette": {
+          "background": "#F7F7F2",
+          "surface": "#ECECE4",
+          "ink": "#0B1F3A",
+          "accent": "#F2B705",
+          "muted": "#53627A"
+        },
+        "tags": [
+          "clear",
+          "civic",
+          "loud",
+          "precise"
+        ],
+        "accentUse": "fill"
+      },
+      {
+        "id": "graphite-copper",
+        "name": "Graphite and copper",
+        "palette": {
+          "background": "#1A1C1E",
+          "surface": "#232628",
+          "ink": "#E8E6E1",
+          "accent": "#C9783D",
+          "muted": "#9C9A94"
+        },
+        "tags": [
+          "refined",
+          "serious",
+          "dark",
+          "dramatic"
+        ]
+      },
+      {
+        "id": "salt-and-sea",
+        "name": "Salt and sea",
+        "palette": {
+          "background": "#F3F7F7",
+          "surface": "#E4EDED",
+          "ink": "#0B2B33",
+          "accent": "#0E7C86",
+          "muted": "#506E75"
+        },
+        "tags": [
+          "cool",
+          "quiet",
+          "curious",
+          "clear"
+        ]
+      }
+    ],
+    "layout": [
+      {
+        "id": "asymmetric-twelve",
+        "name": "Asymmetric twelve columns",
+        "summary": "Headline across eight columns, body offset into the remaining space; whitespace carries the hierarchy.",
+        "tags": [
+          "confident",
+          "precise",
+          "refined",
+          "loud"
+        ]
+      },
+      {
+        "id": "baseline-modular",
+        "name": "Baseline modular grid",
+        "summary": "Everything snaps to one baseline and module size, like a catalogue page.",
+        "tags": [
+          "precise",
+          "clear",
+          "serious",
+          "technical"
+        ]
+      },
+      {
+        "id": "single-column-longform",
+        "name": "Single column long form",
+        "summary": "One reading column of about 60 characters with side notes in the margin.",
+        "tags": [
+          "text-led",
+          "quiet",
+          "curious",
+          "serious"
+        ]
+      },
+      {
+        "id": "fixed-split",
+        "name": "Fixed split screen",
+        "summary": "A fixed panel carries the title and actions while the other side scrolls.",
+        "tags": [
+          "confident",
+          "refined",
+          "dramatic"
+        ]
+      },
+      {
+        "id": "sticky-index",
+        "name": "Sticky numbered index",
+        "summary": "A sticky table of contents with numbered sections beside the content.",
+        "tags": [
+          "technical",
+          "text-led",
+          "clear",
+          "precise"
+        ]
+      },
+      {
+        "id": "rules-and-lists",
+        "name": "Rules and lists, no cards",
+        "summary": "Sections separated by hairline rules; content as lists and tables instead of boxes.",
+        "tags": [
+          "serious",
+          "clear",
+          "quiet",
+          "text-led"
+        ]
+      },
+      {
+        "id": "full-bleed-sequence",
+        "name": "Full-bleed scenes",
+        "summary": "Each viewport is a scene of image or type with one idea.",
+        "tags": [
+          "dramatic",
+          "immersive",
+          "loud"
+        ]
+      },
+      {
+        "id": "collage-overlap",
+        "name": "Overlapping collage on a hidden grid",
+        "summary": "Panels overlap and rotate slightly while a simple grid keeps order.",
+        "tags": [
+          "playful",
+          "loud",
+          "friendly"
+        ]
+      },
+      {
+        "id": "centered-formal",
+        "name": "Formal center axis",
+        "summary": "Symmetrical, ceremonial layout with a central axis and generous margins.",
+        "tags": [
+          "quiet",
+          "refined",
+          "serious",
+          "warm"
+        ]
+      },
+      {
+        "id": "dense-dashboard",
+        "name": "Information-dense panels",
+        "summary": "Tables, small type and tight spacing for expert users who scan.",
+        "tags": [
+          "technical",
+          "precise",
+          "curious"
+        ]
+      }
+    ],
+    "motion": [
+      {
+        "id": "still",
+        "name": "Almost still",
+        "summary": "No decorative motion; focus and hover transitions of 120 ms or less.",
+        "tags": [
+          "quiet",
+          "serious",
+          "clear",
+          "precise"
+        ],
+        "guard": "Nothing to disable for reduced motion."
+      },
+      {
+        "id": "snappy-mechanical",
+        "name": "Snappy and mechanical",
+        "summary": "120-180 ms ease-out transitions, no bounce, state changes that feel like switches.",
+        "tags": [
+          "technical",
+          "precise",
+          "confident"
+        ],
+        "guard": "Honor prefers-reduced-motion by removing transforms."
+      },
+      {
+        "id": "soft-inertial",
+        "name": "Soft and inertial",
+        "summary": "Gentle 400-700 ms reveals on scroll, restrained parallax on one element.",
+        "tags": [
+          "warm",
+          "quiet",
+          "humane",
+          "refined"
+        ],
+        "guard": "Disable parallax and reveals under prefers-reduced-motion."
+      },
+      {
+        "id": "typographic-reveal",
+        "name": "Typographic reveals",
+        "summary": "Headlines reveal line by line through a mask; nothing else moves.",
+        "tags": [
+          "refined",
+          "confident",
+          "text-led"
+        ],
+        "guard": "Show the text immediately when motion is reduced."
+      },
+      {
+        "id": "scroll-narrative",
+        "name": "Scroll narrative",
+        "summary": "One pinned, scroll-driven sequence tells the central story.",
+        "tags": [
+          "dramatic",
+          "immersive",
+          "curious"
+        ],
+        "guard": "Needs a performance budget, no scroll hijacking, and a static fallback."
+      },
+      {
+        "id": "cursor-reactive",
+        "name": "Cursor reactive",
+        "summary": "A single key object responds subtly to the pointer.",
+        "tags": [
+          "playful",
+          "friendly",
+          "loud"
+        ],
+        "guard": "Pointer-only enhancement; keyboard and touch get a static state."
+      },
+      {
+        "id": "view-transitions",
+        "name": "Page-to-page view transitions",
+        "summary": "Cross-document view transitions carry shared elements between pages.",
+        "tags": [
+          "refined",
+          "confident",
+          "clear"
+        ],
+        "guard": "Feature-detect and fall back to instant navigation."
+      },
+      {
+        "id": "ambient-loop",
+        "name": "Slow ambient loop",
+        "summary": "One CSS-only background animation that takes over a minute to repeat.",
+        "tags": [
+          "quiet",
+          "dark",
+          "dramatic",
+          "cool"
+        ],
+        "guard": "Pause it under prefers-reduced-motion and when the tab is hidden."
+      }
+    ],
+    "imagery": [
+      {
+        "id": "photography-led",
+        "name": "Real photography",
+        "summary": "Natural light, the real product and people, shot consistently.",
+        "tags": [
+          "warm",
+          "humane",
+          "tactile",
+          "quiet",
+          "refined"
+        ],
+        "needs": "A photographer or a shot list the team can actually deliver."
+      },
+      {
+        "id": "single-illustrator",
+        "name": "One illustrator's style",
+        "summary": "One consistent illustrated world instead of stock icons.",
+        "tags": [
+          "playful",
+          "friendly",
+          "humane",
+          "curious"
+        ],
+        "needs": "A commissioned or consistent set; never mix styles."
+      },
+      {
+        "id": "type-as-image",
+        "name": "Typography as the image",
+        "summary": "Large type, numerals and marks do the visual work.",
+        "tags": [
+          "loud",
+          "confident",
+          "text-led",
+          "raw",
+          "precise"
+        ],
+        "needs": "Strong type choices and tight copy."
+      },
+      {
+        "id": "diagrams-and-data",
+        "name": "Diagrams and data",
+        "summary": "Diagrams, charts and maps explain the product.",
+        "tags": [
+          "technical",
+          "curious",
+          "precise",
+          "cool"
+        ],
+        "needs": "Real data and accessible alternatives."
+      },
+      {
+        "id": "texture-print",
+        "name": "Paper and print texture",
+        "summary": "Risograph, grain and paper surfaces under flat shapes.",
+        "tags": [
+          "tactile",
+          "warm",
+          "playful",
+          "nostalgic"
+        ],
+        "needs": "Subtle, optimized textures; never over text."
+      },
+      {
+        "id": "hero-object",
+        "name": "One hero object",
+        "summary": "A single product or 3D object, presented with care.",
+        "tags": [
+          "refined",
+          "dramatic",
+          "quiet",
+          "confident"
+        ],
+        "needs": "A 3D budget and a still fallback."
+      },
+      {
+        "id": "annotated-screens",
+        "name": "Annotated interface",
+        "summary": "Real screenshots with callouts that teach.",
+        "tags": [
+          "technical",
+          "clear",
+          "precise"
+        ],
+        "needs": "Up-to-date screens that match the product."
+      },
+      {
+        "id": "no-imagery",
+        "name": "Text only",
+        "summary": "No pictures; hierarchy, rhythm and copy carry everything.",
+        "tags": [
+          "text-led",
+          "serious",
+          "quiet",
+          "raw"
+        ],
+        "needs": "Excellent writing."
+      }
+    ],
+    "voice": [
+      {
+        "id": "plainspoken",
+        "name": "Plainspoken",
+        "summary": "Short sentences, concrete nouns, no adjectives that cannot be checked.",
+        "tags": [
+          "clear",
+          "honest",
+          "humane",
+          "serious"
+        ],
+        "avoid": [
+          "leverage",
+          "solution",
+          "best-in-class"
+        ]
+      },
+      {
+        "id": "dry-wit",
+        "name": "Dry wit",
+        "summary": "Understatement and the occasional deadpan aside, never at the reader's expense.",
+        "tags": [
+          "curious",
+          "confident",
+          "refined",
+          "playful"
+        ],
+        "avoid": [
+          "exclamation marks",
+          "puns on every line"
+        ]
+      },
+      {
+        "id": "calm-authority",
+        "name": "Calm authority",
+        "summary": "Measured and precise; claims arrive with their evidence.",
+        "tags": [
+          "serious",
+          "quiet",
+          "precise",
+          "refined"
+        ],
+        "avoid": [
+          "hype",
+          "superlatives"
+        ]
+      },
+      {
+        "id": "warm-personal",
+        "name": "Warm and personal",
+        "summary": "First person, specific people and places, a maker's voice.",
+        "tags": [
+          "warm",
+          "humane",
+          "tactile",
+          "friendly"
+        ],
+        "avoid": [
+          "corporate we",
+          "buzzwords"
+        ]
+      },
+      {
+        "id": "technical-exact",
+        "name": "Technical and exact",
+        "summary": "Units, versions, limits and failure modes stated up front.",
+        "tags": [
+          "technical",
+          "precise",
+          "curious",
+          "clear"
+        ],
+        "avoid": [
+          "magic",
+          "effortless"
+        ]
+      },
+      {
+        "id": "restrained-poetic",
+        "name": "Restrained and poetic",
+        "summary": "Few words, with rhythm; imagery used once, not everywhere.",
+        "tags": [
+          "quiet",
+          "refined",
+          "dramatic",
+          "warm"
+        ],
+        "avoid": [
+          "purple prose",
+          "stacked metaphors"
+        ]
+      },
+      {
+        "id": "direct-urgent",
+        "name": "Direct and urgent",
+        "summary": "Imperatives, deadlines and numbers; says what to do now.",
+        "tags": [
+          "loud",
+          "confident",
+          "clear",
+          "raw"
+        ],
+        "avoid": [
+          "fake scarcity",
+          "pressure the product cannot justify"
+        ]
+      },
+      {
+        "id": "playful-conversational",
+        "name": "Playful and conversational",
+        "summary": "Writes the way a friendly expert talks, with jokes that carry information.",
+        "tags": [
+          "playful",
+          "friendly",
+          "humane",
+          "loud"
+        ],
+        "avoid": [
+          "slang that dates quickly",
+          "jokes about errors"
+        ]
+      }
+    ]
+  }
+}

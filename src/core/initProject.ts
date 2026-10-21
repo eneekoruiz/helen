@@ -1,7 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import { setupProject, type SetupAgent } from "./setup.js";
-import { guardrailsModule } from "../modules/guardrails/index.js";
+import {
+  guardrailsModule,
+  PREPARE_SCRIPT,
+} from "../modules/guardrails/index.js";
+import { spawnSync } from "node:child_process";
+import { activateHooks } from "./gitHooks.js";
 import { detectProject } from "./projectDetector.js";
 import {
   buildPlan,
@@ -22,9 +27,18 @@ export interface InitProjectOptions {
   yes?: boolean;
   dryRun?: boolean;
   force?: boolean;
+  /** Create a git repository when there is none and activate the hooks. Default: true. */
+  git?: boolean;
+}
+
+export interface GitSetupResult {
+  initialized: boolean;
+  hooksActive: boolean;
+  note?: string;
 }
 
 export interface InitProjectResult {
+  gitResult: GitSetupResult;
   projectDir: string;
   isNewFolder: boolean;
   chosenGoal: string;
@@ -47,6 +61,74 @@ export interface InitProjectResult {
   };
   actionsTaken: string[];
   nextSteps: string[];
+}
+
+/** Create the repository when missing and point git at the hooks that guardrails installed. */
+export function setupGit(
+  targetDir: string,
+  options: { enabled: boolean; dryRun: boolean },
+  actions: string[],
+): GitSetupResult {
+  if (!options.enabled)
+    return {
+      initialized: false,
+      hooksActive: false,
+      note: "Git setup skipped (--no-git).",
+    };
+  if (
+    spawnSync("git", ["--version"], { stdio: "ignore", windowsHide: true })
+      .status !== 0
+  ) {
+    return {
+      initialized: false,
+      hooksActive: false,
+      note: "git is not installed; hooks stay inactive.",
+    };
+  }
+  const inside =
+    fs.existsSync(targetDir) &&
+    spawnSync("git", ["-C", targetDir, "rev-parse", "--show-toplevel"], {
+      stdio: "ignore",
+      windowsHide: true,
+    }).status === 0;
+  let initialized = false;
+  if (!inside) {
+    if (options.dryRun) {
+      actions.push("[DRY-RUN] Would run git init");
+      return { initialized: false, hooksActive: false };
+    }
+    if (
+      spawnSync("git", ["-C", targetDir, "init", "-q"], {
+        stdio: "ignore",
+        windowsHide: true,
+      }).status !== 0
+    ) {
+      return {
+        initialized: false,
+        hooksActive: false,
+        note: "git init failed; hooks stay inactive.",
+      };
+    }
+    initialized = true;
+    actions.push("Initialized a git repository");
+  }
+  if (options.dryRun || !fs.existsSync(path.join(targetDir, ".githooks")))
+    return { initialized, hooksActive: false };
+  // A parent repository owns the folder when it is not a repository root: its shared hooks path stays untouched.
+  const activation = activateHooks(targetDir);
+  if (activation.changed && activation.active)
+    actions.push("Activated the git hooks (core.hooksPath = .githooks)");
+  return {
+    initialized,
+    hooksActive: activation.active,
+    ...(activation.note
+      ? {
+          note: activation.note.includes("Not the root")
+            ? "Inside a parent git repository; hooks path left unchanged."
+            : activation.note,
+        }
+      : {}),
+  };
 }
 
 export async function runInitProject(
@@ -115,7 +197,7 @@ export async function runInitProject(
         name: defaultPkgName,
         version: "0.1.0",
         private: true,
-        scripts: {},
+        scripts: { prepare: PREPARE_SCRIPT },
       };
       actionsTaken.push("Create minimal package.json");
       if (!dryRun) {
@@ -170,6 +252,12 @@ export async function runInitProject(
       throw new Error(
         `Guardrails failed: ${guardrailsRes.diagnostics?.map((item) => item.message).join("; ") || "module did not complete"}`,
       );
+
+    const gitResult = setupGit(
+      targetDir,
+      { enabled: options.git !== false, dryRun },
+      actionsTaken,
+    );
 
     // 4. Determine phase and goal, then start tracking
     const detection = detectPhase(targetDir);
@@ -257,6 +345,7 @@ export async function runInitProject(
             ? existingProgress.steps.length
             : plan.goal.steps.length,
       },
+      gitResult,
       actionsTaken,
       nextSteps,
     };

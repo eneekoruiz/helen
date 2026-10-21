@@ -76,6 +76,10 @@ import {
 import { validateCatalog } from "./core/catalog.js";
 import { registerProgressCommands } from "./commands/progressCmd.js";
 import { registerApplyCommand } from "./commands/applyCmd.js";
+import { registerTeamCommands } from "./commands/teamCmd.js";
+import { registerLoopCommands } from "./commands/loopCmd.js";
+import { registerDesignCommands } from "./commands/designCmd.js";
+import { registerAssistantCommands } from "./commands/assistantCmd.js";
 import { runAgentDoctor } from "./core/agentDoctor.js";
 import { readGuide } from "./core/guide.js";
 import {
@@ -98,6 +102,8 @@ import type { HelenContext } from "./core/context.js";
 import { getInstallCommand } from "./core/packageManager.js";
 import { runRollback } from "./core/rollback.js";
 import { validateAllEvals } from "./core/evals.js";
+import { validateAllRubrics } from "./core/rubrics.js";
+import { validateDirectionData } from "./core/direction.js";
 import {
   isJsonMode,
   setJsonMode,
@@ -105,6 +111,7 @@ import {
   clearJsonBuffers,
 } from "./core/jsonOutput.js";
 import { runInitProject } from "./core/initProject.js";
+import { helenVersion } from "./core/version.js";
 import {
   runProjectOperation,
   listOperations,
@@ -112,7 +119,7 @@ import {
 } from "./core/operations.js";
 import { withPreview, previewToJSON, renderPreview } from "./core/preview.js";
 
-const VERSION = "2.1.0";
+const VERSION = helenVersion();
 
 interface ModuleRunResult {
   failed?: boolean;
@@ -298,6 +305,10 @@ export function runLint(): number {
   );
   const skillIssues = validateSkills().map((issue) => `skills: ${issue}`);
   const evalIssues = validateAllEvals().map((issue) => `evals: ${issue}`);
+  const rubricIssues = [
+    ...validateAllRubrics(),
+    ...validateDirectionData(),
+  ].map((issue) => `design data: ${issue}`);
   const catalog = validateCatalog();
   const catalogErrors = catalog
     .filter((issue) => issue.level === "error")
@@ -311,6 +322,7 @@ export function runLint(): number {
     ...playbookIssues,
     ...skillIssues,
     ...evalIssues,
+    ...rubricIssues,
     ...catalogErrors,
   ];
   const allWarnings = [...catalogWarns];
@@ -338,7 +350,7 @@ export function runLint(): number {
   for (const error of allErrors) logger.error(error);
   if (allErrors.length > 0) return 1;
   logger.success(
-    "HELEN library is valid (prompts, indexes, playbooks, skills, catalog, evals).",
+    "HELEN library is valid (prompts, indexes, playbooks, skills, catalog, evals, rubrics).",
   );
   return allWarnings.length > 0 ? 2 : 0;
 }
@@ -542,6 +554,7 @@ export function createProgram(): Command {
       "Initial goal to plan and track (default: strategy for new project, or phase recommendation)",
     )
     .option("--yes", "Skip confirmation prompts", false)
+    .option("--no-git", "Do not create a git repository or activate the hooks")
     .option("--dry-run", "Preview actions without modifying disk", false)
     .option("--force", "Explicitly restart or replace the tracked plan", false)
     .action(
@@ -553,6 +566,7 @@ export function createProgram(): Command {
           yes?: boolean;
           dryRun?: boolean;
           force?: boolean;
+          git?: boolean;
         },
       ) => {
         try {
@@ -564,6 +578,7 @@ export function createProgram(): Command {
             yes: opts?.yes,
             dryRun: opts?.dryRun,
             force: opts?.force,
+            git: opts?.git,
           });
 
           if (isJsonMode()) {
@@ -1060,6 +1075,12 @@ export function createProgram(): Command {
             { project, issues, fixReport },
             {
               ok: errorCount === 0,
+              errors: issues
+                .filter((i) => i.status === "error")
+                .map((i) => `${i.label}: ${i.message}`),
+              warnings: issues
+                .filter((i) => i.status === "warn")
+                .map((i) => `${i.label}: ${i.message}`),
               exitCode,
             },
           );
@@ -1251,6 +1272,10 @@ export function createProgram(): Command {
     });
 
   registerApplyCommand(program);
+  registerTeamCommands(program);
+  registerLoopCommands(program);
+  registerDesignCommands(program);
+  registerAssistantCommands(program);
 
   // helen skills
   registerSkillsCommands(program);
@@ -1361,9 +1386,17 @@ export function createProgram(): Command {
     .description(
       "Start the HELEN Model Context Protocol (MCP) server over stdio",
     )
-    .action(async () => {
-      const { startMcpServer } = await import("./core/mcp.js");
-      startMcpServer(process.stdin, process.stdout);
+    .option(
+      "--root <dir...>",
+      "Extra project directories clients may address with cwd (default: the directory the server starts in; also HELEN_MCP_ROOTS)",
+    )
+    .action(async (opts: { root?: string[] }) => {
+      const { startMcpServer, serverPolicy } = await import("./core/mcp.js");
+      startMcpServer(
+        process.stdin,
+        process.stdout,
+        serverPolicy({ roots: opts.root }),
+      );
     });
 
   // helen config

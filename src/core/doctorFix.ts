@@ -3,6 +3,7 @@ import path from "node:path";
 import { detectProject } from "./projectDetector.js";
 import { updateAgentSetup } from "./agentDoctor.js";
 import { isSafeProjectPath, writeFileSafe } from "./fs.js";
+import { ensureHooks } from "./gitHooks.js";
 import { updateConfig } from "./config.js";
 import {
   configureHelenHooksPath,
@@ -95,67 +96,12 @@ function applyDoctorRepairs(
         if (!isSafeProjectPath(cwd, githooksDir))
           throw new Error("Unsafe .githooks path");
 
-        // Pre-commit hook
-        const preCommitPath = path.join(githooksDir, "pre-commit");
-        if (
-          !isSafeProjectPath(cwd, preCommitPath) ||
-          (fs.existsSync(preCommitPath) && !fs.statSync(preCommitPath).isFile())
-        ) {
-          throw new Error("Unsafe .githooks/pre-commit path");
-        }
-        if (!fs.existsSync(preCommitPath)) {
-          const hookContent = `#!/bin/sh
-# HELEN pre-commit: fast checks on staged files only, no dependencies.
-# Skip once with: git commit --no-verify
-node --input-type=commonjs <<'HELEN_NODE'
-const { execFileSync } = require('node:child_process');
-const path = require('node:path');
-const git = (...args) => execFileSync('git', args, { maxBuffer: 32 * 1024 * 1024 });
-let failed = false;
-try {
-  const files = git('diff', '--cached', '--name-only', '-z', '--diff-filter=ACMR').toString().split('\\0').filter(Boolean);
-  for (const file of files) {
-    const fail = (reason) => { console.error('✖ ' + JSON.stringify(file) + ': ' + reason); failed = true; };
-    const name = path.posix.basename(file);
-    if ((name === '.env' || name.startsWith('.env.') || name.endsWith('.env')) && !/\\.(example|sample|template)$/.test(name)) fail('environment files must not be committed');
-    const blob = git('show', ':' + file);
-    if (blob.length > 5242880) fail('larger than 5 MB (use Git LFS or external storage)');
-    const content = blob.toString();
-    if (/^(<<<<<<<|>>>>>>>) /m.test(content)) fail('merge conflict markers');
-    if (/-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{36}|sk-(live|proj)-[A-Za-z0-9_-]{16,}|xox[baprs]-[A-Za-z0-9-]{10,}/.test(content)) fail('looks like it contains a secret (value not shown)');
-  }
-} catch {
-  console.error('Unable to inspect staged files; commit blocked.');
-  failed = true;
-}
-if (failed) { console.error('Commit blocked by .githooks/pre-commit'); process.exit(1); }
-HELEN_NODE
-`;
-          const status = writeFileSafe(preCommitPath, hookContent, {
-            dryRun: opts.dryRun,
-            root: cwd,
-          });
-          if (status === "skipped")
-            throw new Error("Could not safely install .githooks/pre-commit");
-          if (!opts.dryRun) fs.chmodSync(preCommitPath, 0o755);
-          report.fixed.push("Installed .githooks/pre-commit");
-        } else if (
-          process.platform !== "win32" &&
-          (fs.statSync(preCommitPath).mode & 0o111) === 0
-        ) {
-          const existing = fs.readFileSync(preCommitPath, "utf8");
-          if (existing.includes("# HELEN pre-commit:")) {
-            if (!opts.dryRun)
-              writeAtomicFile(preCommitPath, existing, {
-                mode: (fs.statSync(preCommitPath).mode & 0o777) | 0o111,
-              });
-            report.fixed.push("Made .githooks/pre-commit executable");
-          } else {
-            report.skipped.push(
-              "Preserved existing non-HELEN .githooks/pre-commit",
-            );
-          }
-        }
+        // Write the hooks that are missing, make every hook executable (git silently ignores the rest).
+        const installed = ensureHooks(cwd, { dryRun: opts.dryRun });
+        for (const name of installed.created)
+          report.fixed.push(`Installed .githooks/${name}`);
+        for (const name of installed.madeExecutable)
+          report.fixed.push(`Made .githooks/${name} executable`);
         if (opts.dryRun && hooks.kind === "unset")
           report.fixed.push("Configured git core.hooksPath to .githooks");
         onHooksReady?.();

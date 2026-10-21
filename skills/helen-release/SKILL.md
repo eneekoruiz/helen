@@ -42,6 +42,10 @@ Decide if the project can be packaged as a release candidate (RC) or delivered t
 ```
 Prepare release artifacts within authorization; tags, publication and account transfers require existing explicit authorization.
 
+## Measured convergence
+
+Before a release verdict, open `helen loop start release --subject "<version>"` and score every criterion with evidence (`helen loop rubrics release`). Only `converged` supports a RELEASE READY verdict; `exhausted` means report what blocks it.
+
 ## Native clarification
 
 Before implementation or evaluation, check whether a missing preference, constraint or acceptance decision materially affects the result. If it does, invoke the application's available native structured question tool (such as `request_user_input_async`, an available `request_user_input`, or `AskUserQuestion`), with concise task-specific choices and free text. Reuse existing answers and continue independent work while waiting. If the tool is unavailable in the current mode, ask conversationally; do not create a separate visual artifact or invent answers. If context suffices, proceed without a questionnaire.

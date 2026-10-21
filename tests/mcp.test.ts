@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   HELEN_MCP_TOOLS,
   handleToolCall,
+  serverPolicy,
   startMcpServer,
 } from "../src/core/mcp.js";
 import { PassThrough } from "node:stream";
@@ -313,5 +314,146 @@ describe("HELEN MCP Server & Tools", () => {
     const result = await handleToolCall("helen_status", { cwd: undefined });
     expect(result.isError).toBeUndefined();
     expect(result.content[0].text).toContain("tracked");
+  });
+
+  describe("access policy for untrusted clients", () => {
+    const make = (prefix: string) =>
+      fs.mkdtempSync(path.join(os.tmpdir(), prefix));
+
+    it("lets clients address the root and anything below it, including folders that do not exist yet", async () => {
+      const root = make("helen-mcp-root-");
+      try {
+        const policy = serverPolicy({ cwd: root, env: {} });
+        fs.mkdirSync(path.join(root, "app"));
+        expect(
+          (await handleToolCall("helen_status", {}, policy)).isError,
+        ).not.toBe(true);
+        expect(
+          (
+            await handleToolCall(
+              "helen_status",
+              { cwd: path.join(root, "app") },
+              policy,
+            )
+          ).isError,
+        ).not.toBe(true);
+        expect(
+          (
+            await handleToolCall(
+              "helen_init_project",
+              { cwd: path.join(root, "not-created-yet"), dryRun: true },
+              policy,
+            )
+          ).isError,
+        ).not.toBe(true);
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    });
+
+    it("rejects directories outside the roots, parent traversal and symlink escapes", async () => {
+      const root = make("helen-mcp-root-");
+      const outside = make("helen-mcp-outside-");
+      try {
+        const policy = serverPolicy({ cwd: root, env: {} });
+        for (const cwd of [
+          outside,
+          path.join(root, ".."),
+          path.join(root, "app", "..", "..", path.basename(outside)),
+        ]) {
+          const result = await handleToolCall("helen_status", { cwd }, policy);
+          expect(result.isError).toBe(true);
+          expect(result.content[0]!.text).toContain("outside the directories");
+        }
+        let linked = true;
+        try {
+          fs.symlinkSync(outside, path.join(root, "escape"), "dir");
+        } catch {
+          linked = false;
+        }
+        if (linked) {
+          const result = await handleToolCall(
+            "helen_apply",
+            { cwd: path.join(root, "escape"), goal: "strategy", track: true },
+            policy,
+          );
+          expect(result.isError).toBe(true);
+          expect(fs.existsSync(path.join(outside, ".helen"))).toBe(false);
+        }
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+        fs.rmSync(outside, { recursive: true, force: true });
+      }
+    });
+
+    it("adds roots from options and HELEN_MCP_ROOTS", () => {
+      const a = path.resolve("a-root");
+      const b = path.resolve("b-root");
+      const c = path.resolve("c-root");
+      const policy = serverPolicy({
+        cwd: a,
+        roots: [b],
+        env: { HELEN_MCP_ROOTS: [c, b].join(path.delimiter) },
+      });
+      expect(policy.roots).toEqual([a, b, c]);
+      expect(policy.allowForce).toBe(false);
+      expect(
+        serverPolicy({ cwd: a, env: { HELEN_MCP_ALLOW_FORCE: "1" } })
+          .allowForce,
+      ).toBe(true);
+    });
+
+    it("does not let a client force a checkpoint unless the user enabled it", async () => {
+      const root = make("helen-mcp-force-");
+      try {
+        const denied = await handleToolCall(
+          "helen_done",
+          { cwd: root, force: true },
+          serverPolicy({ cwd: root, env: {} }),
+        );
+        expect(denied.isError).toBe(true);
+        expect(denied.content[0]!.text).toContain("force is disabled");
+        const allowed = await handleToolCall(
+          "helen_done",
+          { cwd: root, force: true },
+          serverPolicy({ cwd: root, env: { HELEN_MCP_ALLOW_FORCE: "1" } }),
+        );
+        expect(allowed.content[0]!.text).not.toContain("force is disabled");
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    });
+
+    it("applies the policy to requests that arrive over the protocol", async () => {
+      const root = make("helen-mcp-wire-");
+      const outside = make("helen-mcp-wire-out-");
+      try {
+        const input = new PassThrough();
+        const output = new PassThrough();
+        startMcpServer(input, output, serverPolicy({ cwd: root, env: {} }));
+        const received = new Promise<{
+          result: { isError?: boolean; content: Array<{ text: string }> };
+        }>((resolve) =>
+          output.once("data", (chunk) => resolve(JSON.parse(chunk.toString()))),
+        );
+        input.write(
+          JSON.stringify({
+            jsonrpc: "2.0",
+            id: 7,
+            method: "tools/call",
+            params: { name: "helen_status", arguments: { cwd: outside } },
+          }) + "\n",
+        );
+        const response = await received;
+        expect(response.result.isError).toBe(true);
+        expect(response.result.content[0]!.text).toContain(
+          "outside the directories",
+        );
+        input.end();
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+        fs.rmSync(outside, { recursive: true, force: true });
+      }
+    });
   });
 });

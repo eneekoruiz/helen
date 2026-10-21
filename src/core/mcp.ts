@@ -20,6 +20,19 @@ import { runInitProject } from "./initProject.js";
 import { parseFrontmatter } from "./frontmatter.js";
 import { installedHelenSkills, runAgentDoctor } from "./agentDoctor.js";
 import { withStderrLogging } from "./logger.js";
+import { helenVersion } from "./version.js";
+import { isPathInside } from "./fs.js";
+import {
+  createMcpSession,
+  matchesType,
+  type McpPolicy,
+  type McpSession,
+  type McpTool,
+  type McpToolHandler,
+} from "./mcpTypes.js";
+import { TEAM_TOOLS } from "./mcpTeam.js";
+import { DESIGN_TOOLS } from "./mcpDesign.js";
+import { ASSISTANT_TOOLS } from "../assistant/mcpAssistant.js";
 import { jobProviderSchema } from "./jobTypes.js";
 import { z } from "zod";
 import {
@@ -44,20 +57,69 @@ import {
   jobLogs,
 } from "./jobs.js";
 
-export interface McpTool {
-  name: string;
-  description: string;
-  inputSchema: {
-    type: "object";
-    properties: Record<
-      string,
-      { type: string; description: string; items?: { type: string } }
-    >;
-    required?: string[];
+export type { McpTool, McpPolicy } from "./mcpTypes.js";
+
+/**
+ * Access policy for a running MCP server. An agent talking to the server is not fully trusted:
+ * it may only address project directories under the allowed roots and may not bypass checkpoints.
+ * A caller that passes no policy (in-process use, tests) is unrestricted.
+ */
+/** Roots default to the directory the server was started in, plus --root flags and HELEN_MCP_ROOTS. */
+export function serverPolicy(
+  options: { cwd?: string; roots?: string[]; env?: NodeJS.ProcessEnv } = {},
+): Required<McpPolicy> {
+  const env = options.env ?? process.env;
+  const fromEnv = (env.HELEN_MCP_ROOTS ?? "")
+    .split(path.delimiter)
+    .filter(Boolean);
+  const roots = [
+    options.cwd ?? process.cwd(),
+    ...(options.roots ?? []),
+    ...fromEnv,
+  ].map((root) => path.resolve(root));
+  return {
+    roots: [...new Set(roots)],
+    allowForce: env.HELEN_MCP_ALLOW_FORCE === "1",
+    allowJobs: env.HELEN_MCP_ALLOW_JOBS === "1",
   };
 }
 
-export const HELEN_MCP_TOOLS: McpTool[] = [
+/** Resolve symlinks on the deepest existing ancestor so a link cannot smuggle a path out of a root. */
+function canonical(target: string): string {
+  const missing: string[] = [];
+  let current = path.resolve(target);
+  while (!fs.existsSync(current)) {
+    const parent = path.dirname(current);
+    if (parent === current) break;
+    missing.unshift(path.basename(current));
+    current = parent;
+  }
+  let real = current;
+  try {
+    real = fs.realpathSync.native(current);
+  } catch {
+    // Keep the lexical path; the containment check below still applies.
+  }
+  return path.join(real, ...missing);
+}
+
+export function resolveToolCwd(requested: unknown, policy?: McpPolicy): string {
+  const fallback = policy?.roots?.[0] ?? process.cwd();
+  const cwd =
+    typeof requested === "string" && requested
+      ? path.resolve(requested)
+      : fallback;
+  if (!policy?.roots) return cwd;
+  const real = canonical(cwd);
+  if (!policy.roots.some((root) => isPathInside(canonical(root), real))) {
+    throw new Error(
+      "cwd is outside the directories this MCP server may access. Start the server with --root <dir> or set HELEN_MCP_ROOTS.",
+    );
+  }
+  return cwd;
+}
+
+const CORE_TOOLS: McpTool[] = [
   {
     name: "helen_work_route",
     description:
@@ -531,19 +593,38 @@ export const HELEN_MCP_TOOLS: McpTool[] = [
   },
 ];
 
+/** Tools implemented in their own modules (coordination, quality loops, personal assistant). */
+const EXTENSION_TOOLS: McpToolHandler[] = [
+  ...TEAM_TOOLS,
+  ...DESIGN_TOOLS,
+  ...ASSISTANT_TOOLS,
+];
+
+export const HELEN_MCP_TOOLS: McpTool[] = [
+  ...CORE_TOOLS,
+  ...EXTENSION_TOOLS.map((tool) => tool.definition),
+];
+
+/** In-process callers that do not manage sessions share one, like a single long-lived client. */
+const DEFAULT_SESSION = createMcpSession();
+
 export async function handleToolCall(
   name: string,
   args: Record<string, unknown> = {},
+  policy?: McpPolicy,
+  session: McpSession = DEFAULT_SESSION,
 ): Promise<{
   content: Array<{ type: "text"; text: string }>;
   isError?: boolean;
 }> {
-  return withStderrLogging(() => executeToolCall(name, args));
+  return withStderrLogging(() => executeToolCall(name, args, policy, session));
 }
 
 async function executeToolCall(
   name: string,
   args: Record<string, unknown>,
+  policy: McpPolicy | undefined,
+  session: McpSession,
 ): Promise<{
   content: Array<{ type: "text"; text: string }>;
   isError?: boolean;
@@ -559,15 +640,20 @@ async function executeToolCall(
       for (const [key, value] of Object.entries(args)) {
         if (value === undefined) continue;
         const property = tool.inputSchema.properties[key];
-        if (
-          property &&
-          !(property.type === "array"
-            ? Array.isArray(value)
-            : property.type === "object"
-              ? isRecord(value)
-              : typeof value === property.type)
-        )
+        if (property && !matchesType(value, property.type))
           throw new Error(`Invalid argument ${key}: expected ${property.type}`);
+        if (property?.enum && !property.enum.includes(String(value)))
+          throw new Error(
+            `Invalid argument ${key}: expected one of ${property.enum.join(", ")}`,
+          );
+        if (
+          property?.items &&
+          Array.isArray(value) &&
+          value.some((entry) => !matchesType(entry, property.items!.type))
+        )
+          throw new Error(
+            `Invalid argument ${key}: every entry must be a ${property.items.type}`,
+          );
       }
       if (
         args.limit !== undefined &&
@@ -575,8 +661,7 @@ async function executeToolCall(
       )
         throw new Error("limit must be a non-negative integer");
     }
-    const cwd =
-      typeof args.cwd === "string" && args.cwd ? args.cwd : process.cwd();
+    const cwd = resolveToolCwd(args.cwd, policy);
     switch (name) {
       case "helen_work_route": {
         const needs = z
@@ -754,6 +839,20 @@ async function executeToolCall(
       case "helen_job_logs":
       case "helen_job_stop":
       case "helen_job_resume": {
+        if (
+          policy &&
+          !policy.allowJobs &&
+          (name === "helen_job_start" || name === "helen_job_resume")
+        )
+          return {
+            content: [
+              {
+                type: "text",
+                text: "Background jobs are disabled for MCP clients: ask the user to start the server with HELEN_MCP_ALLOW_JOBS=1.",
+              },
+            ],
+            isError: true,
+          };
         const id = args.id as string;
         const data =
           name === "helen_job_start"
@@ -903,6 +1002,17 @@ async function executeToolCall(
       }
 
       case "helen_done": {
+        if (args.force === true && policy && !policy.allowForce) {
+          return {
+            isError: true,
+            content: [
+              {
+                type: "text",
+                text: "force is disabled for MCP clients: get a passing check, or ask the user to start the server with HELEN_MCP_ALLOW_FORCE=1.",
+              },
+            ],
+          };
+        }
         try {
           const updated = markDone(
             cwd,
@@ -1144,11 +1254,29 @@ async function executeToolCall(
         };
       }
 
-      default:
+      default: {
+        const extension = EXTENSION_TOOLS.find(
+          (candidate) => candidate.definition.name === name,
+        );
+        if (extension) {
+          const data = await extension.run(args, { cwd, policy, session });
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  typeof data === "string"
+                    ? data
+                    : JSON.stringify(data, null, 2),
+              },
+            ],
+          };
+        }
         return {
           isError: true,
           content: [{ type: "text", text: `Unknown tool: "${name}"` }],
         };
+      }
     }
   } catch (err: unknown) {
     return {
@@ -1173,7 +1301,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 export function startMcpServer(
   input: NodeJS.ReadableStream = process.stdin,
   output: NodeJS.WritableStream = process.stdout,
+  policy?: McpPolicy,
 ): void {
+  const session = createMcpSession();
   const rl = readline.createInterface({
     input,
     terminal: false,
@@ -1238,7 +1368,7 @@ export function startMcpServer(
             },
             serverInfo: {
               name: "helen-mcp-server",
-              version: "2.1.0",
+              version: helenVersion(),
             },
           },
         });
@@ -1281,6 +1411,8 @@ export function startMcpServer(
         const callResult = await handleToolCall(
           params.name,
           params.arguments as Record<string, unknown> | undefined,
+          policy,
+          session,
         );
         sendResponse({
           jsonrpc: "2.0",

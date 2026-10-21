@@ -9,9 +9,11 @@ Activation counts exclude failed observations and remain separate from answer ef
 | Skill | Evidence | Valid pairs / attempted | Independent cases | Natural trigger | False activation | Forced runs | Baseline | With skill | Delta 95% CI | Errors |
 |---|---|---|---|---|---|---|---|---|---|---|
 | helen-apply | UNMEASURED | 0/6 | 0 | unknown | unknown | 12 | unknown | unknown | unknown | 24 |
+| helen-assistant | INCONCLUSIVE | 12/12 | 6 | 8/8 | 0/4 | 0 | 45.8% [-2.3, 94] | 84.1% [58.7, 109.5] | 38.3% [-7.4, 83.9] | 0 |
 | helen-audit | UNMEASURED | 0/0 | 0 | unknown | unknown | 0 | unknown | unknown | unknown | 0 |
 | helen-backend | UNMEASURED | 0/0 | 0 | unknown | unknown | 0 | unknown | unknown | unknown | 0 |
 | helen-copy | UNMEASURED | 0/0 | 0 | unknown | unknown | 0 | unknown | unknown | unknown | 0 |
+| helen-debug | UNMEASURED | 0/0 | 0 | unknown | unknown | 0 | unknown | unknown | unknown | 0 |
 | helen-design | UNMEASURED | 0/0 | 0 | unknown | unknown | 0 | unknown | unknown | unknown | 0 |
 | helen-implementa | UNMEASURED | 0/6 | 0 | unknown | unknown | 9 | unknown | unknown | unknown | 24 |
 | helen-knowledge | UNMEASURED | 0/6 | 0 | unknown | unknown | 12 | unknown | unknown | unknown | 24 |
@@ -20,6 +22,7 @@ Activation counts exclude failed observations and remain separate from answer ef
 | helen-router | UNMEASURED | 0/6 | 0 | unknown | unknown | 12 | unknown | unknown | unknown | 24 |
 | helen-security | UNMEASURED | 0/6 | 0 | unknown | unknown | 12 | unknown | unknown | unknown | 24 |
 | helen-strategy | UNMEASURED | 0/6 | 0 | unknown | unknown | 12 | unknown | unknown | unknown | 24 |
+| helen-team | INCONCLUSIVE | 12/12 | 6 | 5/8 | 0/4 | 0 | 61.1% [28.5, 93.7] | 83.4% [64.3, 102.6] | 22.3% [-10.3, 55] | 0 |
 
 ## Interpretation and limits
 
@@ -41,9 +44,11 @@ Activation counts exclude failed observations and remain separate from answer ef
 | Skill | Evidence | Valid pairs / attempted | Independent cases | Baseline | Forced skill | Delta 95% CI | Errors |
 |---|---|---|---|---|---|---|---|
 | helen-apply | UNMEASURED | 0/12 | 0 | unknown | unknown | unknown | 60 |
+| helen-assistant | UNMEASURED | 0/0 | 0 | unknown | unknown | unknown | 0 |
 | helen-audit | UNMEASURED | 0/0 | 0 | unknown | unknown | unknown | 0 |
 | helen-backend | UNMEASURED | 0/0 | 0 | unknown | unknown | unknown | 0 |
 | helen-copy | UNMEASURED | 0/0 | 0 | unknown | unknown | unknown | 0 |
+| helen-debug | UNMEASURED | 0/0 | 0 | unknown | unknown | unknown | 0 |
 | helen-design | UNMEASURED | 0/0 | 0 | unknown | unknown | unknown | 0 |
 | helen-implementa | UNMEASURED | 0/9 | 0 | unknown | unknown | unknown | 45 |
 | helen-knowledge | UNMEASURED | 0/12 | 0 | unknown | unknown | unknown | 60 |
@@ -52,15 +57,18 @@ Activation counts exclude failed observations and remain separate from answer ef
 | helen-router | UNMEASURED | 0/12 | 0 | unknown | unknown | unknown | 60 |
 | helen-security | UNMEASURED | 0/12 | 0 | unknown | unknown | unknown | 60 |
 | helen-strategy | UNMEASURED | 0/12 | 0 | unknown | unknown | unknown | 60 |
+| helen-team | UNMEASURED | 0/0 | 0 | unknown | unknown | unknown | 0 |
 
 ## Reported execution metrics
 
 | Skill | Tokens | Reported cost USD | Sum of call durations ms | Model | Observation date |
 |---|---|---|---|---|---|
 | helen-apply | unknown | unknown | unknown | sonnet | 2026-10-01 |
+| helen-assistant | 522626 | 0.8478457000000001 | 390531 | sonnet | 2026-10-20 |
 | helen-audit | unknown | unknown | unknown | unknown | unknown |
 | helen-backend | unknown | unknown | unknown | unknown | unknown |
 | helen-copy | unknown | unknown | unknown | unknown | unknown |
+| helen-debug | unknown | unknown | unknown | unknown | unknown |
 | helen-design | unknown | unknown | unknown | unknown | unknown |
 | helen-implementa | unknown | unknown | unknown | sonnet | 2026-10-01 |
 | helen-knowledge | unknown | unknown | unknown | sonnet | 2026-10-01 |
@@ -69,6 +77,7 @@ Activation counts exclude failed observations and remain separate from answer ef
 | helen-router | unknown | unknown | unknown | sonnet | 2026-10-01 |
 | helen-security | unknown | unknown | unknown | sonnet | 2026-10-01 |
 | helen-strategy | unknown | unknown | unknown | sonnet | 2026-10-01 |
+| helen-team | 402198 | 0.8468819 | 374524 | sonnet | 2026-10-20 |
 
 ## Answer token comparison
 
@@ -77,9 +86,11 @@ Compare identical task/model conditions; judge tokens are overhead, not answer-g
 | Skill | Baseline answer tokens | Natural skill answer tokens | Forced answer tokens | Judge tokens |
 |---|---|---|---|---|
 | helen-apply | unknown | unknown | unknown | unknown |
+| helen-assistant | 207120 | 199912 | unknown | 115594 |
 | helen-audit | unknown | unknown | unknown | unknown |
 | helen-backend | unknown | unknown | unknown | unknown |
 | helen-copy | unknown | unknown | unknown | unknown |
+| helen-debug | unknown | unknown | unknown | unknown |
 | helen-design | unknown | unknown | unknown | unknown |
 | helen-implementa | unknown | unknown | unknown | unknown |
 | helen-knowledge | unknown | unknown | unknown | unknown |
@@ -88,6 +99,7 @@ Compare identical task/model conditions; judge tokens are overhead, not answer-g
 | helen-router | unknown | unknown | unknown | unknown |
 | helen-security | unknown | unknown | unknown | unknown |
 | helen-strategy | unknown | unknown | unknown | unknown |
+| helen-team | 113390 | 168529 | unknown | 120279 |
 
 Historical files for retired skills and archived previous versions remain in `evals/results`; they are excluded from the current-skill table.
 

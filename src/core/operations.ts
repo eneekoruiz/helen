@@ -1,7 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import { AsyncLocalStorage } from "node:async_hooks";
-import { createHash, randomUUID } from "node:crypto";
+import {
+  createHash,
+  createHmac,
+  randomBytes,
+  randomUUID,
+  timingSafeEqual,
+} from "node:crypto";
+import os from "node:os";
 import { z } from "zod";
 import { isSafeProjectPath } from "./fs.js";
 import { logger } from "./logger.js";
@@ -13,6 +20,11 @@ const journalSchema = z.object({
   status: z.enum(["active", "failed", "committed", "recovered"]),
   startedAt: z.string().datetime(),
   ownerPid: z.number().int().positive().optional(),
+  /** HMAC with a key that lives outside the project: a journal that arrives with the repository is not ours. */
+  sig: z
+    .string()
+    .regex(/^[a-f0-9]{64}$/)
+    .optional(),
   temporaries: z.array(z.string()).default([]),
   entries: z.array(
     z.object({
@@ -51,6 +63,8 @@ interface OperationState {
 const currentOperation = new AsyncLocalStorage<OperationState>();
 const digest = (content: Buffer): string =>
   createHash("sha256").update(content).digest("hex");
+const JOURNAL_NAME =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.json$/i;
 const journalPath = (cwd: string, id: string): string =>
   path.join(cwd, ".helen", "operations", `${id}.json`);
 const lockPath = (cwd: string): string =>
@@ -123,10 +137,13 @@ function atomicWrite(
           (code === "EPERM" || code === "EBUSY" || code === "EACCES") &&
           attempt < 7
         ) {
-          const end = Date.now() + (attempt + 1) * 15;
-          while (Date.now() < end) {
-            // Wait for Windows file lock to clear.
-          }
+          // Sleep (no CPU spin) while the Windows file lock clears.
+          Atomics.wait(
+            new Int32Array(new SharedArrayBuffer(4)),
+            0,
+            0,
+            (attempt + 1) * 15,
+          );
           continue;
         }
         throw error;
@@ -149,7 +166,71 @@ function assertFile(cwd: string, file: string): void {
   }
 }
 
+/**
+ * Recovery writes bytes taken from a journal back into the project, so a journal must prove it was written by this
+ * installation. The key sits in the user's HELEN home (never in the project); without a writable home it lives only in memory.
+ */
+let memoryKey: Buffer | undefined;
+function journalKey(): Buffer {
+  const dir = path.resolve(
+    process.env.HELEN_HOME || path.join(os.homedir(), ".helen"),
+  );
+  const file = path.join(dir, "operation.key");
+  try {
+    if (fs.existsSync(file))
+      return Buffer.from(fs.readFileSync(file, "utf8").trim(), "hex");
+    fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+    const key = randomBytes(32);
+    try {
+      fs.writeFileSync(file, `${key.toString("hex")}\n`, {
+        mode: 0o600,
+        flag: "wx",
+      });
+      return key;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "EEXIST")
+        return Buffer.from(fs.readFileSync(file, "utf8").trim(), "hex");
+      throw error;
+    }
+  } catch {
+    memoryKey ??= randomBytes(32);
+    return memoryKey;
+  }
+}
+
+/** Key order must not matter: a journal is parsed and re-serialized with its keys in schema order. */
+function stable(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(stable).join(",")}]`;
+  if (value && typeof value === "object")
+    return `{${Object.entries(value as Record<string, unknown>)
+      .filter(([, entry]) => entry !== undefined)
+      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+      .map(([key, entry]) => `${JSON.stringify(key)}:${stable(entry)}`)
+      .join(",")}}`;
+  return JSON.stringify(value);
+}
+
+function sign(journal: Journal): string {
+  const { sig: _sig, ...body } = journal;
+  return createHmac("sha256", journalKey()).update(stable(body)).digest("hex");
+}
+
+/** Re-seal a journal after it was edited on purpose (used by tests that simulate crashes and tampering). */
+export function sealJournal<T extends { sig?: string }>(journal: T): T {
+  return { ...journal, sig: sign(journal as unknown as Journal) };
+}
+
+export class ForeignJournalError extends Error {
+  constructor(readonly id: string) {
+    super(
+      `Operation journal ${id} was not created by this HELEN installation, so it will not be replayed. If you trust it, delete .helen/operations/${id}.json.`,
+    );
+    this.name = "ForeignJournalError";
+  }
+}
+
 function persist(cwd: string, journal: Journal): void {
+  journal.sig = sign(journal);
   const file = journalPath(cwd, journal.id);
   assertFile(cwd, file);
   const temporary = `${file}.tmp`;
@@ -359,11 +440,23 @@ function readJournal(cwd: string, id: string): Journal {
   );
   if (journal.id !== id)
     throw new Error("Operation journal ID does not match its filename");
+  const expected = Buffer.from(sign(journal), "hex");
+  const presented = Buffer.from(journal.sig ?? "", "hex");
+  if (
+    presented.length !== expected.length ||
+    !timingSafeEqual(presented, expected)
+  )
+    throw new ForeignJournalError(id);
   for (const entry of journal.entries) {
     const relative = path
       .relative(cwd, path.resolve(cwd, entry.file))
       .replace(/\\/g, "/");
-    if (path.isAbsolute(entry.file) || isOperationMetadata(relative))
+    if (
+      path.isAbsolute(entry.file) ||
+      isOperationMetadata(relative) ||
+      relative === ".git" ||
+      relative.startsWith(".git/")
+    )
       throw new Error("Invalid recovery target in operation journal");
     assertFile(cwd, path.resolve(cwd, entry.file));
     const original =
@@ -392,13 +485,24 @@ export function listOperations(cwd: string): OperationSummary[] {
   if (!fs.existsSync(directory)) return [];
   return fs
     .readdirSync(directory)
-    .filter((name) => name.endsWith(".json"))
+    .filter((name) => JOURNAL_NAME.test(name))
     .flatMap((name) => {
       try {
         return [summary(readJournal(cwd, name.slice(0, -5)))];
       } catch (error) {
         // A completed writer may remove its journal after directory enumeration.
         if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+        // Journals that did not come from this installation, or that are damaged, never block work and are never replayed.
+        if (
+          error instanceof ForeignJournalError ||
+          error instanceof z.ZodError ||
+          error instanceof SyntaxError
+        ) {
+          logger.warn(
+            `Ignoring operation journal ${name}: ${error instanceof ForeignJournalError ? "it was not created by this HELEN installation" : "it is damaged"}.`,
+          );
+          return [];
+        }
         throw error;
       }
     })
@@ -437,12 +541,18 @@ function reconcileCompletedOperations(cwd: string): void {
   if (!fs.existsSync(directory)) return;
   for (const name of fs
     .readdirSync(directory)
-    .filter((name) => name.endsWith(".json"))) {
+    .filter((name) => JOURNAL_NAME.test(name))) {
     try {
       const journal = readJournal(cwd, name.slice(0, -5));
       if (journal.status === "committed" || journal.status === "recovered")
         unlinkIfPresent(journalPath(cwd, journal.id));
     } catch (error) {
+      if (
+        error instanceof ForeignJournalError ||
+        error instanceof z.ZodError ||
+        error instanceof SyntaxError
+      )
+        continue; // listOperations already reports it; it must not block unrelated work
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
     }
   }

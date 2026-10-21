@@ -9,6 +9,10 @@ updates:
       minor-and-patch:
         update-types: [minor, patch]
     # Major updates arrive as separate PRs so breaking changes are reviewed one by one.
+    ignore:
+      # The Node types stay on a major that HELEN supports (package.json engines): a newer major type-checks APIs that older supported versions lack.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
   - package-ecosystem: github-actions
     directory: /
     schedule:

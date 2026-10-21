@@ -877,12 +877,12 @@ export async function runSpecialtyEvaluations(argv, dependencies = {}) {
         dependencies.onObservation?.(observation);
       } finally {
         const resolved = path.resolve(temp);
+        // Only ever remove our own temp directory; anything else is left alone.
         if (
-          path.dirname(resolved) !== path.resolve(os.tmpdir()) ||
-          !path.basename(resolved).startsWith("helen-specialty-answer-")
+          path.dirname(resolved) === path.resolve(os.tmpdir()) &&
+          path.basename(resolved).startsWith("helen-specialty-answer-")
         )
-          throw new Error("Unsafe temporary cleanup target");
-        fs.rmSync(resolved, { recursive: true, force: true });
+          fs.rmSync(resolved, { recursive: true, force: true });
       }
     }
   } finally {

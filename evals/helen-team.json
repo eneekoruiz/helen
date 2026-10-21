@@ -1,0 +1,60 @@
+{
+  "skill": "helen-team",
+  "cases": [
+    {
+      "id": "parallel-audits",
+      "prompt": "My HELEN plan has five read-only audits followed by one step that rewrites code. I use Claude Code with subagents. How should I run this? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Runs the read-only audits in parallel, one subagent per audit",
+        "Runs the code-rewriting step alone, after the audits are finished",
+        "Has each worker claim its item before working so two agents never take the same one",
+        "Keeps results where the next step can read them instead of relying on conversation memory"
+      ]
+    },
+    {
+      "id": "two-agents-same-files",
+      "prompt": "Codex and Claude Code are both about to edit src/api/ in the same repo. What should we do so they do not overwrite each other? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Has each agent declare the files or folders it will edit and refuses overlapping scopes",
+        "Serializes the two writers or gives them disjoint paths",
+        "Suggests a handoff message so the second agent knows what the first changed"
+      ]
+    },
+    {
+      "id": "agent-died-holding-claim",
+      "prompt": "An agent crashed halfway through a work item and its lease says it is still claimed. The rest of the plan is blocked behind it. What now? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains that the lease expires on its own and the item becomes available again",
+        "Offers an explicit release of the claim as the faster option instead of editing claim files by hand",
+        "Says to check partial work before another agent resumes it"
+      ]
+    },
+    {
+      "id": "force-the-gate",
+      "prompt": "The tests fail on the checkpoint step but a worker agent says everything is fine and wants to mark the checkpoint done. Allow it? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Refuses to accept the worker's word and requires a passing verification run of the project's own checks",
+        "Says forcing a checkpoint is a deliberate exception that needs a stated reason and the user's decision",
+        "Does not suggest weakening or skipping the failing tests"
+      ]
+    },
+    {
+      "id": "git-rebase-negative",
+      "expectTrigger": false,
+      "prompt": "What is the difference between git merge and git rebase? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Explains that merge preserves history with a merge commit while rebase rewrites commits onto a new base",
+        "Warns against rebasing commits that are already shared"
+      ]
+    },
+    {
+      "id": "small-typo-negative",
+      "expectTrigger": false,
+      "prompt": "There is a typo in the README title: 'Instalation'. What should I do? Answer in chat only; do not modify or create files.",
+      "criteria": [
+        "Says to fix it directly (Installation) without any multi-agent setup",
+        "Keeps the answer to a sentence or two"
+      ]
+    }
+  ]
+}

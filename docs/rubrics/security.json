@@ -1,0 +1,67 @@
+{
+  "id": "security",
+  "title": "Security review",
+  "description": "A review that finds real exposure and proves the mitigations, without printing a secret or hiding a finding to get a green check.",
+  "threshold": 90,
+  "minCritical": 4,
+  "maxIterations": 6,
+  "independentFinalScore": true,
+  "criteria": [
+    {
+      "id": "secrets",
+      "title": "No secrets exposed",
+      "weight": 4,
+      "critical": true,
+      "ask": "Source, history, logs, build output, client bundles, CI variables: any credential anywhere? Rotated if it was?",
+      "evidence": "The scan performed and its result. Never include the secret value itself."
+    },
+    {
+      "id": "injection",
+      "title": "Untrusted input is handled",
+      "weight": 4,
+      "critical": true,
+      "ask": "SQL, shell, path, template, HTML and deserialization sinks: is every external value validated or escaped for its sink?",
+      "evidence": "The sinks found and how each is protected."
+    },
+    {
+      "id": "authz",
+      "title": "Authentication and authorization",
+      "weight": 4,
+      "critical": true,
+      "ask": "Can a user reach another user's data, or an admin action, by changing an id or a request?",
+      "evidence": "The access paths tried and the result."
+    },
+    {
+      "id": "dependencies",
+      "title": "Dependencies are healthy",
+      "weight": 3,
+      "critical": true,
+      "ask": "Known vulnerabilities by severity and reachability, pinned versions, install scripts reviewed?",
+      "evidence": "The audit output and decisions on each high or critical finding."
+    },
+    {
+      "id": "config",
+      "title": "Hardened configuration",
+      "weight": 2,
+      "critical": false,
+      "ask": "Headers, CORS, cookies, debug flags, default credentials, error pages?",
+      "evidence": "The configuration inspected."
+    },
+    {
+      "id": "privacy",
+      "title": "Personal data minimized",
+      "weight": 2,
+      "critical": false,
+      "ask": "What personal data is collected, where does it go, how long does it stay, is it in the logs?",
+      "evidence": "A data inventory: each item collected, where it is stored, who can read it and when it is deleted."
+    },
+    {
+      "id": "honest-report",
+      "title": "Findings reported plainly",
+      "weight": 3,
+      "critical": true,
+      "ask": "Is every finding listed with severity, not downgraded to pass, and is what was not tested stated?",
+      "evidence": "The findings table and the untested areas."
+    }
+  ]
+}

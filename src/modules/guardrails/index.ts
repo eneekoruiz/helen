@@ -6,6 +6,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { recordFileResult } from "../results.js";
 import { hooksPathPrepareScript, readHooksPath } from "./hooksPath.js";
+import { PRE_COMMIT_HOOK, PRE_PUSH_HOOK } from "../../core/gitHooks.js";
+
+export const PREPARE_SCRIPT = hooksPathPrepareScript;
 
 const meta: HelenModule["meta"] = {
   id: "guardrails",
@@ -37,48 +40,6 @@ const meta: HelenModule["meta"] = {
   recommendedLevel: "beginner",
   status: "stable",
 };
-
-const preCommit = `#!/bin/sh
-# HELEN pre-commit: fast checks on staged files only, no dependencies.
-# Skip once with: git commit --no-verify
-node --input-type=commonjs <<'HELEN_NODE'
-const { execFileSync } = require('node:child_process');
-const path = require('node:path');
-const git = (...args) => execFileSync('git', args, { maxBuffer: 32 * 1024 * 1024 });
-let failed = false;
-try {
-  const files = git('diff', '--cached', '--name-only', '-z', '--diff-filter=ACMR').toString().split('\\0').filter(Boolean);
-  for (const file of files) {
-    const fail = (reason) => { console.error('✖ ' + JSON.stringify(file) + ': ' + reason); failed = true; };
-    const name = path.posix.basename(file);
-    if ((name === '.env' || name.startsWith('.env.') || name.endsWith('.env')) && !/\\.(example|sample|template)$/.test(name)) fail('environment files must not be committed');
-    const blob = git('show', ':' + file);
-    if (blob.length > 5242880) fail('larger than 5 MB (use Git LFS or external storage)');
-    const content = blob.toString();
-    if (/^(<<<<<<<|>>>>>>>) /m.test(content)) fail('merge conflict markers');
-    if (/-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{36}|sk-(live|proj)-[A-Za-z0-9_-]{16,}|xox[baprs]-[A-Za-z0-9-]{10,}/.test(content)) fail('looks like it contains a secret (value not shown)');
-  }
-} catch {
-  console.error('Unable to inspect staged files; commit blocked.');
-  failed = true;
-}
-if (failed) { console.error('Commit blocked by .githooks/pre-commit'); process.exit(1); }
-HELEN_NODE
-`;
-
-const prePush = `#!/bin/sh
-# HELEN pre-push: run the project's own quality scripts that exist.
-# Skip once with: git push --no-verify
-if [ -f pnpm-lock.yaml ]; then pm=pnpm; elif [ -f yarn.lock ]; then pm=yarn; elif [ -f bun.lockb ] || [ -f bun.lock ]; then pm=bun; else pm=npm; fi
-[ -f package.json ] || exit 0
-
-for script in typecheck lint test build; do
-  if node -e "process.exit(require('./package.json').scripts?.['$script'] ? 0 : 1)" 2>/dev/null; then
-    echo "▸ $pm run $script"
-    CI=1 $pm run "$script" || { echo "✖ $script failed: push blocked by .githooks/pre-push"; exit 1; }
-  fi
-done
-`;
 
 const dependabot = `version: 2
 updates:
@@ -113,8 +74,8 @@ async function execute(ctx: HelenContext): Promise<ModuleResult> {
   }
 
   const files: Array<[string, string]> = [
-    [".githooks/pre-commit", preCommit],
-    [".githooks/pre-push", prePush],
+    [".githooks/pre-commit", PRE_COMMIT_HOOK],
+    [".githooks/pre-push", PRE_PUSH_HOOK],
     [".github/dependabot.yml", dependabot],
   ];
   for (const [rel, content] of files) {
