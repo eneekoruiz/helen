@@ -184,6 +184,45 @@ function scriptedModel(
   };
 }
 
+describe("everyday phrasings", () => {
+  it("moves a reminder keeping its day, and snoozes with plain words", async () => {
+    await ask("recuérdame mañana a las 9 llamar a mamá");
+    expect((await ask("cambia el recordatorio de mamá a las 10")).text).toBe(
+      "Cambiado: «llamar a mamá» mañana (miércoles, 21 de octubre) a las 10:00.",
+    );
+    expect((await ask("pospón eso una hora")).text).toMatch(
+      /^Te lo vuelvo a recordar/,
+    );
+  });
+
+  it("understands the time before the verb and filler words", async () => {
+    expect(
+      (await ask("todos los lunes a las 8 recuérdame ir al gimnasio")).text,
+    ).toMatch(/«ir al gimnasio» cada lunes a las 08:00/);
+    expect(
+      (await ask("oye, apúntame que el viernes tengo dentista a las 5")).text,
+    ).toBe("Apuntado. Y te aviso el viernes, 23 de octubre, a las 17:00.");
+  });
+
+  it("removes a task by name and asks when the name fits several things", async () => {
+    await ask("añade leche y pan a la compra");
+    expect((await ask("borra lo de la leche")).text).toBe(
+      "Quitado de tus tareas: «leche».",
+    );
+    await ask("recuérdame mañana a las 9 comprar pan");
+    expect((await ask("borra lo del pan")).text).toMatch(
+      /Puede ser: tarea «pan», recordatorio «comprar pan»/,
+    );
+  });
+
+  it("finds a note from a question about it", async () => {
+    await ask("apunta que las llaves están en el cajón");
+    expect((await ask("dónde dejé las llaves")).text).toMatch(
+      /las llaves están en el cajón/,
+    );
+  });
+});
+
 describe("with a model", () => {
   it("sends only what the rules do not understand, with tools that act on HELEN's data", async () => {
     const model = scriptedModel([

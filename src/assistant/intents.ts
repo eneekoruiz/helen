@@ -11,6 +11,8 @@ export type Intent =
   | { name: "forget"; query: string }
   | { name: "reminder.cancel"; query: string }
   | { name: "reminder.snooze"; when: string }
+  | { name: "reminder.move"; query: string; when: string }
+  | { name: "remove"; query: string }
   | { name: "reminders.list" }
   | { name: "task.add"; text: string; list?: string }
   | { name: "task.done"; query: string; list?: string }
@@ -58,8 +60,27 @@ const RULES: Rule[] = [
   // Snooze the reminder that just fired.
   {
     pattern:
-      /^(?:pospon(?:lo|la|er)?|aplaza(?:lo|la)?|retrasa(?:lo|la)?|recuerdamelo|recuerdamela|avisame\s+otra\s+vez|repitelo|snooze(?:\s+it|\s+that)?|remind\s+me\s+again)(?:\s+(?<when>.+))?$/,
+      /^(?:pospon(?:lo|la|er)?|aplaza(?:lo|la)?|retrasa(?:lo|la)?|recuerdamelo|recuerdamela|avisame\s+otra\s+vez|repitelo|snooze(?:\s+it|\s+that)?|remind\s+me\s+again)(?:\s+(?:eso|esto|ese|este|el\s+recordatorio|it|that))?(?:\s+(?<when>.+))?$/,
     build: (_g, o) => ({ name: "reminder.snooze", when: o("when") ?? "" }),
+  },
+  // Move a reminder to another time.
+  {
+    pattern:
+      /^(?:cambia|cambiame|mueve|mueveme|pasa|pasame|reprograma|retrasa|adelanta|pospon|aplaza)\s+(?:el\s+|mi\s+|ese\s+)?(?:recordatorio|aviso|alarma)\s+(?:de\s+|del\s+|para\s+|sobre\s+)?(?<query>.+?)\s+(?:a\s+las?|a|para\s+las?|para|al|hasta)\s+(?<when>.+)$/,
+    build: (_g, o) => ({
+      name: "reminder.move",
+      query: o("query")!,
+      when: o("when")!,
+    }),
+  },
+  {
+    pattern:
+      /^(?:move|change|reschedule|push)\s+(?:the\s+|my\s+)?reminder\s+(?:to\s+|about\s+|for\s+|of\s+)?(?<query>.+?)\s+(?:to|until|for)\s+(?<when>.+)$/,
+    build: (_g, o) => ({
+      name: "reminder.move",
+      query: o("query")!,
+      when: o("when")!,
+    }),
   },
   // Cancel a reminder.
   {
@@ -77,6 +98,12 @@ const RULES: Rule[] = [
     pattern:
       /^(?:(?:que|cuales\s+son\s+(?:mis\s+|los\s+)?)\s*recordatorios(?:\s+tengo)?|(?:mis|ver|lista\s+de|dime\s+(?:mis|los)|leeme\s+(?:mis|los))\s+recordatorios|recordatorios(?:\s+pendientes)?|(?:list|show|read)\s+(?:me\s+)?(?:my\s+)?reminders|what\s+reminders(?:\s+do\s+i\s+have)?|(?:my\s+)?reminders)$/,
     build: () => ({ name: "reminders.list" }),
+  },
+  // "Todos los lunes a las 8 recuérdame ir al gimnasio": the time comes first.
+  {
+    pattern:
+      /^(?<when>(?:todos\s+los|cada|el|la|los|manana|hoy|pasado\s+manana|esta|este|en\s+\d+|a\s+las|every|tomorrow|today|on|at|in\s+\d+|next)\b.+?),?\s+(?:recuerdame|avisame|alertame|remind\s+me)\s+(?:de\s+|to\s+|that\s+)?(?<text>.+)$/,
+    build: (_g, o) => ({ name: "remind", text: `${o("text")!} ${o("when")!}` }),
   },
   // Create a reminder.
   {
@@ -229,16 +256,27 @@ const RULES: Rule[] = [
       /^(?:what\s+do\s+you\s+know\s+about|what\s+did\s+i\s+(?:tell|say\s+to)\s+you\s+about|do\s+you\s+remember|search(?:\s+(?:for|my\s+notes\s+for))?|find|look\s+up)\s+(?<query>.+)$/,
     build: (_g, o) => ({ name: "recall", query: o("query")! }),
   },
+  {
+    pattern:
+      /^(?:que\s+(?:me\s+)?(?:habias|has|habia)\s+dicho\s+(?:de|sobre)|que\s+te\s+(?:habia\s+)?(?:dicho|conte|comente)\s+(?:de|sobre)|cuando\s+(?:era|es|fue)\s+(?:lo\s+d[eo]l?\s+|lo\s+de\s+|el\s+|la\s+|mi\s+)?|como\s+se\s+llama|cual\s+(?:era|es)\s+(?:el\s+|la\s+|mi\s+)?|donde\s+(?=(?:deje|puse|guarde|esta|estan)\b)|dime\s+(?:lo\s+que\s+sabes\s+(?:de|sobre)|algo\s+(?:de|sobre)))\s*(?<query>.+)$/,
+    build: (_g, o) => ({ name: "recall", query: o("query")! }),
+  },
   // Remember a fact.
   {
     pattern:
-      /^(?:recuerda|recuerdalo|apunta(?:te)?|anota(?:te)?|guarda|memoriza|toma\s+nota(?:\s+de)?|no\s+olvides|ten\s+en\s+cuenta|quiero\s+que\s+recuerdes)\s+(?:que\s+)?(?<text>.+)$/,
+      /^(?:recuerda|recuerdalo|apunta(?:me|te)?|anota(?:me|te)?|guarda(?:me)?|memoriza|toma\s+nota(?:\s+de)?|no\s+olvides|ten\s+en\s+cuenta|quiero\s+que\s+recuerdes)\s+(?:que\s+)?(?<text>.+)$/,
     build: (_g, o) => ({ name: "remember", text: o("text")! }),
   },
   {
     pattern:
       /^(?:remember|note|keep\s+in\s+mind|don'?t\s+forget|save|write\s+down|take\s+a\s+note(?:\s+of)?|make\s+a\s+note(?:\s+of)?)\s+(?:that\s+|of\s+)?(?<text>.+)$/,
     build: (_g, o) => ({ name: "remember", text: o("text")! }),
+  },
+  // "Borra lo de la leche": the target could be a task, a reminder or a note; the brain finds out.
+  {
+    pattern:
+      /^(?:borra|elimina|quita|delete|remove)\s+(?:lo\s+d[eo]l?\s+|el\s+|la\s+|los\s+|las\s+|the\s+|that\s+)?(?<query>.+)$/,
+    build: (_g, o) => ({ name: "remove", query: o("query")! }),
   },
   // Small talk.
   {
@@ -285,6 +323,10 @@ export function cleanUtterance(input: string): string {
     .normalize("NFC")
     .replace(/^[\s¿¡"'«]+/, "")
     .replace(/^(?:(?:oye|hey|hola|ok|okay|eh)[\s,]+)?helen[\s,:;.!-]+/i, "")
+    .replace(
+      /^(?:oye|oiga|mira|vale|bueno|pues|venga|a\s+ver)[\s,]+(?=\S)/i,
+      "",
+    )
     .replace(/^(?:por\s+favor|please)[\s,]+/i, "")
     .replace(/^[\s¿¡"'«]+/, "")
     .replace(/[\s,]+(?:por\s+favor|please)[\s.!?]*$/i, "")

@@ -281,6 +281,21 @@ export function completeReminder(home: string, id: string): Reminder {
   });
 }
 
+/** "10", "una hora", "2 días" are offsets from now: spell them as "en …" so the date parser reads them. */
+export function relativeWhen(when: string, lang: "es" | "en"): string {
+  const inWord = lang === "es" ? "en" : "in";
+  const text = when.trim();
+  if (/^\d+$/.test(text))
+    return `${inWord} ${text} ${lang === "es" ? "minutos" : "minutes"}`;
+  if (
+    /^(?:\d+|un|una|media|an?|half)\s*(?:min|minutos?|minutes?|h|horas?|hours?|hora|hour|d[ií]as?|days?)\b/i.test(
+      text,
+    )
+  )
+    return `${inWord} ${text}`;
+  return text;
+}
+
 /** Move a reminder: "10 minutos", "en una hora", "mañana a las 9". A bare number means minutes. */
 export function snoozeReminder(
   home: string,
@@ -290,16 +305,7 @@ export function snoozeReminder(
 ): Reminder {
   const now = context.now ?? new Date();
   const lang = context.locale.startsWith("es") ? "es" : "en";
-  const inWord = lang === "es" ? "en" : "in";
-  let text = when.trim();
-  if (/^\d+$/.test(text))
-    text = `${inWord} ${text} ${lang === "es" ? "minutos" : "minutes"}`;
-  else if (
-    /^(?:\d+|un|una|media|an?|half)\s*(?:min|minutos?|minutes?|h|horas?|hours?|hora|hour|d[ií]as?|days?)\b/i.test(
-      text,
-    )
-  )
-    text = `${inWord} ${text}`;
+  const text = relativeWhen(when, lang);
   const parsed = parseWhen(text, {
     now,
     timezone: context.timezone,

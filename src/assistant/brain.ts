@@ -27,6 +27,7 @@ import {
   cancelReminder,
   findReminder,
   listReminders,
+  relativeWhen,
   snoozeReminder,
   WhenNotUnderstoodError,
   type Reminder,
@@ -45,7 +46,7 @@ import {
   type Task,
 } from "./tasks.js";
 import { fold, tokens } from "./text.js";
-import { describeInstant, shortInstant } from "./time.js";
+import { describeInstant, localDateKey, shortInstant } from "./time.js";
 import { describeRecurrence, parseWhen, stripWhen } from "./when.js";
 
 /**
@@ -512,7 +513,10 @@ function snooze(ctx: Context, when: string): BrainReply {
           ctx.home,
           {
             text: target.text,
-            when: when || say(ctx.lang, "en 10 minutos", "in 10 minutes"),
+            when: relativeWhen(
+              when || say(ctx.lang, "en 10 minutos", "in 10 minutes"),
+              ctx.lang,
+            ),
             source: ctx.channel,
             sensitive: target.sensitive,
           },
@@ -533,6 +537,137 @@ function snooze(ctx: Context, when: string): BrainReply {
   } catch (error) {
     return reply(ctx, "reminder.snooze", errorText(error));
   }
+}
+
+function moveReminder(ctx: Context, query: string, when: string): BrainReply {
+  try {
+    const target = findReminder(ctx.home, query, ctx.lang);
+    if (target.recurrence) {
+      const created = addReminder(
+        ctx.home,
+        {
+          text: target.text,
+          when,
+          source: ctx.channel,
+          sensitive: target.sensitive,
+        },
+        reminderContext(ctx),
+      );
+      cancelReminder(ctx.home, target.id);
+      ctx.conversation.lastReminder = created.id;
+      return reply(
+        ctx,
+        "reminder.move",
+        say(
+          ctx.lang,
+          `Cambiado: ${quote(created.text, "es")} ${whenText(created, ctx)}.`,
+          `Moved: ${quote(created.text, "en")} ${whenText(created, ctx)}.`,
+        ),
+        { reminder: created },
+      );
+    }
+    // Only a time ("a las 10"): keep the day the reminder already had.
+    const bare = when.match(
+      /^(?:las?\s+)?(\d{1,2}(?:[:.]\d{2})?\s*(?:h|am|pm|de\s+la\s+(?:manana|mañana|tarde|noche))?)$/i,
+    );
+    const moved = snoozeReminder(
+      ctx.home,
+      target.id,
+      bare
+        ? `${localDateKey(new Date(target.due), ctx.config.timezone)} ${say(ctx.lang, "a las", "at")} ${bare[1]}`
+        : when,
+      reminderContext(ctx),
+    );
+    ctx.conversation.lastReminder = moved.id;
+    return reply(
+      ctx,
+      "reminder.move",
+      say(
+        ctx.lang,
+        `Cambiado: ${quote(moved.text, "es")} ${whenText(moved, ctx)}.`,
+        `Moved: ${quote(moved.text, "en")} ${whenText(moved, ctx)}.`,
+      ),
+      { reminder: moved },
+    );
+  } catch (error) {
+    return reply(ctx, "reminder.move", errorText(error));
+  }
+}
+
+/** "Borra lo de la leche": decide whether it is a task, a reminder or a note; ask when it could be several. */
+function removeAny(ctx: Context, query: string): BrainReply {
+  const found: { kind: "task" | "reminder" | "note"; label: string }[] = [];
+  let task: ReturnType<typeof findTask> | undefined;
+  let reminder: Reminder | undefined;
+  let firstError: unknown;
+  try {
+    task = findTask(ctx.home, query, { lang: ctx.lang });
+    found.push({ kind: "task", label: task.text });
+  } catch (error) {
+    firstError ??= error;
+  }
+  try {
+    reminder = findReminder(ctx.home, query, ctx.lang);
+    found.push({ kind: "reminder", label: reminder.text });
+  } catch (error) {
+    firstError ??= error;
+  }
+  const note = searchMemory(ctx.home, query, {
+    limit: 1,
+    includeSensitive: true,
+    now: ctx.now,
+  })[0];
+  if (note && note.score >= 2)
+    found.push({ kind: "note", label: note.item.title });
+  if (found.length === 0)
+    return reply(
+      ctx,
+      "remove",
+      firstError
+        ? errorText(firstError)
+        : say(
+            ctx.lang,
+            `No encuentro nada sobre «${query}».`,
+            `I find nothing about "${query}".`,
+          ),
+    );
+  if (found.length > 1) {
+    const names = {
+      task: ["tarea", "task"],
+      reminder: ["recordatorio", "reminder"],
+      note: ["nota", "note"],
+    } as const;
+    const options = found
+      .map(
+        (entry) =>
+          `${names[entry.kind][ctx.lang === "es" ? 0 : 1]} «${entry.label}»`,
+      )
+      .join(", ");
+    return reply(
+      ctx,
+      "remove",
+      say(
+        ctx.lang,
+        `Puede ser: ${options}. Dime cuál, por ejemplo «cancela el recordatorio de ${query}».`,
+        `It could be: ${options}. Tell me which, for example "cancel the reminder about ${query}".`,
+      ),
+    );
+  }
+  const only = found[0]!;
+  if (only.kind === "task") {
+    completeTask(ctx.home, task!.id, ctx.now);
+    return reply(
+      ctx,
+      "remove",
+      say(
+        ctx.lang,
+        `Quitado de tus tareas: «${task!.text}».`,
+        `Removed from your tasks: "${task!.text}".`,
+      ),
+    );
+  }
+  if (only.kind === "reminder") return cancel(ctx, query);
+  return forget(ctx, query);
 }
 
 function remindersList(ctx: Context): BrainReply {
@@ -1199,6 +1334,10 @@ async function route(
       return cancel(ctx, intent.query);
     case "reminder.snooze":
       return snooze(ctx, intent.when);
+    case "reminder.move":
+      return moveReminder(ctx, intent.query, intent.when);
+    case "remove":
+      return removeAny(ctx, intent.query);
     case "reminders.list":
       return remindersList(ctx);
     case "task.add":
