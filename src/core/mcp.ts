@@ -80,6 +80,7 @@ export function serverPolicy(
   return {
     roots: [...new Set(roots)],
     allowForce: env.HELEN_MCP_ALLOW_FORCE === "1",
+    allowJobs: env.HELEN_MCP_ALLOW_JOBS === "1",
   };
 }
 
@@ -838,6 +839,20 @@ async function executeToolCall(
       case "helen_job_logs":
       case "helen_job_stop":
       case "helen_job_resume": {
+        if (
+          policy &&
+          !policy.allowJobs &&
+          (name === "helen_job_start" || name === "helen_job_resume")
+        )
+          return {
+            content: [
+              {
+                type: "text",
+                text: "Background jobs are disabled for MCP clients: ask the user to start the server with HELEN_MCP_ALLOW_JOBS=1.",
+              },
+            ],
+            isError: true,
+          };
         const id = args.id as string;
         const data =
           name === "helen_job_start"

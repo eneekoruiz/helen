@@ -715,6 +715,14 @@ export function workspaceAction(
         const parent = feature(state, id),
           index = parent.tasks.findIndex((value) => value.id === input.id);
         const task: Task = { ...input, status: "pending", needsReview: false };
+        const previous = index < 0 ? undefined : parent.tasks[index];
+        if (previous?.checkpoint) {
+          // A checkpoint cannot be downgraded through the record tool.
+          task.checkpoint = true;
+          task.requiredChecks = [
+            ...new Set([...previous.requiredChecks, ...task.requiredChecks]),
+          ];
+        }
         if (index < 0) parent.tasks.push(task);
         else parent.tasks[index] = task;
         return {

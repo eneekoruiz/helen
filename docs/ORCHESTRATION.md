@@ -63,3 +63,5 @@ helen design check src/ --fail-on warn    # also fail on warnings (default: erro
 `helen mcp` exposes the same functions as tools: `helen_team_*` (graph, claim, brief, heartbeat, complete, skip, release, handoff, inbox, events), `helen_loop_*` and `helen_design_*`, confined to the project directories the server allows (`--root` or `HELEN_MCP_ROOTS`).
 
 The code is in `src/core/orchestrate.ts`, `src/core/claims.ts`, `src/core/handoffs.ts`, `src/core/teamRun.ts`, `src/core/loop.ts`, `src/core/direction.ts` and `src/core/designCheck.ts`.
+
+**Background jobs over MCP.** `helen_job_start` and `helen_job_resume` launch detached model CLIs, so an MCP client can only use them when the user started the server with `HELEN_MCP_ALLOW_JOBS=1`.

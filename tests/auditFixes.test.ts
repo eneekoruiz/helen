@@ -110,3 +110,68 @@ describe("operation journals that arrive with a repository", () => {
     );
   });
 });
+
+describe("workspace checkpoints cannot be downgraded through the record tool", () => {
+  it("keeps checkpoint and required checks when a task is redefined", async () => {
+    const { workspaceAction, getFeature } =
+      await import("../src/core/workspace.js");
+    fs.writeFileSync(
+      path.join(tmp, "package.json"),
+      JSON.stringify({ name: "x", private: true, scripts: {} }),
+    );
+    workspaceAction(tmp, "create", {
+      data: {
+        id: "f",
+        title: "Feature f",
+        goal: "Keep the checkpoint gate honest",
+        exclusions: ["none"],
+        files: ["package.json"],
+      },
+    });
+    workspaceAction(tmp, "requirement", {
+      id: "f",
+      data: {
+        id: "r",
+        title: "R",
+        acceptance: ["It holds"],
+        files: ["package.json"],
+      },
+    });
+    const base = {
+      id: "t",
+      title: "T",
+      requirements: ["r"],
+      files: ["package.json"],
+    };
+    workspaceAction(tmp, "task", {
+      id: "f",
+      data: { ...base, checkpoint: true, requiredChecks: ["test"] },
+    });
+    workspaceAction(tmp, "task", {
+      id: "f",
+      data: { ...base, checkpoint: false, requiredChecks: [] },
+    });
+    const task = getFeature(tmp, "f").tasks[0]!;
+    expect(task.checkpoint).toBe(true);
+    expect(task.requiredChecks).toContain("test");
+  });
+});
+
+describe("background jobs over MCP", () => {
+  it("are refused for a policed client unless the user enabled them", async () => {
+    const { handleToolCall, serverPolicy } = await import("../src/core/mcp.js");
+    const policy = serverPolicy({ cwd: tmp }, {});
+    const res = (await handleToolCall(
+      "helen_job_start",
+      {
+        cwd: tmp,
+        provider: "codex",
+        prompt: "x",
+        subscriptionOnly: true,
+      },
+      policy,
+    )) as { isError?: boolean; content: { text: string }[] };
+    expect(res.isError).toBe(true);
+    expect(res.content[0]!.text).toMatch(/HELEN_MCP_ALLOW_JOBS/);
+  });
+});

@@ -19,6 +19,7 @@ export interface McpTool {
 export interface McpPolicy {
   roots?: string[];
   allowForce?: boolean;
+  allowJobs?: boolean;
 }
 
 /**
