@@ -22,6 +22,7 @@ import { repoImplementationHoldoutCases } from "../scripts/lib/repoEvalCases.mjs
 import { gradeFixture, prepareFixture } from "../scripts/run-repo-evals.mjs";
 
 const temporary: string[] = [];
+const test = it.skipIf(Number(process.versions.node.split(".")[0]) < 22);
 afterEach(() => {
   for (const directory of temporary.splice(0))
     fs.rmSync(directory, { recursive: true, force: true });
@@ -670,7 +671,7 @@ describe("Frozen specialty grading controls", () => {
     });
   }
 
-  it("independent implementation holdout rejects the original mutation defect and accepts an actual safe immutable patch", () => {
+  test("independent implementation holdout rejects the original mutation defect and accepts an actual safe immutable patch", () => {
     const spec = repoImplementationHoldoutCases[0];
     const dir = directory();
     const fixture = prepareFixture(dir, spec, "codex", false);

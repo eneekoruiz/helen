@@ -754,9 +754,7 @@ export function runFocusedChecks(
       );
     }
     const files = [...new Set(selection.files)].map((input) => {
-      // The existing package-manager runner uses a shell on Windows for .cmd shims.
-      // Keep focused paths to shell-inert characters so a filename cannot become an option or command.
-      if (!input || !/^[a-z0-9._/\\:-]+$/i.test(input))
+      if (!input || input.startsWith("-"))
         throw new Error(`Invalid focused test path: ${input}`);
       const absolute = path.resolve(cwd, input);
       if (!isSafeProjectPath(cwd, absolute) || !fs.existsSync(absolute))
@@ -767,7 +765,8 @@ export function runFocusedChecks(
       if (!info.isFile())
         throw new Error(`Focused test path must be a regular file: ${input}`);
       const relative = path.relative(cwd, absolute).replaceAll("\\", "/");
-      if (relative.startsWith("-") || relative.includes(":"))
+      // Only the normalized relative path reaches the package-manager shell.
+      if (relative.startsWith("-") || !/^[a-z0-9._/-]+$/i.test(relative))
         throw new Error(
           `Invalid focused test path after normalization: ${input}`,
         );

@@ -89,15 +89,32 @@ export function getLocalSkillsRoots(): string[] {
   const roots: string[] = [];
   const home = process.env.HOME || process.env.USERPROFILE || "";
 
-  if (process.env.HELEN_LOCAL_SKILLS_PATH && fs.existsSync(process.env.HELEN_LOCAL_SKILLS_PATH)) {
+  if (
+    process.env.HELEN_LOCAL_SKILLS_PATH &&
+    fs.existsSync(process.env.HELEN_LOCAL_SKILLS_PATH)
+  ) {
     roots.push(path.resolve(process.env.HELEN_LOCAL_SKILLS_PATH));
   }
-  if (process.env.ECC_SKILLS_PATH && fs.existsSync(process.env.ECC_SKILLS_PATH)) {
+  if (
+    process.env.ECC_SKILLS_PATH &&
+    fs.existsSync(process.env.ECC_SKILLS_PATH)
+  ) {
     roots.push(path.resolve(process.env.ECC_SKILLS_PATH));
   }
 
-  const localEcc = path.join("C:", "Users", "User", "Desktop", "ENEKO", "ECC", "skills");
-  if (fs.existsSync(localEcc) && !roots.some((r) => r.toLowerCase() === path.resolve(localEcc).toLowerCase())) {
+  const localEcc = path.join(
+    "C:",
+    "Users",
+    "User",
+    "Desktop",
+    "ENEKO",
+    "ECC",
+    "skills",
+  );
+  if (
+    fs.existsSync(localEcc) &&
+    !roots.some((r) => r.toLowerCase() === path.resolve(localEcc).toLowerCase())
+  ) {
     roots.push(path.resolve(localEcc));
   }
 
@@ -107,7 +124,12 @@ export function getLocalSkillsRoots(): string[] {
     path.join(home, ".codex", "skills"),
   ];
   for (const agentRoot of agentRoots) {
-    if (fs.existsSync(agentRoot) && !roots.some((r) => r.toLowerCase() === path.resolve(agentRoot).toLowerCase())) {
+    if (
+      fs.existsSync(agentRoot) &&
+      !roots.some(
+        (r) => r.toLowerCase() === path.resolve(agentRoot).toLowerCase(),
+      )
+    ) {
       roots.push(path.resolve(agentRoot));
     }
   }
@@ -141,7 +163,10 @@ export function listLocalSkills(): SkillInfo[] {
  * Returns all skills: bundled HELEN skills, local ECC skills, and agent global skills.
  */
 export function listAllSkills(root: string = SKILLS_ROOT): SkillInfo[] {
-  const bundled = listSkills(root).map((s) => ({ ...s, sourceType: "bundled" as const }));
+  const bundled = listSkills(root).map((s) => ({
+    ...s,
+    sourceType: "bundled" as const,
+  }));
   const bundledNames = new Set(bundled.map((s) => s.name));
   const local = listLocalSkills().filter((s) => !bundledNames.has(s.name));
   return [...bundled, ...local].sort((a, b) => a.name.localeCompare(b.name));

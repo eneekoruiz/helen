@@ -6,7 +6,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { detectProject } from "../src/core/projectDetector.js";
 import { dockerModule } from "../src/modules/docker/index.js";
 import { guardrailsModule } from "../src/modules/guardrails/index.js";
-import { hooksPathPrepareScript } from "../src/modules/guardrails/hooksPath.js";
+import {
+  configureHelenHooksPath,
+  hooksPathPrepareScript,
+} from "../src/modules/guardrails/hooksPath.js";
 
 describe("hook activation and Docker compatibility", () => {
   let cwd: string;
@@ -57,6 +60,64 @@ describe("hook activation and Docker compatibility", () => {
     expect(activate().status).toBe(0);
     expect(git("config", "--get", "core.hooksPath")).toBe(".githooks");
   });
+
+  it("keeps the repository prepare command aligned with the generated guardrail", () => {
+    const pkg = JSON.parse(
+      fs.readFileSync(path.resolve("package.json"), "utf8"),
+    );
+    expect(pkg.scripts.prepare).toBe(hooksPathPrepareScript);
+  });
+
+  it("does not activate hooks when npm requests lifecycle scripts be ignored", async () => {
+    git("init", "-q");
+    await guardrailsModule.execute(context());
+    vi.stubEnv("npm_config_ignore_scripts", "true");
+    const before = fs.readFileSync(path.join(cwd, ".git/config"), "utf8");
+    expect(activate().status).toBe(0);
+    expect(fs.readFileSync(path.join(cwd, ".git/config"), "utf8")).toBe(before);
+  });
+
+  it("preserves the parent repository when prepare runs from a nested package", () => {
+    git("init", "-q");
+    const parent = cwd;
+    const before = fs.readFileSync(path.join(parent, ".git/config"), "utf8");
+    const nested = path.join(parent, "packages", "child");
+    fs.mkdirSync(path.join(nested, ".githooks"), { recursive: true });
+    try {
+      cwd = nested;
+      expect(activate().status).toBe(0);
+      expect(() => configureHelenHooksPath(nested)).toThrow(
+        "Git worktree root",
+      );
+      expect(fs.readFileSync(path.join(parent, ".git/config"), "utf8")).toBe(
+        before,
+      );
+    } finally {
+      cwd = parent;
+    }
+  });
+
+  it.skipIf(process.platform !== "win32")(
+    "activates hooks through a Windows directory alias of the worktree root",
+    async () => {
+      git("init", "-q");
+      await guardrailsModule.execute(context());
+      const original = cwd;
+      const alias = path.join(cwd, "worktree-alias");
+      fs.symlinkSync(cwd, alias, "junction");
+      try {
+        cwd = alias;
+        expect(activate().status).toBe(0);
+        expect(git("config", "--get", "core.hooksPath")).toBe(".githooks");
+        git("config", "--unset", "core.hooksPath");
+        expect(configureHelenHooksPath(alias).kind).toBe("unset");
+        expect(git("config", "--get", "core.hooksPath")).toBe(".githooks");
+      } finally {
+        cwd = original;
+        fs.unlinkSync(alias);
+      }
+    },
+  );
 
   it.each([".husky/_", "", "../shared hooks", ".githooks ", " .githooks"])(
     "the generated prepare script preserves a custom hooksPath %j",

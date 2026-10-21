@@ -60,6 +60,28 @@ describe("focused check runs", () => {
     expect(readProgress(cwd)!.lastCheck).toEqual(fullEvidence);
   });
 
+  it("accepts absolute test paths when the project root contains spaces", () => {
+    const nested = path.join(cwd, "project ~with spaces");
+    fs.mkdirSync(path.join(nested, "tests"), { recursive: true });
+    fs.copyFileSync(
+      path.join(cwd, "package.json"),
+      path.join(nested, "package.json"),
+    );
+    const file = path.join(nested, "tests", "one.test.ts");
+    fs.writeFileSync(file, "");
+    let argumentsPassed: string[] = [];
+    const result = runFocusedChecks(
+      nested,
+      { files: [file] },
+      (_cwd, _pm, _script, args) => {
+        argumentsPassed = args;
+        return true;
+      },
+    );
+    expect(result.ok).toBe(true);
+    expect(argumentsPassed).toEqual(["--run", "tests/one.test.ts"]);
+  });
+
   it("rejects paths outside the project, symlinks, and option-like paths before invoking the runner", () => {
     const outside = path.join(path.dirname(cwd), "helen-outside.test.ts");
     fs.writeFileSync(outside, "");

@@ -23,13 +23,15 @@ export function isSafeProjectPath(root: string, candidate: string): boolean {
   const resolvedCandidate = path.resolve(candidate);
   if (!isPathInside(resolvedRoot, resolvedCandidate)) return false;
   let current = resolvedCandidate;
-  while (current !== resolvedRoot) {
+  while (path.relative(resolvedRoot, current) !== "") {
     try {
       if (fs.lstatSync(current).isSymbolicLink()) return false;
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code !== "ENOENT") return false;
     }
-    current = path.dirname(current);
+    const parent = path.dirname(current);
+    if (parent === current) return false;
+    current = parent;
   }
   return true;
 }
