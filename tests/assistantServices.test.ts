@@ -188,7 +188,7 @@ describe("scheduler", () => {
     ).toEqual([["tomar la pastilla", "2026-10-21T08:45:00.000Z"]]);
   });
 
-  it("retries when nobody could be told, and gives up after a day", async () => {
+  it("keeps an uncertain remote send pending for explicit reconciliation", async () => {
     addReminder(
       home,
       { text: "regar las plantas en 5 minutos" },
@@ -218,9 +218,9 @@ describe("scheduler", () => {
           config,
           channels: [failing],
         })
-      ).delivered,
+      ).failed,
     ).toHaveLength(1);
-    expect(listReminders(home)).toEqual([]);
+    expect(listReminders(home)).toHaveLength(1);
   });
 
   it("sends the daily briefing once, after its time", async () => {
@@ -387,6 +387,47 @@ describe("HTTP server", () => {
     });
     expect(bad.status).toBe(400);
     expect((await bad.json()).error).toContain("No entiendo cuándo");
+  });
+
+  it("protects calendar and review endpoints and imports a calendar idempotently", async () => {
+    await start();
+    expect((await fetch(`${base}/calendar`)).status).toBe(401);
+    expect((await fetch(`${base}/review`)).status).toBe(401);
+    const calendar =
+      "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nUID:test-http-import\r\nDTSTART:20301023T100000Z\r\nSUMMARY:Revisar proyecto\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n";
+    const upload = () =>
+      fetch(`${base}/calendar`, {
+        method: "POST",
+        headers: auth,
+        body: JSON.stringify({ calendar }),
+      });
+    expect(await (await upload()).json()).toMatchObject({ reminders: 1 });
+    expect(await (await upload()).json()).toMatchObject({ skipped: 1 });
+    const exported = await fetch(`${base}/calendar`, { headers: auth });
+    expect(exported.headers.get("content-type")).toContain("text/calendar");
+    expect(await exported.text()).toContain("SUMMARY:Revisar proyecto");
+    expect(
+      await (await fetch(`${base}/review`, { headers: auth })).json(),
+    ).toHaveProperty("pendingTasks");
+  });
+  it("applies HTTP privacy settings to creation responses and collection reads", async () => {
+    const privateConfig = { ...config, privacy: { showSensitiveOn: [] } };
+    await start({ config: privateConfig });
+    for (const endpoint of ["remember", "remind"]) {
+      const response = await fetch(`${base}/${endpoint}`, {
+        method: "POST",
+        headers: auth,
+        body: JSON.stringify({
+          text: "el código del portal es 4532",
+          when: "mañana a las 9",
+        }),
+      });
+      expect(response.status).toBe(201);
+      expect(await response.text()).not.toContain("4532");
+    }
+    expect(
+      await (await fetch(`${base}/reminders`, { headers: auth })).text(),
+    ).not.toContain("4532");
   });
 
   it("locks out guessing, limits the rate and the body size", async () => {

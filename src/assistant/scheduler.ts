@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { z } from "zod";
+import { updateCollection } from "./store.js";
 import { buildAgenda, formatAgenda } from "./agenda.js";
 import {
   ensureHome,
@@ -27,11 +29,120 @@ import { describeRecurrence } from "./when.js";
 
 /**
  * The scheduler delivers reminders when they are due and the optional daily briefing. One scheduler runs per
- * home (a lease file guards it), so two servers never announce the same reminder twice.
+ * home (a lease file guards it); per-channel claims also protect direct concurrent ticks.
  */
 const LATE_MS = 5 * 60_000;
-/** Past this, a reminder nobody could receive is closed instead of retried forever. */
-const GIVE_UP_MS = 24 * 3600_000;
+
+export const DeliverySchema = z.object({
+  key: z.string(),
+  occurrence: z.string(),
+  channel: z.string(),
+  state: z.enum(["inflight", "sent", "failed", "uncertain"]),
+  updated: z.string().datetime(),
+  error: z.string().optional(),
+});
+export type DeliveryStatus = z.infer<typeof DeliverySchema>;
+
+export function deliveryStatus(home: string): DeliveryStatus[] {
+  const file = path.join(home, "deliveries.json");
+  if (!fs.existsSync(file)) return [];
+  try {
+    return z
+      .object({ version: z.literal(1), items: z.array(DeliverySchema) })
+      .parse(JSON.parse(fs.readFileSync(file, "utf8"))).items;
+  } catch {
+    throw new Error(
+      "Invalid delivery ledger; repair it before sending notifications",
+    );
+  }
+}
+
+/** Resolve only after checking the destination: retry explicitly accepts duplicate risk. */
+export function resolveDelivery(
+  home: string,
+  key: string,
+  action: "sent" | "retry",
+): void {
+  updateCollection(home, "deliveries", DeliverySchema, (items) => {
+    const item = items.find((entry) => entry.key === key);
+    if (!item || !["inflight", "uncertain"].includes(item.state))
+      throw new Error("No unresolved delivery with that key");
+    item.state = action === "sent" ? "sent" : "failed";
+    item.updated = new Date().toISOString();
+  });
+}
+
+async function deliverOccurrence(
+  home: string,
+  occurrence: string,
+  notification: Notification,
+  channels: DeliveryChannel[],
+  now: Date,
+): Promise<DeliveryResult[]> {
+  if (new Set(channels.map((channel) => channel.name)).size !== channels.length)
+    throw new Error("Delivery channel names must be unique");
+  deliveryStatus(home); // A corrupt ledger must never reset deduplication.
+  return Promise.all(
+    channels.map(async (channel) => {
+      const key = JSON.stringify([occurrence, channel.name]);
+      const previous = updateCollection(
+        home,
+        "deliveries",
+        DeliverySchema,
+        (items) => {
+          const existing = items.find((item) => item.key === key);
+          if (existing && existing.state !== "failed") return { ...existing };
+          const entry: DeliveryStatus = {
+            key,
+            occurrence,
+            channel: channel.name,
+            state: "inflight",
+            updated: now.toISOString(),
+          };
+          if (existing) Object.assign(existing, entry);
+          else items.push(entry);
+          return null;
+        },
+      );
+      if (previous)
+        return previous.state === "sent"
+          ? { channel: channel.name, ok: true }
+          : {
+              channel: channel.name,
+              ok: false,
+              uncertain: true,
+              error: `Delivery ${previous.state}; verify destination and resolve ${key}`,
+            };
+      const result = (await deliver(notification, [channel]))[0]!;
+      updateCollection(home, "deliveries", DeliverySchema, (items) => {
+        const item = items.find((entry) => entry.key === key)!;
+        item.state = result.ok
+          ? "sent"
+          : result.uncertain
+            ? "uncertain"
+            : "failed";
+        item.error = result.error;
+        item.updated = now.toISOString();
+      });
+      return result;
+    }),
+  );
+}
+
+export function inQuietHours(config: AssistantConfig, now: Date): boolean {
+  if (!config.quietHours) return false;
+  const { hour, minute } = localParts(now, config.timezone);
+  const clock = hour * 60 + minute;
+  const minutes = (time: string): number => {
+    const [h, m] = time.split(":").map(Number);
+    return h! * 60 + m!;
+  };
+  const start = minutes(config.quietHours.start),
+    end = minutes(config.quietHours.end);
+  return start < end
+    ? clock >= start && clock < end
+    : clock >= start || clock < end;
+}
 
 export interface TickOptions {
   now?: Date;
@@ -59,8 +170,8 @@ export function reminderNotification(
   const late = now.getTime() - Date.parse(reminder.due) > LATE_MS;
   const when = late
     ? es
-      ? ` (con retraso: era para ${shortInstant(new Date(reminder.due), config.timezone, config.locale, now)})`
-      : ` (late: it was due ${shortInstant(new Date(reminder.due), config.timezone, config.locale, now)})`
+      ? ` (con retraso: era para ${shortInstant(new Date(reminder.due), reminder.timezone ?? config.timezone, config.locale, now)})`
+      : ` (late: it was due ${shortInstant(new Date(reminder.due), reminder.timezone ?? config.timezone, config.locale, now)})`
     : "";
   const every = reminder.recurrence
     ? ` · ${describeRecurrence(reminder.recurrence, es ? "es" : "en")}`
@@ -102,16 +213,26 @@ export async function tick(
   const result: TickResult = { delivered: [], failed: [] };
 
   for (const reminder of dueReminders(home, now)) {
-    const results = await deliver(
+    if (!reminder.urgent && inQuietHours(config, now)) continue;
+    const results = await deliverOccurrence(
+      home,
+      `reminder:${reminder.id}:${reminder.due}`,
       reminderNotification(reminder, config, now),
       options.channels,
+      now,
     );
     if (
-      wasDelivered(results) ||
-      now.getTime() - Date.parse(reminder.due) > GIVE_UP_MS
+      wasDelivered(results) &&
+      results.every((entry) => entry.ok || entry.skipped)
     ) {
       result.delivered.push({
-        reminder: markDelivered(home, reminder.id, config.timezone, now),
+        reminder: markDelivered(
+          home,
+          reminder.id,
+          config.timezone,
+          now,
+          reminder.due,
+        ),
         results,
       });
     } else {
@@ -130,7 +251,11 @@ export async function tick(
     ];
     const due =
       local.hour > hour || (local.hour === hour && local.minute >= minute);
-    if (due && readState(home).lastBriefing !== today) {
+    if (
+      due &&
+      !inQuietHours(config, now) &&
+      readState(home).lastBriefing !== today
+    ) {
       const es = lang(config) === "es";
       const agenda = formatAgenda(
         buildAgenda(home, "today", { now, timezone: config.timezone }),
@@ -141,7 +266,9 @@ export async function tick(
           showSensitive: false,
         },
       );
-      const results = await deliver(
+      const results = await deliverOccurrence(
+        home,
+        `briefing:${today}`,
         {
           title: "HELEN",
           text: `${es ? "Buenos días" : "Good morning"}, ${config.owner}.\n${agenda}`,
@@ -150,8 +277,12 @@ export async function tick(
           lang: es ? "es" : "en",
         },
         options.channels,
+        now,
       );
-      if (wasDelivered(results))
+      if (
+        wasDelivered(results) &&
+        results.every((entry) => entry.ok || entry.skipped)
+      )
         withHomeLock(home, () =>
           writePrivate(
             stateFile(home),
@@ -184,7 +315,8 @@ function alive(pid: number): boolean {
  * Returns the function that gives the lease back.
  */
 export function acquireSchedulerLease(home: string): () => void {
-  ensureHome(home);
+  if (!fs.existsSync(path.join(home, ".restore-transaction.json")))
+    ensureHome(home);
   const file = path.join(home, "scheduler.pid");
   const mine: Lease = {
     pid: process.pid,

@@ -20,6 +20,7 @@ export interface DeliveryResult {
   /** The channel is not usable here (no notify-send, no token...): not a failure of this delivery. */
   skipped?: boolean;
   error?: string;
+  uncertain?: boolean;
 }
 
 export interface DeliveryChannel {
@@ -34,6 +35,9 @@ export class ChannelUnavailableError extends Error {
     this.name = "ChannelUnavailableError";
   }
 }
+
+/** The provider explicitly rejected delivery; safe to retry without duplicating an accepted send. */
+export class DeliveryRejectedError extends Error {}
 
 const TIMEOUT_MS = 10_000;
 
@@ -167,7 +171,11 @@ async function post(
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
   if (!response.ok)
-    throw new Error(`HTTP ${response.status} from ${new URL(url).host}`);
+    throw response.status >= 400 && response.status < 500
+      ? new DeliveryRejectedError(
+          `HTTP ${response.status} from ${new URL(url).host}`,
+        )
+      : new Error(`HTTP ${response.status} from ${new URL(url).host}`);
 }
 
 /** JSON, ntfy (push to a phone), Slack or Discord incoming webhooks. */
@@ -271,10 +279,17 @@ export function configuredChannels(
   if (config.channels.desktop) channels.push(desktopChannel(options.platform));
   if (config.channels.webhook)
     channels.push(webhookChannel(config.channels.webhook, options.fetcher));
-  if (config.channels.telegram)
-    channels.push(
-      telegramChannel(config.channels.telegram, options.env, options.fetcher),
-    );
+  if (config.channels.telegram) {
+    for (const chat of config.channels.telegram.allowedChats) {
+      const channel = telegramChannel(
+        { ...config.channels.telegram, allowedChats: [chat] },
+        options.env,
+        options.fetcher,
+      );
+      channel.name = `telegram:${chat}`;
+      channels.push(channel);
+    }
+  }
   return channels;
 }
 
@@ -292,7 +307,12 @@ export async function deliver(
         const message = error instanceof Error ? error.message : String(error);
         return error instanceof ChannelUnavailableError
           ? { channel: channel.name, ok: false, skipped: true, error: message }
-          : { channel: channel.name, ok: false, error: message };
+          : {
+              channel: channel.name,
+              ok: false,
+              uncertain: !(error instanceof DeliveryRejectedError),
+              error: message,
+            };
       }
     }),
   );

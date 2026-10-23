@@ -74,7 +74,7 @@ function offsetAt(instant: number, timeZone: string): number {
   );
 }
 
-/** The instant at which the wall clock in `timeZone` shows the given local time. */
+/** DST policy: choose the earlier fold instant; move nonexistent times forward by the gap. */
 export function zonedTimeToUtc(
   year: number,
   month: number,
@@ -84,11 +84,25 @@ export function zonedTimeToUtc(
   timeZone: string,
 ): Date {
   const guess = Date.UTC(year, month - 1, day, hour, minute, 0);
-  const first = offsetAt(guess, timeZone);
-  let instant = guess - first;
-  const second = offsetAt(instant, timeZone);
-  if (second !== first) instant = guess - second;
-  return new Date(instant);
+  const offsets = new Set(
+    [-2, -1, 0, 1, 2].map((days) =>
+      offsetAt(guess + days * 86_400_000, timeZone),
+    ),
+  );
+  const candidates = [...offsets]
+    .map((offset) => guess - offset)
+    .sort((a, b) => a - b);
+  const exact = candidates.filter((candidate) => {
+    const p = localParts(new Date(candidate), timeZone);
+    return (
+      p.year === year &&
+      p.month === month &&
+      p.day === day &&
+      p.hour === hour &&
+      p.minute === minute
+    );
+  });
+  return new Date(exact[0] ?? candidates.at(-1)!);
 }
 
 /** Calendar arithmetic on local dates, independent of any zone. */

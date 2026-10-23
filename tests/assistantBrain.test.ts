@@ -443,6 +443,48 @@ describe("the Claude API client (real SDK, local stand-in for the API)", () => {
     });
   });
 
+  it("sends conversation history and explicit reasoning settings through the real SDK", async () => {
+    respond = () =>
+      message([{ type: "text", text: "La segunda opción." }], "end_turn");
+    const configured = writeConfig(
+      {
+        ...config,
+        provider: {
+          type: "anthropic",
+          model: "test-model",
+          keyEnv: "HELEN_TEST_KEY",
+          baseUrl,
+          thinking: "adaptive",
+          effort: "high",
+          maxOutputTokens: 2048,
+        },
+      },
+      home,
+    );
+    const model = createModel(configured, { HELEN_TEST_KEY: "test-key" })!;
+    await model.answer({
+      system: "Assist carefully",
+      user: "Amplía la segunda",
+      history: [
+        { role: "user", content: "Compara estas opciones" },
+        { role: "assistant", content: "Primera: A. Segunda: B." },
+      ],
+      tools: [],
+      timeoutMs: 10000,
+      maxRounds: 1,
+    });
+    expect(bodies[0]).toMatchObject({
+      max_tokens: 2048,
+      thinking: { type: "adaptive" },
+      output_config: { effort: "high" },
+      messages: [
+        { role: "user", content: "Compara estas opciones" },
+        { role: "assistant", content: "Primera: A. Segunda: B." },
+        { role: "user", content: "Amplía la segunda" },
+      ],
+    });
+  });
+
   it("turns API failures and refusals into plain answers", async () => {
     const provider = {
       type: "anthropic" as const,

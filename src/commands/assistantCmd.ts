@@ -11,6 +11,14 @@ import {
 } from "../assistant/agenda.js";
 import { handleMessage, whenText } from "../assistant/brain.js";
 import {
+  createAssistantBackup,
+  recoverInterruptedRestore,
+  restoreAssistantBackup,
+} from "../assistant/backup.js";
+import { exportCalendar, importCalendar } from "../assistant/calendar.js";
+import { diagnoseAssistant } from "../assistant/doctor.js";
+import { weeklyReview } from "../assistant/review.js";
+import {
   apiToken,
   configFile,
   ensureHome,
@@ -41,7 +49,12 @@ import {
   snoozeReminder,
   type ReminderContext,
 } from "../assistant/reminders.js";
-import { acquireSchedulerLease, runScheduler } from "../assistant/scheduler.js";
+import {
+  acquireSchedulerLease,
+  deliveryStatus,
+  resolveDelivery,
+  runScheduler,
+} from "../assistant/scheduler.js";
 import { createAssistantServer } from "../assistant/server.js";
 import {
   addTasks,
@@ -660,6 +673,167 @@ function registerAssistantAdmin(program: Command): void {
     .description(
       "Set up and run HELEN as your personal assistant (server, Telegram, Alexa, notifications)",
     );
+
+  assistant
+    .command("doctor")
+    .description(
+      "Diagnose home, model, channels, Alexa and server without sending messages",
+    )
+    .option("--tunnel <url>", "Also probe the HTTPS tunnel health endpoint")
+    .action(async (opts: { tunnel?: string }) => {
+      const checks = await diagnoseAssistant(home(), opts);
+      handle(
+        "assistant doctor",
+        () => ({ checks }),
+        (data) => {
+          for (const check of data.checks)
+            console.log(`${check.status}: ${check.name}: ${check.detail}`);
+        },
+      );
+      if (checks.some((check) => check.status === "error"))
+        process.exitCode = 1;
+    });
+  assistant
+    .command("review")
+    .description(
+      "Weekly review of pending, overdue, stale and failed items (private text excluded)",
+    )
+    .action(() =>
+      handle(
+        "assistant review",
+        () => weeklyReview(home()),
+        (data) => {
+          for (const [name, items] of Object.entries(data))
+            if (Array.isArray(items)) {
+              console.log(`${name}: ${items.length}`);
+              for (const item of items)
+                console.log(`  ${item.id}: ${item.text}`);
+            }
+        },
+      ),
+    );
+  assistant
+    .command("backup <file>")
+    .description(
+      "Create a private validated backup; credentials and transient chat are excluded",
+    )
+    .action((file: string) =>
+      handle(
+        "assistant backup",
+        () => createAssistantBackup(home(), file),
+        (data) => console.log(`Backup saved to ${data.file}`),
+      ),
+    );
+  assistant
+    .command("restore <file>")
+    .description(
+      "Restore a backup while scheduler is stopped; keep previous data for recovery",
+    )
+    .action((file: string) =>
+      handle(
+        "assistant restore",
+        () => restoreAssistantBackup(home(), file),
+        (data) =>
+          console.log(
+            `Restored. Previous data: ${data.previous}. Past pending reminders cancelled: ${data.cancelledPastReminders}`,
+          ),
+      ),
+    );
+  assistant
+    .command("restore-recover")
+    .description(
+      "Roll back an interrupted restore while preserving staged data for inspection",
+    )
+    .action(() =>
+      handle(
+        "assistant restore recover",
+        () => ({ recovered: recoverInterruptedRestore(home()) }),
+        (data) =>
+          console.log(
+            data.recovered
+              ? "Interrupted restore rolled back"
+              : "No interrupted restore found",
+          ),
+      ),
+    );
+  const delivery = assistant
+    .command("delivery")
+    .description("Inspect and reconcile uncertain notification deliveries");
+  delivery.command("status").action(() =>
+    handle(
+      "assistant delivery status",
+      () => ({
+        deliveries: deliveryStatus(home()).map(
+          ({ error: _error, ...entry }) => entry,
+        ),
+      }),
+      (data) => {
+        for (const entry of data.deliveries)
+          console.log(
+            `${entry.state} ${entry.channel} ${entry.updated}\n  ${entry.key}`,
+          );
+      },
+    ),
+  );
+  delivery
+    .command("resolve <key> <action>")
+    .description(
+      "Resolve an uncertain send: sent acknowledges receipt; retry may duplicate a prior delivery",
+    )
+    .option(
+      "--accept-duplicate-risk",
+      "Required when explicitly retrying an uncertain delivery",
+      false,
+    )
+    .action(
+      (key: string, action: string, opts: { acceptDuplicateRisk: boolean }) =>
+        handle(
+          "assistant delivery resolve",
+          () => {
+            if (action !== "sent" && action !== "retry")
+              throw new Error("Action must be sent or retry");
+            if (action === "retry" && !opts.acceptDuplicateRisk)
+              throw new Error(
+                "An uncertain delivery may have arrived. Add --accept-duplicate-risk to retry",
+              );
+            resolveDelivery(home(), key, action);
+            return { resolved: true, action };
+          },
+          (data) => console.log(`Delivery resolved: ${data.action}`),
+        ),
+    );
+  const calendar = assistant
+    .command("calendar")
+    .description("Import or export reminders and tasks as iCalendar");
+  calendar
+    .command("export")
+    .option("--out <file>", "Write .ics to a private file")
+    .option("--include-sensitive", "Include sensitive reminders", false)
+    .action((opts: { out?: string; includeSensitive: boolean }) => {
+      const text = exportCalendar(home(), {
+        includeSensitive: opts.includeSensitive,
+        timezone: config().timezone,
+      });
+      if (opts.out) writePrivate(path.resolve(opts.out), text);
+      else process.stdout.write(text);
+    });
+  calendar.command("import <file>").action((file: string) =>
+    handle(
+      "assistant calendar import",
+      () => {
+        const source = path.resolve(file);
+        if (fs.statSync(source).size > 2 * 1024 * 1024)
+          throw new Error("Calendar exceeds 2 MB");
+        return importCalendar(home(), fs.readFileSync(source, "utf8"), {
+          timezone: config().timezone,
+        });
+      },
+      (data) =>
+        console.log(
+          `Imported ${data.reminders} reminders and ${data.tasks} tasks; skipped ${data.skipped}`,
+        ),
+    ),
+  );
 
   assistant
     .command("status")
