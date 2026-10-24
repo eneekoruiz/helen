@@ -660,34 +660,52 @@ describe("red-team regressions", () => {
 
     it("#9 an interrupted run stops its workers and gives every claim back", async () => {
       startProgress(tmp, plan(READ_ONLY));
-      const marker = path.join(tmp, "still-running");
-      const descendantMarker = path.join(tmp, "descendant-still-running");
-      const descendant = `setTimeout(() => require('fs').writeFileSync(${JSON.stringify(descendantMarker)}, 'x'), 3000);`;
+      const marker = path.join(tmp, "worker-liveness");
+      fs.mkdirSync(marker);
+      const heartbeat = `const fs=require('fs'); const file=require('path').join(${JSON.stringify(marker)}, String(process.pid)); fs.writeFileSync(file, String(Date.now())); setInterval(() => fs.writeFileSync(file, String(Date.now())), 50);`;
+      const descendant = heartbeat;
       const command = [
         process.execPath,
         "-e",
-        `require('child_process').spawn(process.execPath, ['-e', ${JSON.stringify(descendant)}], {stdio: 'ignore'}); setTimeout(() => require('fs').writeFileSync(${JSON.stringify(marker)}, 'x'), 3000); process.stdin.resume();`,
+        `require('child_process').spawn(process.execPath, ['-e', ${JSON.stringify(descendant)}], {stdio: 'ignore'}); ${heartbeat} process.stdin.resume();`,
       ];
       const controller = new AbortController();
-      setTimeout(() => controller.abort(), 400);
-      const started = Date.now();
+      let abortedAt = 0;
+      setTimeout(() => {
+        abortedAt = Date.now();
+        controller.abort();
+      }, 400);
       const result = await runTeam({
         cwd: tmp,
         command,
         concurrency: 3,
         signal: controller.signal,
       });
-      expect(Date.now() - started).toBeLessThan(5000);
+      expect(abortedAt).toBeGreaterThan(0);
+      // Measure cancellation, excluding synchronous plan/claim setup; Windows also runs taskkill.
+      expect(Date.now() - abortedAt).toBeLessThan(
+        process.platform === "win32" ? 10_000 : 5000,
+      );
       expect(result.interrupted).toBe(true);
       expect(result.failed).toEqual([]);
       expect(listClaims(tmp).active).toEqual([]);
       expect(
         readEvents(tmp, { type: "run.finished" }).at(-1)!.data,
       ).toMatchObject({ interrupted: true });
-      await new Promise((resolve) => setTimeout(resolve, 3500));
-      expect(fs.existsSync(marker)).toBe(false); // the workers really died
-      expect(fs.existsSync(descendantMarker)).toBe(false);
-    }, 15_000);
+      const snapshot = () =>
+        fs
+          .readdirSync(marker)
+          .sort()
+          .map((file) => [
+            file,
+            fs.readFileSync(path.join(marker, file), "utf8"),
+          ]);
+      const stopped = snapshot();
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      expect(snapshot()).toEqual(stopped); // Neither workers nor descendants can write after claims are released.
+      for (const [pid] of stopped)
+        expect(() => process.kill(Number(pid), 0)).toThrow();
+    }, 30_000);
 
     it("keeps secrets that a worker printed out of the log and the captured result", async () => {
       startProgress(tmp, plan([READ_ONLY[0]!]));
