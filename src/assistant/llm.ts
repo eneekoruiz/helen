@@ -21,7 +21,7 @@ export interface AssistantTool {
   /** When to call it, not just what it does: the model decides from this. */
   description: string;
   schema: Anthropic.Tool["input_schema"];
-  input: z.ZodType<Record<string, unknown>, z.ZodTypeDef, unknown>;
+  input: z.ZodType<Record<string, unknown>, unknown>;
   run(input: Record<string, unknown>): Promise<string> | string;
 }
 
@@ -306,7 +306,7 @@ const CommandAnswerSchema = z
           .object({
             id: z.string().regex(/^[a-z0-9_-]{1,128}$/i),
             name: z.string().regex(/^[a-z0-9_-]{1,100}$/i),
-            input: z.record(z.unknown()),
+            input: z.record(z.string(), z.unknown()),
           })
           .strict(),
       )

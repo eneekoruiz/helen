@@ -210,7 +210,7 @@ function validate(raw: unknown): Backup {
 function collection<T>(
   home: string,
   name: string,
-  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+  schema: z.ZodType<T, unknown>,
 ): T[] {
   const file = safePath(path.join(home, `${name}.json`));
   if (!fs.existsSync(file)) return [];

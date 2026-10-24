@@ -93,7 +93,7 @@
     "handlebars": "^4.7.10",
     "ora": "^9.4.1",
     "picocolors": "^1.1.1",
-    "zod": "^3.23.8"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",

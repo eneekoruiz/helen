@@ -85,7 +85,7 @@ const ChannelsSchema = z
       })
       .optional(),
   })
-  .default({});
+  .prefault({});
 
 const ProviderSchema = z
   .object({
@@ -179,7 +179,7 @@ export const AssistantConfigSchema = z.object({
       host: z.string().default("127.0.0.1"),
       port: z.number().int().min(1).max(65535).default(8787),
     })
-    .default({}),
+    .prefault({}),
   alexa: z
     .object({
       skillIds: z
@@ -190,7 +190,7 @@ export const AssistantConfigSchema = z.object({
       /** Also create a native reminder on the Echo when a reminder is made by voice (needs the reminders permission). */
       nativeReminders: z.boolean().default(true),
     })
-    .default({}),
+    .prefault({}),
   privacy: z
     .object({
       /** Channels that may show items marked sensitive. Voice never does. */
@@ -198,7 +198,7 @@ export const AssistantConfigSchema = z.object({
         .array(z.enum(CHANNEL_NAMES))
         .default(["cli", "http", "web"]),
     })
-    .default({}),
+    .prefault({}),
   /** A daily summary pushed to the delivery channels (empty: off). */
   briefing: z
     .object({
@@ -207,7 +207,7 @@ export const AssistantConfigSchema = z.object({
         .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
         .optional(),
     })
-    .default({}),
+    .prefault({}),
   /** Expose all memory to MCP clients, not just items shared with agents. Off by default. */
   shareAllMemoryWithAgents: z.boolean().default(false),
 });

@@ -25,7 +25,7 @@ function collectionFile(home: string, name: string): string {
 export function readCollection<T>(
   home: string,
   name: string,
-  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+  schema: z.ZodType<T, unknown>,
 ): LoadedCollection<T> {
   const file = collectionFile(home, name);
   if (!fs.existsSync(file)) return { version: 1, items: [], invalid: [] };
@@ -61,7 +61,7 @@ export function readCollection<T>(
 export function updateCollection<T, R>(
   home: string,
   name: string,
-  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+  schema: z.ZodType<T, unknown>,
   change: (items: T[]) => R,
 ): R {
   return withHomeLock(home, () => {

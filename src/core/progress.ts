@@ -424,7 +424,7 @@ export function runChecks(
   const pkgFile = path.join(cwd, "package.json");
   const scripts = fs.existsSync(pkgFile)
     ? (z
-        .object({ scripts: z.record(z.string()).optional() })
+        .object({ scripts: z.record(z.string(), z.string()).optional() })
         .parse(JSON.parse(fs.readFileSync(pkgFile, "utf-8"))).scripts ?? {})
     : {};
   const detected = detectProject(cwd).packageManager;
@@ -812,7 +812,7 @@ export function runFocusedChecks(
   }
   const scripts =
     z
-      .object({ scripts: z.record(z.string()).optional() })
+      .object({ scripts: z.record(z.string(), z.string()).optional() })
       .parse(JSON.parse(fs.readFileSync(pkgFile, "utf-8"))).scripts ?? {};
   const detected = detectProject(cwd).packageManager;
   const packageManager = detected === "unknown" ? "npm" : detected;

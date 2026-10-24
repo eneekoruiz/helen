@@ -842,7 +842,7 @@ export function workspaceAction(
           .array(z.string().trim().min(1).max(4000))
           .max(40)
           .optional(),
-        files: requirementInput.shape.files.optional(),
+        files: requirementInput.shape.files.removeDefault().optional(),
         profile: z.enum(["quick", "standard", "exhaustive"]).optional(),
         status: z.enum(["active", "paused", "completed"]).optional(),
       })
