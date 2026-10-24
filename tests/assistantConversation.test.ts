@@ -233,6 +233,22 @@ describe("assistant conversational depth", () => {
     expect(result.text).not.toBe("Hecho.");
     expect(result.text).toContain("No he podido terminar");
   });
+  it("reports completed actions when a later model step fails", async () => {
+    const answer = await ask(
+      "Programa una llamada mañana y ayúdame a prepararla",
+      {
+        model: model(async (request) => {
+          await request.tools
+            .find((tool) => tool.name === "reminder_add")!
+            .run({ what: "llamar a mamá", when: "mañana a las 9" });
+          throw new Error("network unavailable");
+        }),
+      },
+    );
+    expect(listReminders(home)).toHaveLength(1);
+    expect(answer.text).toContain("se completaron");
+    expect(answer.text).toContain("crear un recordatorio");
+  });
   it("does not resurrect forgotten history when an older model request finishes", async () => {
     const note = addMemory(home, { text: "Me gusta pasear junto al río" });
     let release!: () => void;

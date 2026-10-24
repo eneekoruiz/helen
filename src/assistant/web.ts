@@ -72,24 +72,29 @@ form button { border: 0; background: var(--ink); color: var(--bg); border-radius
   const log = document.getElementById('log');
   const tokenForm = document.getElementById('token');
   const chat = document.getElementById('chat');
+  let session = 0;
   let conversation = store.get('helen-conversation');
   if (!conversation) { conversation = Math.random().toString(36).slice(2, 12); store.set('helen-conversation', conversation); }
   const add = (text, who) => { const div = document.createElement('div'); div.className = 'msg ' + who; div.textContent = text; log.appendChild(div); log.scrollTop = log.scrollHeight; };
   const show = () => { const has = Boolean(store.get('helen-token')); tokenForm.hidden = has; chat.hidden = !has; (has ? document.getElementById('text') : document.getElementById('tokenInput')).focus(); };
+  const logout = () => { session++; store.del('helen-token'); store.del('helen-conversation'); conversation = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2, 12); store.set('helen-conversation', conversation); log.replaceChildren(); document.getElementById('text').value = ''; document.getElementById('tokenInput').value = ''; show(); };
   async function send(text) {
     if (!text.trim()) return;
+    const requestSession = session;
     add(text, 'me');
     try {
       const response = await fetch('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + store.get('helen-token'), 'X-Helen-Client': 'web' }, body: JSON.stringify({ text, conversation }) });
-      if (response.status === 401) { add(${JSON.stringify(t.denied)}, 'error'); store.del('helen-token'); show(); return; }
+      if (requestSession !== session) return;
+      if (response.status === 401) { logout(); add(${JSON.stringify(t.denied)}, 'error'); return; }
       const data = await response.json();
+      if (requestSession !== session) return;
       add(data.text || data.error || '…', data.error ? 'error' : 'helen');
-    } catch { add(${JSON.stringify(t.offline)}, 'error'); }
+    } catch { if (requestSession === session) add(${JSON.stringify(t.offline)}, 'error'); }
   }
   tokenForm.addEventListener('submit', event => { event.preventDefault(); const value = document.getElementById('tokenInput').value.trim(); if (value) { store.set('helen-token', value); show(); } });
   document.getElementById('ask').addEventListener('submit', event => { event.preventDefault(); const input = document.getElementById('text'); const text = input.value; input.value = ''; send(text); });
   document.querySelectorAll('[data-say]').forEach(button => button.addEventListener('click', () => send(button.dataset.say)));
-  document.getElementById('forget').addEventListener('click', () => { store.del('helen-token'); show(); });
+  document.getElementById('forget').addEventListener('click', logout);
   show();
 })();
 </script>

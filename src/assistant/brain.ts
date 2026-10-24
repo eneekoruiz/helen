@@ -97,6 +97,7 @@ interface Context {
   conversation: Conversation;
   model: LanguageModel | null;
   privateAccess?: boolean;
+  completedActions?: string[];
 }
 
 const say = (lang: "es" | "en", es: string, en: string): string =>
@@ -969,6 +970,15 @@ function modelTools(ctx: Context): AssistantTool[] {
   const visible = (item: { sensitive: boolean }) =>
     allowSensitive || !item.sensitive;
   const rctx = reminderContext(ctx);
+  const actionLabels: Record<string, [string, string]> = {
+    memory_add: ["guardar una nota", "save a note"],
+    memory_update: ["corregir un recuerdo", "correct a memory"],
+    reminder_add: ["crear un recordatorio", "create a reminder"],
+    reminder_move: ["cambiar un recordatorio", "move a reminder"],
+    reminder_cancel: ["cancelar un recordatorio", "cancel a reminder"],
+    task_add: ["añadir una tarea", "add a task"],
+    task_complete: ["completar una tarea", "complete a task"],
+  };
   const tools: AssistantTool[] = [
     {
       name: "weekly_review",
@@ -1327,6 +1337,9 @@ function modelTools(ctx: Context): AssistantTool[] {
           throw new Error("Assistant mutations must complete synchronously");
         return result;
       });
+      const label = actionLabels[tool.name];
+      if (label)
+        (ctx.completedActions ??= []).push(label[ctx.lang === "es" ? 0 : 1]);
       return !allowSensitive && looksSensitive(output)
         ? json({ result: "private; view on an authorized private channel" })
         : redact(output);
@@ -1451,8 +1464,9 @@ async function askModel(ctx: Context, message: string): Promise<BrainReply> {
         : redact(text),
     );
   } catch (error) {
-    const reason =
-      error instanceof ModelError ? error.message : errorText(error);
+    const reason = redact(
+      error instanceof ModelError ? error.message : errorText(error),
+    );
     const fallback = searchMemory(ctx.home, message, {
       limit: 1,
       includeSensitive: true,
@@ -1469,9 +1483,21 @@ async function askModel(ctx: Context, message: string): Promise<BrainReply> {
           "No he podido consultar el modelo ahora mismo.",
           "I could not reach the model right now.",
         );
-    return reply(ctx, "model", ctx.speaker ? base : `${base}\n(${reason})`, {
-      speech: toSpeech(base),
-    });
+    const completed = ctx.completedActions?.length
+      ? say(
+          ctx.lang,
+          ` Antes del fallo se completaron estas acciones: ${ctx.completedActions.join(", ")}. Revisa tus datos antes de repetir la petición.`,
+          ` These actions completed before the failure: ${ctx.completedActions.join(", ")}. Check your data before repeating the request.`,
+        )
+      : "";
+    return reply(
+      ctx,
+      "model",
+      ctx.speaker ? base + completed : `${base}${completed}\n(${reason})`,
+      {
+        speech: toSpeech(base + completed),
+      },
+    );
   }
 }
 

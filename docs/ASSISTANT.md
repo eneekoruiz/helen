@@ -93,7 +93,7 @@ See [ALEXA.md](ALEXA.md). In short: a private custom skill (`helen assistant ale
 
 Rules cover the everyday requests. For anything else you can add a model:
 
-- A local command, for example Claude Code in print mode: `helen assistant config set provider '{"type":"command","command":["claude","-p"]}'`. It receives the question with the relevant notes and today's agenda; it answers but cannot change your data.
+- A local command, for example Claude Code in print mode: `helen assistant config set provider '{"type":"command","command":["claude","-p"]}'`. By default it receives the question with relevant notes and today's agenda and has no HELEN action tools. Enable `commandTools` for the validated action protocol described below.
 - The Claude API with tools: `helen assistant config set provider '{"type":"anthropic","model":"<model id from the Anthropic docs>"}'` and an API key in `ANTHROPIC_API_KEY` (or name another variable in `keyEnv`). The model can search and save notes, create and cancel reminders and manage lists, through the same functions as the rules; every tool call is validated.
 
 `mode` `fallback` (default) only sends what the rules do not understand; `always` sends every message. `timeoutMs` and `voiceTimeoutMs` bound waiting (voice assistants give up after about eight seconds, so HELEN answers from its own rules and memory when the model is slower). HELEN ships no default model id: pick one from your provider's documentation.
@@ -134,6 +134,14 @@ The code lives in `src/assistant/` (brain, intents, dates, stores, scheduler, se
 ## Conversations that continue
 
 With a configured model, HELEN can discuss ideas, explain a subject, compare decisions, help write or study, and work through a problem. Follow-ups such as “develop the second option” receive the previous conversation. This uses the same brain in the terminal, web, Telegram and Alexa.
+
+For an included Claude CLI subscription, sign in with `claude auth login`, keep extra usage disabled in the account, and configure:
+
+```bash
+helen assistant config set provider '{"type":"command","command":["claude","-p","--tools","","--no-session-persistence"],"commandTools":true,"subscriptionOnly":true,"mode":"always"}'
+```
+
+`commandTools` enables HELEN's structured JSON action protocol. CLI built-in tools are disabled in this example: HELEN validates each requested action and returns its result to the next model round. Identical repeated tool-call ids replay their recorded result instead of repeating a mutation. Malformed output fails safely. `subscriptionOnly` removes API credentials from the child environment; it does not change or inspect account billing settings. Without `commandTools`, command providers retain their original text-only behavior.
 
 Each channel/session retains at most 24 messages and 24,000 characters locally, expires after two days without activity, and excludes credentials. Private context is withheld from providers by default and is never exposed through a speaker. Conversation context is separate from long-term notes: ordinary chat is not automatically saved as a durable preference.
 
@@ -186,3 +194,9 @@ Export omits sensitive items unless `--include-sensitive` is explicit. Events an
 Supported recurrence must fit HELEN's recurrence model: unsupported COUNT/UNTIL/exceptions and short-month clamping cases are rejected explicitly. Explicitly private calendar tasks are rejected because the task store cannot preserve that classification. Files use IANA TZID identifiers without embedded VTIMEZONE definitions; real Google/Apple interoperability still needs a device/account check.
 
 The authenticated API exposes `GET /review`, `GET /calendar` (text/calendar) and `POST /calendar {"calendar":"...ics..."}`. The existing `POST /remind` accepts `leadMinutes` and `urgent`.
+
+## Browser conversation checks
+
+After `npm run build`, run `node scripts/run-assistant-qa.mjs`. Playwright must already be available; `--playwright-module /absolute/path/to/playwright/index.mjs` reuses an existing installation. The script uses an isolated synthetic home, tests the actual web chat, records errors and saves six viewport/theme screenshots under the ignored `.helen/qa/` directory. Logout clears visible messages, credentials and the browser conversation identity; replies from the previous session are discarded. Stored notes remain until explicitly deleted.
+
+For real conversations, authenticate with `claude auth login`, then add `--live --claude-extra-usage-disabled` only when extra usage is disabled in the Claude account. The script strips API credentials, requires subscription authentication and caps the session at 20 minutes and 32 provider invocations. It records actual duration; blocked authentication sends no evaluation prompts. Review the transcript to assess reasoning and context. Offline checks alone cannot establish conversation quality, and screenshots without a baseline cannot establish visual regression coverage.

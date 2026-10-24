@@ -106,6 +106,10 @@ const ProviderSchema = z
     maxOutputTokens: z.number().int().min(256).max(16000).optional(),
     /** For type command: argv of a local CLI that reads the prompt on stdin and prints the answer, e.g. ["claude", "-p"]. */
     command: z.array(z.string().min(1)).min(1).optional(),
+    /** Opt into the validated JSON tool protocol for a trusted subscription/local CLI. */
+    commandTools: z.boolean().optional(),
+    /** Strip API credentials from a subscription CLI's environment; included billing remains an account setting. */
+    subscriptionOnly: z.boolean().optional(),
     /** fallback: rules first, the model only for what they do not understand. always: every message goes to the model. */
     mode: z.enum(["fallback", "always"]).default("fallback"),
     /** Send items marked sensitive to the provider. Off by default. */
