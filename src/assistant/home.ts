@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { z } from "zod";
 import { withLockSync } from "../core/fileLock.js";
+import { isValidTimeZone } from "./time.js";
 
 /**
  * HELEN's personal home: memory, reminders and tasks of one person. It lives outside every project
@@ -15,14 +16,45 @@ export function helenHome(env: NodeJS.ProcessEnv = process.env): string {
 
 /** Create the home with private permissions. */
 export function ensureHome(home: string = helenHome()): string {
+  if (fs.existsSync(path.join(home, ".restore-transaction.json")))
+    throw new Error(
+      "An interrupted restore needs recovery: run helen assistant restore-recover.",
+    );
   fs.mkdirSync(home, { recursive: true, mode: 0o700 });
   fs.mkdirSync(path.join(home, "memory"), { recursive: true, mode: 0o700 });
   return home;
 }
 
-export function withHomeLock<T>(home: string, action: () => T): T {
-  ensureHome(home);
-  return withLockSync(path.join(home, ".lock"), action);
+const ownedLocks = new Set<string>();
+export function withHomeLock<T>(
+  home: string,
+  action: () => T,
+  options: { allowRestore?: boolean } = {},
+): T {
+  if (!fs.existsSync(path.join(home, ".restore-transaction.json")))
+    ensureHome(home);
+  const key = fs.realpathSync.native(home);
+  const checkRestore = () => {
+    if (
+      !options.allowRestore &&
+      fs.existsSync(path.join(home, ".restore-transaction.json"))
+    )
+      throw new Error(
+        "An interrupted restore needs recovery: run helen assistant restore again before changing data.",
+      );
+  };
+  checkRestore();
+  // Synchronous nested store calls share the transaction; the outer call owns the process lock.
+  if (ownedLocks.has(key)) return action();
+  return withLockSync(path.join(home, ".lock"), () => {
+    checkRestore();
+    ownedLocks.add(key);
+    try {
+      return action();
+    } finally {
+      ownedLocks.delete(key);
+    }
+  });
 }
 
 /** Write a private file atomically. */
@@ -53,7 +85,7 @@ const ChannelsSchema = z
       })
       .optional(),
   })
-  .default({});
+  .prefault({});
 
 const ProviderSchema = z
   .object({
@@ -69,8 +101,15 @@ const ProviderSchema = z
     baseUrl: z.string().url().optional(),
     /** Reasoning effort, when the chosen model supports it. */
     effort: z.enum(["low", "medium", "high", "xhigh", "max"]).optional(),
+    /** Enable only for a model that supports adaptive thinking. */
+    thinking: z.enum(["adaptive", "off"]).optional(),
+    maxOutputTokens: z.number().int().min(256).max(16000).optional(),
     /** For type command: argv of a local CLI that reads the prompt on stdin and prints the answer, e.g. ["claude", "-p"]. */
     command: z.array(z.string().min(1)).min(1).optional(),
+    /** Opt into the validated JSON tool protocol for a trusted subscription/local CLI. */
+    commandTools: z.boolean().optional(),
+    /** Strip API credentials from a subscription CLI's environment; included billing remains an account setting. */
+    subscriptionOnly: z.boolean().optional(),
     /** fallback: rules first, the model only for what they do not understand. always: every message goes to the model. */
     mode: z.enum(["fallback", "always"]).default("fallback"),
     /** Send items marked sensitive to the provider. Off by default. */
@@ -117,11 +156,22 @@ export const AssistantConfigSchema = z.object({
     .default("es-ES"),
   timezone: z
     .string()
+    .refine(isValidTimeZone, "Use a valid IANA time zone")
     .default(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"),
   defaultTime: z
     .string()
     .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
     .default("09:00"),
+  quietHours: z
+    .object({
+      start: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+      end: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+    })
+    .refine(
+      (value) => value.start !== value.end,
+      "Quiet hours must have different start and end times",
+    )
+    .optional(),
   channels: ChannelsSchema,
   provider: ProviderSchema.optional(),
   server: z
@@ -129,7 +179,7 @@ export const AssistantConfigSchema = z.object({
       host: z.string().default("127.0.0.1"),
       port: z.number().int().min(1).max(65535).default(8787),
     })
-    .default({}),
+    .prefault({}),
   alexa: z
     .object({
       skillIds: z
@@ -140,7 +190,7 @@ export const AssistantConfigSchema = z.object({
       /** Also create a native reminder on the Echo when a reminder is made by voice (needs the reminders permission). */
       nativeReminders: z.boolean().default(true),
     })
-    .default({}),
+    .prefault({}),
   privacy: z
     .object({
       /** Channels that may show items marked sensitive. Voice never does. */
@@ -148,7 +198,7 @@ export const AssistantConfigSchema = z.object({
         .array(z.enum(CHANNEL_NAMES))
         .default(["cli", "http", "web"]),
     })
-    .default({}),
+    .prefault({}),
   /** A daily summary pushed to the delivery channels (empty: off). */
   briefing: z
     .object({
@@ -157,7 +207,7 @@ export const AssistantConfigSchema = z.object({
         .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
         .optional(),
     })
-    .default({}),
+    .prefault({}),
   /** Expose all memory to MCP clients, not just items shared with agents. Off by default. */
   shareAllMemoryWithAgents: z.boolean().default(false),
 });
@@ -195,8 +245,9 @@ export function writeConfig(
   home: string = helenHome(),
 ): AssistantConfig {
   const parsed = AssistantConfigSchema.parse(config);
-  ensureHome(home);
-  writePrivate(configFile(home), `${JSON.stringify(parsed, null, 2)}\n`);
+  withHomeLock(home, () =>
+    writePrivate(configFile(home), `${JSON.stringify(parsed, null, 2)}\n`),
+  );
   return parsed;
 }
 

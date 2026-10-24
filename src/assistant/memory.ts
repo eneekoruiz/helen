@@ -2,7 +2,8 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { parseFrontmatter } from "../core/frontmatter.js";
-import { ensureHome, withHomeLock, writePrivate } from "./home.js";
+import { clearConversations } from "./conversation.js";
+import { withHomeLock, writePrivate } from "./home.js";
 import { findSecrets, looksSensitive, secretRefusal } from "../core/secrets.js";
 import { fold, slug, tokens } from "./text.js";
 
@@ -209,7 +210,6 @@ export function addMemory(home: string, input: AddMemoryInput): MemoryItem {
       `Unknown kind "${kind}". Kinds: ${MEMORY_KINDS.join(", ")}`,
     );
   const now = (input.now ?? new Date()).toISOString();
-  ensureHome(home);
   return withHomeLock(home, () => {
     let id = "";
     do id = `m${crypto.randomBytes(3).toString("hex")}`;
@@ -293,12 +293,14 @@ export function updateMemory(
 
 /** Delete an item for good. Nothing of its content is kept. */
 export function forgetMemory(home: string, id: string): MemoryItem {
-  return withHomeLock(home, () => {
+  const deleted = withHomeLock(home, () => {
     const item = getMemory(home, id);
     if (!item) throw new Error(`No memory with id ${id}.`);
     fs.rmSync(item.file, { force: true });
     return item;
   });
+  clearConversations(home);
+  return deleted;
 }
 
 export interface SearchHit {

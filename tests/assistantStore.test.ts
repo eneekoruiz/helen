@@ -7,7 +7,27 @@ import {
   getConversation,
   pendingFor,
   saveConversation,
+  ConversationSchema,
 } from "../src/assistant/conversation.js";
+
+it("rejects an oversized history before inspecting its elements", () => {
+  let inspected = 0;
+  const entry = {
+    get role() {
+      inspected++;
+      return "user";
+    },
+    content: "x",
+    sensitive: false,
+  };
+  const result = ConversationSchema.safeParse({
+    id: "test",
+    updated: new Date().toISOString(),
+    history: Array(25).fill(entry),
+  });
+  expect(result.success).toBe(false);
+  expect(inspected).toBe(0);
+});
 import {
   readConfig,
   setConfigValue,

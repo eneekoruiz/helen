@@ -174,6 +174,7 @@ export async function handleUpdate(
       channel: "telegram",
       conversation: String(chat),
       config: options.config,
+      signal: options.signal,
       ...(options.model !== undefined ? { model: options.model } : {}),
     });
     text = reply.text || reply.speech;
@@ -210,30 +211,43 @@ export async function runTelegramBot(options: TelegramOptions): Promise<void> {
   const poll = options.pollSeconds ?? 50;
   let offset = readOffset(options.home);
   let backoff = 1000;
+  const pending = new Set<Promise<void>>();
   while (!options.signal?.aborted) {
     try {
+      if (pending.size >= 16) await Promise.race(pending);
+      if (options.signal?.aborted) break;
       const updates = await call<TelegramUpdate[]>(
         fetcher,
         token,
         "getUpdates",
-        { offset, timeout: poll, allowed_updates: ["message"] },
+        {
+          offset,
+          timeout: poll,
+          limit: Math.max(1, 16 - pending.size),
+          allowed_updates: ["message"],
+        },
         (poll + 10) * 1000,
         options.signal,
       );
       for (const update of updates) {
+        if (pending.size >= 16) await Promise.race(pending);
+        if (options.signal?.aborted) break;
         offset = update.update_id + 1;
         // Saved before answering: a crash never makes HELEN answer the same message twice.
         writePrivate(
           stateFile(options.home),
           `${JSON.stringify({ offset })}\n`,
         );
-        try {
-          await handleUpdate(update, { ...options, token });
-        } catch (error) {
-          options.log?.(
-            `Telegram: could not answer an update: ${(error as Error).message}`,
-          );
-        }
+        // Keep polling so an authorized stop message can interrupt a slow model response.
+        const task = handleUpdate(update, { ...options, token })
+          .then(() => undefined)
+          .catch((error) => {
+            options.log?.(
+              `Telegram: could not answer an update: ${(error as Error).message}`,
+            );
+          })
+          .finally(() => pending.delete(task));
+        pending.add(task);
       }
       backoff = 1000;
     } catch (error) {
@@ -255,4 +269,5 @@ export async function runTelegramBot(options: TelegramOptions): Promise<void> {
       backoff = Math.min(backoff * 2, 60_000);
     }
   }
+  await Promise.allSettled(pending);
 }

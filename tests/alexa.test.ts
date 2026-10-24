@@ -7,6 +7,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import {
   AlexaVerificationError,
   createAlexaVerifier,
+  createNativeReminder,
   handleAlexa,
   interactionModel,
   nativeReminderBody,
@@ -554,6 +555,86 @@ describe("the skill", () => {
     expect(body.trigger.recurrence.startDateTime).toBe(
       "2026-10-20T21:00:00.000",
     );
+  });
+  it("keeps native notification text private and pins its time zone", () => {
+    const reminder = addReminder(
+      home,
+      { text: "el código del portal es 4532 mañana a las 9" },
+      {
+        timezone: "Europe/Madrid",
+        locale: "es-ES",
+        defaultTime: "09:00",
+        now: NOW,
+      },
+    );
+    const body = nativeReminderBody(
+      reminder,
+      "America/New_York",
+      "es-ES",
+      NOW,
+    ) as { trigger: { timeZoneId: string } };
+    expect(body.trigger.timeZoneId).toBe("Europe/Madrid");
+    expect(JSON.stringify(body)).not.toContain("4532");
+    expect(JSON.stringify(body)).toContain("recordatorio privado");
+  });
+  it("does not create native Echo alarms that bypass configured silence or recurring advance times", async () => {
+    const reminder = addReminder(
+      home,
+      { text: "llamar a mamá todos los lunes a las 9", leadMinutes: 30 },
+      {
+        timezone: "Europe/Madrid",
+        locale: "es-ES",
+        defaultTime: "09:00",
+        now: NOW,
+      },
+    );
+    const api = remindersApi();
+    expect(
+      (
+        await createNativeReminder(
+          envelope({}),
+          reminder,
+          config,
+          NOW,
+          api.fetcher,
+        )
+      ).ok,
+    ).toBe(false);
+    const quietConfig = {
+      ...config,
+      quietHours: { start: "23:00", end: "08:00" },
+    };
+    expect(
+      (
+        await createNativeReminder(
+          envelope({}),
+          { ...reminder, recurrence: undefined, leadMinutes: 0 },
+          quietConfig,
+          NOW,
+          api.fetcher,
+        )
+      ).ok,
+    ).toBe(false);
+    expect(api.calls).toHaveLength(0);
+  });
+  it("keeps the microphone open for model conversations", async () => {
+    const response = await handleAlexa(
+      intent("AskIntent", { texto: "Explícame la gravedad con un ejemplo" }),
+      {
+        home,
+        config,
+        now: NOW,
+        model: {
+          kind: "command",
+          usesTools: false,
+          answer: async () => ({
+            text: "La gravedad atrae los cuerpos entre sí.",
+            toolCalls: [],
+          }),
+        },
+      },
+    );
+    expect(response.response.shouldEndSession).toBe(false);
   });
 
   it("rebuilds sentences from intents and slots", () => {

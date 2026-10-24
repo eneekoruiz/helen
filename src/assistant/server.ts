@@ -1,5 +1,8 @@
 import crypto from "node:crypto";
 import http from "node:http";
+import { looksSensitive } from "../core/secrets.js";
+import { exportCalendar, importCalendar } from "./calendar.js";
+import { weeklyReview } from "./review.js";
 import { buildAgenda, formatAgenda, type AgendaRange } from "./agenda.js";
 import {
   AlexaVerificationError,
@@ -282,8 +285,32 @@ export function createAssistantServer(options: ServerOptions): http.Server {
         }),
       });
     }
+    if (url.pathname === "/review" && method === "GET")
+      return send(200, weeklyReview(home));
+    if (url.pathname === "/calendar" && method === "GET") {
+      response.writeHead(200, {
+        "Content-Type": "text/calendar; charset=utf-8",
+      });
+      response.end(exportCalendar(home, { timezone: config.timezone }));
+      return;
+    }
+    if (url.pathname === "/calendar" && method === "POST") {
+      const body = jsonBody(await readBody(request));
+      return send(
+        201,
+        importCalendar(home, text(body.calendar, "calendar", 64000), {
+          timezone: config.timezone,
+        }),
+      );
+    }
     if (url.pathname === "/reminders" && method === "GET")
-      return send(200, { reminders: listReminders(home) });
+      return send(200, {
+        reminders: listReminders(home).map((item) =>
+          item.sensitive && !config.privacy.showSensitiveOn.includes("http")
+            ? { ...item, text: "(private)" }
+            : item,
+        ),
+      });
     if (url.pathname === "/tasks" && method === "GET")
       return send(200, {
         tasks: listTasks(
@@ -291,6 +318,11 @@ export function createAssistantServer(options: ServerOptions): http.Server {
           url.searchParams.get("list")
             ? { list: url.searchParams.get("list")! }
             : {},
+        ).map((item) =>
+          looksSensitive(item.text) &&
+          !config.privacy.showSensitiveOn.includes("http")
+            ? { ...item, text: "(private)" }
+            : item,
         ),
       });
     if (url.pathname === "/remember" && method === "POST") {
@@ -300,7 +332,12 @@ export function createAssistantServer(options: ServerOptions): http.Server {
         source: "http",
         lang,
       });
-      return send(201, { memory: item });
+      return send(201, {
+        memory:
+          item.sensitive && !config.privacy.showSensitiveOn.includes("http")
+            ? { ...item, title: "(private)", body: "" }
+            : item,
+      });
     }
     if (url.pathname === "/remind" && method === "POST") {
       const body = jsonBody(await readBody(request));
@@ -310,6 +347,10 @@ export function createAssistantServer(options: ServerOptions): http.Server {
           text: text(body.text, "text", 500),
           ...(typeof body.when === "string" ? { when: body.when } : {}),
           source: "http",
+          ...(typeof body.leadMinutes === "number"
+            ? { leadMinutes: body.leadMinutes }
+            : {}),
+          ...(typeof body.urgent === "boolean" ? { urgent: body.urgent } : {}),
         },
         {
           timezone: config.timezone,
@@ -317,7 +358,12 @@ export function createAssistantServer(options: ServerOptions): http.Server {
           defaultTime: config.defaultTime,
         },
       );
-      return send(201, { reminder });
+      return send(201, {
+        reminder:
+          reminder.sensitive && !config.privacy.showSensitiveOn.includes("http")
+            ? { ...reminder, text: "(private)" }
+            : reminder,
+      });
     }
     throw new HttpError(404, "Not found.");
   };

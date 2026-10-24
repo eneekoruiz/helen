@@ -54,9 +54,10 @@ export const outcomeInput = z
         message: "Baseline must not claim a skill",
       });
   });
-const stored = outcomeInput
-  .innerType()
-  .extend({ id: z.string().uuid(), recordedAt: z.string().datetime() });
+const stored = outcomeInput.safeExtend({
+  id: z.string().uuid(),
+  recordedAt: z.string().datetime(),
+});
 export type OutcomeInput = z.input<typeof outcomeInput>;
 export type Outcome = z.infer<typeof stored>;
 const store = z

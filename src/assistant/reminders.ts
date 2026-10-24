@@ -3,6 +3,7 @@ import { z } from "zod";
 import { findSecrets, looksSensitive, secretRefusal } from "../core/secrets.js";
 import { readCollection, updateCollection } from "./store.js";
 import { oneLine, tokens } from "./text.js";
+import { isValidTimeZone } from "./time.js";
 import {
   nextOccurrence,
   parseWhen,
@@ -30,6 +31,9 @@ export const ReminderSchema = z.object({
   /** Next time it fires (UTC). */
   due: z.string().datetime(),
   recurrence: RecurrenceSchema.optional(),
+  timezone: z.string().refine(isValidTimeZone).optional(),
+  leadMinutes: z.number().int().min(0).max(525600).optional(),
+  urgent: z.boolean().default(false),
   status: z.enum(["pending", "done", "cancelled"]),
   created: z.string().datetime(),
   updated: z.string().datetime(),
@@ -78,6 +82,8 @@ function cleanText(text: string): string {
 }
 
 export interface AddReminderInput {
+  leadMinutes?: number;
+  urgent?: boolean;
   /** The whole sentence ("llamar a mamá mañana a las 9") or just the task when `when` is given. */
   text: string;
   /** When, if not inside the text ("mañana a las 9"). */
@@ -93,6 +99,26 @@ export function addReminder(
   context: ReminderContext,
 ): Reminder {
   const now = context.now ?? new Date();
+  const leadPattern =
+    /\b(\d+)\s*(minutos?|minutes?|horas?|hours?)\s+(?:antes(?:\s+de)?|before)\b/i;
+  const leadMatch = leadPattern.exec(input.when ?? input.text);
+  const naturalLead = leadMatch
+    ? Number(leadMatch[1]) * (/^(hora|hour)/i.test(leadMatch[2]!) ? 60 : 1)
+    : 0;
+  if (
+    leadMatch &&
+    input.leadMinutes !== undefined &&
+    input.leadMinutes !== naturalLead
+  )
+    throw new Error("Conflicting advance notice times");
+  const leadMinutes = z
+    .number()
+    .int()
+    .min(0)
+    .max(525600)
+    .parse(input.leadMinutes ?? naturalLead);
+  if (!isValidTimeZone(context.timezone))
+    throw new Error("Invalid reminder timezone");
   const lang = context.locale.startsWith("es") ? "es" : "en";
   const options = {
     now,
@@ -100,10 +126,12 @@ export function addReminder(
     defaultTime: context.defaultTime,
     locale: context.locale,
   };
-  const parsed = parseWhen(input.when ?? input.text, options);
+  const sentence = (input.when ?? input.text).replace(leadPattern, " ");
+  const parsed = parseWhen(sentence, options);
   if (!parsed) throw new WhenNotUnderstoodError(lang);
+  const due = new Date(parsed.due.getTime() - leadMinutes * 60_000);
   const text = cleanText(
-    input.when ? input.text : stripWhen(input.text, parsed.spans),
+    input.when ? input.text : stripWhen(sentence, parsed.spans),
   );
   if (!text)
     throw new Error(
@@ -119,7 +147,7 @@ export function addReminder(
     );
   const secrets = findSecrets(text);
   if (secrets.length > 0) throw new Error(secretRefusal(secrets, lang));
-  if (parsed.due.getTime() <= now.getTime()) {
+  if (due.getTime() <= now.getTime()) {
     throw new Error(
       lang === "es"
         ? "Esa hora ya ha pasado. Dime otra."
@@ -131,7 +159,10 @@ export function addReminder(
     const reminder: Reminder = {
       id: newId(items),
       text,
-      due: parsed.due.toISOString(),
+      due: due.toISOString(),
+      timezone: context.timezone,
+      leadMinutes,
+      urgent: input.urgent ?? false,
       ...(parsed.recurrence ? { recurrence: parsed.recurrence } : {}),
       status: "pending",
       created: stamp,
@@ -182,7 +213,7 @@ export function occurrencesBetween(
     while (at && at < to && guard < 400) {
       if (at >= from) out.push({ reminder, at });
       at = reminder.recurrence
-        ? nextOccurrence(reminder.recurrence, at, timezone)
+        ? nextReminderOccurrence(reminder, at, timezone)
         : null;
       guard += 1;
     }
@@ -306,9 +337,12 @@ export function snoozeReminder(
   const now = context.now ?? new Date();
   const lang = context.locale.startsWith("es") ? "es" : "en";
   const text = relativeWhen(when, lang);
+  const existing = listReminders(home, { status: "all" }).find(
+    (item) => item.id === id,
+  );
   const parsed = parseWhen(text, {
     now,
-    timezone: context.timezone,
+    timezone: existing?.timezone ?? context.timezone,
     defaultTime: context.defaultTime,
     locale: context.locale,
   });
@@ -346,17 +380,38 @@ export function markDelivered(
   id: string,
   timezone: string,
   now: Date = new Date(),
+  expectedDue?: string,
 ): Reminder {
   return mutate(home, id, (reminder) => {
+    if (
+      expectedDue &&
+      (reminder.due !== expectedDue || reminder.status !== "pending")
+    )
+      return;
     reminder.fired += 1;
     reminder.lastFired = now.toISOString();
     reminder.failedAttempts = 0;
     const next = reminder.recurrence
-      ? nextOccurrence(reminder.recurrence as Recurrence, now, timezone)
+      ? nextReminderOccurrence(reminder, now, timezone)
       : null;
     if (next) reminder.due = next.toISOString();
     else reminder.status = "done";
   });
+}
+
+/** Recurrence is the event's wall time; the lead is subtracted on every occurrence. */
+function nextReminderOccurrence(
+  reminder: Reminder,
+  after: Date,
+  timezone: string,
+): Date | null {
+  const lead = (reminder.leadMinutes ?? 0) * 60_000;
+  const next = nextOccurrence(
+    reminder.recurrence as Recurrence,
+    new Date(after.getTime() + lead),
+    reminder.timezone ?? timezone,
+  );
+  return next ? new Date(next.getTime() - lead) : null;
 }
 
 export function markDeliveryFailed(home: string, id: string): Reminder {
