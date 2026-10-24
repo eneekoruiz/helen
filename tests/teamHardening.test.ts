@@ -661,10 +661,12 @@ describe("red-team regressions", () => {
     it("#9 an interrupted run stops its workers and gives every claim back", async () => {
       startProgress(tmp, plan(READ_ONLY));
       const marker = path.join(tmp, "still-running");
+      const descendantMarker = path.join(tmp, "descendant-still-running");
+      const descendant = `setTimeout(() => require('fs').writeFileSync(${JSON.stringify(descendantMarker)}, 'x'), 3000);`;
       const command = [
         process.execPath,
         "-e",
-        `setTimeout(() => require('fs').writeFileSync(${JSON.stringify(marker)}, 'x'), 3000); process.stdin.resume();`,
+        `require('child_process').spawn(process.execPath, ['-e', ${JSON.stringify(descendant)}], {stdio: 'ignore'}); setTimeout(() => require('fs').writeFileSync(${JSON.stringify(marker)}, 'x'), 3000); process.stdin.resume();`,
       ];
       const controller = new AbortController();
       setTimeout(() => controller.abort(), 400);
@@ -684,6 +686,7 @@ describe("red-team regressions", () => {
       ).toMatchObject({ interrupted: true });
       await new Promise((resolve) => setTimeout(resolve, 3500));
       expect(fs.existsSync(marker)).toBe(false); // the workers really died
+      expect(fs.existsSync(descendantMarker)).toBe(false);
     }, 15_000);
 
     it("keeps secrets that a worker printed out of the log and the captured result", async () => {

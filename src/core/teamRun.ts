@@ -179,6 +179,7 @@ function killTree(child: ChildProcess, signal: NodeJS.Signals): void {
       spawnSync("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
         windowsHide: true,
         stdio: "ignore",
+        timeout: KILL_GRACE_MS,
       });
     else process.kill(-child.pid, signal); // the worker leads its own process group: its tools die with it
   } catch {
@@ -188,6 +189,31 @@ function killTree(child: ChildProcess, signal: NodeJS.Signals): void {
       // Already gone.
     }
   }
+}
+
+/** taskkill can be slow under load; concurrent cancellations must not block one another's event handlers. */
+function stopTree(child: ChildProcess): Promise<void> {
+  if (process.platform !== "win32" || child.pid === undefined) {
+    killTree(child, "SIGTERM");
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    const killer = spawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
+      windowsHide: true,
+      stdio: "ignore",
+      timeout: KILL_GRACE_MS,
+      killSignal: "SIGKILL",
+    });
+    let settled = false;
+    const done = (failed: boolean): void => {
+      if (settled) return;
+      settled = true;
+      if (failed) killTree(child, "SIGKILL");
+      resolve();
+    };
+    killer.once("error", () => done(true));
+    killer.once("close", (code) => done(code !== 0));
+  });
 }
 
 interface WorkerOutcome {
@@ -237,6 +263,8 @@ function runWorker(options: WorkerOptions): Promise<WorkerOutcome> {
     } | null = null;
     let child: ChildProcess | undefined;
     let fallback: NodeJS.Timeout | undefined;
+    let escalation: NodeJS.Timeout | undefined;
+    let termination = Promise.resolve();
     // Assigned once the worker starts; declared up front because finish() and stop() clear them.
     // eslint-disable-next-line prefer-const
     let beat: NodeJS.Timeout | undefined;
@@ -245,7 +273,8 @@ function runWorker(options: WorkerOptions): Promise<WorkerOutcome> {
     const finish = (outcome: WorkerOutcome): void => {
       if (settled) return;
       settled = true;
-      for (const handle of [timer, fallback]) if (handle) clearTimeout(handle);
+      for (const handle of [timer, fallback, escalation])
+        if (handle) clearTimeout(handle);
       if (beat) clearInterval(beat);
       options.signal?.removeEventListener("abort", onAbort);
       if (child) options.children.delete(child);
@@ -283,17 +312,17 @@ function runWorker(options: WorkerOptions): Promise<WorkerOutcome> {
           output: `[helen] ${note}`,
         });
       const target = child;
-      killTree(target, "SIGTERM");
-      setTimeout(() => killTree(target, "SIGKILL"), KILL_GRACE_MS).unref();
-      fallback = setTimeout(
-        () =>
-          finish({
-            ...stopping!.outcome,
-            code: null,
-            output: `${output}\n[helen] ${note} (the worker did not exit)`,
-          }),
-        KILL_GRACE_MS + 2000,
-      );
+      termination = stopTree(target);
+      escalation = setTimeout(() => killTree(target, "SIGKILL"), KILL_GRACE_MS);
+      escalation.unref();
+      fallback = setTimeout(async () => {
+        await termination;
+        finish({
+          ...stopping!.outcome,
+          code: null,
+          output: `${output}\n[helen] ${note} (the worker did not exit)`,
+        });
+      }, KILL_GRACE_MS + 2000);
     };
     const onAbort = (): void => stop("interrupt", "interrupted");
     if (options.signal?.aborted) {
@@ -361,7 +390,8 @@ function runWorker(options: WorkerOptions): Promise<WorkerOutcome> {
         output,
       });
     });
-    child.on("close", (code) => {
+    child.on("close", async (code) => {
+      await termination;
       if (stopping)
         finish({
           ...stopping.outcome,
