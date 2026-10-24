@@ -13,10 +13,13 @@ import { listReminders } from '../dist/assistant/reminders.js';
 import { listTasks } from '../dist/assistant/tasks.js';
 import { listMemory } from '../dist/assistant/memory.js';
 import { subscriptionEnvironment } from '../dist/core/jobRuntime.js';
+import { handleMessage } from '../dist/assistant/brain.js';
+import { RegressionCaseSchema } from '../dist/assistant/regressions.js';
 
 const { values } = parseArgs({ options: {
   'playwright-module': { type: 'string' }, live: { type: 'boolean', default: false },
   'claude-extra-usage-disabled': { type: 'boolean', default: false },
+  regressions: { type: 'string' },
 } });
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, '.helen', 'qa', `assistant-${new Date().toISOString().replace(/[:.]/g, '-')}`);
@@ -119,6 +122,34 @@ try {
     }
   };
   await visual();
+  if (values.regressions) {
+    const file = path.resolve(values.regressions);
+    assert.ok(fs.statSync(file).size <= 4 * 1024 * 1024, 'Regression input exceeds 4 MiB');
+    const collection = JSON.parse(fs.readFileSync(file, 'utf8'));
+    assert.equal(collection.version, 1);
+    const cases = RegressionCaseSchema.array().max(100).parse(collection.items);
+    report.regressions = [];
+    for (const example of cases) {
+      const users = example.messages.filter(turn => turn.role === 'user');
+      if ((example.requiresModel && !provider) || Date.now() + users.length * 90000 + 10000 >= deadline || (provider && report.providerCallsUpperBound + users.length * 2 > 32)) {
+        report.regressions.push({ id: example.id, status: 'skipped', reason: 'Model authentication or session budget unavailable' });
+        continue;
+      }
+      const replayHome = fs.mkdtempSync(path.join(os.tmpdir(), 'helen-regression-'));
+      try {
+        let answer;
+        const replayConfig = AssistantConfigSchema.parse({ timezone: example.timezone, ...(provider ? { provider } : {}) });
+        for (const turn of users) {
+          if (provider) report.providerCallsUpperBound += 2;
+          answer = await handleMessage(turn.content, { home: replayHome, channel: 'cli', config: replayConfig, now: new Date(example.at), ...(!provider ? { model: null } : {}) });
+        }
+        check(`Conversation regression ${example.id}`, () => assert.ok(answer?.text.toLocaleLowerCase().includes(example.expected.toLocaleLowerCase()), 'Expected answer fragment missing'));
+        report.regressions.push({ id: example.id, status: 'passed' });
+      } finally {
+        fs.rmSync(replayHome, { recursive: true, force: true });
+      }
+    }
+  }
   if (provider) {
     config.provider = AssistantConfigSchema.parse({ provider }).provider;
     const prompts = [
@@ -140,7 +171,7 @@ try {
       'Borra de tus recuerdos mi preferencia sobre cuándo estudiar. Pide confirmación si hace falta.',
     ];
     for (const prompt of prompts) {
-      if (Date.now() + 100000 >= deadline) break;
+      if (Date.now() + 100000 >= deadline || report.providerCallsUpperBound + 2 > 32) break;
       await send(prompt, report.live.transcript);
       report.providerCallsUpperBound += 2;
     }

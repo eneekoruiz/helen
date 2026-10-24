@@ -354,6 +354,14 @@ describe("command model tool protocol", () => {
     expect(context.user).not.toContain("hunter2abc");
     expect(context.history).not.toContain("abcdefghijklmnop");
   });
+  it("aborts a running command when its conversation is interrupted", async () => {
+    const controller = new AbortController();
+    const pending = model(
+      "process.stdin.resume();setTimeout(()=>{},30000)",
+    ).answer({ ...request(), signal: controller.signal });
+    controller.abort();
+    await expect(pending).rejects.toThrow(/abort/i);
+  });
 });
 import http from "node:http";
 import type { AddressInfo } from "node:net";

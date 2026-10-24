@@ -10,7 +10,7 @@ import { readCollection, updateCollection } from "./store.js";
  * just asked ("¿Lo guardo?", "¿Cuándo?") so that a bare "sí" or "mañana a las 9" can complete it.
  */
 const PendingSchema = z.object({
-  kind: z.enum(["remember", "remind", "forget"]),
+  kind: z.enum(["remember", "remind", "forget", "regression"]),
   text: z.string().max(20_000).optional(),
   id: z.string().max(40).optional(),
   expires: z.string().datetime(),
@@ -20,6 +20,7 @@ export const ConversationSchema = z.object({
   id: z.string().min(1).max(200),
   generation: z.string().max(40).optional(),
   pending: PendingSchema.optional(),
+  lastUsedModel: z.boolean().optional(),
   /** The reminder this conversation talked about last ("cancélalo", "pospónlo"). */
   lastReminder: z.string().max(20).optional(),
   history: z

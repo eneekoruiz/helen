@@ -54,6 +54,7 @@ import { fold, tokens } from "./text.js";
 import { describeInstant, localDateKey, shortInstant } from "./time.js";
 import { describeRecurrence, parseWhen, stripWhen } from "./when.js";
 import { weeklyReview } from "./review.js";
+import { prepareRegression, saveRegression } from "./regressions.js";
 
 /**
  * HELEN's brain: one message in, one answer out, for every channel (terminal, HTTP, Telegram, Alexa).
@@ -71,6 +72,8 @@ export interface BrainOptions {
   speaker?: boolean;
   /** Override the configured model (tests); null disables it. */
   model?: LanguageModel | null;
+  /** Internal per-session interruption; completed atomic actions are retained. */
+  signal?: AbortSignal;
 }
 
 export interface BrainReply {
@@ -98,6 +101,7 @@ interface Context {
   model: LanguageModel | null;
   privateAccess?: boolean;
   completedActions?: string[];
+  signal?: AbortSignal;
 }
 
 const say = (lang: "es" | "en", es: string, en: string): string =>
@@ -1020,6 +1024,9 @@ function modelTools(ctx: Context): AssistantTool[] {
             body: hit.item.body.slice(0, 1500),
             tags: hit.item.tags,
             updated: hit.item.updated,
+            source: hit.item.source,
+            created: hit.item.created,
+            expires: hit.item.expires,
           })),
         ),
     },
@@ -1044,6 +1051,12 @@ function modelTools(ctx: Context): AssistantTool[] {
             items: { type: "string" },
             description: "A few short tags",
           },
+          expires: {
+            type: "string",
+            format: "date-time",
+            description:
+              "Optional future expiration, only when requested by the owner",
+          },
         },
         required: ["text"],
       },
@@ -1051,14 +1064,21 @@ function modelTools(ctx: Context): AssistantTool[] {
         text: z.string().min(1).max(20_000),
         kind: z.enum(MEMORY_KINDS).optional(),
         tags: z.array(z.string().max(40)).max(12).optional(),
+        expires: z.string().datetime().optional(),
       }),
       run: (input) => {
+        if (
+          input.expires &&
+          Date.parse(String(input.expires)) <= ctx.now.getTime()
+        )
+          throw new Error("Memory expiration must be in the future");
         clearActions(ctx.home);
         const item = addMemory(ctx.home, {
           text: String(input.text),
           ...(input.kind ? { kind: input.kind as MemoryItem["kind"] } : {}),
           ...(input.tags ? { tags: input.tags as string[] } : {}),
           source: ctx.channel,
+          ...(input.expires ? { expires: String(input.expires) } : {}),
           now: ctx.now,
         });
         return json({
@@ -1074,21 +1094,50 @@ function modelTools(ctx: Context): AssistantTool[] {
         "Correct an existing remembered fact only when the owner explicitly asks. Search first for the exact id. Never infer preferences as facts.",
       schema: {
         type: "object",
-        properties: { id: { type: "string" }, text: { type: "string" } },
-        required: ["id", "text"],
+        properties: {
+          id: { type: "string" },
+          text: { type: "string" },
+          expires: {
+            anyOf: [{ type: "string", format: "date-time" }, { type: "null" }],
+            description:
+              "Future expiry; null makes memory permanent, only on explicit request",
+          },
+        },
+        required: ["id"],
       },
-      input: z.object({
-        id: z.string().regex(/^m[0-9a-f]{6}$/),
-        text: z.string().min(1).max(4000),
-      }),
+      input: z
+        .object({
+          id: z.string().regex(/^[a-z][a-z0-9-]{2,60}$/),
+          text: z.string().min(1).max(4000).optional(),
+          expires: z.string().datetime().nullable().optional(),
+        })
+        .refine(
+          (input) => input.text !== undefined || input.expires !== undefined,
+          "Supply a correction or expiration",
+        ),
       run: (input) => {
         const item = getMemory(ctx.home, String(input.id));
         if (!item || !visible(item)) throw new Error("Memory unavailable");
+        if (
+          input.expires &&
+          Date.parse(String(input.expires)) <= ctx.now.getTime()
+        )
+          throw new Error("Memory expiration must be in the future");
         clearActions(ctx.home);
         const updated = updateMemory(ctx.home, item.id, {
-          title: String(input.text).split("\n")[0]!.slice(0, 80),
-          body: String(input.text),
-          sensitive: item.sensitive || looksSensitive(String(input.text)),
+          ...(input.text !== undefined
+            ? {
+                title: String(input.text).split("\n")[0]!.slice(0, 80),
+                body: String(input.text),
+                sensitive: item.sensitive || looksSensitive(String(input.text)),
+              }
+            : {}),
+          ...(input.expires !== undefined
+            ? {
+                expires:
+                  input.expires === null ? undefined : String(input.expires),
+              }
+            : {}),
         });
         return json({ updated: updated.id });
       },
@@ -1330,6 +1379,8 @@ function modelTools(ctx: Context): AssistantTool[] {
   return tools.map((tool) => ({
     ...tool,
     run: async (input) => {
+      if (ctx.signal?.aborted)
+        throw new Error("Request cancelled by the owner");
       const parsed = tool.input.parse(input);
       const output = runAction(ctx.home, ctx.conversation.id, ctx.now, () => {
         const result = tool.run(parsed);
@@ -1432,6 +1483,7 @@ async function askModel(ctx: Context, message: string): Promise<BrainReply> {
         ? (provider?.voiceTimeoutMs ?? 6_000)
         : (provider?.timeoutMs ?? 60_000),
       maxRounds: provider?.maxRounds ?? 6,
+      signal: ctx.signal,
     });
     if (answer.refused)
       return reply(
@@ -1621,6 +1673,10 @@ function resolvePending(
     );
   }
   if (pending.kind === "remind" && pending.text) {
+    if (intent.name !== "unknown") {
+      delete ctx.conversation.pending;
+      return null;
+    }
     // Anything that reads as a time completes "¿Cuándo te lo recuerdo?".
     const parsed = parseWhen(input, {
       now: ctx.now,
@@ -1628,7 +1684,10 @@ function resolvePending(
       defaultTime: ctx.config.defaultTime,
       locale: localeFor(ctx),
     });
-    if (!parsed) return null;
+    if (!parsed) {
+      delete ctx.conversation.pending;
+      return null;
+    }
     delete ctx.conversation.pending;
     return remind(ctx, pending.text, input);
   }
@@ -1637,6 +1696,22 @@ function resolvePending(
     return null;
   }
   delete ctx.conversation.pending;
+  if (pending.kind === "regression" && pending.text) {
+    try {
+      saveRegression(ctx.home, JSON.parse(pending.text));
+    } catch (error) {
+      return reply(ctx, "pending", errorText(error));
+    }
+    return reply(
+      ctx,
+      "pending",
+      say(
+        ctx.lang,
+        "Prueba guardada localmente. No se ha enviado a ningún proveedor.",
+        "Test saved locally. Nothing was sent to a provider.",
+      ),
+    );
+  }
   if (pending.kind === "remember" && pending.text)
     return remember(ctx, pending.text);
   if (pending.kind === "forget" && pending.id) {
@@ -1662,6 +1737,17 @@ async function handleTurn(
   options: BrainOptions,
 ): Promise<BrainReply> {
   const config = options.config ?? readConfig(options.home);
+  if (options.signal?.aborted) {
+    const es = config.locale.startsWith("es");
+    const text = es ? "Petición interrumpida." : "Request interrupted.";
+    return {
+      text,
+      speech: text,
+      intent: "stop",
+      lang: es ? "es" : "en",
+      endSession: true,
+    };
+  }
   const now = options.now ?? new Date();
   const fallbackLang = config.locale.startsWith("es") ? "es" : "en";
   const understood = understand(input.slice(0, 4000), fallbackLang);
@@ -1692,11 +1778,130 @@ async function handleTurn(
       !speaker && config.privacy.showSensitiveOn.includes(options.channel),
     conversation: getConversation(options.home, conversationId, now),
     model,
+    signal: options.signal,
   };
   if (!understood.cleaned) return reply(ctx, "help", HELP[ctx.lang]);
   const control = fold(understood.cleaned)
     .replace(/[¿?!.]/g, "")
     .trim();
+  const regression =
+    /^(?:prepara (?:una )?prueba|prepare (?:a )?test):\s*(.+)$/is.exec(
+      understood.cleaned,
+    );
+  if (regression) {
+    try {
+      if (ctx.speaker || !ctx.showSensitive)
+        throw new Error("Revisa esta prueba en un canal privado con pantalla.");
+      const example = prepareRegression(
+        ctx.conversation.history ?? [],
+        regression[1]!,
+        {
+          now,
+          timezone: config.timezone,
+          requiresModel: ctx.conversation.lastUsedModel ?? true,
+        },
+      );
+      ctx.conversation.pending = pendingFor(
+        "regression",
+        { text: JSON.stringify(example) },
+        now,
+      );
+      saveConversation(ctx.home, ctx.conversation, now);
+      return reply(
+        ctx,
+        "pending",
+        say(
+          ctx.lang,
+          "Revisa nombres y datos que puedan identificarte antes de guardar esta prueba local. ¿Confirmas? (sí/no)\n",
+          "Review names and identifying details before saving this local test. Confirm? (yes/no)\n",
+        ) +
+          JSON.stringify(example.messages) +
+          "\n" +
+          example.expected,
+      );
+    } catch (error) {
+      return reply(ctx, "pending", errorText(error));
+    }
+  }
+  const provenance =
+    /^(?:de donde (?:sabes|sale)|por que recuerdas|origen del recuerdo|memory source)\s+(.+)$/.exec(
+      control,
+    );
+  if (provenance) {
+    delete ctx.conversation.pending;
+    saveConversation(ctx.home, ctx.conversation, now);
+    const hit = searchMemory(ctx.home, provenance[1]!, {
+      limit: 1,
+      includeSensitive: ctx.showSensitive,
+      now,
+    })[0];
+    return reply(
+      ctx,
+      "recall",
+      hit
+        ? `${memoryLine(hit.item, ctx)}\n${say(ctx.lang, "Origen", "Source")}: ${hit.item.source}; ${say(ctx.lang, "creado", "created")}: ${hit.item.created}; ${say(ctx.lang, "actualizado", "updated")}: ${hit.item.updated}; ${say(ctx.lang, "caduca", "expires")}: ${hit.item.expires ?? say(ctx.lang, "sin caducidad", "never")}.`
+        : say(ctx.lang, "No encuentro ese recuerdo.", "Memory not found."),
+    );
+  }
+  const temporary =
+    /^(?:recuerda hasta|remember until)\s+(.+?):\s*(.+)$/is.exec(
+      understood.cleaned,
+    );
+  const correction =
+    /^(?:corrige el recuerdo|correct memory)\s+([a-z][a-z0-9-]{2,60}):\s*(.+)$/is.exec(
+      understood.cleaned,
+    );
+  const expiration =
+    /^(?:haz temporal el recuerdo|expire memory)\s+([a-z][a-z0-9-]{2,60})\s+(?:hasta|at)\s+(.+)$/i.exec(
+      understood.cleaned,
+    );
+  if (temporary || correction || expiration) {
+    try {
+      delete ctx.conversation.pending;
+      saveConversation(ctx.home, ctx.conversation, now);
+      const date = temporary?.[1] ?? expiration?.[2];
+      const parsed = date
+        ? parseWhen(date, {
+            now,
+            timezone: config.timezone,
+            defaultTime: config.defaultTime,
+            locale: config.locale,
+          })
+        : undefined;
+      if (date && (!parsed || parsed.recurrence || parsed.due <= now))
+        throw new Error("Indica una fecha futura sin repetición.");
+      const id = correction?.[1] ?? expiration?.[1];
+      const item = id ? getMemory(ctx.home, id) : undefined;
+      if (id && (!item || (item.sensitive && !ctx.showSensitive)))
+        throw new Error("Memory unavailable");
+      clearActions(ctx.home);
+      const saved = temporary
+        ? addMemory(ctx.home, {
+            text: temporary[2]!,
+            source: ctx.channel,
+            expires: parsed!.due.toISOString(),
+            now,
+          })
+        : updateMemory(
+            ctx.home,
+            id!,
+            correction
+              ? {
+                  title: correction[2]!.split("\n")[0]!.slice(0, 80),
+                  body: correction[2]!,
+                  sensitive: item!.sensitive || looksSensitive(correction[2]!),
+                }
+              : { expires: parsed!.due.toISOString() },
+          );
+      return reply(
+        ctx,
+        "remember",
+        `${memoryLine(saved, ctx)}${saved.expires ? `\n${say(ctx.lang, "Caduca", "Expires")}: ${saved.expires}` : ""}`,
+      );
+    } catch (error) {
+      return reply(ctx, "remember", errorText(error));
+    }
+  }
   if (/^(?:revision semanal|revisa mi semana|weekly review)$/.test(control)) {
     const review = weeklyReview(ctx.home, now);
     const lines = [
@@ -1817,6 +2022,12 @@ async function handleTurn(
         route(ctx, understood.intent, understood.cleaned),
       )
     : route(ctx, understood.intent, understood.cleaned));
+  if (options.signal?.aborted)
+    return reply(
+      ctx,
+      "stop",
+      say(ctx.lang, "Petición interrumpida.", "Request interrupted."),
+    );
   if (result.intent === "forget") {
     delete ctx.conversation.history;
     clearActions(ctx.home);
@@ -1850,25 +2061,62 @@ async function handleTurn(
     )
       ctx.conversation.history!.splice(0, 2);
   }
+  ctx.conversation.lastUsedModel = result.intent === "model";
   saveConversation(options.home, ctx.conversation, now);
   return result;
 }
 
 const turns = new Map<string, Promise<unknown>>();
+const controllers = new Map<string, AbortController>();
 /** Serialize a session so overlapping HTTP messages cannot lose context or execute an undo out of order. */
 export async function handleMessage(
   input: string,
   options: BrainOptions,
 ): Promise<BrainReply> {
   const key = `${options.home}:${options.channel}:${options.conversation ?? "default"}`;
+  if (
+    /^(?:espera(?:,? eso no| un momento)?|eso no|olvidalo|cancela(?: lo pendiente| eso)?|para|stop|cancel(?: pending)?|wait(?:,? not that| a moment)?|never mind)[.!?]*$/.test(
+      fold(input).trim(),
+    )
+  ) {
+    controllers.get(key)?.abort();
+    controllers.delete(key);
+    turns.delete(key);
+    const now = options.now ?? new Date();
+    const conversation = getConversation(
+      options.home,
+      `${options.channel}:${options.conversation ?? "default"}`.slice(0, 200),
+      now,
+    );
+    delete conversation.pending;
+    saveConversation(options.home, conversation, now);
+    const es = (options.config ?? readConfig(options.home)).locale.startsWith(
+      "es",
+    );
+    const text = es
+      ? "Detengo lo pendiente. Las acciones ya completadas se conservan; puedes usar «deshaz eso»."
+      : 'Pending request stopped. Completed actions are retained; you can say "undo that".';
+    return {
+      text,
+      speech: text,
+      intent: "stop",
+      lang: es ? "es" : "en",
+      endSession: true,
+    };
+  }
+  const controller = controllers.get(key) ?? new AbortController();
+  controllers.set(key, controller);
   const previous = turns.get(key) ?? Promise.resolve();
   const current = previous
     .catch(() => undefined)
-    .then(() => handleTurn(input, options));
+    .then(() => handleTurn(input, { ...options, signal: controller.signal }));
   turns.set(key, current);
   try {
     return await current;
   } finally {
-    if (turns.get(key) === current) turns.delete(key);
+    if (turns.get(key) === current) {
+      turns.delete(key);
+      if (controllers.get(key) === controller) controllers.delete(key);
+    }
   }
 }
