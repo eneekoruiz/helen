@@ -2109,7 +2109,14 @@ export async function handleMessage(
   const previous = turns.get(key) ?? Promise.resolve();
   const current = previous
     .catch(() => undefined)
-    .then(() => handleTurn(input, { ...options, signal: controller.signal }));
+    .then(() =>
+      handleTurn(input, {
+        ...options,
+        signal: options.signal
+          ? AbortSignal.any([controller.signal, options.signal])
+          : controller.signal,
+      }),
+    );
   turns.set(key, current);
   try {
     return await current;

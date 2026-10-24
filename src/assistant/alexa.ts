@@ -588,8 +588,17 @@ export async function handleAlexa(
     "alexa";
   const request = envelope.request;
 
-  if (request.type === "SessionEndedRequest")
+  if (request.type === "SessionEndedRequest") {
+    await handleMessage("stop", {
+      home,
+      channel: "alexa",
+      conversation,
+      config,
+      now,
+      model: null,
+    });
     return { version: "1.0", response: {} };
+  }
   if (request.type === "LaunchRequest") {
     return speak(
       es
@@ -653,8 +662,17 @@ export async function handleAlexa(
   if (
     intent.name === "AMAZON.StopIntent" ||
     intent.name === "AMAZON.CancelIntent"
-  )
+  ) {
+    await handleMessage("stop", {
+      home,
+      channel: "alexa",
+      conversation,
+      config,
+      now,
+      model: null,
+    });
     return speak(es ? "Hasta luego." : "Bye.");
+  }
   if (
     intent.name === "AMAZON.FallbackIntent" ||
     intent.name === "AMAZON.NavigateHomeIntent"

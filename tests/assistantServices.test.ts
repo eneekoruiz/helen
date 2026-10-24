@@ -582,10 +582,16 @@ describe("Telegram bot", () => {
               ],
             }),
           );
-        controller.abort();
+        if (!init?.signal?.aborted)
+          await new Promise<void>((resolve) =>
+            init?.signal?.addEventListener("abort", () => resolve(), {
+              once: true,
+            }),
+          );
         return new Response(JSON.stringify({ ok: true, result: [] }));
       }
       sent.push(JSON.parse(String(init?.body)));
+      controller.abort();
       return new Response(JSON.stringify({ ok: true, result: {} }));
     }) as typeof fetch;
     await runTelegramBot({

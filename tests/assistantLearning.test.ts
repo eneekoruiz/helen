@@ -13,6 +13,8 @@ import {
 } from "../src/assistant/regressions.js";
 import { listReminders } from "../src/assistant/reminders.js";
 import { readCollection } from "../src/assistant/store.js";
+import { runTelegramBot } from "../src/assistant/telegram.js";
+import { handleAlexa } from "../src/assistant/alexa.js";
 
 let home: string;
 const now = new Date("2026-10-24T10:00:00Z");
@@ -216,4 +218,102 @@ it("refuses regression examples containing private turns or credentials", () => 
       options,
     ),
   ).toThrow("credenciales");
+});
+
+it("routes Alexa stop and session-end events through pending-request cancellation", async () => {
+  const conversation = "echo-test";
+  for (const event of ["AMAZON.StopIntent", "SessionEndedRequest"]) {
+    await ask("recuérdame llamar a mamá", { channel: "alexa", conversation });
+    await handleAlexa(
+      {
+        session: { user: { userId: conversation } },
+        request: {
+          type: event === "SessionEndedRequest" ? event : "IntentRequest",
+          timestamp: now.toISOString(),
+          intent: { name: event },
+        },
+      },
+      { home, config: config(), now, model: null },
+    );
+    expect(
+      getConversation(home, `alexa:${conversation}`, now).pending,
+    ).toBeUndefined();
+  }
+});
+
+it("receives a Telegram stop from a later poll while the model is still running", async () => {
+  const controller = new AbortController();
+  let entered!: () => void;
+  const started = new Promise<void>((resolve) => {
+    entered = resolve;
+  });
+  const sent: string[] = [];
+  let polls = 0;
+  const fetcher = (async (url: string | URL, init?: RequestInit) => {
+    if (String(url).endsWith("/getUpdates")) {
+      polls++;
+      if (polls === 2) await started;
+      if (polls > 2 && !init?.signal?.aborted)
+        await new Promise<void>((resolve) =>
+          init?.signal?.addEventListener("abort", () => resolve(), {
+            once: true,
+          }),
+        );
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          result:
+            polls > 2
+              ? []
+              : [
+                  {
+                    update_id: polls,
+                    message: {
+                      message_id: polls,
+                      chat: { id: 42 },
+                      text:
+                        polls === 1
+                          ? "Ayúdame a preparar una llamada"
+                          : "espera, eso no",
+                    },
+                  },
+                ],
+        }),
+      );
+    }
+    const body = JSON.parse(String(init?.body));
+    sent.push(body.text);
+    if (body.text.includes("Detengo")) controller.abort();
+    return new Response(JSON.stringify({ ok: true, result: {} }));
+  }) as typeof fetch;
+  await runTelegramBot({
+    home,
+    config: {
+      ...config(),
+      channels: {
+        ...config().channels,
+        telegram: { tokenEnv: "TEST_TOKEN", allowedChats: [42] },
+      },
+    },
+    env: { TEST_TOKEN: "synthetic-token" },
+    signal: controller.signal,
+    fetcher,
+    model: model(async (request) => {
+      entered();
+      await new Promise<void>((resolve) =>
+        request.signal!.addEventListener("abort", () => resolve(), {
+          once: true,
+        }),
+      );
+      await expect(
+        request.tools
+          .find((tool) => tool.name === "reminder_add")!
+          .run({ what: "No debe guardarse", when: "mañana a las 9" }),
+      ).rejects.toThrow("cancelled");
+      return "Respuesta antigua";
+    }),
+  });
+  expect(polls).toBeGreaterThanOrEqual(2);
+  expect(sent.some((text) => text.includes("Detengo"))).toBe(true);
+  expect(listReminders(home)).toHaveLength(0);
 });
