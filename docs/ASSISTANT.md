@@ -2,7 +2,9 @@
 
 Besides orchestrating coding agents, HELEN can be your own assistant and long-term memory: it keeps notes, reminders, lists and your agenda, reminds you on its own, and answers on the terminal, a chat page, Telegram and an Amazon Echo.
 
-Everything lives in `~/.helen` (or the folder in `HELEN_HOME`), with permissions only you can read. Nothing goes into a project repository, and nothing leaves your machine unless you connect a channel or a model that does so (see [Privacy](#privacy)).
+Everything lives in `~/.helen` (or the folder in `HELEN_HOME`), with permissions only you can read. Nothing goes into a project repository, and nothing leaves your machine unless you connect an external channel or model, authorize Gmail, or enable browser dictation that uses its provider's service (see [Privacy](#privacy)).
+
+For the day-to-day flows, see [chat, voice and personal workflows](ASSISTANT-LIFE.md), [reviewed capture](ASSISTANT-CAPTURE.md), [preparation and capacity planning](ASSISTANT-WORKFLOWS.md), [Gmail setup and sending](ASSISTANT-GMAIL.md), and [reply checks and follow-up](ASSISTANT-GMAIL-WATCH.md).
 
 ## Quick start
 
@@ -22,32 +24,32 @@ Every command accepts `--json` for scripts and agents.
 
 HELEN reads everyday Spanish and English with rules (instant, offline, predictable):
 
-| You say | HELEN does |
-|---|---|
-| "Recuérdame llamar a mamá mañana a las 9", "remind me to call mom at 9am" | A reminder at 09:00 tomorrow, in your time zone |
-| "Recuérdame sacar la basura los martes y jueves a las 21", "every weekday at 7am" | A recurring reminder (daily, weekly by day, monthly, yearly, every N days/weeks) |
-| "Recuérdame comprar un regalo para Ana" | Asks "¿Cuándo te lo recuerdo?" and takes your next message as the time |
-| "Recuerda que el wifi de casa se llama Casa_5G" | A note. If it carries a future date ("el viernes a las 17 tengo dentista") it also schedules a reminder |
-| "¿Cuál es el wifi de casa?", "¿cuándo es el dentista?", "what do you know about Ana?" | Searches notes, reminders and lists |
-| "Añade leche, huevos y pan a la lista de la compra", "tengo que renovar el DNI antes del viernes" | One item per product on the shopping list; a task with a deadline |
-| "Ya he comprado la leche", "tacha los huevos de la lista" | Ticks the item off |
-| "¿Qué tengo hoy?", "agenda de esta semana", "buenos días" | Your agenda (a morning summary for "buenos días") |
-| "Cancela el recordatorio de mamá", "pospónlo 10 minutos" | Cancels or snoozes; when several match, it asks which |
-| "Olvida lo del wifi" | Asks for confirmation, then deletes the note for good |
+| You say                                                                                           | HELEN does                                                                                              |
+| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| "Recuérdame llamar a mamá mañana a las 9", "remind me to call mom at 9am"                         | A reminder at 09:00 tomorrow, in your time zone                                                         |
+| "Recuérdame sacar la basura los martes y jueves a las 21", "every weekday at 7am"                 | A recurring reminder (daily, weekly by day, monthly, yearly, every N days/weeks)                        |
+| "Recuérdame comprar un regalo para Ana"                                                           | Asks "¿Cuándo te lo recuerdo?" and takes your next message as the time                                  |
+| "Recuerda que el wifi de casa se llama Casa_5G"                                                   | A note. If it carries a future date ("el viernes a las 17 tengo dentista") it also schedules a reminder |
+| "¿Cuál es el wifi de casa?", "¿cuándo es el dentista?", "what do you know about Ana?"             | Searches notes, reminders and lists                                                                     |
+| "Añade leche, huevos y pan a la lista de la compra", "tengo que renovar el DNI antes del viernes" | One item per product on the shopping list; a task with a deadline                                       |
+| "Ya he comprado la leche", "tacha los huevos de la lista"                                         | Ticks the item off                                                                                      |
+| "¿Qué tengo hoy?", "agenda de esta semana", "buenos días"                                         | Your agenda (a morning summary for "buenos días")                                                       |
+| "Cancela el recordatorio de mamá", "pospónlo 10 minutos"                                          | Cancels or snoozes; when several match, it asks which                                                   |
+| "Olvida lo del wifi"                                                                              | Asks for confirmation, then deletes the note for good                                                   |
 
 Dates: "mañana", "pasado mañana", "el viernes por la tarde", "en 2 horas", "dentro de 3 días", "el 15 de noviembre a las 17:30", "a las nueve menos cuarto", "15/11" (day/month outside the US), ISO dates. Hours said as words, as voice assistants transcribe them, also work ("a las nueve y media"). Times are wall-clock times in your zone, so daylight saving changes do not move them.
 
 ## Commands
 
-| Area | Commands |
-|---|---|
-| Notes | `helen remember <text> [--kind note\|fact\|idea\|decision\|person\|bookmark\|journal] [--tags ...] [--agents] [--sensitive] [--expires <when>]` · `helen recall <words>` · `helen notes` · `helen forget <id>` |
-| Reminders | `helen remind <text with when>` · `helen remind "<text>" --at "<when>"` · `helen reminders [--all]` · `helen reminders cancel <words\|id>` · `helen reminders snooze <id> <when>` · `helen reminders done <id>` |
-| Lists | `helen todo <task> [--list <name>] [--due <when>] [--priority high]` · `helen todo list [--list <name>]` · `helen todo done <words\|id>` · `helen todo rm <words\|id>` · `helen todo clear` |
-| Agenda and chat | `helen agenda [hoy\|mañana\|semana]` · `helen ask <anything> [--speaker]` · `helen chat` |
-| Setup | `helen assistant status` · `helen assistant config [show\|set <key> <value>\|init]` · `helen assistant check [--send-test]` · `helen assistant token [--show\|--rotate]` · `helen assistant export [--out <file>]` |
-| Running | `helen assistant serve [--port] [--host] [--no-scheduler] [--no-telegram]` · `helen assistant service` |
-| Channels | `helen assistant telegram setup\|allow <chat id>` · `helen assistant alexa setup\|model [--locale]` |
+| Area            | Commands                                                                                                                                                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Notes           | `helen remember <text> [--kind note\|fact\|idea\|decision\|person\|bookmark\|journal] [--tags ...] [--agents] [--sensitive] [--expires <when>]` · `helen recall <words>` · `helen notes` · `helen forget <id>`     |
+| Reminders       | `helen remind <text with when>` · `helen remind "<text>" --at "<when>"` · `helen reminders [--all]` · `helen reminders cancel <words\|id>` · `helen reminders snooze <id> <when>` · `helen reminders done <id>`    |
+| Lists           | `helen todo <task> [--list <name>] [--due <when>] [--priority high]` · `helen todo list [--list <name>]` · `helen todo done <words\|id>` · `helen todo rm <words\|id>` · `helen todo clear`                        |
+| Agenda and chat | `helen agenda [hoy\|mañana\|semana]` · `helen ask <anything> [--speaker]` · `helen chat`                                                                                                                           |
+| Setup           | `helen assistant status` · `helen assistant config [show\|set <key> <value>\|init]` · `helen assistant check [--send-test]` · `helen assistant token [--show\|--rotate]` · `helen assistant export [--out <file>]` |
+| Running         | `helen assistant serve [--port] [--host] [--no-scheduler] [--no-telegram]` · `helen assistant service`                                                                                                             |
+| Channels        | `helen assistant telegram setup\|allow <chat id>` · `helen assistant alexa setup\|model [--locale]`                                                                                                                |
 
 Notes are plain Markdown files in `~/.helen/memory/` (you can open them in any editor or in Obsidian); reminders, tasks and short conversation state are JSON files next to them.
 
@@ -55,13 +57,13 @@ Notes are plain Markdown files in `~/.helen/memory/` (you can open them in any e
 
 `helen assistant serve` runs the scheduler: it delivers every due reminder once, says when one comes late because HELEN was off, and moves recurring reminders to their next time. Only one scheduler runs per home. Channels:
 
-| Channel | How to turn it on | Notes |
-|---|---|---|
-| Terminal | on by default | Lines in the server output |
-| Desktop | on by default | `notify-send` (Linux), `osascript` (macOS) or a PowerShell balloon (Windows); skipped where missing |
-| Phone (ntfy) | `helen assistant config set channels.webhook '{"url":"https://ntfy.sh/<a long private topic>","format":"ntfy"}'` | Install the ntfy app and subscribe to the same topic |
-| Slack, Discord, any webhook | `format` `slack`, `discord` or `json` | |
-| Telegram | `helen assistant telegram setup` | Also lets you chat with HELEN |
+| Channel                     | How to turn it on                                                                                                | Notes                                                                                               |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Terminal                    | on by default                                                                                                    | Lines in the server output                                                                          |
+| Desktop                     | on by default                                                                                                    | `notify-send` (Linux), `osascript` (macOS) or a PowerShell balloon (Windows); skipped where missing |
+| Phone (ntfy)                | `helen assistant config set channels.webhook '{"url":"https://ntfy.sh/<a long private topic>","format":"ntfy"}'` | Install the ntfy app and subscribe to the same topic                                                |
+| Slack, Discord, any webhook | `format` `slack`, `discord` or `json`                                                                            |                                                                                                     |
+| Telegram                    | `helen assistant telegram setup`                                                                                 | Also lets you chat with HELEN                                                                       |
 
 A daily summary at a fixed time: `helen assistant config set briefing.time 08:00`. Test every channel with `helen assistant check --send-test`.
 
@@ -113,21 +115,21 @@ Through `helen mcp`, coding agents get three tools: `helen_memory_search` (only 
 
 `~/.helen/config.json` (edit with `helen assistant config set <key> <value>`; values are JSON when they parse as JSON):
 
-| Key | Default | Meaning |
-|---|---|---|
-| `owner` | your user name | How HELEN addresses you |
-| `locale` | `es-ES` | Language of answers and date reading |
-| `timezone` | detected | IANA name, for example `Europe/Madrid` |
-| `defaultTime` | `09:00` | Time used when only a day is given |
-| `channels.console`, `channels.desktop` | `true` | Local delivery |
-| `channels.webhook` | off | `{"url", "format": "json\|ntfy\|slack\|discord"}` |
-| `channels.telegram` | off | `{"tokenEnv", "allowedChats": []}` |
-| `provider` | off | `{"type": "anthropic\|command", "model", "keyEnv", "baseUrl", "effort", "command", "mode", "allowSensitive", "maxRounds", "timeoutMs", "voiceTimeoutMs"}` |
-| `server.host`, `server.port` | `127.0.0.1`, `8787` | Where `helen assistant serve` listens |
-| `alexa.skillIds`, `alexa.userIds`, `alexa.nativeReminders` | `[]`, `[]`, `true` | See [ALEXA.md](ALEXA.md) |
-| `privacy.showSensitiveOn` | `["cli","http","web"]` | Channels allowed to show private items |
-| `briefing.time` | off | Daily summary time, `HH:MM` |
-| `shareAllMemoryWithAgents` | `false` | Let MCP clients read every non-private note |
+| Key                                                        | Default                | Meaning                                                                                                                                                   |
+| ---------------------------------------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `owner`                                                    | your user name         | How HELEN addresses you                                                                                                                                   |
+| `locale`                                                   | `es-ES`                | Language of answers and date reading                                                                                                                      |
+| `timezone`                                                 | detected               | IANA name, for example `Europe/Madrid`                                                                                                                    |
+| `defaultTime`                                              | `09:00`                | Time used when only a day is given                                                                                                                        |
+| `channels.console`, `channels.desktop`                     | `true`                 | Local delivery                                                                                                                                            |
+| `channels.webhook`                                         | off                    | `{"url", "format": "json\|ntfy\|slack\|discord"}`                                                                                                         |
+| `channels.telegram`                                        | off                    | `{"tokenEnv", "allowedChats": []}`                                                                                                                        |
+| `provider`                                                 | off                    | `{"type": "anthropic\|command", "model", "keyEnv", "baseUrl", "effort", "command", "mode", "allowSensitive", "maxRounds", "timeoutMs", "voiceTimeoutMs"}` |
+| `server.host`, `server.port`                               | `127.0.0.1`, `8787`    | Where `helen assistant serve` listens                                                                                                                     |
+| `alexa.skillIds`, `alexa.userIds`, `alexa.nativeReminders` | `[]`, `[]`, `true`     | See [ALEXA.md](ALEXA.md)                                                                                                                                  |
+| `privacy.showSensitiveOn`                                  | `["cli","http","web"]` | Channels allowed to show private items                                                                                                                    |
+| `briefing.time`                                            | off                    | Daily summary time, `HH:MM`                                                                                                                               |
+| `shareAllMemoryWithAgents`                                 | `false`                | Let MCP clients read every non-private note                                                                                                               |
 
 The code lives in `src/assistant/` (brain, intents, dates, stores, scheduler, server, Telegram, Alexa) and `src/commands/assistantCmd.ts`.
 

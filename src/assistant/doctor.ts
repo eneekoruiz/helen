@@ -3,6 +3,8 @@ import path from "node:path";
 import { homePermissionProblems, readConfig } from "./home.js";
 import { deliveryStatus } from "./scheduler.js";
 import { isValidTimeZone } from "./time.js";
+import { readGmailConnection } from "./gmailAuth.js";
+import { listGmailDrafts } from "./gmail.js";
 
 export interface AssistantDiagnostic {
   name: string;
@@ -53,6 +55,38 @@ export async function diagnoseAssistant(
     return checks;
   }
   const env = options.env ?? process.env;
+  try {
+    const connection = readGmailConnection(home);
+    add(
+      "gmail",
+      connection ? "ok" : "warning",
+      connection
+        ? "Saved Google authorization present; live mail delivery is not tested"
+        : "Connect Gmail from the private chat settings to enable mail",
+    );
+    const unresolved = listGmailDrafts(home).filter((item) =>
+      ["inflight", "uncertain", "preparing"].includes(item.state),
+    ).length;
+    if (unresolved)
+      add(
+        "gmail-deliveries",
+        "warning",
+        `${unresolved} mail operations need review; do not resend automatically`,
+      );
+  } catch {
+    add(
+      "gmail",
+      "error",
+      "Google authorization or delivery state is invalid; reconnect or reconcile before sending",
+    );
+  }
+  add(
+    "capture",
+    config.capture?.extractor ? "ok" : "warning",
+    config.capture?.extractor
+      ? "Local extractor configured; audio, OCR and PDF recognition are not calibrated"
+      : "Text capture works; audio, photo and PDF capture need a trusted local extractor",
+  );
   add(
     "timezone",
     isValidTimeZone(config.timezone) ? "ok" : "error",

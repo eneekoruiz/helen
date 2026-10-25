@@ -700,6 +700,10 @@ export async function handleAlexa(
     config,
     now,
     speaker: true,
+    ownerVerified:
+      config.alexa.userIds.length > 0 &&
+      config.alexa.userIds.includes(conversation),
+    requestId: request.requestId,
     ...(options.model !== undefined ? { model: options.model } : {}),
   });
   const card =

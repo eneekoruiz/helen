@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { z } from "zod";
+import { GmailConfigSchema } from "./gmail.js";
 import { withLockSync } from "../core/fileLock.js";
 import { isValidTimeZone } from "./time.js";
 
@@ -174,6 +175,68 @@ export const AssistantConfigSchema = z.object({
     .optional(),
   channels: ChannelsSchema,
   provider: ProviderSchema.optional(),
+  assistance: z
+    .object({
+      detail: z.enum(["brief", "balanced", "detailed"]).default("balanced"),
+      simpleLanguage: z.boolean().default(false),
+      stepByStep: z.boolean().default(false),
+      preferredLanguage: z
+        .string()
+        .regex(/^[a-z]{2}(-[A-Z]{2})?$/)
+        .optional(),
+    })
+    .prefault({}),
+  capture: z
+    .object({
+      extractor: z
+        .object({
+          command: z.string().min(1).max(1000),
+          args: z.array(z.string().max(2000)).max(30).optional(),
+          timeoutMs: z.number().int().min(100).max(120000).optional(),
+        })
+        .optional(),
+    })
+    .optional(),
+  gmail: z.lazy(() => GmailConfigSchema).optional(),
+  gmailRedirectUri: z
+    .string()
+    .url()
+    .refine((value) => {
+      const url = new URL(value);
+      return (
+        url.pathname === "/gmail/callback" &&
+        !url.search &&
+        !url.hash &&
+        !url.username &&
+        !url.password &&
+        (url.protocol === "https:" ||
+          (url.protocol === "http:" &&
+            ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)))
+      );
+    })
+    .optional(),
+  gmailAuth: z
+    .object({
+      clientIdEnv: z.string().regex(/^[A-Za-z_][A-Za-z0-9_]*$/),
+      clientSecretEnv: z
+        .string()
+        .regex(/^[A-Za-z_][A-Za-z0-9_]*$/)
+        .optional(),
+      redirectUri: z
+        .string()
+        .url()
+        .refine((value) => {
+          const url = new URL(value);
+          return (
+            !url.username &&
+            !url.password &&
+            (url.protocol === "https:" ||
+              (url.protocol === "http:" &&
+                ["127.0.0.1", "localhost", "[::1]"].includes(url.hostname)))
+          );
+        }),
+    })
+    .optional(),
   server: z
     .object({
       host: z.string().default("127.0.0.1"),

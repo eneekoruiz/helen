@@ -1,6 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
+import { z } from "zod";
 import { handleMessage } from "./brain.js";
+import { createCapture, extractCaptureAttachment } from "./capture.js";
+import { getConversation, saveConversation } from "./conversation.js";
+import { looksSensitive, redact } from "../core/secrets.js";
 import { writePrivate, type AssistantConfig } from "./home.js";
 import type { LanguageModel } from "./llm.js";
 
@@ -14,8 +18,27 @@ interface TelegramUpdate {
   message?: {
     message_id: number;
     chat: { id: number; type?: string };
-    from?: { first_name?: string; username?: string };
+    from?: { id?: number; first_name?: string; username?: string };
     text?: string;
+    voice?: { file_id: string; mime_type?: string; file_size?: number };
+    photo?: Array<{
+      file_id: string;
+      file_size?: number;
+      width?: number;
+      height?: number;
+    }>;
+    document?: {
+      file_id: string;
+      mime_type?: string;
+      file_size?: number;
+      file_name?: string;
+    };
+    caption?: string;
+    forward_origin?: unknown;
+    forward_date?: number;
+    forward_from?: unknown;
+    forward_from_chat?: unknown;
+    forward_sender_name?: string;
   };
 }
 
@@ -131,6 +154,7 @@ async function call<T>(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+      redirect: "error",
       signal: signal
         ? AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)])
         : AbortSignal.timeout(timeoutMs),
@@ -148,13 +172,214 @@ async function call<T>(
   return data.result as T;
 }
 
+const MAX_MEDIA_BYTES = 10 * 1024 * 1024;
+
+async function downloadMedia(
+  file: { file_id: string; file_size?: number },
+  options: TelegramOptions & { token: string },
+): Promise<Buffer> {
+  const id = z.string().min(1).max(500).parse(file.file_id);
+  if (file.file_size !== undefined)
+    z.number().int().min(1).max(MAX_MEDIA_BYTES).parse(file.file_size);
+  const fetcher = options.fetcher ?? fetch;
+  const metadata = z
+    .object({
+      file_path: z.string().min(1).max(500),
+      file_size: z.number().int().min(1).max(MAX_MEDIA_BYTES).optional(),
+    })
+    .parse(
+      await call(
+        fetcher,
+        options.token,
+        "getFile",
+        { file_id: id },
+        15_000,
+        options.signal,
+      ),
+    );
+  if (
+    !/^[a-zA-Z0-9_.-]+(?:\/[a-zA-Z0-9_.-]+)*$/.test(metadata.file_path) ||
+    metadata.file_path.split("/").some((part) => part === "." || part === "..")
+  )
+    throw new Error("Telegram returned an unsafe file path.");
+  const signal = options.signal
+    ? AbortSignal.any([options.signal, AbortSignal.timeout(15_000)])
+    : AbortSignal.timeout(15_000);
+  const response = await fetcher(
+    `https://api.telegram.org/file/bot${options.token}/${metadata.file_path}`,
+    { redirect: "error", signal },
+  );
+  if (!response.ok || response.status >= 300 || !response.body)
+    throw new Error("Telegram media download failed.");
+  const length = response.headers.get("content-length");
+  if (length && (!/^\d+$/.test(length) || Number(length) > MAX_MEDIA_BYTES)) {
+    await response.body.cancel();
+    throw new Error("Telegram attachment exceeds 10 MiB.");
+  }
+  const reader = response.body.getReader();
+  const abort = () => {
+    void reader.cancel().catch(() => undefined);
+  };
+  signal.addEventListener("abort", abort, { once: true });
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    for (;;) {
+      signal.throwIfAborted();
+      const chunk = await reader.read();
+      signal.throwIfAborted();
+      if (chunk.done) break;
+      size += chunk.value.byteLength;
+      if (size > MAX_MEDIA_BYTES)
+        throw new Error("Telegram attachment exceeds 10 MiB.");
+      chunks.push(chunk.value);
+    }
+    if (!size) throw new Error("Telegram attachment is empty.");
+    return Buffer.concat(chunks, size);
+  } finally {
+    signal.removeEventListener("abort", abort);
+    await reader.cancel().catch(() => undefined);
+    reader.releaseLock();
+  }
+}
+
+async function mediaMessage(
+  update: TelegramUpdate,
+  options: TelegramOptions & { token: string },
+  lang: "es" | "en",
+): Promise<string> {
+  const message = update.message!;
+  const es = lang === "es";
+  const voice = message.voice;
+  const photo = message.photo?.at(-1);
+  const file = voice ?? photo ?? message.document;
+  if (!file) throw new Error("No supported attachment found.");
+  let mime = voice
+    ? (voice.mime_type ?? "audio/ogg")
+    : photo
+      ? "image/jpeg"
+      : (message.document?.mime_type ?? "");
+  const allowed = voice
+    ? ["audio/ogg", "audio/mpeg", "audio/wav"]
+    : photo
+      ? ["image/jpeg", "image/png"]
+      : ["application/pdf", "text/plain", "text/markdown"];
+  if (!allowed.includes(mime))
+    throw new Error(
+      es
+        ? "Formato no compatible. Usa voz OGG/MP3/WAV, foto JPEG/PNG o documento PDF/texto."
+        : "Unsupported format. Use OGG/MP3/WAV voice, JPEG/PNG photos or PDF/text documents.",
+    );
+  const extractor = options.config.capture?.extractor;
+  if (!mime.startsWith("text/") && !extractor)
+    throw new Error(
+      es
+        ? "Configura capture.extractor con un transcriptor/OCR local de confianza para procesar voz, fotos o PDF."
+        : "Configure capture.extractor with a trusted local transcription/OCR command to process voice, photos or PDF.",
+    );
+  const data = await downloadMedia(file, options);
+  if (
+    photo &&
+    data.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+  )
+    mime = "image/png";
+  const transcript = await extractCaptureAttachment({ data, mime }, extractor);
+  options.signal?.throwIfAborted();
+  const forwarded =
+    message.forward_origin !== undefined ||
+    message.forward_date !== undefined ||
+    message.forward_from !== undefined ||
+    message.forward_from_chat !== undefined ||
+    message.forward_sender_name !== undefined;
+  if (voice && !forwarded) {
+    if (transcript.length > 4000)
+      throw new Error(
+        es
+          ? "La transcripción supera 4000 caracteres; divide el audio para revisar cada petición completa."
+          : "The transcript exceeds 4000 characters; split the audio so each complete request can be reviewed.",
+      );
+    const reply = await handleMessage(commandToText(transcript, lang), {
+      home: options.home,
+      channel: "telegram",
+      conversation: String(message.chat.id),
+      config: options.config,
+      ownerVerified: true,
+      requestId: `telegram-${update.update_id}`,
+      signal: options.signal,
+      fetcher: options.fetcher,
+      ...(options.model !== undefined ? { model: options.model } : {}),
+    });
+    return reply.text || reply.speech;
+  }
+  return stageTelegramSource(
+    [transcript, message.caption].filter(Boolean).join("\n"),
+    message.chat.id,
+    options,
+    lang,
+  );
+}
+
+async function stageTelegramSource(
+  source: string,
+  chat: number,
+  options: TelegramOptions & { token: string },
+  lang: "es" | "en",
+): Promise<string> {
+  const es = lang === "es";
+  const now = new Date();
+  const owner = `telegram:${chat}`;
+  if (
+    !options.config.privacy.showSensitiveOn.includes("telegram") &&
+    looksSensitive(source)
+  )
+    return es
+      ? "El archivo contiene información privada. Revísalo desde un canal autorizado para datos sensibles; no se guardó ni se ejecutó su contenido."
+      : "The file contains private information. Review it from a channel authorized for sensitive data; its content was neither saved nor executed.";
+  const draft = await createCapture(
+    options.home,
+    { owner, text: source },
+    {
+      now,
+      timezone: options.config.timezone,
+      locale: options.config.locale,
+      defaultTime: options.config.defaultTime,
+    },
+  );
+  const preview = `${es ? "Borrador del archivo; su contenido no se ejecutó ni se añadieron tareas." : "File draft; its content was not executed and no tasks were added."}\n${draft.items.map((item, index) => `${index + 1}. ${item.text}${item.due ? ` — ${item.due}` : ""}${item.missing.length ? ` (${item.missing.join("; ")})` : ""}`).join("\n")}\n${es ? "Revisa todos los elementos y responde sí para guardarlos o no para cancelar." : "Review all items and reply yes to save them or no to cancel."}`;
+  if (preview.length > 3900)
+    throw new Error(
+      es
+        ? "La vista previa no cabe en un mensaje; divide el archivo antes de aprobar elementos."
+        : "The complete preview does not fit in one message; split the file before approving items.",
+    );
+  const conversation = getConversation(options.home, owner, now);
+  conversation.pending = {
+    kind: "capture",
+    text: JSON.stringify({
+      id: draft.id,
+      version: draft.version,
+      items: draft.items,
+    }),
+    expires: new Date(now.getTime() + 10 * 60000).toISOString(),
+  };
+  saveConversation(options.home, conversation, now);
+  return preview;
+}
+
 /** Answer one update; returns what was sent (for logs and tests). */
 export async function handleUpdate(
   update: TelegramUpdate,
   options: TelegramOptions & { token: string },
 ): Promise<string | null> {
   const message = update.message;
-  if (!message?.text) return null;
+  if (
+    !message ||
+    (!message.text &&
+      !message.voice &&
+      !message.photo?.length &&
+      !message.document)
+  )
+    return null;
   const fetcher = options.fetcher ?? fetch;
   const telegram = options.config.channels.telegram!;
   const chat = message.chat.id;
@@ -168,13 +393,59 @@ export async function handleUpdate(
     options.log?.(
       `Telegram: message from a chat that is not allowed (${chat}).`,
     );
+  } else if (message.chat.type && message.chat.type !== "private") {
+    text =
+      lang === "es"
+        ? "Las gestiones y los archivos personales solo se procesan en un chat privado autorizado."
+        : "Personal requests and files are only processed in an authorized private chat.";
+  } else if (message.voice || message.photo?.length || message.document) {
+    if (
+      message.chat.type !== "private" ||
+      (message.from?.id !== undefined && message.from.id !== chat)
+    )
+      text =
+        lang === "es"
+          ? "Envía el archivo desde tu chat privado autorizado."
+          : "Send the file from your authorized private chat.";
+    else
+      try {
+        text = await mediaMessage(update, options, lang);
+      } catch (error) {
+        if (options.signal?.aborted) throw error;
+        text = `${lang === "es" ? "No pude procesar el archivo" : "Could not process the file"}: ${redact((error as Error).message.replaceAll(options.token, "<token>"))}`;
+      }
+  } else if (
+    message.forward_origin !== undefined ||
+    message.forward_date !== undefined ||
+    message.forward_from !== undefined ||
+    message.forward_from_chat !== undefined ||
+    message.forward_sender_name !== undefined
+  ) {
+    if (message.chat.type !== "private")
+      text =
+        lang === "es"
+          ? "Reenvía el texto desde tu chat privado autorizado."
+          : "Forward text from your authorized private chat.";
+    else
+      try {
+        text = await stageTelegramSource(message.text!, chat, options, lang);
+      } catch (error) {
+        text = redact(
+          (error as Error).message.replaceAll(options.token, "<token>"),
+        );
+      }
   } else {
-    const reply = await handleMessage(commandToText(message.text, lang), {
+    const reply = await handleMessage(commandToText(message.text!, lang), {
       home: options.home,
       channel: "telegram",
       conversation: String(chat),
       config: options.config,
+      ownerVerified:
+        message.chat.type === "private" &&
+        (options.config.channels.telegram?.allowedChats ?? []).includes(chat),
+      requestId: `telegram-${update.update_id}`,
       signal: options.signal,
+      fetcher: options.fetcher,
       ...(options.model !== undefined ? { model: options.model } : {}),
     });
     text = reply.text || reply.speech;

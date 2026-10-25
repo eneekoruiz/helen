@@ -21,6 +21,7 @@ import {
   type DeliveryStatus,
 } from "./scheduler.js";
 import { TaskSchema } from "./tasks.js";
+import { WorkflowSchema } from "./workflows.js";
 
 const MemorySchema = z
   .object({
@@ -57,6 +58,7 @@ const BackupSchema = z
     reminders: z.array(ReminderSchema).max(100000),
     calendarImports: z.array(CalendarImportLinkSchema).max(100000).default([]),
     deliveries: z.array(DeliverySchema).max(100000).default([]),
+    workflows: z.array(WorkflowSchema).max(10000).default([]),
   })
   .strict();
 type Backup = z.infer<typeof BackupSchema>;
@@ -69,6 +71,7 @@ const RESTORE_NAMES = [
   "memory",
   "calendar-imports.json",
   "deliveries.json",
+  "workflows.json",
 ] as const;
 const TransactionSchema = z
   .object({
@@ -175,10 +178,21 @@ function safePath(file: string): string {
 
 function validate(raw: unknown): Backup {
   const backup = BackupSchema.parse(raw);
-  for (const items of [backup.memory, backup.tasks, backup.reminders]) {
+  for (const items of [
+    backup.memory,
+    backup.tasks,
+    backup.reminders,
+    backup.workflows,
+  ]) {
     if (new Set(items.map((item) => item.id)).size !== items.length)
       throw new Error("Duplicate backup item ids");
   }
+  for (const workflow of backup.workflows)
+    if (
+      new Set(workflow.items.map((item) => item.id)).size !==
+      workflow.items.length
+    )
+      throw new Error("Duplicate workflow item ids");
   if (
     new Set(backup.deliveries.map((item) => item.key)).size !==
     backup.deliveries.length
@@ -234,6 +248,10 @@ export function createAssistantBackup(
     safePath(path.join(home, "config.json"));
     safePath(path.join(home, "memory"));
     const config = readConfig(home);
+    delete config.capture;
+    delete config.gmail;
+    delete config.gmailAuth;
+    delete config.gmailRedirectUri;
     delete config.channels.webhook;
     if (config.provider?.type === "command") delete config.provider;
     else if (config.provider) delete config.provider.baseUrl;
@@ -247,6 +265,7 @@ export function createAssistantBackup(
       config,
       memory: safe(exportMemory(home)),
       tasks: safe(tasks),
+      workflows: safe(collection(home, "workflows", WorkflowSchema)),
       reminders: safe(
         reminders.map(({ alexaAlertToken: _token, ...item }) => item),
       ),
@@ -349,6 +368,10 @@ export function restoreAssistantBackup(
           }),
         );
         fs.mkdirSync(path.join(stage, "memory"), { mode: 0o700 });
+        writePrivate(
+          path.join(stage, "workflows.json"),
+          JSON.stringify({ version: 1, items: backup.workflows }),
+        );
         for (const item of backup.memory) {
           const metadata = [
             "id",

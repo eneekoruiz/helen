@@ -17,6 +17,7 @@ import {
 } from "../assistant/backup.js";
 import { exportCalendar, importCalendar } from "../assistant/calendar.js";
 import { diagnoseAssistant } from "../assistant/doctor.js";
+import { runGmailMonitor } from "../assistant/gmailMonitor.js";
 import { weeklyReview } from "../assistant/review.js";
 import {
   apiToken,
@@ -1147,6 +1148,14 @@ function registerAssistantAdmin(program: Command): void {
         if (opts.scheduler) {
           try {
             releaseLease = acquireSchedulerLease(dir);
+            tasks.push(
+              runGmailMonitor({
+                home: dir,
+                config: cfg,
+                signal: controller.signal,
+                log,
+              }),
+            );
             tasks.push(
               runScheduler({
                 home: dir,
