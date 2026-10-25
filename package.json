@@ -52,7 +52,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:json": "vitest run --reporter=json --outputFile=test-results.json",
-    "lint": "eslint src/ tests/ --ext .ts && eslint scripts/ --ext .mjs",
+    "lint": "eslint src/ tests/ scripts/",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
     "clean": "node -e \"const fs=require('fs');fs.rmSync('dist',{recursive:true,force:true});\"",
@@ -96,11 +96,13 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^22.20.5",
     "@typescript-eslint/eslint-plugin": "^8.71.2",
     "@typescript-eslint/parser": "^8.71.0",
-    "eslint": "^8.57.0",
+    "eslint": "^10.13.0",
+    "globals": "^16.5.0",
     "prettier": "^3.9.10",
     "tsx": "^4.23.15",
     "typescript": "^5.6.3",
