@@ -38,7 +38,16 @@ let server;
 let exitCode = 0;
 function check(name, fn) { fn(); report.checks.push({ name, status: 'passed' }); }
 try {
-  const imported = values['playwright-module'] ? await import(pathToFileURL(path.resolve(values['playwright-module'])).href) : await import('playwright');
+  let imported;
+  try {
+    imported = values['playwright-module'] ? await import(pathToFileURL(path.resolve(values['playwright-module'])).href) : await import('playwright');
+  } catch (err) {
+    if (err && (err.code === "ERR_MODULE_NOT_FOUND" || err.message?.includes("Cannot find package 'playwright'"))) {
+      console.log(JSON.stringify({ verdict: 'skipped', reason: "Playwright no está instalado en el entorno. Pasa --playwright-module <ruta> o instala playwright.", checks: 0 }, null, 2));
+      process.exit(0);
+    }
+    throw err;
+  }
   const { chromium } = imported.default ?? imported;
   browser = await chromium.launch({ headless: true });
   let provider;

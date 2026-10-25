@@ -89,7 +89,7 @@ export async function handleLifeMessage(
   ctx: LifeContext,
 ): Promise<LifeReply | null> {
   const message = input.trim();
-  const normalized = fold(message);
+  const normalized = fold(message).replace(/^[¿¡\s]+/, "");
   const capture =
     /^(?:captura|capture|apunta esto|organiza estas notas)\s*:\s*([\s\S]+)$/i.exec(
       message,
@@ -109,14 +109,26 @@ export async function handleLifeMessage(
     /^(?:mis gestiones|lista (?:de )?gestiones|my workflows|list workflows)[.!?]?$/.test(
       normalized,
     );
-  const next = /^(?:siguiente paso|next step)\s+([0-9a-f-]{36})[.!?]?$/i.exec(
-    message,
-  );
+  const next =
+    /^(?:siguiente paso|next step)(?:\s+(?:de\s+|del\s+|en\s+|for\s+|in\s+)?(?<target>.+?))?[.!?]?$/i.exec(
+      normalized,
+    );
+  const completeStep =
+    /^(?:marca como (?:hecho|completado|terminado)|completa|termina|mark as done|complete|finish)\s+(?:el\s+)?siguiente paso(?:\s+(?:de\s+|del\s+|en\s+|for\s+|in\s+)?(?<target>.+?))?[.!?]?$/i.exec(
+      normalized,
+    );
   const state =
     /^(?:gestion|workflow)\s+([0-9a-f-]{36})\s+(?:elemento|item)\s+([0-9a-f-]{36})\s+(hecho|done|esperando|waiting|en curso|doing|pendiente|todo)(?:\s*:\s*(.+))?$/i.exec(
       normalized,
     );
-  if (!capture && !prepare && !planning && !listing && !next && !state)
+  const freeSlots =
+    /^(?:(?:que|cuales son mis|cuales|ver|dime|show|list)\s+)?(?:huecos libres|hueco libre|tiempo libre|free slots?)(?:\s+(?:tengo|hay))?(?:\s+(?:hoy|today))?[.!?]?$/i.test(
+      normalized,
+    ) ||
+    /^(?:cuando tengo|tengo algun|tengo|hay|when do i have|do i have any)\s+(?:un\s+)?(?:hueco|tiempo)\s*(?:libre)?(?:\s+(?:hoy|today))?[.!?]?$/i.test(
+      normalized,
+    );
+  if (!capture && !prepare && !planning && !listing && !next && !state && !completeStep && !freeSlots)
     return null;
   const es = spanish(ctx);
   if (!ctx.ownerVerified)
@@ -219,12 +231,78 @@ export async function handleLifeMessage(
           : "No task fits that time, energy and known free slots. Nothing was changed.",
     };
   }
+  if (freeSlots) {
+    const { from, to } = rangeBounds("today", {
+      now: ctx.now,
+      timezone: ctx.config.timezone,
+    });
+    const plan = capacityPlan(
+      ctx.home,
+      {
+        from: from.toISOString(),
+        to: to.toISOString(),
+        availableMinutes: 480,
+        energy: "low",
+        timezone: ctx.config.timezone,
+        showSensitive: ctx.showSensitive,
+      },
+      ctx.now,
+    );
+    const validSlots = plan.freeSlots
+      .map((s) => ({
+        from: new Date(Math.max(new Date(s.from).getTime(), ctx.now.getTime())),
+        to: new Date(s.to),
+      }))
+      .filter((s) => s.to.getTime() - s.from.getTime() >= 15 * 60000);
+
+    if (validSlots.length === 0) {
+      return {
+        text: es
+          ? "No tienes huecos libres conocidos hoy de más de 15 minutos."
+          : "No known free slots of 15+ minutes today.",
+      };
+    }
+    const slotLines = validSlots.map((s) => {
+      const startStr = clock(s.from.toISOString(), ctx);
+      const endStr = clock(s.to.toISOString(), ctx);
+      const durMin = Math.round((s.to.getTime() - s.from.getTime()) / 60000);
+      const hours = Math.floor(durMin / 60);
+      const mins = durMin % 60;
+      const durText =
+        hours > 0
+          ? `${hours} h${mins > 0 ? ` ${mins} min` : ""}`
+          : `${mins} min`;
+      return `- ${startStr}–${endStr} (${durText})`;
+    });
+
+    return {
+      text: `${es ? "Huecos libres hoy" : "Free slots today"}:\n${slotLines.join("\n")}\n${es ? "Solo se han comprobado compromisos locales y recordatorios." : "Only local commitments and reminders were checked."}`,
+    };
+  }
   if (listing || next) {
     const workflows = listWorkflows(ctx.home, {
       showSensitive: ctx.showSensitive,
     });
     if (next) {
-      const workflow = workflows.find((candidate) => candidate.id === next[1]);
+      const rawTarget = next.groups?.target?.trim();
+      let workflow: Workflow | undefined;
+      if (!rawTarget) {
+        workflow =
+          workflows.length === 1
+            ? workflows[0]
+            : workflows.find(
+                (w) => workflowProgress(w, ctx.now).done < w.items.length,
+              );
+      } else if (/^[0-9a-f-]{36}$/i.test(rawTarget)) {
+        workflow = workflows.find(
+          (candidate) => candidate.id.toLowerCase() === rawTarget.toLowerCase(),
+        );
+      } else {
+        const foldedTarget = fold(rawTarget);
+        workflow = workflows.find((candidate) =>
+          fold(candidate.title).includes(foldedTarget),
+        );
+      }
       if (!workflow)
         return {
           text: es
@@ -255,6 +333,64 @@ export async function handleLifeMessage(
         : es
           ? "No tienes gestiones visibles guardadas."
           : "No visible workflows are saved.",
+    };
+  }
+  if (completeStep) {
+    const rawTarget = completeStep.groups?.target?.trim();
+    const workflows = listWorkflows(ctx.home, {
+      showSensitive: ctx.showSensitive,
+    });
+    let workflow: Workflow | undefined;
+    if (!rawTarget) {
+      workflow =
+        workflows.length === 1
+          ? workflows[0]
+          : workflows.find(
+              (w) => workflowProgress(w, ctx.now).done < w.items.length,
+            );
+    } else if (/^[0-9a-f-]{36}$/i.test(rawTarget)) {
+      workflow = workflows.find(
+        (candidate) => candidate.id.toLowerCase() === rawTarget.toLowerCase(),
+      );
+    } else {
+      const foldedTarget = fold(rawTarget);
+      workflow = workflows.find((candidate) =>
+        fold(candidate.title).includes(foldedTarget),
+      );
+    }
+    if (!workflow)
+      return {
+        text: es
+          ? "No encuentro esa gestión accesible."
+          : "No accessible workflow matches that ID or name.",
+      };
+    const progress = workflowProgress(workflow, ctx.now);
+    if (!progress.next) {
+      return {
+        text: es
+          ? "No hay ningún paso pendiente en esta gestión."
+          : "No pending step found in this workflow.",
+      };
+    }
+    const completedItem = progress.next;
+    updateWorkflowItem(
+      ctx.home,
+      {
+        workflowId: workflow.id,
+        itemId: completedItem.id,
+        status: "done",
+      },
+      ctx.now,
+      { showSensitive: ctx.showSensitive },
+    );
+    const updated = listWorkflows(ctx.home, {
+      showSensitive: ctx.showSensitive,
+    }).find((w) => w.id === workflow!.id)!;
+    const nextProgress = workflowProgress(updated, ctx.now);
+    return {
+      text: es
+        ? `Hecho: ${completedItem.text}.${nextProgress.next ? ` Siguiente paso: ${nextProgress.next.text}.` : " ¡Gestión terminada!"}`
+        : `Completed: ${completedItem.text}.${nextProgress.next ? ` Next step: ${nextProgress.next.text}.` : " Workflow complete!"}`,
     };
   }
   if (state) {

@@ -17,11 +17,17 @@ export type Intent =
   | { name: "task.add"; text: string; list?: string }
   | { name: "task.done"; query: string; list?: string }
   | { name: "tasks.list"; list?: string }
+  | { name: "tasks.urgent" }
+  | { name: "tasks.reschedule_overdue"; when?: string }
+  | { name: "task.next_free" }
+  | { name: "day.shutdown" }
+  | { name: "day.kickoff" }
+  | { name: "codex.status"; query?: string }
   | { name: "agenda"; range: AgendaRange }
   | { name: "recall"; query: string }
   | { name: "time" }
   | { name: "date" }
-  | { name: "help" }
+  | { name: "help"; topic?: string }
   | { name: "greeting"; morning: boolean }
   | { name: "thanks" }
   | { name: "stop" }
@@ -141,6 +147,16 @@ const RULES: Rule[] = [
       list: o("list") ?? "lista",
     }),
   },
+  {
+    pattern: new RegExp(
+      String.raw`^(?:anade|agrega|apunta|pon|mete|incluye|add|put)\s+(?:a|en|to|on|in)\s+(?<list>${LIST})\s*:?\s+(?<text>.+)$`,
+    ),
+    build: (_g, o) => ({
+      name: "task.add",
+      text: o("text")!,
+      list: o("list") ?? "lista",
+    }),
+  },
   // "necesito…" is left out on purpose: "necesito saber dónde dejé la bici" is a question, not a task.
   {
     pattern:
@@ -149,7 +165,7 @@ const RULES: Rule[] = [
   },
   {
     pattern:
-      /^(?:nueva\s+tarea|tarea|pendiente|todo|task|new\s+task|to-?do)\s*:?\s+(?<text>.+)$/,
+      /^(?:anade\s+(?:una\s+)?tarea|nueva\s+tarea|tarea|pendiente|todo|task|new\s+task|add\s+(?:a\s+)?task|to-?do)\s*:?\s+(?<text>.+)$/,
     build: (_g, o) => ({ name: "task.add", text: o("text")! }),
   },
   // Tick something off.
@@ -189,6 +205,51 @@ const RULES: Rule[] = [
     pattern:
       /^(?:que\s+tengo\s+que\s+comprar|que\s+(?:hace\s+falta|falta)\s+(?:comprar|en\s+casa)|what\s+do\s+i\s+need\s+to\s+buy|(?:la\s+|mi\s+)?lista\s+de\s+la\s+compra|(?:the\s+|my\s+)?shopping\s+list)$/,
     build: () => ({ name: "tasks.list", list: "compra" }),
+  },
+  {
+    pattern:
+      /^(?:que\s+(?:es\s+|tengo\s+)?(?:lo\s+)?mas\s+urgente|tareas?\s+urgentes?|lo\s+urgente|what\s+is\s+(?:most\s+)?urgent|urgent\s+tasks?)[.!?]?$/,
+    build: () => ({ name: "tasks.urgent" }),
+  },
+  {
+    pattern:
+      /^(?:pasa|pasame|mueve|mueveme|reprograma|reprogramame|retrasa|pospon|aplaza)\s+(?:todas\s+)?(?:las\s+)?(?:tareas\s+)?(?:atrasadas|vencidas|pendientes\s+atrasadas|pendientes\s+vencidas|lo\s+atrasado|lo\s+vencido)(?:\s+(?:a|para|hasta)\s+(?<when>.+))?[.!?]?$/,
+    build: (_g, o) => ({
+      name: "tasks.reschedule_overdue",
+      when: o("when") ?? "hoy",
+    }),
+  },
+  {
+    pattern:
+      /^(?:reschedule|move|push|postpone)\s+(?:all\s+)?(?:the\s+)?(?:overdue\s+tasks|overdue|late\s+tasks)(?:\s+(?:to|until|for)\s+(?<when>.+))?[.!?]?$/,
+    build: (_g, o) => ({
+      name: "tasks.reschedule_overdue",
+      when: o("when") ?? "today",
+    }),
+  },
+  // Daily shutdown ritual.
+  {
+    pattern:
+      /^(?:cierro\s+por\s+hoy|cerrar\s+(?:el\s+)?dia|cierre\s+(?:del\s+)?dia|daily\s+shutdown|fin\s+del\s+dia|resumen\s+(?:del\s+)?cierre|shutdown)[.!?]?$/,
+    build: () => ({ name: "day.shutdown" }),
+  },
+  // Daily kickoff / morning plan.
+  {
+    pattern:
+      /^(?:como\s+arranco\s+manana|plan\s+de\s+manana|preparar?\s+manana|kickoff(?:\s+(?:de\s+)?manana)?|como\s+empiezo\s+(?:el\s+dia|manana)|morning\s+kickoff)[.!?]?$/,
+    build: () => ({ name: "day.kickoff" }),
+  },
+  // Smart next task for free slot.
+  {
+    pattern:
+      /^(?:que\s+(?:puedo\s+hacer|hago)\s+(?:ahora|en\s+este\s+hueco|en\s+este\s+rato)|tengo\s+un\s+(?:rato|hueco)\s+libre|recomiendame\s+algo\s+(?:para\s+hacer|que\s+hacer)|en\s+que\s+me\s+pongo|what\s+should\s+i\s+do\s+now|what\s+can\s+i\s+do\s+in\s+this\s+slot|free\s+slot\s+task)[.!?]?$/,
+    build: () => ({ name: "task.next_free" }),
+  },
+  // Antigravity & Codex session status.
+  {
+    pattern:
+      /^(?:que\s+estabamos\s+haciendo\s+en\s+codex|que\s+dejamos\s+(?:a\s+medias\s+|pendiente\s+)?en\s+codex|sesion(?:es)?\s+de\s+codex|que\s+hay\s+pendiente\s+en\s+antigravity|que\s+estabamos\s+haciendo\s+en\s+antigravity|resumen\s+de\s+(?:la\s+)?sesion\s+de\s+antigravity|codex\s+status|antigravity\s+status)[.!?]?$/,
+    build: (_g, o) => ({ name: "codex.status", query: o("query") }),
   },
   {
     pattern:
@@ -279,9 +340,22 @@ const RULES: Rule[] = [
     build: (_g, o) => ({ name: "remove", query: o("query")! }),
   },
   // Small talk.
+  // Specific topic capabilities: "qué puedes hacer con antigravity", "qué puedes hacer con recordatorios", etc.
   {
     pattern:
-      /^(?:ayuda|ayudame|que\s+puedes\s+hacer|que\s+sabes\s+hacer|como\s+funcionas|instrucciones|help|what\s+can\s+you\s+do|how\s+do\s+you\s+work)$/,
+      /^(?:que\s+(?:puedes|sabes)\s+hacer\s+(?:con|en|sobre|de)\s+|what\s+can\s+you\s+do\s+(?:with|in|about)\s+)(?<topic>.+?)[.!?]?$/,
+    build: (_g, o) => ({ name: "help", topic: o("topic") }),
+  },
+  // What can you do and what can you NOT do: "qué puedes y qué no puedes hacer", "tus límites", etc.
+  {
+    pattern:
+      /^(?:que\s+(?:puedes|sabes)\s+y\s+que\s+no\s+(?:puedes|sabes)?\s+hacer|cuales\s+son\s+tus\s+limites|que\s+no\s+puedes\s+hacer|what\s+can\s+and\s+can'?t\s+you\s+do|what\s+are\s+your\s+limits)[.!?]?$/,
+    build: () => ({ name: "help", topic: "limits" }),
+  },
+  // General capabilities.
+  {
+    pattern:
+      /^(?:ayuda|ayudame|que\s+puedes\s+hacer|que\s+sabes\s+hacer|como\s+funcionas|cuales\s+son\s+tus\s+funciones|instrucciones|help|what\s+can\s+you\s+do|how\s+do\s+you\s+work|what\s+are\s+your\s+features)[.!?]?$/,
     build: () => ({ name: "help" }),
   },
   {
@@ -322,12 +396,13 @@ export function cleanUtterance(input: string): string {
   return input
     .normalize("NFC")
     .replace(/^[\s¿¡"'«]+/, "")
-    .replace(/^(?:(?:oye|hey|hola|ok|okay|eh)[\s,]+)?helen[\s,:;.!-]+/i, "")
+    .replace(/^(?:(?:oye|hey|hola|ok|okay|eh+)[\s,]+)?helen[\s,:;.!-]+/i, "")
     .replace(
-      /^(?:oye|oiga|mira|vale|bueno|pues|venga|a\s+ver)[\s,]+(?=\S)/i,
+      /^(?:oye|oiga|mira|vale|bueno|pues|venga|a\s+ver|eh+|mmm+|este|o\s+sea)[\s,]+(?=\S)/i,
       "",
     )
     .replace(/^(?:por\s+favor|please)[\s,]+/i, "")
+    .replace(/\b(?:eh+|mmm+|uh+|um+)\b/gi, "")
     .replace(/^[\s¿¡"'«]+/, "")
     .replace(/[\s,]+(?:por\s+favor|please)[\s.!?]*$/i, "")
     .replace(/[\s?!.¿¡"'»]+$/, "")

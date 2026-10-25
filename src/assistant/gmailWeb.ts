@@ -76,6 +76,47 @@ export async function handleGmailRequest(
         },
         fetchOptions,
       );
+      if (request.headers.accept?.includes("text/html")) {
+        const safeAccount = connection.account.replace(/[<>&"]/g, "");
+        const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gmail Conectado - HELEN</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #0f172a; color: #f8fafc; text-align: center; padding: 1.5rem; }
+    .card { background: #1e293b; border-radius: 1rem; padding: 2rem; max-width: 440px; width: 100%; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); border: 1px solid #334155; }
+    .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    h1 { font-size: 1.35rem; margin: 0 0 0.5rem; font-weight: 600; }
+    p { color: #94a3b8; font-size: 0.95rem; margin: 0 0 1.5rem; word-break: break-all; }
+    .btn { display: inline-block; background: #2563eb; color: #fff; text-decoration: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 500; font-size: 1rem; transition: background 0.15s; }
+    .btn:hover { background: #1d4ed8; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">✅</div>
+    <h1>Gmail conectado con éxito</h1>
+    <p>Cuenta autorizada: <strong>${safeAccount}</strong></p>
+    <a class="btn" href="/" id="btnBack">Volver al Asistente</a>
+  </div>
+  <script>
+    if (window.opener) {
+      setTimeout(() => { window.close(); }, 2000);
+    }
+  </script>
+</body>
+</html>`;
+        response.writeHead(200, {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "no-store",
+          "X-Content-Type-Options": "nosniff",
+        });
+        response.end(html);
+        return true;
+      }
       send(200, {
         connected: true,
         account: connection.account,

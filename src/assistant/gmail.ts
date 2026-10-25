@@ -184,6 +184,16 @@ async function request(
     throw new Error("Gmail returned an invalid object");
   return result as Record<string, unknown>;
 }
+interface TokenCacheEntry {
+  token: string;
+  expiresAt: number;
+}
+const tokenCache = new Map<string, TokenCacheEntry>();
+
+export function clearGmailTokenCache(): void {
+  tokenCache.clear();
+}
+
 async function authorization(
   config: GmailConfig,
   options: GmailOptions,
@@ -198,27 +208,42 @@ async function authorization(
   let token: string;
   if (config.accessTokenEnv) token = read(config.accessTokenEnv);
   else {
-    const result = await request(
-      "https://oauth2.googleapis.com/token",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          grant_type: "refresh_token",
-          client_id: read(config.clientIdEnv),
-          ...(config.clientSecretEnv
-            ? { client_secret: read(config.clientSecretEnv) }
-            : {}),
-          refresh_token: read(config.refreshTokenEnv),
-        }).toString(),
-      },
-      options,
-    );
-    token = z
-      .string()
-      .min(1)
-      .regex(/^[^\r\n]+$/)
-      .parse(result.access_token);
+    const clientId = read(config.clientIdEnv);
+    const refreshToken = read(config.refreshTokenEnv);
+    const cacheKey = `${clientId}:${refreshToken}`;
+    const cached = tokenCache.get(cacheKey);
+    const now = Date.now();
+    if (cached && cached.expiresAt > now + 60_000) {
+      token = cached.token;
+    } else {
+      const result = await request(
+        "https://oauth2.googleapis.com/token",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            grant_type: "refresh_token",
+            client_id: clientId,
+            ...(config.clientSecretEnv
+              ? { client_secret: read(config.clientSecretEnv) }
+              : {}),
+            refresh_token: refreshToken,
+          }).toString(),
+        },
+        options,
+      );
+      token = z
+        .string()
+        .min(1)
+        .regex(/^[^\r\n]+$/)
+        .parse(result.access_token);
+      const expiresIn =
+        typeof result.expires_in === "number" ? result.expires_in : 3600;
+      tokenCache.set(cacheKey, {
+        token,
+        expiresAt: now + expiresIn * 1000,
+      });
+    }
   }
   return {
     Authorization: `Bearer ${token}`,

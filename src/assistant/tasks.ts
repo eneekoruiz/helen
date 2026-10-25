@@ -115,7 +115,7 @@ export function addTasks(
   const list = listKey(input.list);
   const now = (input.now ?? new Date()).toISOString();
   const texts = (
-    list === SHOPPING ? splitItems(input.text) : [oneLine(input.text)]
+    list !== INBOX ? splitItems(input.text) : [oneLine(input.text)]
   )
     .map((text) => text.slice(0, 300))
     .filter(Boolean);
@@ -170,6 +170,70 @@ const PRIORITY_ORDER: Record<Task["priority"], number> = {
   normal: 1,
   low: 2,
 };
+
+export interface UrgencyContext {
+  now: Date;
+  lastDoneByList: Map<string, number>;
+}
+
+export function getLastDoneByList(allTasks: Task[]): Map<string, number> {
+  const lastDone = new Map<string, number>();
+  for (const t of allTasks) {
+    if (t.status === "done" && t.done) {
+      const doneMs = Date.parse(t.done);
+      const prev = lastDone.get(t.list) ?? 0;
+      if (doneMs > prev) lastDone.set(t.list, doneMs);
+    }
+  }
+  return lastDone;
+}
+
+export function scoreTaskUrgency(task: Task, ctx: UrgencyContext): number {
+  let score = 0;
+  const nowMs = ctx.now.getTime();
+  const createdMs = Date.parse(task.created);
+  const ageDays = Math.max(0, (nowMs - createdMs) / 86_400_000);
+
+  // 1. Prioridad explícita
+  if (task.priority === "high") score += 500;
+  else if (task.priority === "low") score -= 150;
+
+  // 2. Proximidad de fecha límite o retraso acumulado
+  if (task.due) {
+    const dueMs = Date.parse(task.due);
+    const diffDays = (dueMs - nowMs) / 86_400_000;
+    if (diffDays < 0) {
+      // Tarea atrasada: cuanto más tiempo lleve vencida, mayor urgencia
+      const overdueDays = Math.abs(diffDays);
+      score += 1000 + overdueDays * 50;
+    } else if (diffDays <= 1) {
+      // Vence hoy (próximas 24h)
+      score += 800 - diffDays * 100;
+    } else if (diffDays <= 2) {
+      // Vence mañana
+      score += 500;
+    } else if (diffDays <= 7) {
+      // Vence esta semana
+      score += 200 - diffDays * 20;
+    }
+  }
+
+  // 3. Desatención / Starvation por sección o lista (ej. compra, limpieza, cuidado)
+  const lastDoneMs = ctx.lastDoneByList.get(task.list);
+  if (lastDoneMs !== undefined) {
+    const daysSinceDone = Math.max(0, (nowMs - lastDoneMs) / 86_400_000);
+    // Si una categoría lleva semanas o meses desatendida, gana prioridad automáticamente
+    score += Math.min(600, daysSinceDone * 15);
+  } else {
+    // Si nunca se ha completado ninguna tarea en esta lista, pondera por antigüedad
+    score += Math.min(400, ageDays * 10);
+  }
+
+  // 4. Desempate por antigüedad de creación: la que más tiempo lleve esperando
+  score += Math.min(300, ageDays * 5);
+
+  return score;
+}
 
 export function listTasks(
   home: string,
@@ -250,6 +314,27 @@ export function reopenTask(home: string, id: string): Task {
   return mutate(home, id, (task) => {
     task.status = "open";
     delete task.done;
+  });
+}
+
+/** Reschedule all open overdue tasks to a new target due date. */
+export function rescheduleOverdueTasks(
+  home: string,
+  targetDue: Date,
+  now: Date = new Date(),
+): Task[] {
+  return updateCollection(home, NAME, TaskSchema, (items) => {
+    const updated: Task[] = [];
+    const nowIso = now.toISOString();
+    const targetIso = targetDue.toISOString();
+    for (const task of items) {
+      if (task.status === "open" && task.due && task.due < nowIso) {
+        task.due = targetIso;
+        task.updated = nowIso;
+        updated.push({ ...task });
+      }
+    }
+    return updated;
   });
 }
 

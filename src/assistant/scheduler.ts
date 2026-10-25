@@ -26,6 +26,7 @@ import {
 } from "./reminders.js";
 import { localDateKey, localParts, shortInstant } from "./time.js";
 import { describeRecurrence } from "./when.js";
+import { runDailyShutdown } from "./dailyRitual.js";
 
 /**
  * The scheduler delivers reminders when they are due and the optional daily briefing. One scheduler runs per
@@ -187,6 +188,7 @@ export function reminderNotification(
 
 interface SchedulerState {
   lastBriefing?: string;
+  lastShutdown?: string;
 }
 
 function stateFile(home: string): string {
@@ -290,6 +292,56 @@ export async function tick(
           ),
         );
       result.briefing = results;
+    }
+  }
+
+  const shutdownTime = config.briefing.shutdownTime;
+  if (shutdownTime) {
+    const today = localDateKey(now, config.timezone);
+    const local = localParts(now, config.timezone);
+    const [hour, minute] = shutdownTime.split(":").map(Number) as [
+      number,
+      number,
+    ];
+    const due =
+      local.hour > hour || (local.hour === hour && local.minute >= minute);
+    if (
+      due &&
+      !inQuietHours(config, now) &&
+      readState(home).lastShutdown !== today
+    ) {
+      const es = lang(config) === "es";
+      const shutdown = runDailyShutdown(home, {
+        now,
+        timezone: config.timezone,
+        locale: config.locale,
+        lang: lang(config),
+      });
+      const notification: Notification = {
+        title: es ? "HELEN · Cierre del Día" : "HELEN · Daily Shutdown",
+        text: shutdown.text,
+        sensitive: false,
+        kind: "briefing",
+        lang: lang(config),
+      };
+      const results = await deliverOccurrence(
+        home,
+        `shutdown:${today}`,
+        notification,
+        options.channels,
+        now,
+      );
+      if (
+        wasDelivered(results) &&
+        results.every((entry) => entry.ok || entry.skipped)
+      ) {
+        withHomeLock(home, () =>
+          writePrivate(
+            stateFile(home),
+            `${JSON.stringify({ ...readState(home), lastShutdown: today })}\n`,
+          ),
+        );
+      }
     }
   }
   return result;

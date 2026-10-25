@@ -7,6 +7,7 @@ import { getConversation, saveConversation } from "./conversation.js";
 import { looksSensitive, redact } from "../core/secrets.js";
 import { writePrivate, type AssistantConfig } from "./home.js";
 import type { LanguageModel } from "./llm.js";
+import { completeTask, rescheduleOverdueTasks } from "./tasks.js";
 
 /**
  * Talk to HELEN from Telegram: a bot of your own (created with @BotFather) that long-polls Telegram, so the
@@ -39,6 +40,16 @@ interface TelegramUpdate {
     forward_from?: unknown;
     forward_from_chat?: unknown;
     forward_sender_name?: string;
+  };
+  callback_query?: {
+    id: string;
+    from: { id: number; first_name?: string; username?: string };
+    message?: {
+      message_id: number;
+      chat: { id: number; type?: string };
+      text?: string;
+    };
+    data?: string;
   };
 }
 
@@ -105,6 +116,58 @@ export function commandToText(text: string, lang: "es" | "en"): string {
     case "tareas":
     case "tasks":
       return es ? "qué tengo pendiente" : "what do I need to do";
+    case "tarea":
+    case "task":
+      return rest
+        ? es
+          ? `añade la tarea ${rest}`
+          : `add task ${rest}`
+        : es
+          ? "qué tengo pendiente"
+          : "what do I need to do";
+    case "urgente":
+    case "urgent":
+      return es ? "qué es lo más urgente" : "what is most urgent";
+    case "cierre":
+    case "shutdown":
+      return es ? "cierro por hoy" : "daily shutdown";
+    case "kickoff":
+      return es ? "cómo arranco mañana" : "morning kickoff";
+    case "hueco":
+    case "slot":
+      return es ? "qué puedo hacer en este hueco" : "what can i do now";
+    case "codex":
+      return es ? "qué estábamos haciendo en codex" : "codex status";
+    case "paso":
+    case "step":
+      return rest
+        ? es
+          ? `siguiente paso de ${rest}`
+          : `next step of ${rest}`
+        : es
+          ? "siguiente paso"
+          : "next step";
+    case "hecho":
+    case "done":
+      return rest
+        ? es
+          ? `marca como hecho ${rest}`
+          : `mark as done ${rest}`
+        : es
+          ? "completa el siguiente paso"
+          : "complete next step";
+    case "planifica":
+    case "plan":
+      return rest
+        ? es
+          ? `planifica mi dia con ${rest}`
+          : `plan my day with ${rest}`
+        : es
+          ? "planifica mi dia"
+          : "plan my day";
+    case "huecos":
+    case "slots":
+      return es ? "huecos libres hoy" : "free slots today";
     case "recordatorios":
     case "reminders":
       return es ? "qué recordatorios tengo" : "what reminders do I have";
@@ -369,8 +432,103 @@ async function stageTelegramSource(
 /** Answer one update; returns what was sent (for logs and tests). */
 export async function handleUpdate(
   update: TelegramUpdate,
-  options: TelegramOptions & { token: string },
+  options: TelegramOptions & { token: string; now?: Date },
 ): Promise<string | null> {
+  const fetcher = options.fetcher ?? fetch;
+  const telegram = options.config.channels.telegram!;
+  const lang = options.config.locale.startsWith("es") ? "es" : "en";
+  const es = lang === "es";
+
+  // Manejo de botones interactivos (Inline Keyboards)
+  if (update.callback_query) {
+    const cb = update.callback_query;
+    const chat = cb.message?.chat.id ?? cb.from.id;
+
+    if (!telegram.allowedChats.includes(chat)) {
+      await call(
+        fetcher,
+        options.token,
+        "answerCallbackQuery",
+        {
+          callback_query_id: cb.id,
+          text: es ? "Chat no autorizado." : "Unauthorized chat.",
+        },
+        10_000,
+        options.signal,
+      );
+      return null;
+    }
+
+    const data = cb.data ?? "";
+    let toast = es ? "Acción completada" : "Action completed";
+
+    if (data.startsWith("done:")) {
+      const taskId = data.slice(5);
+      try {
+        completeTask(options.home, taskId, options.now ?? new Date());
+        toast = es ? "✓ Tarea completada" : "✓ Task completed";
+      } catch (e) {
+        toast = (e as Error).message;
+      }
+    } else if (data.startsWith("snooze:")) {
+      try {
+        const tomorrow = new Date(
+          (options.now ?? new Date()).getTime() + 86_400_000,
+        );
+        rescheduleOverdueTasks(
+          options.home,
+          tomorrow,
+          options.now ?? new Date(),
+        );
+        toast = es ? "📅 Tarea pospuesta 1 día" : "📅 Task postponed 1 day";
+      } catch (e) {
+        toast = (e as Error).message;
+      }
+    } else if (data === "snooze_overdue") {
+      try {
+        const tomorrow = new Date(
+          (options.now ?? new Date()).getTime() + 86_400_000,
+        );
+        rescheduleOverdueTasks(
+          options.home,
+          tomorrow,
+          options.now ?? new Date(),
+        );
+        toast = es
+          ? "📅 Vencidas pospuestas a mañana"
+          : "📅 Overdue postponed to tomorrow";
+      } catch (e) {
+        toast = (e as Error).message;
+      }
+    }
+
+    await call(
+      fetcher,
+      options.token,
+      "answerCallbackQuery",
+      { callback_query_id: cb.id, text: toast },
+      10_000,
+      options.signal,
+    );
+
+    if (cb.message?.message_id && cb.message.text) {
+      await call(
+        fetcher,
+        options.token,
+        "editMessageText",
+        {
+          chat_id: chat,
+          message_id: cb.message.message_id,
+          text: `${cb.message.text}\n\n[${toast}]`,
+        },
+        10_000,
+        options.signal,
+      ).catch(() => {});
+    }
+
+    return toast;
+  }
+
   const message = update.message;
   if (
     !message ||
@@ -380,11 +538,11 @@ export async function handleUpdate(
       !message.document)
   )
     return null;
-  const fetcher = options.fetcher ?? fetch;
-  const telegram = options.config.channels.telegram!;
+
   const chat = message.chat.id;
-  const lang = options.config.locale.startsWith("es") ? "es" : "en";
   let text: string;
+  let buttons: Array<Array<{ text: string; callback_data: string }>> | undefined = undefined;
+
   if (!telegram.allowedChats.includes(chat)) {
     text =
       lang === "es"
@@ -446,9 +604,11 @@ export async function handleUpdate(
       requestId: `telegram-${update.update_id}`,
       signal: options.signal,
       fetcher: options.fetcher,
+      ...(options.now ? { now: options.now } : {}),
       ...(options.model !== undefined ? { model: options.model } : {}),
     });
     text = reply.text || reply.speech;
+    buttons = reply.buttons;
   }
   await call(
     fetcher,
@@ -458,6 +618,9 @@ export async function handleUpdate(
       chat_id: chat,
       text: text.slice(0, 4000),
       reply_to_message_id: message.message_id,
+      ...(buttons && buttons.length > 0
+        ? { reply_markup: { inline_keyboard: buttons } }
+        : {}),
     },
     15_000,
     options.signal,

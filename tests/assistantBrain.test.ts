@@ -18,7 +18,7 @@ import {
 } from "../src/assistant/llm.js";
 import { addMemory, listMemory } from "../src/assistant/memory.js";
 import { listReminders } from "../src/assistant/reminders.js";
-import { listTasks } from "../src/assistant/tasks.js";
+import { addTasks, listTasks } from "../src/assistant/tasks.js";
 
 const NOW = new Date("2026-10-20T08:30:00Z");
 let home: string;
@@ -147,6 +147,23 @@ describe("conversation without a model", () => {
     expect(
       listTasks(home, { list: "compra" }).map((task) => task.text),
     ).toEqual(["milk", "eggs"]);
+  });
+
+  it("reschedules overdue tasks in batch and splits items on custom lists", async () => {
+    const addList = await ask("añade a la lista de maleta toalla, bañador y crema solar");
+    expect(addList.text).toMatch(/Añadido a la lista «maleta»: toalla, bañador y crema solar/);
+    const packingTasks = listTasks(home, { list: "maleta" });
+    expect(packingTasks.map((t) => t.text)).toEqual(["toalla", "bañador", "crema solar"]);
+
+    addTasks(home, { text: "enviar presupuesto", due: new Date("2026-10-18T10:00:00Z") });
+    addTasks(home, { text: "revisar factura", due: new Date("2026-10-19T12:00:00Z") });
+    const overdueRes = await ask("pasa las tareas atrasadas a hoy");
+    expect(overdueRes.text).toMatch(/He pasado 2 tareas atrasadas a hoy/);
+    expect(overdueRes.text).toContain("enviar presupuesto");
+    expect(overdueRes.text).toContain("revisar factura");
+
+    const noneOverdue = await ask("pasa lo atrasado a hoy");
+    expect(noneOverdue.text).toBe("No tienes ninguna tarea atrasada.");
   });
 
   it("speaks in short sentences, without ids or list marks", () => {

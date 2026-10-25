@@ -25,9 +25,9 @@ export const CaptureSchema = z
     owner: z.string().min(1).max(200),
     version: z.number().int().positive(),
     created: z.string().datetime(),
-    items: z.array(CandidateSchema).min(1).max(20),
+    items: z.array(CandidateSchema).min(1).max(100),
     status: z.enum(["draft", "reserved", "confirmed"]),
-    taskIds: z.array(z.string().regex(/^t[0-9a-f]{6}$/)).max(20),
+    taskIds: z.array(z.string().regex(/^t[0-9a-f]{6}$/)).max(100),
   })
   .refine(
     (draft) =>
@@ -197,9 +197,9 @@ export async function createCapture(
     .split(/\r?\n/)
     .map((line) => oneLine(line.replace(/^\s*(?:[-*•]|\d+[.)])\s+/, "")))
     .filter(Boolean);
-  if (!lines.length || lines.length > 20)
+  if (!lines.length || lines.length > 100)
     throw new Error(
-      "Capture accepts 1 to 20 candidate lines; split larger documents before importing.",
+      "Capture accepts 1 to 100 (up to 20 candidate lines recommended); split larger documents before importing.",
     );
   const items = lines.map((line): CaptureCandidate => {
     if (line.length > 300)
@@ -257,7 +257,7 @@ export interface CaptureApproval {
   items: CaptureCandidate[];
 }
 function validateItems(items: CaptureCandidate[]): CaptureCandidate[] {
-  const parsed = z.array(CandidateSchema).min(1).max(20).parse(items);
+  const parsed = z.array(CandidateSchema).min(1).max(100).parse(items);
   for (const item of parsed) checkText(JSON.stringify(item));
   return parsed;
 }

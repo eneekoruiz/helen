@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { z } from "zod";
 import { withHomeLock, writePrivate } from "./home.js";
-import { GmailConfigSchema, type GmailConfig } from "./gmail.js";
+import { GmailConfigSchema, type GmailConfig, clearGmailTokenCache } from "./gmail.js";
 
 export const GMAIL_AUTH_ENV = {
   clientId: "HELEN_GOOGLE_CLIENT_ID",
@@ -292,6 +292,7 @@ export async function disconnectGmail(
   options: GmailAuthOptions = {},
 ): Promise<{ disconnected: true; revoked: boolean }> {
   const connection = withHomeLock(home, () => {
+    clearGmailTokenCache();
     const saved = load(authFile(home), ConnectionSchema);
     fs.rmSync(authFile(home), { force: true });
     fs.rmSync(pendingFile(home), { force: true });

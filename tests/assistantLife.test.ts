@@ -109,6 +109,12 @@ describe("offline personal assistance", () => {
       (await handleLifeMessage(`Siguiente paso ${workflow.id}`, ctx))?.text,
     ).toContain("Llamar");
     expect(
+      (await handleLifeMessage("Siguiente paso de Renovar", ctx))?.text,
+    ).toContain("Llamar");
+    expect((await handleLifeMessage("Siguiente paso", ctx))?.text).toContain(
+      "Llamar",
+    );
+    expect(
       (
         await handleLifeMessage(
           `Gestión ${workflow.id} elemento ${workflow.items[0]!.id} esperando`,
@@ -128,11 +134,18 @@ describe("offline personal assistance", () => {
     expect(
       (await handleLifeMessage(`Siguiente paso ${workflow.id}`, ctx))?.text,
     ).toContain("Reunir documentos");
-    await handleLifeMessage(
-      `Gestión ${workflow.id} elemento ${workflow.items[1]!.id} hecho`,
+    const completed = await handleLifeMessage(
+      "completa el siguiente paso de Renovar",
       ctx,
     );
+    expect(completed?.text).toContain("Hecho: Reunir documentos");
     expect(listWorkflows(home)[0]!.items[1]!.status).toBe("done");
+  });
+
+  it("answers free slots query with known available time blocks", async () => {
+    const reply = await handleLifeMessage("¿Qué huecos libres tengo hoy?", ctx);
+    expect(reply?.text).toContain("Huecos libres hoy");
+    expect(reply?.text).toContain("Solo se han comprobado compromisos locales");
   });
 
   it("does not leak private workflows or captures into a restricted channel", async () => {

@@ -269,6 +269,10 @@ export const AssistantConfigSchema = z.object({
         .string()
         .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
         .optional(),
+      shutdownTime: z
+        .string()
+        .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+        .optional(),
     })
     .prefault({}),
   /** Expose all memory to MCP clients, not just items shared with agents. Off by default. */
