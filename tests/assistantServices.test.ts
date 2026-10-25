@@ -536,7 +536,8 @@ describe("Telegram bot", () => {
         update_id: 2,
         message: {
           message_id: 2,
-          chat: { id: 42 },
+          chat: { id: 42, type: "private" },
+          from: { id: 42 },
           text: "¿cuál es el wifi de casa?",
         },
       },
@@ -575,7 +576,8 @@ describe("Telegram bot", () => {
                   update_id: 100,
                   message: {
                     message_id: 1,
-                    chat: { id: 42 },
+                    chat: { id: 42, type: "private" },
+                    from: { id: 42 },
                     text: "recuérdame mañana a las 9 llamar a mamá",
                   },
                 },

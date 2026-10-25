@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   GMAIL_AUTH_ENV,
   GMAIL_SCOPES,
@@ -19,7 +19,10 @@ let home: string;
 beforeEach(() => {
   home = fs.mkdtempSync(path.join(os.tmpdir(), "helen-gmail-auth-"));
 });
-afterEach(() => fs.rmSync(home, { recursive: true, force: true }));
+afterEach(() => {
+  vi.restoreAllMocks();
+  fs.rmSync(home, { recursive: true, force: true });
+});
 const start = {
   clientId: "client-id",
   clientSecret: "client-secret",
@@ -55,6 +58,12 @@ const finish = (state: string) => ({
   redirectUri: start.redirectUri,
 });
 describe("Gmail browser OAuth", () => {
+  it("rejects oversized credential state before reading its content", () => {
+    fs.writeFileSync(path.join(home, "gmail-auth.json"), "x".repeat(128_001));
+    const read = vi.spyOn(fs, "readSync");
+    expect(() => readGmailConnection(home)).toThrow(/state is invalid/);
+    expect(read).not.toHaveBeenCalled();
+  });
   it("removes credentials before waiting for remote revocation and preserves a later new connection", async () => {
     const first = startGmailAuth(home, start, { now: () => now });
     await completeGmailAuth(home, finish(first.state), mock());

@@ -112,10 +112,10 @@ describe("Daily Rituals (Shutdown & Kickoff)", () => {
 describe("Capabilities & Help Breakdown", () => {
   it("formats specific capabilities for Antigravity with what it can and cannot do", () => {
     const caps = formatCapabilities({ topic: "antigravity", lang: "es" });
-    expect(caps.text).toContain("Antigravity & Codex");
+    expect(caps.text).toContain("Registros locales de Antigravity");
     expect(caps.text).toContain("Qué PUEDE hacer");
     expect(caps.text).toContain("Qué NO puede hacer");
-    expect(caps.text).toContain("No ejecuta comandos destructivos");
+    expect(caps.text).toContain("No ejecuta comandos ni lee objetivos privados en altavoces");
   });
 
   it("formats safety boundaries and limits", () => {
@@ -133,7 +133,7 @@ describe("Capabilities & Help Breakdown", () => {
       model: null,
     });
     expect(reply.intent).toBe("help");
-    expect(reply.text).toContain("Antigravity & Codex");
+    expect(reply.text).toContain("Registros locales de Antigravity");
     expect(reply.text).toContain("Qué PUEDE hacer");
   });
 });
@@ -165,8 +165,8 @@ describe("Free Slot Recommendation & Codex Bridge", () => {
   it("gracefully summarizes Codex work when directory is empty or populated", () => {
     const tmpBrain = fs.mkdtempSync(path.join(os.tmpdir(), "codex-test-"));
     try {
-      const summaryEmpty = summarizeCodexWork({ brainDir: tmpBrain, lang: "es" });
-      expect(summaryEmpty.text).toContain("No se han encontrado sesiones");
+      const summaryEmpty = summarizeCodexWork({ brainDir: tmpBrain, lang: "es", authorized: true });
+      expect(summaryEmpty.text).toContain("No encontré objetivos de usuario");
 
       // Crear sesión simulada
       const sessDir = path.join(tmpBrain, "test-session-1", ".system_generated", "logs");
@@ -181,9 +181,9 @@ describe("Free Slot Recommendation & Codex Bridge", () => {
         }) + "\n",
       );
 
-      const summary = summarizeCodexWork({ brainDir: tmpBrain, lang: "es", now: baseNow });
+      const summary = summarizeCodexWork({ brainDir: tmpBrain, lang: "es", now: baseNow, authorized: true });
       expect(summary.text).toContain("Crear tests de arquitectura limpia");
-      expect(summary.speech).toContain("Crear tests de arquitectura limpia");
+      expect(summary.speech).toContain("Consulta los registros de Antigravity desde un canal privado");
     } finally {
       fs.rmSync(tmpBrain, { recursive: true, force: true });
     }

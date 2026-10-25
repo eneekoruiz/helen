@@ -1,9 +1,10 @@
 import crypto from "node:crypto";
 import { z } from "zod";
-import { findSecrets, secretRefusal } from "../core/secrets.js";
+import { findSecrets, looksSensitive, secretRefusal } from "../core/secrets.js";
 import { bestMatch } from "./reminders.js";
 import { readCollection, updateCollection } from "./store.js";
 import { fold, oneLine, slug } from "./text.js";
+import { scoreForAppMode, type AppMode } from "./appMode.js";
 
 /**
  * Tasks and lists: "tengo que renovar el DNI", "añade leche y pan a la lista de la compra".
@@ -24,6 +25,10 @@ export const TaskSchema = z.object({
 });
 
 export type Task = z.infer<typeof TaskSchema>;
+
+export function isTaskSensitive(task: Pick<Task, "text" | "list">): boolean {
+  return looksSensitive(task.text) || looksSensitive(task.list) || looksSensitive(task.list.toUpperCase());
+}
 
 const NAME = "tasks";
 export const INBOX = "inbox";
@@ -174,6 +179,7 @@ const PRIORITY_ORDER: Record<Task["priority"], number> = {
 export interface UrgencyContext {
   now: Date;
   lastDoneByList: Map<string, number>;
+  mode?: AppMode;
 }
 
 export function getLastDoneByList(allTasks: Task[]): Map<string, number> {
@@ -186,6 +192,43 @@ export function getLastDoneByList(allTasks: Task[]): Map<string, number> {
     }
   }
   return lastDone;
+}
+
+/** Uses observed history, never an invented age for a newly created list. */
+export function getNeglectedLists(
+  allTasks: Task[],
+  now: Date,
+  thresholdDays: number,
+) {
+  const lastDone = getLastDoneByList(
+    allTasks.filter(
+      (task) => !task.done || Date.parse(task.done) <= now.getTime(),
+    ),
+  );
+  const firstCreated = new Map<string, number>();
+  const openLists = new Set<string>();
+  for (const task of allTasks) {
+    const created = Date.parse(task.created);
+    if (created > now.getTime()) continue;
+    firstCreated.set(
+      task.list,
+      Math.min(firstCreated.get(task.list) ?? Infinity, created),
+    );
+    if (task.status === "open" && task.list !== INBOX) openLists.add(task.list);
+  }
+  return [...openLists]
+    .map((list) => ({
+      list,
+      daysSinceDone: Math.floor(
+        (now.getTime() - (lastDone.get(list) ?? firstCreated.get(list)!)) /
+          86_400_000,
+      ),
+    }))
+    .filter((item) => item.daysSinceDone > thresholdDays)
+    .sort(
+      (a, b) =>
+        b.daysSinceDone - a.daysSinceDone || a.list.localeCompare(b.list),
+    );
 }
 
 export function scoreTaskUrgency(task: Task, ctx: UrgencyContext): number {
@@ -232,7 +275,7 @@ export function scoreTaskUrgency(task: Task, ctx: UrgencyContext): number {
   // 4. Desempate por antigüedad de creación: la que más tiempo lleve esperando
   score += Math.min(300, ageDays * 5);
 
-  return score;
+  return scoreForAppMode(score, task, ctx.mode);
 }
 
 export function listTasks(
@@ -289,12 +332,13 @@ function mutate(
   home: string,
   id: string,
   change: (task: Task, items: Task[]) => void,
+  now: Date = new Date(),
 ): Task {
   return updateCollection(home, NAME, TaskSchema, (items) => {
     const task = items.find((candidate) => candidate.id === id);
     if (!task) throw new Error(`No task with id ${id}.`);
     change(task, items);
-    task.updated = new Date().toISOString();
+    task.updated = now.toISOString();
     return { ...task };
   });
 }
@@ -304,10 +348,15 @@ export function completeTask(
   id: string,
   now: Date = new Date(),
 ): Task {
-  return mutate(home, id, (task) => {
-    task.status = "done";
-    task.done = now.toISOString();
-  });
+  return mutate(
+    home,
+    id,
+    (task) => {
+      task.status = "done";
+      task.done = now.toISOString();
+    },
+    now,
+  );
 }
 
 export function reopenTask(home: string, id: string): Task {
@@ -323,12 +372,18 @@ export function rescheduleOverdueTasks(
   targetDue: Date,
   now: Date = new Date(),
 ): Task[] {
+  if (!Number.isFinite(targetDue.getTime()) || targetDue <= now)
+    throw new Error("Choose a future due date for overdue tasks.");
   return updateCollection(home, NAME, TaskSchema, (items) => {
     const updated: Task[] = [];
     const nowIso = now.toISOString();
     const targetIso = targetDue.toISOString();
     for (const task of items) {
-      if (task.status === "open" && task.due && task.due < nowIso) {
+      if (
+        task.status === "open" &&
+        task.due &&
+        Date.parse(task.due) < now.getTime()
+      ) {
         task.due = targetIso;
         task.updated = nowIso;
         updated.push({ ...task });

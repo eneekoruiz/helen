@@ -3,7 +3,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { z } from "zod";
 import { withHomeLock, writePrivate } from "./home.js";
-import { GmailConfigSchema, type GmailConfig, clearGmailTokenCache } from "./gmail.js";
+import {
+  GmailConfigSchema,
+  type GmailConfig,
+  clearGmailTokenCache,
+} from "./gmail.js";
 
 export const GMAIL_AUTH_ENV = {
   clientId: "HELEN_GOOGLE_CLIENT_ID",
@@ -55,10 +59,31 @@ const pendingFile = (home: string) =>
 const authFile = (home: string) => path.join(home, "gmail-auth.json");
 function load<T>(file: string, schema: z.ZodType<T>): T | undefined {
   if (!fs.existsSync(file)) return undefined;
+  let descriptor: number | undefined;
   try {
-    return schema.parse(JSON.parse(fs.readFileSync(file, "utf8")));
+    const before = fs.lstatSync(file);
+    if (before.isSymbolicLink() || !before.isFile() || before.size > 128_000)
+      throw new Error();
+    descriptor = fs.openSync(
+      file,
+      fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW ?? 0),
+    );
+    const stat = fs.fstatSync(descriptor);
+    if (
+      !stat.isFile() ||
+      stat.ino !== before.ino ||
+      stat.dev !== before.dev ||
+      stat.size > 128_000
+    )
+      throw new Error();
+    const buffer = Buffer.alloc(128_001);
+    const bytes = fs.readSync(descriptor, buffer, 0, buffer.length, 0);
+    if (bytes > 128_000) throw new Error();
+    return schema.parse(JSON.parse(buffer.subarray(0, bytes).toString("utf8")));
   } catch {
     throw new Error("Gmail OAuth state is invalid; reconnect Gmail");
+  } finally {
+    if (descriptor !== undefined) fs.closeSync(descriptor);
   }
 }
 function persist(file: string, value: unknown): void {

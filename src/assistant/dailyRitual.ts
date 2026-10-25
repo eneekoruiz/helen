@@ -1,6 +1,17 @@
-import { listReminders, type Reminder } from "./reminders.js";
+import { occurrencesBetween, type Reminder } from "./reminders.js";
+import { findSecrets, looksSensitive } from "../core/secrets.js";
+import { rangeBounds } from "./agenda.js";
+import {
+  getAppMode,
+  getAppModeState,
+  shouldDispatchReminder,
+  type AppMode,
+} from "./appMode.js";
+import { localDateKey } from "./time.js";
 import {
   getLastDoneByList,
+  getNeglectedLists,
+  isTaskSensitive,
   listTasks,
   scoreTaskUrgency,
   type Task,
@@ -12,6 +23,9 @@ export interface DailyRitualOptions {
   timezone: string;
   locale: string;
   lang: "es" | "en";
+  showSensitive?: boolean;
+  speaker?: boolean;
+  mode?: AppMode;
 }
 
 export interface DailyRitualResult {
@@ -26,16 +40,49 @@ export interface DailyRitualResult {
 }
 
 function formatDateInTz(date: Date, timezone: string): string {
-  try {
-    return new Intl.DateTimeFormat("en-CA", {
-      timeZone: timezone,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(date);
-  } catch {
-    return date.toISOString().slice(0, 10);
-  }
+  return localDateKey(date, timezone);
+}
+
+function visibleTasks(home: string, options: DailyRitualOptions, now: Date) {
+  return listTasks(home, { status: "all" }).filter(
+    (task) =>
+      Date.parse(task.created) <= now.getTime() &&
+      findSecrets(task.text).length === 0 &&
+      ((options.showSensitive && !options.speaker) ||
+        !isTaskSensitive(task)),
+  );
+}
+
+function visibleOccurrences(
+  home: string,
+  from: Date,
+  to: Date,
+  options: DailyRitualOptions,
+) {
+  const state = getAppModeState(home);
+  return occurrencesBetween(home, from, to, options.timezone)
+    .filter(
+      ({ reminder, at }) =>
+        findSecrets(reminder.text).length === 0 &&
+        ((options.showSensitive && !options.speaker) ||
+          (!reminder.sensitive && !looksSensitive(reminder.text))) &&
+        shouldDispatchReminder(
+          reminder,
+          options.mode ??
+            (state.until && Date.parse(state.until) <= at.getTime()
+              ? "normal"
+              : state.mode),
+        ),
+    )
+    .map(({ reminder, at }) => ({ ...reminder, due: at.toISOString() }));
+}
+
+function spokenTask(task: Task, es: boolean): string {
+  return isTaskSensitive(task)
+    ? es
+      ? "una tarea privada"
+      : "a private task"
+    : task.text;
 }
 
 export function runDailyShutdown(
@@ -45,13 +92,14 @@ export function runDailyShutdown(
   const now = options.now ?? new Date();
   const lang = options.lang;
   const es = lang === "es";
-  const allTasks = listTasks(home, { status: "all" });
+  const allTasks = visibleTasks(home, options, now);
 
   const todayStr = formatDateInTz(now, options.timezone);
 
   // 1. Tareas completadas hoy
   const completedToday = allTasks.filter((t) => {
-    if (t.status !== "done" || !t.done) return false;
+    if (t.status !== "done" || !t.done || Date.parse(t.done) > now.getTime())
+      return false;
     return formatDateInTz(new Date(t.done), options.timezone) === todayStr;
   });
 
@@ -63,42 +111,24 @@ export function runDailyShutdown(
 
   // 3. Desatención / Starvation por categoría (> 7 días sin completar tareas)
   const lastDoneByList = getLastDoneByList(allTasks);
-  const nowMs = now.getTime();
-  const neglectedLists: Array<{ list: string; daysSinceDone: number }> = [];
-  const knownLists = new Set([
-    "compra",
-    "limpieza",
-    "cuidado",
-    ...allTasks.map((t) => t.list),
-  ]);
-
-  for (const list of knownLists) {
-    if (list === "inbox") continue;
-    const hasOpen = allTasks.some(
-      (t) => t.list === list && t.status === "open",
-    );
-    if (!hasOpen) continue;
-    const lastDoneMs = lastDoneByList.get(list);
-    if (lastDoneMs !== undefined) {
-      const days = Math.round((nowMs - lastDoneMs) / 86_400_000);
-      if (days >= 7) neglectedLists.push({ list, daysSinceDone: days });
-    } else {
-      neglectedLists.push({ list, daysSinceDone: 30 });
-    }
-  }
-  neglectedLists.sort((a, b) => b.daysSinceDone - a.daysSinceDone);
+  const neglectedLists = getNeglectedLists(allTasks, now, 7);
 
   // 4. Próximos avisos para mañana
-  const tomorrow = new Date(nowMs + 86_400_000);
-  const tomorrowStr = formatDateInTz(tomorrow, options.timezone);
-  const reminders = listReminders(home);
-  const tomorrowReminders = reminders.filter((r) => {
-    return formatDateInTz(new Date(r.due), options.timezone) === tomorrowStr;
-  });
+  const tomorrow = rangeBounds("tomorrow", { now, timezone: options.timezone });
+  const tomorrowReminders = visibleOccurrences(
+    home,
+    tomorrow.from,
+    tomorrow.to,
+    options,
+  );
 
   // 5. Top 3 recomendaciones para mañana
   const openTasks = allTasks.filter((t) => t.status === "open");
-  const urgencyCtx: UrgencyContext = { now, lastDoneByList };
+  const urgencyCtx: UrgencyContext = {
+    now: tomorrow.from,
+    lastDoneByList,
+    mode: options.mode ?? getAppMode(home, tomorrow.from),
+  };
   const scored = openTasks
     .map((task) => ({ task, score: scoreTaskUrgency(task, urgencyCtx) }))
     .sort((a, b) => b.score - a.score);
@@ -182,23 +212,23 @@ export function runDailyShutdown(
     );
   } else {
     speechParts.push(
-      es ? "Cierre del día registrado." : "Daily shutdown recorded.",
+      es ? "Resumen del cierre del día." : "Daily shutdown summary.",
     );
   }
   if (top3Tomorrow.length > 0) {
     const first = top3Tomorrow[0]!;
     speechParts.push(
       es
-        ? `Para mañana tu prioridad principal es ${first.text}.`
-        : `For tomorrow your top priority is ${first.text}.`,
+        ? `Para mañana tu prioridad principal es ${spokenTask(first, es)}.`
+        : `For tomorrow your top priority is ${spokenTask(first, es)}.`,
     );
   }
   if (neglectedLists.length > 0) {
     const worst = neglectedLists[0]!;
     speechParts.push(
       es
-        ? `Recuerda que la lista de ${worst.list} lleva ${worst.daysSinceDone} días sin tocarse.`
-        : `Remember that your ${worst.list} list has been untouched for ${worst.daysSinceDone} days.`,
+        ? `Recuerda que una de tus listas lleva ${worst.daysSinceDone} días sin una tarea completada.`
+        : `One of your lists has gone ${worst.daysSinceDone} days without a completed task.`,
     );
   }
 
@@ -214,7 +244,9 @@ export function runDailyShutdown(
   if (openOverdue.length > 0) {
     buttons.push([
       {
-        text: es ? "📅 Posponer vencidas a mañana" : "📅 Postpone overdue to tomorrow",
+        text: es
+          ? "📅 Posponer vencidas a mañana"
+          : "📅 Postpone overdue to tomorrow",
         callback_data: "snooze_overdue",
       },
     ]);
@@ -239,53 +271,34 @@ export function runDailyKickoff(
   const now = options.now ?? new Date();
   const lang = options.lang;
   const es = lang === "es";
-  const allTasks = listTasks(home, { status: "all" });
-
-  const todayStr = formatDateInTz(now, options.timezone);
+  const allTasks = visibleTasks(home, options, now);
 
   // Avisos de hoy
-  const reminders = listReminders(home);
-  const todayReminders = reminders.filter((r) => {
-    return formatDateInTz(new Date(r.due), options.timezone) === todayStr;
-  });
+  // rangeBounds(today) starts now: already elapsed notification times are not invented upcoming alerts.
+  const today = rangeBounds("today", { now, timezone: options.timezone });
+  const todayReminders = visibleOccurrences(
+    home,
+    today.from,
+    today.to,
+    options,
+  );
 
   const lastDoneByList = getLastDoneByList(allTasks);
-  const nowMs = now.getTime();
-  const neglectedLists: Array<{ list: string; daysSinceDone: number }> = [];
-  const knownLists = new Set([
-    "compra",
-    "limpieza",
-    "cuidado",
-    ...allTasks.map((t) => t.list),
-  ]);
-
-  for (const list of knownLists) {
-    if (list === "inbox") continue;
-    const hasOpen = allTasks.some(
-      (t) => t.list === list && t.status === "open",
-    );
-    if (!hasOpen) continue;
-    const lastDoneMs = lastDoneByList.get(list);
-    if (lastDoneMs !== undefined) {
-      const days = Math.round((nowMs - lastDoneMs) / 86_400_000);
-      if (days >= 7) neglectedLists.push({ list, daysSinceDone: days });
-    } else {
-      neglectedLists.push({ list, daysSinceDone: 30 });
-    }
-  }
-  neglectedLists.sort((a, b) => b.daysSinceDone - a.daysSinceDone);
+  const neglectedLists = getNeglectedLists(allTasks, now, 7);
 
   const openTasks = allTasks.filter((t) => t.status === "open");
-  const urgencyCtx: UrgencyContext = { now, lastDoneByList };
+  const urgencyCtx: UrgencyContext = {
+    now,
+    lastDoneByList,
+    mode: options.mode ?? getAppMode(home, now),
+  };
   const scored = openTasks
     .map((task) => ({ task, score: scoreTaskUrgency(task, urgencyCtx) }))
     .sort((a, b) => b.score - a.score);
   const top3 = scored.slice(0, 3).map((s) => s.task);
 
   const lines: string[] = [];
-  lines.push(
-    es ? "🌅 *Plan de arranque del día*" : "🌅 *Daily Kickoff Plan*",
-  );
+  lines.push(es ? "🌅 *Plan de arranque del día*" : "🌅 *Daily Kickoff Plan*");
 
   if (top3.length > 0) {
     lines.push(
@@ -322,14 +335,12 @@ export function runDailyKickoff(
   }
 
   const speechParts: string[] = [];
-  speechParts.push(
-    es ? "Buenos días." : "Good morning.",
-  );
+  speechParts.push(es ? "Buenos días." : "Good morning.");
   if (top3.length > 0) {
     speechParts.push(
       es
-        ? `Tu prioridad número uno hoy es ${top3[0]!.text}.`
-        : `Your number one priority today is ${top3[0]!.text}.`,
+        ? `Tu prioridad número uno hoy es ${spokenTask(top3[0]!, es)}.`
+        : `Your number one priority today is ${spokenTask(top3[0]!, es)}.`,
     );
   }
   if (todayReminders.length > 0) {

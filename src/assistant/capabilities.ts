@@ -23,43 +23,39 @@ export const CAPABILITIES: CapabilityItem[] = [
       "sesiones",
     ],
     title: {
-      es: "Antigravity & Codex (Sesiones y Proyectos)",
-      en: "Antigravity & Codex (Sessions & Projects)",
+      es: "Registros locales de Antigravity",
+      en: "Local Antigravity logs",
     },
     can: {
       es: [
-        "Leer los historiales y transcripts de tus sesiones locales en Antigravity y Codex.",
-        "Resumir qué estabas haciendo en la última sesión y qué tareas o código quedaron pendientes.",
-        "Indicarte el tiempo transcurrido desde la última actividad y el identificador de sesión.",
-        "Responder por voz en Alexa o Telegram para consultar el estado sin abrir el ordenador.",
+        "Consultar objetivos de usuario en registros JSONL compatibles de Antigravity desde un canal privado autorizado.",
+        "Mostrar los objetivos encontrados y la fecha de modificación del archivo; la lectura tiene límites de tamaño y número de archivos.",
       ],
       en: [
-        "Read transcripts and histories of your local Antigravity and Codex sessions.",
-        "Summarize what you were doing in the last session and what tasks or code remained pending.",
-        "Report elapsed time since last activity and the session ID.",
-        "Answer hands-free on Alexa or Telegram to check status without opening your computer.",
+        "Read user goals from compatible Antigravity JSONL logs on an authorized private channel.",
+        "Show observed goals and file modification times within bounded file and directory scans.",
       ],
     },
     cannot: {
       es: [
-        "No ejecuta comandos destructivos (como git reset --hard o borrado de ramas) de forma autónoma.",
-        "No inventa acciones de programación que no estén registradas en el log de la sesión.",
+        "No lee los formatos nativos de Codex ni verifica tareas pendientes o trabajo terminado a partir de un objetivo escrito.",
+        "No ejecuta comandos ni lee objetivos privados en altavoces.",
       ],
       en: [
-        "Does not execute destructive commands (like git reset --hard or branch deletion) autonomously.",
-        "Does not hallucinate coding actions not recorded in the session log.",
+        "Does not read native Codex formats or establish pending or completed work from a recorded goal.",
+        "Does not execute commands or speak private goals aloud.",
       ],
     },
     examples: {
       es: [
-        "«¿Qué estábamos haciendo en Codex?»",
+        "«¿Qué estábamos haciendo en Antigravity?»",
         "«¿Qué dejamos a medias en Antigravity?»",
-        "«Sesión de Codex»",
+        "«Sesión de Antigravity»",
       ],
       en: [
-        '"What were we doing in Codex?"',
+        '"What were we doing in Antigravity?"',
         '"What did we leave pending in Antigravity?"',
-        '"Codex status"',
+        '"Antigravity status"',
       ],
     },
   },
@@ -140,10 +136,10 @@ export const CAPABILITIES: CapabilityItem[] = [
       ],
     },
     cannot: {
-      es: [
-        "No bloquea tu calendario ni altera eventos sin tu confirmación.",
+      es: ["No bloquea tu calendario ni altera eventos sin tu confirmación."],
+      en: [
+        "Does not block your calendar or alter events without confirmation.",
       ],
-      en: ["Does not block your calendar or alter events without confirmation."],
     },
     examples: {
       es: ["«Cierro por hoy»", "«Cómo arranco mañana»", "«Cierre del día»"],
@@ -160,12 +156,12 @@ export const CAPABILITIES: CapabilityItem[] = [
     can: {
       es: [
         "Crear recordatorios puntuales («mañana a las 9»), relativos («en 20 minutos») o recurrentes («cada lunes a las 10»).",
-        "Sincronizar directamente con las alarmas nativas de tu altavoz Amazon Echo para que suene físicamente en casa.",
+        "Crear avisos nativos compatibles de Alexa cuando la integración, los permisos y el dispositivo lo permiten.",
         "Posponer («pospónlo 15 minutos») o mover de hora («pasa el aviso de llamar a Juan a las 6»).",
       ],
       en: [
         'Create exact reminders ("tomorrow at 9am"), relative ("in 20 minutes"), or recurring ("every Monday at 10am").',
-        "Sync natively with Amazon Echo alarms so the physical speaker rings in your home.",
+        "Create supported native Alexa reminders when integration, permissions and the device allow it.",
         'Snooze ("snooze 15 minutes") or reschedule ("move reminder to call John to 6pm").',
       ],
     },
@@ -199,34 +195,34 @@ export const CAPABILITIES: CapabilityItem[] = [
     },
     can: {
       es: [
-        "Resumir tu bandeja de entrada y avisar de correos clave.",
-        "Redactar borradores y buscar en tus hilos de correo.",
-        "Enviar correos únicamente tras pedir confirmación explícita mostrándote el borrador completo.",
+        "Consultar respuestas en hilos vinculados a correos enviados y verificados por HELEN, tras autorizar Gmail.",
+        "Preparar borradores y activar seguimientos de respuestas con avisos genéricos.",
+        "Enviar un borrador aprobado o un correo literal solicitado explícitamente por el propietario.",
       ],
       en: [
-        "Summarize inbox and alert of high-priority emails.",
-        "Draft email replies and search through email threads.",
-        "Send emails strictly after explicit confirmation showing you the exact draft.",
+        "Check replies in threads linked to verified HELEN-sent messages after Gmail authorization.",
+        "Prepare drafts and explicitly requested reply watches with generic notifications.",
+        "Send an approved draft or an exact literal email explicitly requested by the owner.",
       ],
     },
     cannot: {
       es: [
-        "NUNCA envía un correo sin que confirmes diciendo «Sí».",
+        "No lee todo el buzón ni permite que el modelo apruebe sus propios envíos.",
         "No borra correos de tu cuenta.",
       ],
       en: [
-        'NEVER sends an email without you confirming with "Yes".',
+        "Does not scan the whole inbox or let the model approve its own sends.",
         "Does not delete emails from your account.",
       ],
     },
     examples: {
       es: [
         "«Redacta un correo a Carlos diciendo que llego tarde»",
-        "«Revisa mi correo»",
+        "«¿Ana ha respondido al correo?»",
       ],
       en: [
         '"Draft an email to Carlos saying I am running late"',
-        '"Check my email"',
+        '"Draft an email to ana@example.com: I am running late"',
       ],
     },
   },
@@ -242,31 +238,31 @@ export const CAPABILITIES: CapabilityItem[] = [
       "charlar",
     ],
     title: {
-      es: "Memoria, Aprendizaje y Charlas de la Vida",
-      en: "Memory, Continuous Learning & Chat",
+      es: "Memoria y conversación",
+      en: "Memory and conversation",
     },
     can: {
       es: [
         "Guardar datos que le digas («recuerda que mi talla de zapatos es 42») y recuperarlos («¿qué sabes de mi talla?»).",
         "Notas temporales con caducidad automática («recuerda hasta el viernes: el código de la puerta es 1234»).",
-        "Charlar de cualquier tema reflexivo estilo ChatGPT con opiniones fundadas.",
-        "Aprender de ti de forma autónoma guardando preferencias y rutinas en memoria.",
+        "Conversar y adaptar explicaciones con un modelo configurado; la calidad depende del modelo.",
+        "Guardar preferencias cuando lo pides y aplicar el estilo que eliges en Ajustes.",
       ],
       en: [
         'Save notes you provide ("remember my shoe size is 42") and recall them ("what is my shoe size?").',
         'Temporary memories with auto-expiry ("remember until Friday: gate code is 1234").',
-        "Hold thoughtful, deep conversations on any topic like ChatGPT.",
-        "Continuously learn user preferences and routines autonomously via memory.",
+        "Converse and adapt explanations with a configured model; quality depends on that model.",
+        "Remember preferences when requested and apply your selected response style.",
       ],
     },
     cannot: {
       es: [
-        "NUNCA almacena contraseñas maestras ni números completos de tarjeta de crédito (filtro de seguridad activo).",
-        "No comparte tus recuerdos fuera de tu entorno local.",
+        "El filtro rechaza patrones de credenciales reconocibles, pero no garantiza detectar cualquier secreto; utiliza un gestor de contraseñas.",
+        "Los canales y proveedores configurados pueden recibir datos según los permisos; no activa aprendizaje autónomo de hábitos.",
       ],
       en: [
-        "NEVER stores master passwords or full credit card numbers (strict security filter).",
-        "Does not share your memories outside your private local instance.",
+        "The credential filter rejects recognized patterns but cannot identify every secret; use a password manager.",
+        "Configured channels and model providers can receive permitted data; autonomous habit learning is not enabled.",
       ],
     },
     examples: {
@@ -324,6 +320,7 @@ export const CAPABILITIES: CapabilityItem[] = [
 
 export function findCapability(topic: string): CapabilityItem | undefined {
   const folded = fold(topic).trim();
+  if (!folded) return;
   return CAPABILITIES.find(
     (c) =>
       c.key === folded ||
@@ -368,8 +365,8 @@ export function formatCapabilities(options: {
         }
       }
       const speech = es
-        ? "Helen nunca envía correos sin confirmación, no guarda contraseñas en texto plano, y en altavoz no lee datos privados."
-        : "Helen never sends emails without confirmation, never stores plaintext passwords, and suppresses private data on speakers.";
+        ? "Los envíos requieren una orden explícita del propietario o aprobación del borrador. Los modelos y canales configurados pueden recibir datos autorizados."
+        : "Sending requires the owner's explicit instruction or draft approval. Configured models and channels can receive authorized data.";
       return { text: lines.join("\n"), speech };
     }
 
@@ -379,9 +376,13 @@ export function formatCapabilities(options: {
       lines.push(`✨ *${matched.title[lang]}*`);
       lines.push(es ? "\n🟢 *Qué PUEDE hacer:*" : "\n🟢 *What it CAN do:*");
       matched.can[lang].forEach((c) => lines.push(`  • ${c}`));
-      lines.push(es ? "\n🔴 *Qué NO puede hacer:*" : "\n🔴 *What it CANNOT do:*");
+      lines.push(
+        es ? "\n🔴 *Qué NO puede hacer:*" : "\n🔴 *What it CANNOT do:*",
+      );
       matched.cannot[lang].forEach((c) => lines.push(`  • ${c}`));
-      lines.push(es ? "\n💬 *Ejemplos para probar:*" : "\n💬 *Examples to try:*");
+      lines.push(
+        es ? "\n💬 *Ejemplos para probar:*" : "\n💬 *Examples to try:*",
+      );
       matched.examples[lang].forEach((ex) => lines.push(`  • ${ex}`));
 
       const speech = es
@@ -395,8 +396,8 @@ export function formatCapabilities(options: {
   // Vista general de capacidades
   if (speaker) {
     const speech = es
-      ? "Puedo gestionar tus tareas y calcular qué es lo más urgente teniendo en cuenta listas desatendidas, hacer el cierre del día, consultar tus sesiones de Codex, sincronizar recordatorios con tu Echo, redactar correos en Gmail y charlar de cualquier tema guardando memoria de tus preferencias."
-      : "I can prioritize tasks based on urgency and neglected areas, run your daily shutdown, check your Codex sessions, sync reminders to your Echo, draft Gmail messages, and chat while continuously learning your habits.";
+      ? "Puedo organizar tareas, preparar un resumen del día y gestionar recordatorios. Gmail, Alexa y conversación libre necesitan su configuración y permisos."
+      : "I can organize tasks, prepare daily summaries and manage reminders. Gmail, Alexa and open-ended conversation require configuration and permissions.";
     return { text: speech, speech };
   }
 
@@ -408,8 +409,8 @@ export function formatCapabilities(options: {
   );
   lines.push(
     es
-      ? "Estoy preparado para gestionar tu día a día con rigor y cero fricción. Aquí tienes mis áreas principales:\n"
-      : "Engineered to manage your day with precision and zero friction. Here are my core domains:\n",
+      ? "Estas funciones dependen de los datos, conexiones y permisos de tu instalación:\n"
+      : "These functions depend on your installation's data, connections and permissions:\n",
   );
 
   for (const cap of CAPABILITIES) {
@@ -425,8 +426,8 @@ export function formatCapabilities(options: {
   );
 
   const speech = es
-    ? "Puedo gestionar tus tareas y urgencias, tus sesiones de Codex, tus rituales diarios, avisos en Alexa, Gmail y memoria continua."
-    : "I can manage your tasks, Codex sessions, daily rituals, Alexa alarms, Gmail, and continuous memory.";
+    ? "Puedo organizar tareas, preparar resúmenes y guardar notas. Consulta los requisitos de cada integración antes de usarla."
+    : "I can organize tasks, prepare summaries and save notes. Check each integration's requirements before using it.";
 
   return { text: lines.join("\n"), speech };
 }

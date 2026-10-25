@@ -1,130 +1,177 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import { redact } from "../core/secrets.js";
 
 export interface CodexSessionSummary {
   sessionId: string;
   updatedAt: string;
   lastGoal: string;
+  /** Relative evidence path, never the user's absolute home path. */
   source: string;
 }
+const MAX_ENTRIES = 1000;
+const MAX_TRANSCRIPT_BYTES = 2 * 1024 * 1024;
+const TRANSCRIPTS = [
+  ".system_generated/logs/transcript.jsonl",
+  "transcript.jsonl",
+];
 
 export function getAntigravityBrainDir(override?: string): string {
-  if (override) return override;
-  if (process.env.ANTIGRAVITY_BRAIN_DIR) return process.env.ANTIGRAVITY_BRAIN_DIR;
-  const home = process.env.USERPROFILE || process.env.HOME || "";
-  return path.join(home, ".gemini", "antigravity", "brain");
+  return path.resolve(
+    override ||
+      process.env.ANTIGRAVITY_BRAIN_DIR ||
+      path.join(os.homedir(), ".gemini", "antigravity", "brain"),
+  );
+}
+function inside(root: string, candidate: string): boolean {
+  const relative = path.relative(root, candidate);
+  return (
+    !path.isAbsolute(relative) &&
+    relative !== ".." &&
+    !relative.startsWith(`..${path.sep}`)
+  );
+}
+function regularTranscript(
+  root: string,
+  candidate: string,
+): fs.Stats | undefined {
+  try {
+    if (!inside(root, candidate)) return;
+    let current = root;
+    for (const part of path.relative(root, candidate).split(path.sep)) {
+      current = path.join(current, part);
+      if (fs.lstatSync(current).isSymbolicLink()) return;
+    }
+    if (!inside(root, fs.realpathSync(candidate))) return;
+    const stat = fs.lstatSync(candidate);
+    return stat.isFile() ? stat : undefined;
+  } catch {
+    return;
+  }
 }
 
+/** Bounded Antigravity JSONL tail scan; native Codex formats are unsupported. */
 export function listRecentCodexSessions(
   brainDir?: string,
   limit = 3,
 ): CodexSessionSummary[] {
-  const root = getAntigravityBrainDir(brainDir);
-  if (!fs.existsSync(root)) return [];
-
-  let entries: fs.Dirent[] = [];
+  if (!Number.isInteger(limit) || limit < 0 || limit > 20)
+    throw new Error("Session limit must be an integer between 0 and 20.");
+  if (!limit) return [];
+  const requested = getAntigravityBrainDir(brainDir);
+  let root: string;
   try {
-    entries = fs.readdirSync(root, { withFileTypes: true });
+    if (
+      fs.lstatSync(requested).isSymbolicLink() ||
+      !fs.statSync(requested).isDirectory()
+    )
+      return [];
+    root = fs.realpathSync(requested);
   } catch {
     return [];
   }
-
-  const dirs = entries
-    .filter((e) => e.isDirectory())
-    .map((e) => {
-      const fullPath = path.join(root, e.name);
-      try {
-        const stat = fs.statSync(fullPath);
-        return { name: e.name, fullPath, mtime: stat.mtimeMs };
-      } catch {
-        return null;
-      }
-    })
-    .filter(
-      (item): item is { name: string; fullPath: string; mtime: number } =>
-        item !== null,
-    )
-    .sort((a, b) => b.mtime - a.mtime);
-
-  const results: CodexSessionSummary[] = [];
-
-  for (const dir of dirs) {
-    if (results.length >= limit) break;
-
-    // Check transcript locations
-    const candidatePaths = [
-      path.join(dir.fullPath, ".system_generated", "logs", "transcript.jsonl"),
-      path.join(dir.fullPath, "transcript.jsonl"),
-    ];
-
-    let transcriptFile: string | null = null;
-    for (const p of candidatePaths) {
-      if (fs.existsSync(p)) {
-        transcriptFile = p;
-        break;
-      }
-    }
-
-    if (!transcriptFile) continue;
-
-    try {
-      const content = fs.readFileSync(transcriptFile, "utf8");
-      const lines = content.split("\n").filter((l) => l.trim().length > 0);
-      if (lines.length === 0) continue;
-
-      let lastGoal = "";
-      let updatedAt = new Date(dir.mtime).toISOString();
-
-      // Read from end towards beginning to find the last user goal
-      for (let i = lines.length - 1; i >= 0; i--) {
-        try {
-          const parsed = JSON.parse(lines[i]!) as {
-            source?: string;
-            type?: string;
-            content?: string;
-            created_at?: string;
-          };
-          if (parsed.created_at && !lastGoal) updatedAt = parsed.created_at;
-
-          if (
-            parsed.type === "USER_INPUT" ||
-            parsed.source === "USER_EXPLICIT" ||
-            parsed.source === "USER_INPUT"
-          ) {
-            const raw = parsed.content ?? "";
-            const match = /<USER_REQUEST>([\s\S]*?)<\/USER_REQUEST>/i.exec(raw);
-            const goalText = match ? match[1]!.trim() : raw.trim();
-            if (goalText) {
-              // Clean out internal tags or metadata
-              const cleanGoal = goalText
-                .split("\n")[0]!
-                .replace(/<[^>]+>/g, "")
-                .trim()
-                .slice(0, 140);
-              if (cleanGoal) {
-                lastGoal = cleanGoal;
-                break;
-              }
-            }
-          }
-        } catch {
-          // ignore malformed line
+  const candidates: Array<{ sessionId: string; file: string; stat: fs.Stats }> =
+    [];
+  let directory: fs.Dir;
+  try {
+    directory = fs.opendirSync(root);
+  } catch {
+    return [];
+  }
+  try {
+    for (let count = 0; count < MAX_ENTRIES; count++) {
+      const entry = directory.readSync();
+      if (!entry) break;
+      if (!entry.isDirectory() || entry.isSymbolicLink()) continue;
+      for (const location of TRANSCRIPTS) {
+        const file = path.join(root, entry.name, location);
+        const stat = regularTranscript(root, file);
+        if (stat) {
+          candidates.push({ sessionId: entry.name, file, stat });
+          break;
         }
       }
-
-      if (lastGoal) {
-        results.push({
-          sessionId: dir.name,
-          updatedAt,
-          lastGoal,
-          source: transcriptFile,
-        });
+    }
+  } finally {
+    directory.closeSync();
+  }
+  candidates.sort((a, b) => b.stat.mtimeMs - a.stat.mtimeMs);
+  const results: CodexSessionSummary[] = [];
+  for (const candidate of candidates.slice(0, 20)) {
+    if (results.length >= limit) break;
+    let descriptor: number | undefined;
+    try {
+      descriptor = fs.openSync(
+        candidate.file,
+        fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW ?? 0),
+      );
+      const stat = fs.fstatSync(descriptor);
+      const current = regularTranscript(root, candidate.file);
+      if (
+        !current ||
+        !stat.isFile() ||
+        stat.ino !== current.ino ||
+        stat.dev !== current.dev
+      )
+        continue;
+      const start = Math.max(0, stat.size - MAX_TRANSCRIPT_BYTES);
+      const buffer = Buffer.alloc(Math.min(stat.size, MAX_TRANSCRIPT_BYTES));
+      const bytes = fs.readSync(descriptor, buffer, 0, buffer.length, start);
+      let content = buffer.subarray(0, bytes).toString("utf8");
+      if (start > 0) {
+        const newline = content.indexOf("\n");
+        content = newline < 0 ? "" : content.slice(newline + 1);
+      }
+      const lines = content.split("\n");
+      for (let index = lines.length - 1; index >= 0; index--) {
+        const line = lines[index]!;
+        if (line.length > 65536) continue;
+        try {
+          const record = JSON.parse(line) as {
+            type?: unknown;
+            source?: unknown;
+            content?: unknown;
+          };
+          if (
+            !record ||
+            typeof record.content !== "string" ||
+            !(
+              record.type === "USER_INPUT" ||
+              record.source === "USER_EXPLICIT" ||
+              record.source === "USER_INPUT"
+            )
+          )
+            continue;
+          const raw =
+            /<USER_REQUEST>([\s\S]*?)<\/USER_REQUEST>/i.exec(
+              record.content,
+            )?.[1] ?? record.content;
+          const goal = redact(
+            raw
+              .trim()
+              .split("\n")[0]!
+              .replace(/<[^>]+>/g, "")
+              .trim(),
+          ).slice(0, 140);
+          if (!goal) continue;
+          results.push({
+            sessionId: candidate.sessionId,
+            updatedAt: stat.mtime.toISOString(),
+            lastGoal: goal,
+            source: path.relative(root, candidate.file),
+          });
+          break;
+        } catch {
+          /* Malformed records do not establish user goals. */
+        }
       }
     } catch {
-      // ignore read error
+      /* Missing or concurrently replaced logs are not trustworthy evidence. */
+    } finally {
+      if (descriptor !== undefined) fs.closeSync(descriptor);
     }
   }
-
   return results;
 }
 
@@ -132,68 +179,27 @@ export function summarizeCodexWork(options?: {
   brainDir?: string;
   lang?: "es" | "en";
   now?: Date;
+  authorized?: boolean;
 }): { text: string; speech: string } {
-  const lang = options?.lang ?? "es";
-  const es = lang === "es";
-  const now = options?.now ?? new Date();
-  const sessions = listRecentCodexSessions(options?.brainDir, 3);
-
-  if (sessions.length === 0) {
-    return {
-      text: es
-        ? "No se han encontrado sesiones recientes de Codex o Antigravity."
-        : "No recent Codex or Antigravity sessions found.",
-      speech: es
-        ? "No encontré sesiones recientes de programación en el sistema."
-        : "I found no recent coding sessions in the system.",
-    };
+  const es = options?.lang !== "en";
+  const privateMessage = es
+    ? "Consulta los registros de Antigravity desde un canal privado del propietario."
+    : "View Antigravity logs on an authorized private owner channel.";
+  if (!options?.authorized)
+    return { text: privateMessage, speech: privateMessage };
+  const sessions = listRecentCodexSessions(options.brainDir, 3);
+  if (!sessions.length) {
+    const text = es
+      ? "No encontré objetivos de usuario en los registros locales compatibles de Antigravity."
+      : "No user goals found in compatible local Antigravity logs.";
+    return { text, speech: text };
   }
-
-  const latest = sessions[0]!;
-  const diffMinutes = Math.max(
-    0,
-    Math.round(
-      (now.getTime() - new Date(latest.updatedAt).getTime()) / 60_000,
-    ),
-  );
-
-  const timeDesc =
-    diffMinutes < 60
-      ? es
-        ? `hace ${diffMinutes} min`
-        : `${diffMinutes}m ago`
-      : diffMinutes < 1440
-        ? es
-          ? `hace ${Math.round(diffMinutes / 60)}h`
-          : `${Math.round(diffMinutes / 60)}h ago`
-        : es
-          ? `hace ${Math.round(diffMinutes / 1440)}d`
-          : `${Math.round(diffMinutes / 1440)}d ago`;
-
-  const lines: string[] = [];
-  lines.push(
+  const lines = [
     es
-      ? `💻 *Última actividad en Antigravity / Codex (${timeDesc}):*`
-      : `💻 *Recent activity in Antigravity / Codex (${timeDesc}):*`,
-  );
-  lines.push(`• *Objetivo activo:* "${latest.lastGoal}"`);
-  lines.push(`• *Sesión:* \`${latest.sessionId.slice(0, 8)}...\``);
-
-  if (sessions.length > 1) {
-    lines.push(
-      es ? "\n*Sesiones anteriores recientes:*" : "\n*Other recent sessions:*",
-    );
-    for (const s of sessions.slice(1)) {
-      lines.push(`• "${s.lastGoal}" (\`${s.sessionId.slice(0, 8)}\`)`);
-    }
-  }
-
-  const speech = es
-    ? `En la última sesión de Codex estábamos con: "${latest.lastGoal}", ${timeDesc}.`
-    : `In the latest Codex session we were working on: "${latest.lastGoal}", ${timeDesc}.`;
-
-  return {
-    text: lines.join("\n"),
-    speech,
-  };
+      ? "Objetivos encontrados en registros de Antigravity (lectura acotada; no acredita tareas terminadas ni pendientes):"
+      : "Goals found in Antigravity logs (bounded scan; does not establish completed or pending work):",
+  ];
+  for (const session of sessions)
+    lines.push(`${session.updatedAt} — ${session.lastGoal}`);
+  return { text: lines.join("\n"), speech: privateMessage };
 }

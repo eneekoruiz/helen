@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { z } from "zod";
 import { GmailConfigSchema } from "./gmail.js";
+import { RecordatoriosConfigSchema } from "./recordatorios.js";
 import { withLockSync } from "../core/fileLock.js";
 import { isValidTimeZone } from "./time.js";
 
@@ -192,12 +193,13 @@ export const AssistantConfigSchema = z.object({
         .object({
           command: z.string().min(1).max(1000),
           args: z.array(z.string().max(2000)).max(30).optional(),
-          timeoutMs: z.number().int().min(100).max(120000).optional(),
+          timeoutMs: z.number().int().min(100).max(60000).optional(),
         })
         .optional(),
     })
     .optional(),
   gmail: z.lazy(() => GmailConfigSchema).optional(),
+  recordatorios: z.lazy(() => RecordatoriosConfigSchema).optional(),
   gmailRedirectUri: z
     .string()
     .url()
