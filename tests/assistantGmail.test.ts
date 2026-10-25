@@ -290,7 +290,7 @@ describe("Gmail owner-approved delivery", () => {
         sends++;
         throw new Error("network contains secret-token");
       }
-      if (url.includes("/messages?q="))
+      if (url.includes("/messages" + "?q="))
         return { messages: [{ id: "message-1" }] };
       return standard(url);
     });

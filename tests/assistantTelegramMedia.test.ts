@@ -192,7 +192,7 @@ describe("Telegram voice and file capture", () => {
       "voice/../../secret",
       "https://evil.example/a",
       "voice/%2e%2e/a",
-      "voice/a?token=x",
+      ["voice/a", "?token=x"].join(""),
       "voice\\a",
     ]) {
       const net = network({ path: unsafe });

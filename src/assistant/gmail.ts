@@ -465,7 +465,7 @@ export async function reconcileGmailSend(
   let messageId = record.messageId;
   if (!messageId) {
     const found = await request(
-      `${api}/messages?q=${encodeURIComponent(`in:sent rfc822msgid:${record.id}@helen.local`)}&maxResults=2`,
+      `${api}/messages?${new URLSearchParams({ q: `in:sent rfc822msgid:${record.id}@helen.local`, maxResults: "2" })}`,
       { headers },
       options,
     );
