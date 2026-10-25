@@ -2282,7 +2282,10 @@ async function handleTurn(
     .replace(/[¿?!.]/g, "")
     .trim();
   try {
-    const productivity = await handleProductivityMessage(input, ctx);
+    const productivity = await handleProductivityMessage(
+      understood.cleaned,
+      ctx,
+    );
     if (productivity) {
       const result = reply(ctx, "pending", productivity.text, {
         ...("speech" in productivity ? { speech: productivity.speech } : {}),

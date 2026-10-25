@@ -103,9 +103,20 @@ try {
     });
   });
   const page = await context.newPage();
+  let expectedConnectErrors = 2;
   page.on("pageerror", (error) => report.errors.push(error.message));
   page.on("console", (message) => {
-    if (message.type() === "error") report.errors.push(message.text());
+    if (message.type() !== "error") return;
+    if (
+      expectedConnectErrors > 0 &&
+      message.location().url === base + "/recordatorios/connect" &&
+      message.text() ===
+        "Failed to load resource: the server responded with a status of 409 (Conflict)"
+    ) {
+      expectedConnectErrors--;
+      return;
+    }
+    report.errors.push(message.text());
   });
   page.on("requestfailed", (request) =>
     report.errors.push(`Network failure: ${new URL(request.url()).pathname}`),
@@ -472,6 +483,11 @@ try {
     "Synthetic dictation reviews uncertain final text and sends only confident final text",
   );
   assert.deepEqual(report.errors, []);
+  assert.equal(
+    expectedConnectErrors,
+    0,
+    "Both deliberately rejected connection attempts must be observed",
+  );
   check("No browser runtime or network errors");
   report.verdict = "passed";
 } catch (error) {
