@@ -384,6 +384,7 @@ export function nativeReminderBody(
   locale: string,
   now: Date,
 ): Record<string, unknown> {
+  timezone = reminder.timezone ?? timezone;
   const trigger: Record<string, unknown> = {
     type: "SCHEDULED_ABSOLUTE",
     scheduledTime: localStamp(new Date(reminder.due), timezone),
@@ -413,7 +414,18 @@ export function nativeReminderBody(
     requestTime: localStamp(now, timezone),
     trigger,
     alertInfo: {
-      spokenInfo: { content: [{ locale, text: reminder.text.slice(0, 250) }] },
+      spokenInfo: {
+        content: [
+          {
+            locale,
+            text: reminder.sensitive
+              ? locale.startsWith("es")
+                ? "Tienes un recordatorio privado. Consúltalo en un canal privado."
+                : "You have a private reminder. Check it on a private channel."
+              : reminder.text.slice(0, 250),
+          },
+        ],
+      },
     },
     pushNotification: { status: "ENABLED" },
   };
@@ -430,6 +442,16 @@ export async function createNativeReminder(
   now: Date,
   fetcher: typeof fetch = fetch,
 ): Promise<NativeResult> {
+  if (
+    (!reminder.urgent && config.quietHours) ||
+    (reminder.recurrence && reminder.leadMinutes)
+  )
+    return {
+      ok: false,
+      needsPermission: false,
+      error:
+        "This reminder needs HELEN's scheduler to respect quiet hours or recurring advance notices",
+    };
   const system = envelope.context?.System;
   if (!system?.apiEndpoint || !system.apiAccessToken)
     return {
@@ -566,8 +588,17 @@ export async function handleAlexa(
     "alexa";
   const request = envelope.request;
 
-  if (request.type === "SessionEndedRequest")
+  if (request.type === "SessionEndedRequest") {
+    await handleMessage("stop", {
+      home,
+      channel: "alexa",
+      conversation,
+      config,
+      now,
+      model: null,
+    });
     return { version: "1.0", response: {} };
+  }
   if (request.type === "LaunchRequest") {
     return speak(
       es
@@ -631,8 +662,17 @@ export async function handleAlexa(
   if (
     intent.name === "AMAZON.StopIntent" ||
     intent.name === "AMAZON.CancelIntent"
-  )
+  ) {
+    await handleMessage("stop", {
+      home,
+      channel: "alexa",
+      conversation,
+      config,
+      now,
+      model: null,
+    });
     return speak(es ? "Hasta luego." : "Bye.");
+  }
   if (
     intent.name === "AMAZON.FallbackIntent" ||
     intent.name === "AMAZON.NavigateHomeIntent"
@@ -660,6 +700,10 @@ export async function handleAlexa(
     config,
     now,
     speaker: true,
+    ownerVerified:
+      config.alexa.userIds.length > 0 &&
+      config.alexa.userIds.includes(conversation),
+    requestId: request.requestId,
     ...(options.model !== undefined ? { model: options.model } : {}),
   });
   const card =
@@ -696,9 +740,15 @@ export async function handleAlexa(
       return askForRemindersPermission(answer.reminder.id);
     if (!native.needsPermission)
       options.log?.(`Alexa reminder not created: ${native.error}`);
+    return speak(
+      `${answer.speech} ${es ? "El Echo no tiene una alarma para este aviso; se usará el resto de canales configurados." : "The Echo has no alarm for this reminder; your other configured channels will be used."}`,
+      { ...(card ? { card } : {}) },
+    );
   }
   // A question back ("¿Cuándo te lo recuerdo?") keeps the microphone open for the answer.
-  const keepOpen = answer.intent === "pending";
+  const keepOpen =
+    answer.intent === "pending" ||
+    (answer.intent === "model" && !answer.endSession);
   return speak(answer.speech || (es ? "Hecho." : "Done."), {
     end: !keepOpen,
     ...(keepOpen ? { reprompt: answer.speech } : {}),

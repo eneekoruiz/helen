@@ -1,6 +1,7 @@
 import { occurrencesBetween, type Occurrence } from "./reminders.js";
 import { listTasks, SHOPPING, type Task } from "./tasks.js";
 import { addDays, localParts, zonedTimeToUtc } from "./time.js";
+import { looksSensitive } from "../core/secrets.js";
 
 /** What the day (or the week) holds: reminders that fire, tasks that are due or overdue, and the shopping list. */
 export type AgendaRange = "today" | "tomorrow" | "week";
@@ -101,6 +102,12 @@ function joinList(items: string[], lang: "es" | "en"): string {
 
 /** The agenda as a message: a list for screens, one or two sentences for a speaker. */
 export function formatAgenda(agenda: Agenda, options: FormatOptions): string {
+  const taskText = (task: Task) =>
+    looksSensitive(task.text) && (options.speaker || !options.showSensitive)
+      ? options.lang === "es"
+        ? "tarea privada"
+        : "private task"
+      : task.text;
   const { lang } = options;
   const es = lang === "es";
   const when =
@@ -174,13 +181,13 @@ export function formatAgenda(agenda: Agenda, options: FormatOptions): string {
     lines.push(`- ${describe(occurrence)}`);
   if (agenda.overdueTasks.length > 0) {
     lines.push(es ? "Atrasadas:" : "Overdue:");
-    for (const task of agenda.overdueTasks) lines.push(`- ${task.text}`);
+    for (const task of agenda.overdueTasks) lines.push(`- ${taskText(task)}`);
   }
   if (agenda.dueTasks.length > 0) {
     lines.push(es ? "Vencen:" : "Due:");
     for (const task of agenda.dueTasks)
       lines.push(
-        `- ${clock(new Date(task.due!), options, withDay)} ${task.text}`,
+        `- ${clock(new Date(task.due!), options, withDay)} ${taskText(task)}`,
       );
   }
   if (agenda.openTasks > 0)
@@ -191,7 +198,7 @@ export function formatAgenda(agenda: Agenda, options: FormatOptions): string {
     );
   if (agenda.shopping.length > 0)
     lines.push(
-      `${es ? "Compra" : "Shopping"}: ${agenda.shopping.map((task) => task.text).join(", ")}.`,
+      `${es ? "Compra" : "Shopping"}: ${agenda.shopping.map(taskText).join(", ")}.`,
     );
   return lines.join("\n");
 }

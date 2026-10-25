@@ -118,4 +118,33 @@ describe("helen assistant (CLI)", () => {
       "tasks",
     ]);
   }, 120_000);
+  it("exposes review, safe backup restoration and calendar roundtrips through the installed CLI", () => {
+    expect(run(["todo", "revisar proyecto"]).status).toBe(0);
+    expect(run(["assistant", "review"]).body.data.pendingTasks).toHaveLength(1);
+    const backup = path.join(home, "backup.json");
+    expect(run(["assistant", "backup", backup]).status).toBe(0);
+    expect(run(["todo", "otra tarea"]).status).toBe(0);
+    expect(run(["assistant", "restore", backup]).status).toBe(0);
+    expect(run(["todo", "list"]).body.data.tasks).toHaveLength(1);
+    expect(run(["assistant", "restore-recover"]).body.data.recovered).toBe(
+      false,
+    );
+    const calendar = path.join(home, "calendar.ics");
+    fs.writeFileSync(
+      calendar,
+      "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nUID:cli-roundtrip\r\nDTSTART:20301023T100000Z\r\nSUMMARY:Revisión CLI\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n",
+    );
+    expect(
+      run(["assistant", "calendar", "import", calendar]).body.data.reminders,
+    ).toBe(1);
+    expect(
+      run(["assistant", "calendar", "import", calendar]).body.data.skipped,
+    ).toBe(1);
+    expect(run(["assistant", "calendar", "export"], false).stdout).toContain(
+      "SUMMARY:Revisión CLI",
+    );
+    expect(
+      run(["assistant", "delivery", "status"]).body.data.deliveries,
+    ).toEqual([]);
+  }, 120_000);
 });

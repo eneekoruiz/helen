@@ -111,7 +111,7 @@ export const featureSchema = z.object({
   requirements: z.array(requirementInput).max(200),
   tasks: z.array(taskSchema).max(200),
   decisions: z
-    .array(decisionInput.innerType().extend({ at: z.string().datetime() }))
+    .array(decisionInput.safeExtend({ at: z.string().datetime() }))
     .max(200),
   questions: z
     .array(

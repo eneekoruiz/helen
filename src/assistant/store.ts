@@ -25,7 +25,7 @@ function collectionFile(home: string, name: string): string {
 export function readCollection<T>(
   home: string,
   name: string,
-  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+  schema: z.ZodType<T, unknown>,
 ): LoadedCollection<T> {
   const file = collectionFile(home, name);
   if (!fs.existsSync(file)) return { version: 1, items: [], invalid: [] };
@@ -37,12 +37,16 @@ export function readCollection<T>(
       `${file} is not valid JSON (${(error as Error).message}). Fix it or move it away; HELEN will not overwrite it.`,
     );
   }
-  const entries =
-    raw &&
-    typeof raw === "object" &&
-    Array.isArray((raw as { items?: unknown }).items)
-      ? (raw as { items: unknown[] }).items
-      : [];
+  if (
+    !raw ||
+    typeof raw !== "object" ||
+    (raw as { version?: unknown }).version !== 1 ||
+    !Array.isArray((raw as { items?: unknown }).items)
+  )
+    throw new Error(
+      `${file} has an invalid collection envelope; HELEN will not overwrite it.`,
+    );
+  const entries = (raw as { items: unknown[] }).items;
   const items: T[] = [];
   const invalid: unknown[] = [];
   for (const entry of entries) {
@@ -57,7 +61,7 @@ export function readCollection<T>(
 export function updateCollection<T, R>(
   home: string,
   name: string,
-  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+  schema: z.ZodType<T, unknown>,
   change: (items: T[]) => R,
 ): R {
   return withHomeLock(home, () => {
