@@ -1,6 +1,6 @@
 {
   "name": "helen",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Autonomous engineering lifecycle, playbooks, skills, and tools catalog for Claude Code and AI agents",
   "commands": [
     {
