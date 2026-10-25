@@ -87,13 +87,9 @@ function streak(tasks: Task[], now: Date, timezone: string) {
   const days = [
     ...new Set(
       tasks
-        .filter(
-          (task) =>
-            task.status === "done" &&
-            task.done &&
-            Date.parse(task.done) <= now.getTime(),
-        )
-        .map((task) => ordinal(new Date(task.done!), timezone)),
+        .flatMap(completionTimes)
+        .filter((at) => Date.parse(at) <= now.getTime())
+        .map((at) => ordinal(new Date(at), timezone)),
     ),
   ].sort((a, b) => a - b);
   let longest = 0;
@@ -112,6 +108,15 @@ function streak(tasks: Task[], now: Date, timezone: string) {
   return { currentDays: current, longestDays: longest };
 }
 
+function completionTimes(task: Task): string[] {
+  return [
+    ...new Set([
+      ...(task.completions ?? []),
+      ...(task.status === "done" && task.done ? [task.done] : []),
+    ]),
+  ];
+}
+
 /** Observed task completions only: no invented habit tracking or automatic completion. */
 export function runWeeklyReview(home: string, options: WeeklyRitualOptions) {
   const now = options.now ?? new Date();
@@ -124,13 +129,18 @@ export function runWeeklyReview(home: string, options: WeeklyRitualOptions) {
       findSecrets(task.text).length === 0 &&
       ((options.showSensitive && !options.speaker) || !isTaskSensitive(task)),
   );
-  const completedLast7Days = tasks.filter(
-    (task) =>
-      task.status === "done" &&
-      task.done &&
-      Date.parse(task.done) >= from.getTime() &&
-      Date.parse(task.done) <= now.getTime(),
+  const completedLast7Days = tasks.filter((task) =>
+    completionTimes(task).some(
+      (at) =>
+        Date.parse(at) >= from.getTime() && Date.parse(at) <= now.getTime(),
+    ),
   );
+  const completionCountLast7Days = tasks
+    .flatMap(completionTimes)
+    .filter(
+      (at) =>
+        Date.parse(at) >= from.getTime() && Date.parse(at) <= now.getTime(),
+    ).length;
   const lists = [...new Set(tasks.map((task) => task.list))].sort();
   const streaksByList = lists.map((list) => ({
     list,
@@ -165,8 +175,8 @@ export function runWeeklyReview(home: string, options: WeeklyRitualOptions) {
   const lines = [
     es ? "Revisión de los últimos siete días" : "Review of the last seven days",
     es
-      ? `Tareas completadas: ${completedLast7Days.length}. Racha observada: ${observedStreak.currentDays} días.`
-      : `Completed tasks: ${completedLast7Days.length}. Observed streak: ${observedStreak.currentDays} days.`,
+      ? `Tareas completadas: ${completedLast7Days.length}; ejecuciones registradas: ${completionCountLast7Days}. Racha observada: ${observedStreak.currentDays} días.`
+      : `Completed tasks: ${completedLast7Days.length}; recorded completions: ${completionCountLast7Days}. Observed streak: ${observedStreak.currentDays} days.`,
   ];
   if (neglectedLists.length)
     lines.push(
@@ -181,8 +191,8 @@ export function runWeeklyReview(home: string, options: WeeklyRitualOptions) {
     );
   lines.push(
     es
-      ? "Las rachas se calculan con las tareas que conservas; una tarea reabierta o eliminada no aporta historial. No he cambiado fechas ni estados."
-      : "Streaks use retained tasks; reopened or deleted tasks do not provide history. No dates or states were changed.",
+      ? "Las rachas usan el historial conservado; las tareas antiguas sin historial o eliminadas no permiten reconstruir todas las ejecuciones. No he cambiado fechas ni estados."
+      : "Streaks use retained history; old tasks without history or deleted tasks cannot establish all completions. No dates or states were changed.",
   );
   const speech = [
     lines[1],
@@ -199,6 +209,7 @@ export function runWeeklyReview(home: string, options: WeeklyRitualOptions) {
     from: from.toISOString(),
     to: now.toISOString(),
     completedLast7Days,
+    completionCountLast7Days,
     streaksByList,
     streak: observedStreak,
     neglectedLists,

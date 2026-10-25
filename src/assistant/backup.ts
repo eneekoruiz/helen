@@ -23,6 +23,7 @@ import {
 import { TaskSchema } from "./tasks.js";
 import { WorkflowSchema } from "./workflows.js";
 import { AppModeStateSchema } from "./appMode.js";
+import { SyncConflictSchema } from "./recordatorios.js";
 
 const MemorySchema = z
   .object({
@@ -61,6 +62,7 @@ const BackupSchema = z
     deliveries: z.array(DeliverySchema).max(100000).default([]),
     workflows: z.array(WorkflowSchema).max(10000).default([]),
     appMode: z.array(AppModeStateSchema).max(1).default([]),
+    syncConflicts: z.array(SyncConflictSchema).max(10000).default([]),
   })
   .strict();
 type Backup = z.infer<typeof BackupSchema>;
@@ -75,6 +77,7 @@ const RESTORE_NAMES = [
   "deliveries.json",
   "workflows.json",
   "app-mode.json",
+  "sync-conflicts.json",
 ] as const;
 const TransactionSchema = z
   .object({
@@ -271,6 +274,9 @@ export function createAssistantBackup(
       tasks: safe(tasks),
       workflows: safe(collection(home, "workflows", WorkflowSchema)),
       appMode: safe(collection(home, "app-mode", AppModeStateSchema)),
+      syncConflicts: safe(
+        collection(home, "sync-conflicts", SyncConflictSchema),
+      ),
       reminders: safe(
         reminders.map(({ alexaAlertToken: _token, ...item }) => item),
       ),
@@ -380,6 +386,10 @@ export function restoreAssistantBackup(
         writePrivate(
           path.join(stage, "app-mode.json"),
           JSON.stringify({ version: 1, items: backup.appMode }),
+        );
+        writePrivate(
+          path.join(stage, "sync-conflicts.json"),
+          JSON.stringify({ version: 1, items: backup.syncConflicts }),
         );
         for (const item of backup.memory) {
           const metadata = [

@@ -1,7 +1,6 @@
 import { occurrencesBetween, type Occurrence } from "./reminders.js";
-import { listTasks, SHOPPING, type Task } from "./tasks.js";
+import { listTasks, SHOPPING, isTaskSensitive, type Task } from "./tasks.js";
 import { addDays, localParts, zonedTimeToUtc } from "./time.js";
-import { looksSensitive } from "../core/secrets.js";
 
 /** What the day (or the week) holds: reminders that fire, tasks that are due or overdue, and the shopping list. */
 export type AgendaRange = "today" | "tomorrow" | "week";
@@ -106,7 +105,7 @@ function joinList(items: string[], lang: "es" | "en"): string {
 /** The agenda as a message: a list for screens, one or two sentences for a speaker. */
 export function formatAgenda(agenda: Agenda, options: FormatOptions): string {
   const taskText = (task: Task) =>
-    looksSensitive(task.text) && (options.speaker || !options.showSensitive)
+    isTaskSensitive(task) && (options.speaker || !options.showSensitive)
       ? options.lang === "es"
         ? "tarea privada"
         : "private task"

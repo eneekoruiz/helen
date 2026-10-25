@@ -19,6 +19,7 @@ export const TaskSchema = z.object({
   created: z.string().datetime(),
   updated: z.string().datetime(),
   done: z.string().datetime().optional(),
+  completions: z.array(z.string().datetime()).max(10000).optional(),
   /** Optional deadline (UTC instant). */
   due: z.string().datetime().optional(),
   source: z.string().max(20),
@@ -189,8 +190,12 @@ export interface UrgencyContext {
 export function getLastDoneByList(allTasks: Task[]): Map<string, number> {
   const lastDone = new Map<string, number>();
   for (const t of allTasks) {
-    if (t.status === "done" && t.done) {
-      const doneMs = Date.parse(t.done);
+    const completed = [
+      ...(t.completions ?? []),
+      ...(t.status === "done" && t.done ? [t.done] : []),
+    ];
+    for (const at of completed) {
+      const doneMs = Date.parse(at);
       const prev = lastDone.get(t.list) ?? 0;
       if (doneMs > prev) lastDone.set(t.list, doneMs);
     }
@@ -356,8 +361,12 @@ export function completeTask(
     home,
     id,
     (task) => {
+      if (task.status === "done") return;
       task.status = "done";
       task.done = now.toISOString();
+      task.completions = [
+        ...new Set([...(task.completions ?? []), task.done]),
+      ].slice(-10000);
     },
     now,
   );

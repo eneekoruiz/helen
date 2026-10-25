@@ -7,6 +7,10 @@ import {
   restoreAssistantBackup,
 } from "../src/assistant/backup.js";
 import { readConfig, writeConfig } from "../src/assistant/home.js";
+import { addTasks, completeTask, listTasks } from "../src/assistant/tasks.js";
+import { getAppMode, setAppMode } from "../src/assistant/appMode.js";
+import { SyncConflictSchema } from "../src/assistant/recordatorios.js";
+import { readCollection, updateCollection } from "../src/assistant/store.js";
 import {
   createWorkflow,
   listWorkflows,
@@ -81,6 +85,9 @@ it("restores workflow progress while excluding Gmail state and executable connec
     { showSensitive: true },
   );
   const excluded = [
+    "recordatorios-auth.json",
+    "recordatorios-auth-generation.json",
+    "recordatorios-sync.json",
     "gmail-auth.json",
     "gmail-oauth-pending.json",
     "gmail-drafts.json",
@@ -93,6 +100,17 @@ it("restores workflow progress while excluding Gmail state and executable connec
       JSON.stringify({ privateState: `FILE_PRIVATE_SENTINEL_${name}` }),
     );
 
+  const task = addTasks(home, { text: "Repasar apuntes", now }).added[0]!;
+  completeTask(home, task.id, now);
+  setAppMode(home, "examenes", now);
+  const conflict = {
+    id: "saved-conflict",
+    task: listTasks(home, { status: "all" })[0]!,
+    reason: "Concurrent edit",
+  };
+  updateCollection(home, "sync-conflicts", SyncConflictSchema, (items) =>
+    items.push(conflict),
+  );
   createAssistantBackup(home, file, now);
   const serialized = fs.readFileSync(file, "utf8");
   const backup = JSON.parse(serialized);
@@ -117,6 +135,13 @@ it("restores workflow progress while excluding Gmail state and executable connec
     expect(backup.config[key]).toBeUndefined();
 
   restoreAssistantBackup(target, file, now);
+  expect(getAppMode(target, now)).toBe("examenes");
+  expect(listTasks(target, { status: "all" })[0]!.completions).toEqual([
+    now.toISOString(),
+  ]);
+  expect(
+    readCollection(target, "sync-conflicts", SyncConflictSchema).items,
+  ).toEqual([conflict]);
   expect(listWorkflows(target, { showSensitive: true })).toEqual([waiting]);
   const restored = readConfig(target);
   expect(restored.gmail).toBeUndefined();

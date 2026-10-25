@@ -9,6 +9,7 @@ import {
   disconnectRecordatoriosAuthorization,
   assertRecordatoriosAccount,
   recordatoriosStatus,
+  beginRecordatoriosAuthorization,
 } from "./recordatorios.js";
 import type { ServerOptions } from "./server.js";
 
@@ -154,6 +155,7 @@ export async function handleRecordatoriosRequest(
       const config = RecordatoriosConfigSchema.parse({ url: input.url });
       const generation = (generations.get(options) ?? 0) + 1;
       generations.set(options, generation);
+      const persistedGeneration = beginRecordatoriosAuthorization(options.home);
       let token = input.token;
       let loginAccount: string | undefined;
       if (!token) {
@@ -210,7 +212,13 @@ export async function handleRecordatoriosRequest(
       controller.signal.throwIfAborted();
       if (generations.get(options) !== generation) throw new Error();
       withHomeLock(options.home, () => {
-        saveRecordatoriosAuthorization(options.home, config, token, accountId);
+        saveRecordatoriosAuthorization(
+          options.home,
+          config,
+          token,
+          accountId,
+          persistedGeneration,
+        );
         Object.assign(
           options.config,
           writeConfig(
