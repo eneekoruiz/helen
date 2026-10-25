@@ -11,7 +11,9 @@ export {
 export function weeklyReview(home: string, now = new Date()) {
   const safe = (text: string) =>
     !looksSensitive(text) && findSecrets(text).length === 0;
-  const tasks = listTasks(home).filter((item) => safe(item.text) && !isTaskSensitive(item));
+  const tasks = listTasks(home).filter(
+    (item) => safe(item.text) && !isTaskSensitive(item),
+  );
   const reminders = listReminders(home)
     .filter((item) => !item.sensitive && safe(item.text))
     .map(({ id, text, due, updated, failedAttempts }) => ({
@@ -26,7 +28,8 @@ export function weeklyReview(home: string, now = new Date()) {
     generated: now.toISOString(),
     completedLast7Days: listTasks(home, { status: "done" }).filter(
       (item) =>
-        safe(item.text) && !isTaskSensitive(item) &&
+        safe(item.text) &&
+        !isTaskSensitive(item) &&
         item.done &&
         Date.parse(item.done) >= cutoff &&
         Date.parse(item.done) <= now.getTime(),

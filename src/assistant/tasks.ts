@@ -27,7 +27,11 @@ export const TaskSchema = z.object({
 export type Task = z.infer<typeof TaskSchema>;
 
 export function isTaskSensitive(task: Pick<Task, "text" | "list">): boolean {
-  return looksSensitive(task.text) || looksSensitive(task.list) || looksSensitive(task.list.toUpperCase());
+  return (
+    looksSensitive(task.text) ||
+    looksSensitive(task.list) ||
+    looksSensitive(task.list.toUpperCase())
+  );
 }
 
 const NAME = "tasks";

@@ -122,8 +122,7 @@ export function runWeeklyReview(home: string, options: WeeklyRitualOptions) {
     (task) =>
       Date.parse(task.created) <= now.getTime() &&
       findSecrets(task.text).length === 0 &&
-      ((options.showSensitive && !options.speaker) ||
-        !isTaskSensitive(task)),
+      ((options.showSensitive && !options.speaker) || !isTaskSensitive(task)),
   );
   const completedLast7Days = tasks.filter(
     (task) =>

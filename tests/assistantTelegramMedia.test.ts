@@ -339,9 +339,7 @@ describe("Telegram voice and file capture", () => {
     expect(commandToText("/tarea Enviar presupuesto", "es")).toBe(
       "añade la tarea Enviar presupuesto",
     );
-    expect(commandToText("/task Send quote", "en")).toBe(
-      "add task Send quote",
-    );
+    expect(commandToText("/task Send quote", "en")).toBe("add task Send quote");
     expect(commandToText("/urgente", "es")).toBe("qué es lo más urgente");
     expect(commandToText("/urgent", "en")).toBe("what is most urgent");
     expect(commandToText("/paso viaje", "es")).toBe("siguiente paso de viaje");
@@ -355,14 +353,20 @@ describe("Telegram voice and file capture", () => {
     expect(commandToText("/slots", "en")).toBe("free slots today");
     expect(commandToText("/cierre", "es")).toBe("cierro por hoy");
     expect(commandToText("/shutdown", "en")).toBe("daily shutdown");
-    expect(commandToText("/codex", "es")).toBe("qué estábamos haciendo en codex");
+    expect(commandToText("/codex", "es")).toBe(
+      "qué estábamos haciendo en codex",
+    );
     expect(commandToText("/hueco", "es")).toBe("qué puedo hacer en este hueco");
     expect(commandToText("/kickoff", "es")).toBe("cómo arranco mañana");
   });
 
   it("handles callback_query to mark a task as done interactively", async () => {
     const { addTasks } = await import("../src/assistant/tasks.js");
-    const { added } = addTasks(home, { text: "Comprar aceite", source: "test", lang: "es" });
+    const { added } = addTasks(home, {
+      text: "Comprar aceite",
+      source: "test",
+      lang: "es",
+    });
     const taskId = added[0]!.id;
 
     const net = network();
@@ -392,8 +396,12 @@ describe("Telegram voice and file capture", () => {
     expect(tasks).toHaveLength(0); // Ahora está completada
 
     // Verifica que se llamó answerCallbackQuery
-    expect(net.calls.some((c) => c.url.endsWith("/answerCallbackQuery"))).toBe(true);
+    expect(net.calls.some((c) => c.url.endsWith("/answerCallbackQuery"))).toBe(
+      true,
+    );
     // Verifica que se llamó editMessageText
-    expect(net.calls.some((c) => c.url.endsWith("/editMessageText"))).toBe(true);
+    expect(net.calls.some((c) => c.url.endsWith("/editMessageText"))).toBe(
+      true,
+    );
   });
 });

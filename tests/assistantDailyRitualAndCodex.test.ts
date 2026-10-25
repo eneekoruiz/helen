@@ -5,9 +5,11 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { handleMessage } from "../src/assistant/brain.js";
 import { formatCapabilities } from "../src/assistant/capabilities.js";
 import { summarizeCodexWork } from "../src/assistant/codexBridge.js";
-import { runDailyKickoff, runDailyShutdown } from "../src/assistant/dailyRitual.js";
+import {
+  runDailyKickoff,
+  runDailyShutdown,
+} from "../src/assistant/dailyRitual.js";
 import { writeConfig, type AssistantConfig } from "../src/assistant/home.js";
-import { addReminder } from "../src/assistant/reminders.js";
 import { addTasks } from "../src/assistant/tasks.js";
 
 let home: string;
@@ -82,7 +84,9 @@ describe("Daily Rituals (Shutdown & Kickoff)", () => {
     expect(shutdown.text).toContain("Completadas hoy (1)");
     expect(shutdown.text).toContain("limpieza");
     expect(shutdown.top3Tomorrow.length).toBeGreaterThan(0);
-    expect(shutdown.speech).toContain("Buen trabajo, hoy completaste 1 tareas.");
+    expect(shutdown.speech).toContain(
+      "Buen trabajo, hoy completaste 1 tareas.",
+    );
     expect(shutdown.buttons).toBeDefined();
   });
 
@@ -105,7 +109,9 @@ describe("Daily Rituals (Shutdown & Kickoff)", () => {
 
     expect(kickoff.top3Tomorrow).toHaveLength(1);
     expect(kickoff.text).toContain("Top prioridades para hoy");
-    expect(kickoff.speech).toContain("Tu prioridad número uno hoy es Completar informe trimestral");
+    expect(kickoff.speech).toContain(
+      "Tu prioridad número uno hoy es Completar informe trimestral",
+    );
   });
 });
 
@@ -115,7 +121,9 @@ describe("Capabilities & Help Breakdown", () => {
     expect(caps.text).toContain("Registros locales de Antigravity");
     expect(caps.text).toContain("Qué PUEDE hacer");
     expect(caps.text).toContain("Qué NO puede hacer");
-    expect(caps.text).toContain("No ejecuta comandos ni lee objetivos privados en altavoces");
+    expect(caps.text).toContain(
+      "No ejecuta comandos ni lee objetivos privados en altavoces",
+    );
   });
 
   it("formats safety boundaries and limits", () => {
@@ -165,36 +173,58 @@ describe("Free Slot Recommendation & Codex Bridge", () => {
   it("gracefully summarizes Codex work when directory is empty or populated", () => {
     const tmpBrain = fs.mkdtempSync(path.join(os.tmpdir(), "codex-test-"));
     try {
-      const summaryEmpty = summarizeCodexWork({ brainDir: tmpBrain, lang: "es", authorized: true });
+      const summaryEmpty = summarizeCodexWork({
+        brainDir: tmpBrain,
+        lang: "es",
+        authorized: true,
+      });
       expect(summaryEmpty.text).toContain("No encontré objetivos de usuario");
 
       // Crear sesión simulada
-      const sessDir = path.join(tmpBrain, "test-session-1", ".system_generated", "logs");
+      const sessDir = path.join(
+        tmpBrain,
+        "test-session-1",
+        ".system_generated",
+        "logs",
+      );
       fs.mkdirSync(sessDir, { recursive: true });
       fs.writeFileSync(
         path.join(sessDir, "transcript.jsonl"),
         JSON.stringify({
           source: "USER_INPUT",
           type: "USER_INPUT",
-          content: "<USER_REQUEST>Crear tests de arquitectura limpia</USER_REQUEST>",
+          content:
+            "<USER_REQUEST>Crear tests de arquitectura limpia</USER_REQUEST>",
           created_at: baseNow.toISOString(),
         }) + "\n",
       );
 
-      const summary = summarizeCodexWork({ brainDir: tmpBrain, lang: "es", now: baseNow, authorized: true });
+      const summary = summarizeCodexWork({
+        brainDir: tmpBrain,
+        lang: "es",
+        now: baseNow,
+        authorized: true,
+      });
       expect(summary.text).toContain("Crear tests de arquitectura limpia");
-      expect(summary.speech).toContain("Consulta los registros de Antigravity desde un canal privado");
+      expect(summary.speech).toContain(
+        "Consulta los registros de Antigravity desde un canal privado",
+      );
     } finally {
       fs.rmSync(tmpBrain, { recursive: true, force: true });
     }
   });
 
   it("cleans vocal disfluencies (ehh, mmm, o sea) during spoken input", async () => {
-    const { cleanUtterance, understand } = await import("../src/assistant/intents.js");
-    const cleaned = cleanUtterance("Oye Helen, ehh mmm ¿qué es lo más urgente?");
+    const { cleanUtterance, understand } =
+      await import("../src/assistant/intents.js");
+    const cleaned = cleanUtterance(
+      "Oye Helen, ehh mmm ¿qué es lo más urgente?",
+    );
     expect(cleaned).toBe("qué es lo más urgente");
 
-    const understood = understand("Helen ehh recuérdame mañana a las 9 llamar al médico");
+    const understood = understand(
+      "Helen ehh recuérdame mañana a las 9 llamar al médico",
+    );
     expect(understood.intent.name).toBe("remind");
   });
 
@@ -219,6 +249,8 @@ describe("Free Slot Recommendation & Codex Bridge", () => {
       channels: [testChannel],
     });
 
-    expect(sentNotifications.some((n) => n.title.includes("Cierre del Día"))).toBe(true);
+    expect(
+      sentNotifications.some((n) => n.title.includes("Cierre del Día")),
+    ).toBe(true);
   });
 });

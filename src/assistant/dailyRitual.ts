@@ -48,8 +48,7 @@ function visibleTasks(home: string, options: DailyRitualOptions, now: Date) {
     (task) =>
       Date.parse(task.created) <= now.getTime() &&
       findSecrets(task.text).length === 0 &&
-      ((options.showSensitive && !options.speaker) ||
-        !isTaskSensitive(task)),
+      ((options.showSensitive && !options.speaker) || !isTaskSensitive(task)),
   );
 }
 

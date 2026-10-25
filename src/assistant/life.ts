@@ -128,7 +128,16 @@ export async function handleLifeMessage(
     /^(?:cuando tengo|tengo algun|tengo|hay|when do i have|do i have any)\s+(?:un\s+)?(?:hueco|tiempo)\s*(?:libre)?(?:\s+(?:hoy|today))?[.!?]?$/i.test(
       normalized,
     );
-  if (!capture && !prepare && !planning && !listing && !next && !state && !completeStep && !freeSlots)
+  if (
+    !capture &&
+    !prepare &&
+    !planning &&
+    !listing &&
+    !next &&
+    !state &&
+    !completeStep &&
+    !freeSlots
+  )
     return null;
   const es = spanish(ctx);
   if (!ctx.ownerVerified)

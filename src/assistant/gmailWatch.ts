@@ -80,7 +80,8 @@ function plainBody(payload: unknown, depth = 0): string {
       .replaceAll("\0", "")
       .slice(0, 8000);
   }
-  const parts = z.array(z.unknown()).max(200).optional().parse(part.parts) ?? [];
+  const parts =
+    z.array(z.unknown()).max(200).optional().parse(part.parts) ?? [];
   const preferred = parts.filter(
     (item) =>
       item &&

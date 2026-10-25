@@ -52,9 +52,12 @@ describe("15-minute intensive speech conversation session", () => {
     const mockFetch = async (url: string | URL | Request) => {
       const href = String(url);
       if (href.endsWith("/profile")) {
-        return new Response(JSON.stringify({ emailAddress: "eneko@example.com" }), {
-          headers: { "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({ emailAddress: "eneko@example.com" }),
+          {
+            headers: { "Content-Type": "application/json" },
+          },
+        );
       }
       if (href.endsWith("/drafts/send")) {
         return new Response(JSON.stringify({ id: "msg-mock-1" }), {
@@ -66,10 +69,16 @@ describe("15-minute intensive speech conversation session", () => {
           headers: { "Content-Type": "application/json" },
         });
       }
-      if (href.includes("/messages/msg-mock-1") || href.includes("/messages/")) {
-        return new Response(JSON.stringify({ id: "msg-mock-1", labelIds: ["SENT"] }), {
-          headers: { "Content-Type": "application/json" },
-        });
+      if (
+        href.includes("/messages/msg-mock-1") ||
+        href.includes("/messages/")
+      ) {
+        return new Response(
+          JSON.stringify({ id: "msg-mock-1", labelIds: ["SENT"] }),
+          {
+            headers: { "Content-Type": "application/json" },
+          },
+        );
       }
       return new Response(JSON.stringify({}), {
         headers: { "Content-Type": "application/json" },
@@ -116,7 +125,10 @@ describe("15-minute intensive speech conversation session", () => {
     expect(t1.speech).toBeDefined();
 
     // 01:15 - Turn 2: Captura rápida de compra
-    const t2 = await speak("Añade a la lista de la compra café, leche y manzanas", 45);
+    const t2 = await speak(
+      "Añade a la lista de la compra café, leche y manzanas",
+      45,
+    );
     expect(t2.text).toMatch(/Añadido a la lista de la compra/i);
     const shoppingItems = listTasks(home).filter((t) => t.list === SHOPPING);
     expect(shoppingItems.length).toBe(3);
@@ -128,17 +140,25 @@ describe("15-minute intensive speech conversation session", () => {
     expect(t3.text).toContain("manzanas");
 
     // 02:45 - Turn 4: Guardar dato personal en memoria
-    const t4 = await speak("Recuerda que la clave de la alarma de casa es 9182", 45);
+    const t4 = await speak(
+      "Recuerda que la clave de la alarma de casa es 9182",
+      45,
+    );
     expect(t4.text).toMatch(/Guardado|Anotado|Apuntado|Hecho/i);
     const memories = listMemory(home);
-    expect(memories.some((m) => (m.title + " " + m.body).includes("9182"))).toBe(true);
+    expect(
+      memories.some((m) => (m.title + " " + m.body).includes("9182")),
+    ).toBe(true);
 
     // 03:30 - Turn 5: Consulta inmediata de memoria
     const t5 = await speak("¿Cuál es la clave de la alarma?", 45);
     expect(t5.text).toContain("9182");
 
     // 04:15 - Turn 6: Crear un recordatorio con hora hablada
-    const t6 = await speak("Recuérdame a las cinco y media llamar al médico", 45);
+    const t6 = await speak(
+      "Recuérdame a las cinco y media llamar al médico",
+      45,
+    );
     expect(t6.text).toMatch(/17:30/);
     expect(listReminders(home).length).toBe(1);
 
@@ -169,7 +189,10 @@ describe("15-minute intensive speech conversation session", () => {
     expect(t12.text).toContain("Verificar documentación");
 
     // 09:30 - Turn 13: Redactar correo a un contacto conocido
-    const t13 = await speak("Redacta un correo a Ana: Llegaré puntual a la reunión", 45);
+    const t13 = await speak(
+      "Redacta un correo a Ana: Llegaré puntual a la reunión",
+      45,
+    );
     expect(t13.text).toContain("ana@example.com");
     expect(t13.text).toContain("Llegaré puntual a la reunión");
     const drafts = listGmailDrafts(home);
@@ -185,7 +208,10 @@ describe("15-minute intensive speech conversation session", () => {
     expect(listGmailWatches(home).length).toBe(1);
 
     // 11:45 - Turn 16: Añadir tarea urgente
-    const t16 = await speak("Añade una tarea urgente: Enviar presupuesto hoy a las siete", 45);
+    const t16 = await speak(
+      "Añade una tarea urgente: Enviar presupuesto hoy a las siete",
+      45,
+    );
     expect(t16.text).toMatch(/Añadido a tus tareas/i);
 
     // 12:30 - Turn 17: Consultar lo más urgente

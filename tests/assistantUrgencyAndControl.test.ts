@@ -71,7 +71,9 @@ describe("advanced task urgency, starvation weighting and conversational capture
     });
 
     const reply = await ask("¿Qué es lo más urgente?");
-    expect(reply.text).toContain("[limpieza] Limpiar a fondo los filtros de aire");
+    expect(reply.text).toContain(
+      "[limpieza] Limpiar a fondo los filtros de aire",
+    );
     expect(reply.speech).toContain("Limpiar a fondo los filtros de aire");
   });
 
@@ -97,7 +99,9 @@ describe("advanced task urgency, starvation weighting and conversational capture
     // La que lleva 20 días sin hacerse debe figurar primero
     const lines = reply.text.split("\n");
     const seguroLine = lines.findIndex((l) => l.includes("Renovar seguro"));
-    const bombillasLine = lines.findIndex((l) => l.includes("Comprobar bombillas"));
+    const bombillasLine = lines.findIndex((l) =>
+      l.includes("Comprobar bombillas"),
+    );
     expect(seguroLine).toBeGreaterThan(0);
     expect(bombillasLine).toBeGreaterThan(seguroLine);
   });
@@ -127,7 +131,9 @@ describe("advanced task urgency, starvation weighting and conversational capture
 
     // Editar específicamente el tercer elemento por lenguaje natural
     const editReply = await ask("el tercer recordatorio ponlo a las 5");
-    expect(editReply.text).toMatch(/Actualizado el elemento 3: «Llamar al dentista»/);
+    expect(editReply.text).toMatch(
+      /Actualizado el elemento 3: «Llamar al dentista»/,
+    );
     expect(editReply.text).toContain("17:00");
 
     // Aprobar el borrador tras la edición conversacional
@@ -142,7 +148,10 @@ describe("advanced task urgency, starvation weighting and conversational capture
   });
 
   it("supports large captures of up to 60 candidate items in a single request", async () => {
-    const lines = Array.from({ length: 60 }, (_, i) => `Tarea número ${i + 1} para revisar`);
+    const lines = Array.from(
+      { length: 60 },
+      (_, i) => `Tarea número ${i + 1} para revisar`,
+    );
     const draft = await createCapture(
       home,
       { owner: "user-60", text: lines.join("\n") },

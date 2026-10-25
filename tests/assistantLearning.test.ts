@@ -68,10 +68,10 @@ it("creates temporary memories offline and rejects invalid or past expiry", asyn
   await ask(
     "recuerda hasta mañana a las 18: las llaves están en el cajón azul",
   );
-  expect(listMemory(home)).toHaveLength(1);
-  expect(listMemory(home)[0]!.expires).toContain("2026-10-25");
+  expect(listMemory(home, { now })).toHaveLength(1);
+  expect(listMemory(home, { now })[0]!.expires).toContain("2026-10-25");
   await ask("recuerda hasta ayer: esto no se guarda");
-  expect(listMemory(home)).toHaveLength(1);
+  expect(listMemory(home, { now })).toHaveLength(1);
 });
 
 it("does not reveal a private memory's provenance through a speaker", async () => {
