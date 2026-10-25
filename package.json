@@ -106,7 +106,7 @@
     "prettier": "^3.9.10",
     "tsx": "^4.23.15",
     "typescript": "^5.6.3",
-    "vitest": "^4.1.12"
+    "vitest": "^5.0.5"
   },
   "directories": {
     "doc": "docs",
