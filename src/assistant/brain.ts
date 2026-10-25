@@ -23,7 +23,11 @@ import {
   mailTools,
   pendingMailPreview,
 } from "./mail.js";
-import { confirmCapture, editCapture, type CaptureCandidate } from "./capture.js";
+import {
+  confirmCapture,
+  editCapture,
+  type CaptureCandidate,
+} from "./capture.js";
 import {
   createWorkflow,
   listWorkflows,
@@ -62,6 +66,7 @@ import {
   completeTask,
   findTask,
   getLastDoneByList,
+  isTaskSensitive,
   INBOX,
   listKey,
   listLabel,
@@ -76,6 +81,11 @@ import {
 import { runDailyKickoff, runDailyShutdown } from "./dailyRitual.js";
 import { summarizeCodexWork } from "./codexBridge.js";
 import { formatCapabilities } from "./capabilities.js";
+import { getAppMode } from "./appMode.js";
+import {
+  handleProductivityMessage,
+  productivityTools,
+} from "./productivity.js";
 import { fold, tokens } from "./text.js";
 import { describeInstant, localDateKey, shortInstant } from "./time.js";
 import { describeRecurrence, parseWhen, stripWhen } from "./when.js";
@@ -944,7 +954,9 @@ function tasksList(ctx: Context, list?: string): BrainReply {
 }
 
 function urgentTasksReply(ctx: Context): BrainReply {
-  const allTasks = listTasks(ctx.home, { status: "all" });
+  const allTasks = listTasks(ctx.home, { status: "all" }).filter(
+    (task) => (ctx.showSensitive && !ctx.speaker) || !isTaskSensitive(task),
+  );
   const openTasks = allTasks.filter((t) => t.status === "open");
   const nowMs = ctx.now.getTime();
 
@@ -961,7 +973,11 @@ function urgentTasksReply(ctx: Context): BrainReply {
   }
 
   const lastDoneByList = getLastDoneByList(allTasks);
-  const urgencyCtx: UrgencyContext = { now: ctx.now, lastDoneByList };
+  const urgencyCtx: UrgencyContext = {
+    now: ctx.now,
+    lastDoneByList,
+    mode: getAppMode(ctx.home, ctx.now),
+  };
   const scored = openTasks
     .map((task) => ({ task, score: scoreTaskUrgency(task, urgencyCtx) }))
     .sort((a, b) => b.score - a.score);
@@ -992,7 +1008,8 @@ function urgentTasksReply(ctx: Context): BrainReply {
     );
   }
   const topTask = urgent[0]!;
-  const topList = topTask.list && topTask.list !== "inbox" ? `[${topTask.list}] ` : "";
+  const topList =
+    topTask.list && topTask.list !== "inbox" ? `[${topTask.list}] ` : "";
   const speech = say(
     ctx.lang,
     `Lo más urgente es: ${topList}${topTask.text}.`,
@@ -1008,7 +1025,9 @@ function urgentTasksReply(ctx: Context): BrainReply {
 }
 
 function recommendFreeSlotTask(ctx: Context): BrainReply {
-  const allTasks = listTasks(ctx.home, { status: "all" });
+  const allTasks = listTasks(ctx.home, { status: "all" }).filter(
+    (task) => (ctx.showSensitive && !ctx.speaker) || !isTaskSensitive(task),
+  );
   const openTasks = allTasks.filter((t) => t.status === "open");
   if (openTasks.length === 0) {
     return reply(
@@ -1022,7 +1041,11 @@ function recommendFreeSlotTask(ctx: Context): BrainReply {
     );
   }
   const lastDoneByList = getLastDoneByList(allTasks);
-  const urgencyCtx: UrgencyContext = { now: ctx.now, lastDoneByList };
+  const urgencyCtx: UrgencyContext = {
+    now: ctx.now,
+    lastDoneByList,
+    mode: getAppMode(ctx.home, ctx.now),
+  };
   const scored = openTasks
     .map((task) => ({ task, score: scoreTaskUrgency(task, urgencyCtx) }))
     .sort((a, b) => b.score - a.score);
@@ -1042,7 +1065,10 @@ function recommendFreeSlotTask(ctx: Context): BrainReply {
   const buttons: Array<Array<{ text: string; callback_data: string }>> = [
     [
       { text: `✓ ${top.text.slice(0, 16)}`, callback_data: `done:${top.id}` },
-      { text: es ? "Pospón 1 día" : "Postpone 1d", callback_data: `snooze:${top.id}` },
+      {
+        text: es ? "Pospón 1 día" : "Postpone 1d",
+        callback_data: `snooze:${top.id}`,
+      },
     ],
   ];
 
@@ -1051,7 +1077,11 @@ function recommendFreeSlotTask(ctx: Context): BrainReply {
 
 function rescheduleOverdueReply(ctx: Context, whenStr?: string): BrainReply {
   const targetWhen =
-    whenStr && whenStr.trim() ? whenStr.trim() : ctx.lang === "es" ? "hoy" : "today";
+    whenStr && whenStr.trim()
+      ? whenStr.trim()
+      : ctx.lang === "es"
+        ? "hoy"
+        : "today";
   const parsed = parseWhen(targetWhen, {
     now: ctx.now,
     timezone: ctx.config.timezone,
@@ -1596,28 +1626,30 @@ function modelTools(ctx: Context): AssistantTool[] {
           : redact(output);
       },
     })),
-    ...[...lifeTools(ctx), ...(allowSensitive ? mailTools(ctx) : [])].map(
-      (tool) => ({
-        ...tool,
-        run: async (input: Record<string, unknown>) => {
-          if (ctx.signal?.aborted)
-            throw new Error("Request cancelled by the owner");
-          if (tool.name.startsWith("gmail_")) ctx.privateAccess = true;
-          const output = await tool.run(tool.input.parse(input));
-          if (
-            [
-              "workflow_create",
-              "workflow_status",
-              "capture_create",
-              "capture_edit",
-              "gmail_draft",
-            ].includes(tool.name)
-          )
-            (ctx.completedActions ??= []).push(tool.name);
-          return redact(output);
-        },
-      }),
-    ),
+    ...[
+      ...lifeTools(ctx),
+      ...productivityTools(ctx),
+      ...(allowSensitive ? mailTools(ctx) : []),
+    ].map((tool) => ({
+      ...tool,
+      run: async (input: Record<string, unknown>) => {
+        if (ctx.signal?.aborted)
+          throw new Error("Request cancelled by the owner");
+        if (tool.name.startsWith("gmail_")) ctx.privateAccess = true;
+        const output = await tool.run(tool.input.parse(input));
+        if (
+          [
+            "workflow_create",
+            "workflow_status",
+            "capture_create",
+            "capture_edit",
+            "gmail_draft",
+          ].includes(tool.name)
+        )
+          (ctx.completedActions ??= []).push(tool.name);
+        return redact(output);
+      },
+    })),
   ];
 }
 
@@ -1820,6 +1852,8 @@ async function route(
         timezone: ctx.config.timezone,
         locale: localeFor(ctx),
         lang: ctx.lang,
+        showSensitive: ctx.showSensitive,
+        speaker: ctx.speaker,
       });
       return reply(ctx, "day.shutdown", result.text, {
         speech: result.speech,
@@ -1832,6 +1866,8 @@ async function route(
         timezone: ctx.config.timezone,
         locale: localeFor(ctx),
         lang: ctx.lang,
+        showSensitive: ctx.showSensitive,
+        speaker: ctx.speaker,
       });
       return reply(ctx, "day.kickoff", result.text, {
         speech: result.speech,
@@ -1844,7 +1880,9 @@ async function route(
       const result = summarizeCodexWork({
         lang: ctx.lang,
         now: ctx.now,
+        authorized: ctx.ownerVerified && ctx.showSensitive && !ctx.speaker,
       });
+      ctx.privateAccess = true;
       return reply(ctx, "codex.status", result.text, {
         speech: result.speech,
       });
@@ -2244,6 +2282,16 @@ async function handleTurn(
     .replace(/[¿?!.]/g, "")
     .trim();
   try {
+    const productivity = await handleProductivityMessage(input, ctx);
+    if (productivity) {
+      const result = reply(ctx, "pending", productivity.text, {
+        ...("speech" in productivity ? { speech: productivity.speech } : {}),
+        ...("buttons" in productivity ? { buttons: productivity.buttons } : {}),
+      });
+      rememberTurn(ctx, input, result);
+      saveConversation(ctx.home, ctx.conversation, now);
+      return result;
+    }
     const mode =
       /^(?:modo sencillo|simple mode|modo paso a paso|step by step|responde breve|responde con detalle)$/.exec(
         control,
@@ -2550,9 +2598,9 @@ async function handleTurn(
     ctx.conversation.lastReminder
   ) {
     let when =
-      /^(?:cambialo|cambiala|muevelo|muevela|pasalo|pasala|reprogramalo|reprogramala|change it|move it)\s+(?:para\s+|al?\s+|to\s+)?(.+)$/i.exec(
-        control,
-      )![1]!.trim();
+      /^(?:cambialo|cambiala|muevelo|muevela|pasalo|pasala|reprogramalo|reprogramala|change it|move it)\s+(?:para\s+|al?\s+|to\s+)?(.+)$/i
+        .exec(control)![1]!
+        .trim();
     if (/^las?\s+/i.test(when)) when = `a ${when}`;
     const result = runAction(ctx.home, ctx.conversation.id, now, () =>
       moveReminder(ctx, ctx.conversation.lastReminder!, when),

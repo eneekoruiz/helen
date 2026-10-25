@@ -18,6 +18,7 @@ import {
 import { exportCalendar, importCalendar } from "../assistant/calendar.js";
 import { diagnoseAssistant } from "../assistant/doctor.js";
 import { runGmailMonitor } from "../assistant/gmailMonitor.js";
+import { runRecordatoriosSync } from "../assistant/recordatorios.js";
 import { weeklyReview } from "../assistant/review.js";
 import {
   apiToken,
@@ -1149,6 +1150,14 @@ function registerAssistantAdmin(program: Command): void {
           try {
             releaseLease = acquireSchedulerLease(dir);
             tasks.push(
+              runRecordatoriosSync({
+                home: dir,
+                config: cfg,
+                signal: controller.signal,
+                log,
+              }),
+            );
+            tasks.push(
               runGmailMonitor({
                 home: dir,
                 config: cfg,
@@ -1159,7 +1168,8 @@ function registerAssistantAdmin(program: Command): void {
             tasks.push(
               runScheduler({
                 home: dir,
-                channels: configuredChannels(cfg, { write: log }),
+                channels: () =>
+                  configuredChannels(cfg, { home: dir, write: log }),
                 signal: controller.signal,
                 log,
               }),

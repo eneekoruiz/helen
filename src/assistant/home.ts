@@ -267,6 +267,12 @@ export const AssistantConfigSchema = z.object({
   /** A daily summary pushed to the delivery channels (empty: off). */
   briefing: z
     .object({
+      weeklyReviewTime: z
+        .union([
+          z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+          z.literal(false),
+        ])
+        .default("18:00"),
       time: z
         .string()
         .regex(/^([01]\d|2[0-3]):[0-5]\d$/)

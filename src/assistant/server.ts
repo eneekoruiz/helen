@@ -32,6 +32,7 @@ import {
   workflowProgress,
 } from "./workflows.js";
 import { handleGmailRequest } from "./gmailWeb.js";
+import { handleRecordatoriosRequest } from "./recordatoriosWeb.js";
 import type { LanguageModel } from "./llm.js";
 import { addMemory } from "./memory.js";
 import { addReminder, listReminders } from "./reminders.js";
@@ -280,6 +281,10 @@ export function createAssistantServer(options: ServerOptions): http.Server {
     authenticate(request, address);
     const home = options.home;
     const config = options.config;
+    if (
+      await handleRecordatoriosRequest(request, response, url, options, channel)
+    )
+      return;
     const model = options.model !== undefined ? { model: options.model } : {};
     if (url.pathname.startsWith("/gmail/")) {
       if (
