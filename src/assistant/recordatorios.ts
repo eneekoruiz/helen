@@ -552,7 +552,7 @@ function applyRemote(
         done:
           status === "open"
             ? undefined
-            : current?.status === "done"
+            : current?.status === "done" && changes.status === "done"
               ? current.done
               : remote.done,
         created: current?.created ?? remote.created,

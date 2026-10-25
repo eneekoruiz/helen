@@ -114,8 +114,12 @@ function backend() {
         ...mutation.patch,
       } as Remote["task"];
       if (mutation.patch?.due === null) delete task.due;
-      if (task.status === "done") task.done = now.toISOString();
-      else delete task.done;
+      if (task.status === "done") {
+        task.done = now.toISOString();
+        task.completions = [
+          ...new Set([...(task.completions ?? []), task.done]),
+        ];
+      } else delete task.done;
       const row: Remote = {
         id: mutation.id,
         version: (old?.version ?? 0) + 1,
@@ -193,6 +197,16 @@ it("recovers a lost creation response without creating a duplicate", async () =>
   await syncRecordatorios(home, config, api.options);
   expect(api.rows.size).toBe(1);
   expect(listTasks(home)).toHaveLength(1);
+});
+it("uses the acknowledged completion timestamp so network delay does not invent a second execution", async () => {
+  const api = backend();
+  api.rows.set("pwa-1", remote());
+  await syncRecordatorios(home, config, api.options);
+  completeTask(home, listTasks(home)[0]!.id, new Date(now.getTime() + 1000));
+  await syncRecordatorios(home, config, api.options);
+  const task = listTasks(home, { status: "all" })[0]!;
+  expect(task.done).toBe(api.rows.get("pwa-1")!.task.done);
+  expect(task.completions).toEqual([task.done]);
 });
 it("preserves independent local edits when the web wins a version conflict", async () => {
   const api = backend();
