@@ -22,6 +22,7 @@ import {
 } from "./scheduler.js";
 import { TaskSchema } from "./tasks.js";
 import { WorkflowSchema } from "./workflows.js";
+import { AppModeStateSchema } from "./appMode.js";
 
 const MemorySchema = z
   .object({
@@ -59,6 +60,7 @@ const BackupSchema = z
     calendarImports: z.array(CalendarImportLinkSchema).max(100000).default([]),
     deliveries: z.array(DeliverySchema).max(100000).default([]),
     workflows: z.array(WorkflowSchema).max(10000).default([]),
+    appMode: z.array(AppModeStateSchema).max(1).default([]),
   })
   .strict();
 type Backup = z.infer<typeof BackupSchema>;
@@ -72,6 +74,7 @@ const RESTORE_NAMES = [
   "calendar-imports.json",
   "deliveries.json",
   "workflows.json",
+  "app-mode.json",
 ] as const;
 const TransactionSchema = z
   .object({
@@ -252,6 +255,7 @@ export function createAssistantBackup(
     delete config.gmail;
     delete config.gmailAuth;
     delete config.gmailRedirectUri;
+    delete config.recordatorios;
     delete config.channels.webhook;
     if (config.provider?.type === "command") delete config.provider;
     else if (config.provider) delete config.provider.baseUrl;
@@ -266,6 +270,7 @@ export function createAssistantBackup(
       memory: safe(exportMemory(home)),
       tasks: safe(tasks),
       workflows: safe(collection(home, "workflows", WorkflowSchema)),
+      appMode: safe(collection(home, "app-mode", AppModeStateSchema)),
       reminders: safe(
         reminders.map(({ alexaAlertToken: _token, ...item }) => item),
       ),
@@ -371,6 +376,10 @@ export function restoreAssistantBackup(
         writePrivate(
           path.join(stage, "workflows.json"),
           JSON.stringify({ version: 1, items: backup.workflows }),
+        );
+        writePrivate(
+          path.join(stage, "app-mode.json"),
+          JSON.stringify({ version: 1, items: backup.appMode }),
         );
         for (const item of backup.memory) {
           const metadata = [

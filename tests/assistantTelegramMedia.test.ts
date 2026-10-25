@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { getConversation } from "../src/assistant/conversation.js";
 import { writeConfig, type AssistantConfig } from "../src/assistant/home.js";
 import { listTasks } from "../src/assistant/tasks.js";
-import { handleUpdate } from "../src/assistant/telegram.js";
+import { commandToText, handleUpdate } from "../src/assistant/telegram.js";
 
 let home: string;
 let config: AssistantConfig;
@@ -73,6 +73,10 @@ function network(
           : {},
       });
     if (url.endsWith("/sendMessage"))
+      return Response.json({ ok: true, result: {} });
+    if (url.endsWith("/answerCallbackQuery"))
+      return Response.json({ ok: true, result: true });
+    if (url.endsWith("/editMessageText"))
       return Response.json({ ok: true, result: {} });
     throw new Error("Unexpected request");
   }) as typeof fetch;
@@ -329,5 +333,67 @@ describe("Telegram voice and file capture", () => {
     expect(longReply).toContain("vista previa");
     expect(getConversation(home, "telegram:42").pending).toBeUndefined();
     expect(listTasks(home)).toEqual([]);
+  });
+
+  it("translates shortcuts to assistant phrases in Spanish and English", () => {
+    expect(commandToText("/tarea Enviar presupuesto", "es")).toBe(
+      "añade la tarea Enviar presupuesto",
+    );
+    expect(commandToText("/task Send quote", "en")).toBe(
+      "add task Send quote",
+    );
+    expect(commandToText("/urgente", "es")).toBe("qué es lo más urgente");
+    expect(commandToText("/urgent", "en")).toBe("what is most urgent");
+    expect(commandToText("/paso viaje", "es")).toBe("siguiente paso de viaje");
+    expect(commandToText("/step trip", "en")).toBe("next step of trip");
+    expect(commandToText("/hecho", "es")).toBe("completa el siguiente paso");
+    expect(commandToText("/done", "en")).toBe("complete next step");
+    expect(commandToText("/planifica 45 min", "es")).toBe(
+      "planifica mi dia con 45 min",
+    );
+    expect(commandToText("/huecos", "es")).toBe("huecos libres hoy");
+    expect(commandToText("/slots", "en")).toBe("free slots today");
+    expect(commandToText("/cierre", "es")).toBe("cierro por hoy");
+    expect(commandToText("/shutdown", "en")).toBe("daily shutdown");
+    expect(commandToText("/codex", "es")).toBe("qué estábamos haciendo en codex");
+    expect(commandToText("/hueco", "es")).toBe("qué puedo hacer en este hueco");
+    expect(commandToText("/kickoff", "es")).toBe("cómo arranco mañana");
+  });
+
+  it("handles callback_query to mark a task as done interactively", async () => {
+    const { addTasks } = await import("../src/assistant/tasks.js");
+    const { added } = addTasks(home, { text: "Comprar aceite", source: "test", lang: "es" });
+    const taskId = added[0]!.id;
+
+    const net = network();
+    const update = {
+      update_id: 101,
+      callback_query: {
+        id: "cb_test_1",
+        from: { id: 42, first_name: "Eneko" },
+        message: {
+          message_id: 88,
+          chat: { id: 42, type: "private" },
+          text: "Tienes tareas pendientes",
+        },
+        data: `done:${taskId}`,
+      },
+    };
+
+    const result = await handleUpdate(update, {
+      home,
+      config,
+      token,
+      fetcher: net.fetcher,
+    });
+
+    expect(result).toContain("completada");
+    const tasks = listTasks(home);
+    expect(tasks).toHaveLength(0); // Ahora está completada
+
+    // Verifica que se llamó answerCallbackQuery
+    expect(net.calls.some((c) => c.url.endsWith("/answerCallbackQuery"))).toBe(true);
+    // Verifica que se llamó editMessageText
+    expect(net.calls.some((c) => c.url.endsWith("/editMessageText"))).toBe(true);
   });
 });

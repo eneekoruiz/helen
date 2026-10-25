@@ -15,11 +15,13 @@ export interface Agenda {
   overdueTasks: Task[];
   openTasks: number;
   shopping: Task[];
+  workflows?: Array<{ title: string; next?: string }>;
 }
 
 export interface AgendaOptions {
   now?: Date;
   timezone: string;
+  workflows?: Array<{ title: string; next?: string }>;
 }
 
 function localMidnight(now: Date, timezone: string, daysAhead: number): Date {
@@ -66,6 +68,7 @@ export function buildAgenda(
     overdueTasks: open.filter((task) => dueAt(task) < now.getTime()),
     openTasks: open.filter((task) => task.list !== SHOPPING).length,
     shopping: open.filter((task) => task.list === SHOPPING),
+    ...(options.workflows ? { workflows: options.workflows } : {}),
   };
 }
 
@@ -166,6 +169,16 @@ export function formatAgenda(agenda: Agenda, options: FormatOptions): string {
           ? `En la lista de la compra hay ${agenda.shopping.length === 1 ? "una cosa" : `${agenda.shopping.length} cosas`}.`
           : `There ${agenda.shopping.length === 1 ? "is one item" : `are ${agenda.shopping.length} items`} on the shopping list.`,
       );
+    if (agenda.workflows && agenda.workflows.length > 0) {
+      const active = agenda.workflows.filter((w) => w.next);
+      if (active.length > 0) {
+        parts.push(
+          es
+            ? `En tus gestiones: ${active[0]!.title}, ${active[0]!.next}.`
+            : `In your workflows: ${active[0]!.title}, ${active[0]!.next}.`,
+        );
+      }
+    }
     return parts.join(" ");
   }
 
@@ -200,5 +213,14 @@ export function formatAgenda(agenda: Agenda, options: FormatOptions): string {
     lines.push(
       `${es ? "Compra" : "Shopping"}: ${agenda.shopping.map(taskText).join(", ")}.`,
     );
+  if (agenda.workflows && agenda.workflows.length > 0) {
+    const active = agenda.workflows.filter((w) => w.next);
+    if (active.length > 0) {
+      lines.push(es ? "Gestiones en curso:" : "Active workflows:");
+      for (const w of active) {
+        lines.push(`- ${w.title}: ${w.next}`);
+      }
+    }
+  }
   return lines.join("\n");
 }

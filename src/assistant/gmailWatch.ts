@@ -44,7 +44,7 @@ function header(payload: unknown, name: string): string {
   if (!payload || typeof payload !== "object") return "";
   const headers = z
     .array(HeaderSchema)
-    .max(100)
+    .max(1000)
     .parse((payload as { headers?: unknown }).headers ?? []);
   return (
     headers.find((item) => item.name.toLowerCase() === name.toLowerCase())
@@ -80,7 +80,7 @@ function plainBody(payload: unknown, depth = 0): string {
       .replaceAll("\0", "")
       .slice(0, 8000);
   }
-  const parts = z.array(z.unknown()).max(50).optional().parse(part.parts) ?? [];
+  const parts = z.array(z.unknown()).max(200).optional().parse(part.parts) ?? [];
   const preferred = parts.filter(
     (item) =>
       item &&

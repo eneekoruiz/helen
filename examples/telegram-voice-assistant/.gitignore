@@ -1,0 +1,23 @@
+# Entorno virtual y Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# Credenciales y Secretos (CRÍTICO)
+.env
+credentials.json
+token.json
+
+# Archivos de audio temporales
+temp_audio/
+*.ogg
+*.oga
+*.mp3
+*.wav
+
+# Logs y bases de datos locales
+*.log
+assistant_memory.db

@@ -1,5 +1,7 @@
 import { spawn } from "node:child_process";
 import type { AssistantConfig } from "./home.js";
+import { helenHome } from "./home.js";
+import { recordatoriosPushChannel } from "./recordatoriosPush.js";
 
 /**
  * Where HELEN speaks up on its own: reminders and the daily briefing. Local channels (the terminal running
@@ -7,6 +9,7 @@ import type { AssistantConfig } from "./home.js";
  * a neutral "you have a private reminder" for items marked sensitive.
  */
 export interface Notification {
+  id?: string;
   title: string;
   text: string;
   sensitive: boolean;
@@ -262,6 +265,7 @@ export function telegramChannel(
 }
 
 export interface ChannelOptions {
+  home?: string;
   env?: NodeJS.ProcessEnv;
   fetcher?: typeof fetch;
   /** Where console notifications go (the server log); omitted: console channel off. */
@@ -274,6 +278,14 @@ export function configuredChannels(
   options: ChannelOptions = {},
 ): DeliveryChannel[] {
   const channels: DeliveryChannel[] = [];
+  if (config.recordatorios)
+    channels.push(
+      recordatoriosPushChannel(
+        options.home ?? helenHome(),
+        config.recordatorios,
+        { fetcher: options.fetcher, env: options.env },
+      ),
+    );
   if (config.channels.console && options.write)
     channels.push(consoleChannel(options.write));
   if (config.channels.desktop) channels.push(desktopChannel(options.platform));

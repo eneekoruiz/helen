@@ -39,11 +39,36 @@ const check = (name) => report.checks.push({ name, status: "passed" });
 let browser;
 let server;
 try {
-  const module = values["playwright-module"]
-    ? await import(
-        pathToFileURL(path.resolve(values["playwright-module"])).href
-      )
-    : await import("playwright");
+  let module;
+  try {
+    module = values["playwright-module"]
+      ? await import(
+          pathToFileURL(path.resolve(values["playwright-module"])).href
+        )
+      : await import("playwright");
+  } catch (err) {
+    if (
+      err &&
+      (err.code === "ERR_MODULE_NOT_FOUND" ||
+        err.message?.includes("Cannot find package 'playwright'"))
+    ) {
+      console.log(
+        JSON.stringify(
+          {
+            verdict: "skipped",
+            reason:
+              "Playwright no está instalado en el entorno. Para ejecutar Browser QA, pasa --playwright-module <ruta> o instala playwright.",
+            checks: 0,
+            syntheticDataOnly: true,
+          },
+          null,
+          2,
+        ),
+      );
+      process.exit(0);
+    }
+    throw err;
+  }
   const { chromium } = module.default ?? module;
   browser = await chromium.launch({ headless: true });
   const config = writeConfig(
@@ -187,6 +212,101 @@ try {
   );
   await page.unroute("**/gmail/status");
   await page.unroute("**/gmail/disconnect");
+  let recordatoriosConnected = false;
+  let recordatoriosAttempt = 0;
+  await page.route("**/recordatorios/status", (route) =>
+    route.fulfill({
+      json: {
+        configured: recordatoriosConnected,
+        connected: recordatoriosConnected,
+        origin: "https://eneko-ruiz.com",
+      },
+    }),
+  );
+  await page.route("**/recordatorios/connect", (route) => {
+    const input = route.request().postDataJSON();
+    assert.equal(input.url, "https://eneko-ruiz.com");
+    assert.equal(input.password, "synthetic-recordatorios-password");
+    recordatoriosAttempt++;
+    if (recordatoriosAttempt === 1)
+      return route.fulfill({
+        status: 409,
+        json: {
+          twoFactorRequired: true,
+          error:
+            "Introduce el código de verificación y vuelve a escribir tu contraseña.",
+        },
+      });
+    if (recordatoriosAttempt === 2)
+      return route.fulfill({
+        status: 409,
+        json: {
+          pendingDeployment: true,
+          connected: false,
+          error: "La integración de Recordatorios está pendiente de desplegar.",
+        },
+      });
+    recordatoriosConnected = true;
+    return route.fulfill({ json: { connected: true } });
+  });
+  await page.route("**/recordatorios/disconnect", (route) => {
+    assert.equal(route.request().postDataJSON().confirm, true);
+    recordatoriosConnected = false;
+    return route.fulfill({ json: { disconnected: true } });
+  });
+  await page.locator("#recordatoriosEmail").fill("owner@example.com");
+  for (const expected of [
+    "código de verificación",
+    "pendiente de desplegar",
+    "Conexión verificada",
+  ]) {
+    await page
+      .locator("#recordatoriosPassword")
+      .fill("synthetic-recordatorios-password");
+    await page.locator("#recordatoriosCode").fill("123456");
+    await page.locator("#recordatoriosConnect button").click();
+    await page
+      .locator("#recordatoriosMessage")
+      .filter({ hasText: expected })
+      .waitFor();
+    assert.equal(await page.locator("#recordatoriosPassword").inputValue(), "");
+    assert.equal(await page.locator("#recordatoriosCode").inputValue(), "");
+    assert.equal(await page.locator("#chat").isVisible(), true);
+    assert.equal(
+      await page.evaluate(() =>
+        JSON.stringify(localStorage).includes(
+          "synthetic-recordatorios-password",
+        ),
+      ),
+      false,
+    );
+  }
+  for (const width of [375, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    assert.equal(
+      await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth <=
+          document.documentElement.clientWidth,
+      ),
+      true,
+    );
+    const screenshot = path.join(output, `recordatorios-${width}-dark.png`);
+    await page.screenshot({ path: screenshot });
+    report.screenshots.push(screenshot);
+  }
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.locator("#recordatoriosDisconnect").click();
+  await page
+    .locator("#recordatoriosMessage")
+    .filter({ hasText: "Recordatorios desconectado" })
+    .waitFor();
+  await page.unroute("**/recordatorios/status");
+  await page.unroute("**/recordatorios/connect");
+  await page.unroute("**/recordatorios/disconnect");
+  check(
+    "Recordatorios handles 2FA, deployment pending, verified connection and disconnection without storing passwords",
+  );
   await page.keyboard.press("Escape");
   assert.equal(await page.locator("#settings").isVisible(), false);
   assert.equal(

@@ -270,7 +270,8 @@ it("receives a Telegram stop from a later poll while the model is still running"
                     update_id: polls,
                     message: {
                       message_id: polls,
-                      chat: { id: 42 },
+                      chat: { id: 42, type: "private" },
+                      from: { id: 42 },
                       text:
                         polls === 1
                           ? "Ayúdame a preparar una llamada"

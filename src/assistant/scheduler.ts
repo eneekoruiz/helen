@@ -1,4 +1,6 @@
 import fs from "node:fs";
+import { createHash } from "node:crypto";
+import { setTimeout as delay } from "node:timers/promises";
 import os from "node:os";
 import path from "node:path";
 import { z } from "zod";
@@ -26,6 +28,9 @@ import {
 } from "./reminders.js";
 import { localDateKey, localParts, shortInstant } from "./time.js";
 import { describeRecurrence } from "./when.js";
+import { runDailyShutdown } from "./dailyRitual.js";
+import { getAppMode, shouldDispatchReminder } from "./appMode.js";
+import { runWeeklyReview } from "./weeklyRitual.js";
 
 /**
  * The scheduler delivers reminders when they are due and the optional daily briefing. One scheduler runs per
@@ -113,7 +118,15 @@ async function deliverOccurrence(
               uncertain: true,
               error: `Delivery ${previous.state}; verify destination and resolve ${key}`,
             };
-      const result = (await deliver(notification, [channel]))[0]!;
+      const result = (
+        await deliver(
+          {
+            ...notification,
+            id: createHash("sha256").update(occurrence).digest("hex"),
+          },
+          [channel],
+        )
+      )[0]!;
       updateCollection(home, "deliveries", DeliverySchema, (items) => {
         const item = items.find((entry) => entry.key === key)!;
         item.state = result.ok
@@ -186,7 +199,9 @@ export function reminderNotification(
 }
 
 interface SchedulerState {
+  lastWeekly?: string;
   lastBriefing?: string;
+  lastShutdown?: string;
 }
 
 function stateFile(home: string): string {
@@ -213,6 +228,7 @@ export async function tick(
   const result: TickResult = { delivered: [], failed: [] };
 
   for (const reminder of dueReminders(home, now)) {
+    if (!shouldDispatchReminder(reminder, getAppMode(home, now))) continue;
     if (!reminder.urgent && inQuietHours(config, now)) continue;
     const results = await deliverOccurrence(
       home,
@@ -241,6 +257,49 @@ export async function tick(
     }
   }
 
+  const weeklyTime = config.briefing.weeklyReviewTime;
+  if (typeof weeklyTime === "string") {
+    const local = localParts(now, config.timezone);
+    const today = localDateKey(now, config.timezone);
+    const [hour, minute] = weeklyTime.split(":").map(Number);
+    if (
+      local.weekday === 0 &&
+      (local.hour > hour! ||
+        (local.hour === hour && local.minute >= minute!)) &&
+      !inQuietHours(config, now) &&
+      readState(home).lastWeekly !== today
+    ) {
+      const review = runWeeklyReview(home, {
+        now,
+        timezone: config.timezone,
+        locale: config.locale,
+        lang: lang(config),
+      });
+      const results = await deliverOccurrence(
+        home,
+        `weekly:${today}`,
+        {
+          title: "HELEN · Revisión semanal",
+          text: review.text,
+          sensitive: false,
+          kind: "briefing",
+          lang: lang(config),
+        },
+        options.channels,
+        now,
+      );
+      if (
+        wasDelivered(results) &&
+        results.every((entry) => entry.ok || entry.skipped)
+      )
+        withHomeLock(home, () =>
+          writePrivate(
+            stateFile(home),
+            JSON.stringify({ ...readState(home), lastWeekly: today }),
+          ),
+        );
+    }
+  }
   const briefingTime = config.briefing.time;
   if (briefingTime) {
     const today = localDateKey(now, config.timezone);
@@ -290,6 +349,56 @@ export async function tick(
           ),
         );
       result.briefing = results;
+    }
+  }
+
+  const shutdownTime = config.briefing.shutdownTime;
+  if (shutdownTime) {
+    const today = localDateKey(now, config.timezone);
+    const local = localParts(now, config.timezone);
+    const [hour, minute] = shutdownTime.split(":").map(Number) as [
+      number,
+      number,
+    ];
+    const due =
+      local.hour > hour || (local.hour === hour && local.minute >= minute);
+    if (
+      due &&
+      !inQuietHours(config, now) &&
+      readState(home).lastShutdown !== today
+    ) {
+      const es = lang(config) === "es";
+      const shutdown = runDailyShutdown(home, {
+        now,
+        timezone: config.timezone,
+        locale: config.locale,
+        lang: lang(config),
+      });
+      const notification: Notification = {
+        title: es ? "HELEN · Cierre del Día" : "HELEN · Daily Shutdown",
+        text: shutdown.text,
+        sensitive: false,
+        kind: "briefing",
+        lang: lang(config),
+      };
+      const results = await deliverOccurrence(
+        home,
+        `shutdown:${today}`,
+        notification,
+        options.channels,
+        now,
+      );
+      if (
+        wasDelivered(results) &&
+        results.every((entry) => entry.ok || entry.skipped)
+      ) {
+        withHomeLock(home, () =>
+          writePrivate(
+            stateFile(home),
+            `${JSON.stringify({ ...readState(home), lastShutdown: today })}\n`,
+          ),
+        );
+      }
     }
   }
   return result;
@@ -361,7 +470,7 @@ export function acquireSchedulerLease(home: string): () => void {
 
 export interface SchedulerOptions {
   home: string;
-  channels: DeliveryChannel[];
+  channels: DeliveryChannel[] | (() => DeliveryChannel[]);
   intervalMs?: number;
   signal?: AbortSignal;
   log?: (message: string) => void;
@@ -373,7 +482,12 @@ export async function runScheduler(options: SchedulerOptions): Promise<void> {
   const log = options.log ?? (() => undefined);
   while (!options.signal?.aborted) {
     try {
-      const result = await tick(options.home, { channels: options.channels });
+      const result = await tick(options.home, {
+        channels:
+          typeof options.channels === "function"
+            ? options.channels()
+            : options.channels,
+      });
       for (const entry of result.delivered)
         log(
           `Reminder ${entry.reminder.id} delivered (${
@@ -390,16 +504,10 @@ export async function runScheduler(options: SchedulerOptions): Promise<void> {
     } catch (error) {
       log(`Scheduler error: ${(error as Error).message}`);
     }
-    await new Promise<void>((resolve) => {
-      const timer = setTimeout(resolve, interval);
-      options.signal?.addEventListener(
-        "abort",
-        () => {
-          clearTimeout(timer);
-          resolve();
-        },
-        { once: true },
-      );
-    });
+    try {
+      await delay(interval, undefined, { signal: options.signal });
+    } catch (error) {
+      if (!options.signal?.aborted) throw error;
+    }
   }
 }
