@@ -126,6 +126,8 @@ export function createAlexaVerifier(
   options: VerifierOptions,
 ): (rawBody: Buffer, headers: AlexaHeaders) => Promise<AlexaRequestEnvelope> {
   const cache = new Map<string, { leaf: X509Certificate; until: number }>();
+  // A signed request is valid for a couple of minutes; remember its id so a captured one cannot be replayed.
+  const seen = new Map<string, number>();
   const fetcher = options.fetcher ?? fetch;
   const now = options.now ?? (() => new Date());
   return async (rawBody, headers) => {
@@ -142,11 +144,14 @@ export function createAlexaVerifier(
     if (!entry || entry.until < at.getTime()) {
       const response = await fetcher(headers.certUrl, {
         signal: AbortSignal.timeout(5000),
+        redirect: "error",
       });
       if (!response.ok)
         throw new AlexaVerificationError(
           `Could not download the signing certificate (HTTP ${response.status}).`,
         );
+      if (Number(response.headers.get("content-length") ?? 0) > 64 * 1024)
+        throw new AlexaVerificationError("The certificate chain is too large.");
       const pem = await response.text();
       if (pem.length > 64 * 1024)
         throw new AlexaVerificationError("The certificate chain is too large.");
@@ -194,6 +199,15 @@ export function createAlexaVerifier(
       (!user || !options.userIds.includes(user))
     )
       throw new AlexaVerificationError("This Alexa account is not allowed.");
+    const requestId = envelope.request?.requestId;
+    if (typeof requestId === "string" && requestId) {
+      for (const [id, until] of seen)
+        if (until <= at.getTime()) seen.delete(id);
+      if (seen.has(requestId))
+        throw new AlexaVerificationError("This request was already handled.");
+      if (seen.size > 5000) seen.clear();
+      seen.set(requestId, at.getTime() + 2 * TOLERANCE_MS);
+    }
     return envelope;
   };
 }

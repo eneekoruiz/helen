@@ -318,7 +318,13 @@ export async function disconnectGmail(
 ): Promise<{ disconnected: true; revoked: boolean }> {
   const connection = withHomeLock(home, () => {
     clearGmailTokenCache();
-    const saved = load(authFile(home), ConnectionSchema);
+    // A corrupt file must never stop the owner from disconnecting: remove it and skip the revocation.
+    let saved: z.infer<typeof ConnectionSchema> | undefined;
+    try {
+      saved = load(authFile(home), ConnectionSchema);
+    } catch {
+      saved = undefined;
+    }
     fs.rmSync(authFile(home), { force: true });
     fs.rmSync(pendingFile(home), { force: true });
     return saved;

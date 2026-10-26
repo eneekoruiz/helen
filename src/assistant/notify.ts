@@ -143,6 +143,7 @@ export function desktopChannel(
       } else {
         await run("notify-send", [
           "--app-name=HELEN",
+          "--",
           notification.title,
           text,
         ]);

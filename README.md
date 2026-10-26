@@ -35,7 +35,7 @@ HELEN is a workflow kit for building projects with AI agents (Claude Code, Codex
 
 ## Install
 
-Requires Node.js 20 or Node.js 22 and newer. CI is configured for Linux Node 20/22/24 and Windows Node 22, including installed-package checks. Local results and unobserved hosted runs are reported separately.
+Requires Node.js 20 or Node.js 22 and newer. CI runs on Linux with Node 20, 22 and 24, plus an installed-package check; macOS and Windows runners were removed to save hosted minutes, so those platforms are only covered by local runs. Local results and unobserved hosted runs are reported separately.
 
 ```bash
 npm install -g helen-cli

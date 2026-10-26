@@ -336,7 +336,7 @@ const RULES: Rule[] = [
   // "Borra lo de la leche": the target could be a task, a reminder or a note; the brain finds out.
   {
     pattern:
-      /^(?:borra|elimina|quita|delete|remove)\s+(?:lo\s+d[eo]l?\s+|el\s+|la\s+|los\s+|las\s+|the\s+|that\s+)?(?<query>.+)$/,
+      /^(?:borra|elimina|quita|cancela|anula|delete|remove|cancel)\s+(?:lo\s+d[eo]l?\s+|el\s+|la\s+|los\s+|las\s+|the\s+|that\s+)?(?<query>.+)$/,
     build: (_g, o) => ({ name: "remove", query: o("query")! }),
   },
   // Small talk.

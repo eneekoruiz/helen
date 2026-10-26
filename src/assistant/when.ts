@@ -238,6 +238,9 @@ export function parseWhen(
   options: WhenOptions,
 ): ParsedWhen | null {
   const text = foldSameLength(input);
+  // "a las 25:00" or "8:75" is not a time; ask instead of guessing another one.
+  for (const clock of text.matchAll(/(?<![\d:./-])(\d{1,2}):(\d{2})(?![\d:])/g))
+    if (Number(clock[1]) > 24 || Number(clock[2]) > 59) return null;
   const consumed = new Array<boolean>(text.length).fill(false);
   const spans: Array<[number, number]> = [];
   const free = (start: number, end: number): boolean =>
@@ -274,6 +277,7 @@ export function parseWhen(
   let dayOffset = null as number | null;
   let weekday = null as { day: number; thisWeek: boolean } | null;
   let date = null as { year?: number; month: number; day: number } | null;
+  let bareDay = null as number | null;
   let time = null as Time | null;
   let part = null as Part | null;
   let offsetMs = null as number | null;
@@ -471,7 +475,11 @@ export function parseWhen(
         partOf(match[5]),
       );
       if (!converted) return false;
-      time = converted;
+      // "a las 02:30" with a leading zero is a 24-hour time: do not move it to the afternoon.
+      time = {
+        ...converted,
+        explicit: converted.explicit || /^0\d$/.test(match[1]!),
+      };
       return true;
     },
   );
@@ -486,7 +494,10 @@ export function parseWhen(
       if (!converted) return false;
       time = {
         ...converted,
-        explicit: converted.explicit || (Boolean(match[4]) && hour >= 13),
+        explicit:
+          converted.explicit ||
+          (Boolean(match[4]) && hour >= 13) ||
+          /^0\d$/.test(match[1] ?? match[4] ?? match[6] ?? ""),
       };
       return true;
     },
@@ -559,6 +570,19 @@ export function parseWhen(
     },
   );
 
+  // A bare day of the month: "el 31", "el día 5", "the 31st". It means the next date that has that day.
+  take(
+    new RegExp(
+      `${B}el\\s+(?:dia\\s+)?(\\d{1,2})${E}|${B}(?:on\\s+)?the\\s+(\\d{1,2})(?:st|nd|rd|th)${E}`,
+    ),
+    (match) => {
+      const day = Number(match[1] ?? match[2]);
+      if (day < 1 || day > 31) return false;
+      bareDay = day;
+      return true;
+    },
+  );
+
   // 7. Weekdays and plain day words
   take(
     new RegExp(
@@ -588,6 +612,7 @@ export function parseWhen(
     dayOffset !== null ||
     weekday ||
     date ||
+    bareDay !== null ||
     time ||
     part;
   if (!anything) return null;
@@ -605,6 +630,17 @@ export function parseWhen(
     d: { year: number; month: number; day: number },
     t: { hour: number; minute: number },
   ): Date => zonedTimeToUtc(d.year, d.month, d.day, t.hour, t.minute, tz);
+  if (bareDay !== null && !date && !recurrence) {
+    for (let step = 0; step < 14 && !date; step += 1) {
+      const index = today.month - 1 + step;
+      const year = today.year + Math.floor(index / 12);
+      const month = (index % 12) + 1;
+      if (bareDay > daysInMonth(year, month)) continue;
+      if (instant({ year, month, day: bareDay }, resolvedTime()) > now)
+        date = { year, month, day: bareDay };
+    }
+    if (!date) return null;
+  }
   const result = (due: Date, extra: Partial<ParsedWhen> = {}): ParsedWhen => ({
     due,
     spans: spans.sort((a, b) => a[0] - b[0]),

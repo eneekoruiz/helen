@@ -648,3 +648,16 @@ describe("a local command as the model", () => {
     ).rejects.toThrow(/was not found/);
   });
 });
+
+describe("pending work and loose cancel", () => {
+  it("counts reminders when asked what is pending, and cancels by name", async () => {
+    await ask("recuérdame mañana a las 9 tomar vitaminas");
+    expect((await ask("qué tengo pendiente")).text).toContain(
+      "1 recordatorio pendiente",
+    );
+    expect((await ask("cancela vitaminas")).text).toBe(
+      "Cancelado: «tomar vitaminas».",
+    );
+    expect(listReminders(home)).toEqual([]);
+  });
+});

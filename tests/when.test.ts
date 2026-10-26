@@ -250,3 +250,26 @@ describe("what is not a date, and what remains of the sentence", () => {
     );
   });
 });
+
+describe("what used to be guessed silently", () => {
+  it("reads a bare day of the month as the next date that has it", () => {
+    expect(at("recuérdame el 31 a las 9 pagar alquiler")).toBe(
+      "2026-10-31T08:00:00.000Z",
+    ); // 31 October, CET after the clock change
+    expect(at("pay rent on the 31st at 9am", "en-US")).toBe(
+      "2026-10-31T08:00:00.000Z",
+    );
+    // 20 October is already behind the 5th of this month: the next one is in November.
+    expect(at("el 5 llamar a Ana")).toBe("2026-11-05T08:00:00.000Z");
+  });
+
+  it("keeps a leading-zero time in 24-hour form", () => {
+    expect(at("mañana a las 02:30")).toBe("2026-10-21T00:30:00.000Z");
+    expect(at("mañana a las 2:30")).toBe("2026-10-21T12:30:00.000Z");
+  });
+
+  it("refuses impossible clock times instead of picking another one", () => {
+    expect(at("a las 25:00 tomar pastilla")).toBeUndefined();
+    expect(at("mañana a las 8:75")).toBeUndefined();
+  });
+});

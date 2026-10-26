@@ -218,3 +218,12 @@ it("forces an exact preview for a model-composed draft and exposes no send tool"
   await ask("sí");
   expect(sends).toBe(1);
 });
+
+it("never sends in one step from voice or messaging channels", async () => {
+  const before = sends;
+  for (const channel of ["alexa", "telegram"] as const) {
+    const answer = await ask("envía un correo a Ana: Hola", { channel });
+    expect(answer.text).toContain("Para: ana@example.org");
+  }
+  expect(sends).toBe(before);
+});

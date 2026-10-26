@@ -10,7 +10,7 @@
 - Skill `helen-debug`: reproduce, narrow down (git bisect), prove the root cause, fix it at the cause and lock it with a regression test.
 - Eval suite: <!--fact:evalCases-->142<!--/fact--> cases across the bundled skills, with negative (must-not-trigger) cases for each.
 - `npm run docs:check` / `docs:sync`: numbers, file references and links in the documentation are checked against the repository in CI.
-- Release pipeline for real: release-please and npm trusted publishing with provenance (`release.yml`), a packaging check, a Docker image job and a portability matrix (Linux, macOS, Windows).
+- Release pipeline for real: release-please and npm trusted publishing with provenance (`release.yml`), a packaging check, a Docker image job and a Linux portability matrix (Node 20, 22, 24).
 
 ### Fixed
 - Documentation claims that did not match the repository (missing workflows, counts, links) were corrected and are now enforced.
@@ -20,6 +20,14 @@
 
 - Feature workspace (`helen work`, MCP `helen_work_*`): feature dossiers, tasks with checkpoints, and verification gates whose receipts are signed with a per-user key kept outside the project; detached background jobs (`helen job`, MCP `helen_job_*`, which MCP clients may only use when the user sets `HELEN_MCP_ALLOW_JOBS=1`); outcomes, repository and specialty evals, `verify-package`, and a durable operations journal with crash recovery.
 - The assistant understands moving a reminder ("cambia el recordatorio de mamá a las 10"), deleting by name ("borra lo de la leche"), the time before the verb ("todos los lunes a las 8 recuérdame…"), and questions about notes ("dónde dejé las llaves").
+
+### Fixed (second audit, after the assistant grew)
+- Mail is never sent in one step from Alexa or Telegram: those channels always show the preview first. A corrupt Gmail link file no longer blocks disconnecting.
+- Restoring a backup keeps this installation's channels, allow-lists, privacy, Alexa, server, model command and mail links; only data and preferences come from the file.
+- Alexa: replayed signed requests are refused, the certificate download does not follow redirects, and unauthenticated traffic to `/alexa` is bounded.
+- Dates: "el 31" / "the 31st" mean the next date with that day (they used to fire today), "02:30" stays 24-hour, and impossible hours such as 25:00 are refused instead of replaced.
+- "cancela vitaminas" cancels by name, "qué tengo pendiente" counts reminders, and `notify-send` no longer reads reminder text as options.
+- CI no longer skips runs for shipped Markdown (skills, templates, docs) and the README states which platforms CI actually covers.
 
 ### Fixed (audit of the workspace and operations layers)
 - Project scripts run by `helen check` no longer inherit the MCP stdout/stdin and are killed after ten minutes.
