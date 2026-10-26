@@ -196,8 +196,18 @@ describe.skipIf(!hasOpenssl)("request verification", () => {
       (await verify(raw, { certUrl: CERT_URL, signature256: sign(raw) }))
         .request.type,
     ).toBe("LaunchRequest");
-    await verify(raw, { certUrl: CERT_URL, signature256: sign(raw) });
+    const next = body({ requestId: "r2" });
+    await verify(next, { certUrl: CERT_URL, signature256: sign(next) });
     expect(downloads()).toBe(1);
+  });
+
+  it("refuses a captured request that is replayed within its validity window", async () => {
+    const { verify } = verifier();
+    const raw = body();
+    await verify(raw, { certUrl: CERT_URL, signature256: sign(raw) });
+    await expect(
+      verify(raw, { certUrl: CERT_URL, signature256: sign(raw) }),
+    ).rejects.toThrow(/already handled/);
   });
 
   it("rejects a body changed after signing, a foreign key, missing headers and bad URLs", async () => {

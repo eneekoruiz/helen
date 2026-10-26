@@ -137,6 +137,7 @@ interface Bucket {
 export function createAssistantServer(options: ServerOptions): http.Server {
   const buckets = new Map<string, Bucket>();
   const seenAlexaAccounts = new Set<string>();
+  const alexaWindow = { minute: 0, count: 0 };
   const perMinute = options.rateLimit ?? 60;
   const log = options.log ?? (() => undefined);
 
@@ -206,6 +207,14 @@ export function createAssistantServer(options: ServerOptions): http.Server {
       return send(200, { ok: true, name: "helen-assistant" });
 
     if (url.pathname === "/alexa" && method === "POST") {
+      // Nobody is authenticated yet and each attempt can fetch a certificate: bound the whole endpoint.
+      const minute = Math.floor(Date.now() / 60_000);
+      if (alexaWindow.minute !== minute) {
+        alexaWindow.minute = minute;
+        alexaWindow.count = 0;
+      }
+      if (++alexaWindow.count > 60)
+        throw new HttpError(429, "Too many requests.", { "Retry-After": "60" });
       const raw = await readBody(request);
       if (!options.verifyAlexa)
         throw new HttpError(404, "Alexa is not enabled on this server.");
