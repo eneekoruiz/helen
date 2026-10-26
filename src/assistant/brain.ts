@@ -940,6 +940,16 @@ function tasksList(ctx: Context, list?: string): BrainReply {
       );
   }
   if (!key) {
+    // "What is pending" also covers reminders, which live apart from the task lists.
+    const waiting = listReminders(ctx.home).length;
+    if (waiting > 0)
+      lines.push(
+        say(
+          ctx.lang,
+          `Tienes ${waiting} ${waiting === 1 ? "recordatorio pendiente" : "recordatorios pendientes"}.`,
+          `You have ${waiting} pending ${waiting === 1 ? "reminder" : "reminders"}.`,
+        ),
+      );
     const others = listNames(ctx.home).filter((entry) => entry.list !== INBOX);
     if (others.length > 0)
       lines.push(
