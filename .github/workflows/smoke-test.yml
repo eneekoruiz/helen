@@ -5,15 +5,13 @@ on:
   push:
     branches: [main, develop]
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
+      - '*.md'
       - '.gitignore'
       - 'LICENSE'
   pull_request:
     branches: [main]
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
+      - '*.md'
       - '.gitignore'
       - 'LICENSE'
 

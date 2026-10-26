@@ -10,7 +10,7 @@
 - Skill `helen-debug`: reproduce, narrow down (git bisect), prove the root cause, fix it at the cause and lock it with a regression test.
 - Eval suite: <!--fact:evalCases-->142<!--/fact--> cases across the bundled skills, with negative (must-not-trigger) cases for each.
 - `npm run docs:check` / `docs:sync`: numbers, file references and links in the documentation are checked against the repository in CI.
-- Release pipeline for real: release-please and npm trusted publishing with provenance (`release.yml`), a packaging check, a Docker image job and a portability matrix (Linux, macOS, Windows).
+- Release pipeline for real: release-please and npm trusted publishing with provenance (`release.yml`), a packaging check, a Docker image job and a Linux portability matrix (Node 20, 22, 24).
 
 ### Fixed
 - Documentation claims that did not match the repository (missing workflows, counts, links) were corrected and are now enforced.
