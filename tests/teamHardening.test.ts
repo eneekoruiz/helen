@@ -84,6 +84,23 @@ function deadPid(): number {
   return Number(child.stdout.trim());
 }
 
+/** A killed orphan can linger as a zombie when the container's init never reaps it: that process is dead. */
+function isAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+  } catch {
+    return false;
+  }
+  try {
+    const stat = fs.readFileSync(`/proc/${pid}/stat`, "utf8");
+    return (
+      stat.slice(stat.lastIndexOf(")") + 2, stat.lastIndexOf(")") + 3) !== "Z"
+    );
+  } catch {
+    return true;
+  }
+}
+
 describe("red-team regressions", () => {
   let tmp: string;
   beforeEach(() => {
@@ -703,8 +720,7 @@ describe("red-team regressions", () => {
       const stopped = snapshot();
       await new Promise((resolve) => setTimeout(resolve, 500));
       expect(snapshot()).toEqual(stopped); // Neither workers nor descendants can write after claims are released.
-      for (const [pid] of stopped)
-        expect(() => process.kill(Number(pid), 0)).toThrow();
+      for (const [pid] of stopped) expect(isAlive(Number(pid))).toBe(false);
     }, 30_000);
 
     it("keeps secrets that a worker printed out of the log and the captured result", async () => {
