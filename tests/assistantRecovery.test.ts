@@ -179,7 +179,8 @@ describe("assistant recovery", () => {
     const restored = restoreAssistantBackup(home, file, now);
     expect(listMemory(home).map((item) => item.id)).toEqual([note.id]);
     expect(listTasks(home).map((item) => item.id)).toEqual([task.id]);
-    expect(readConfig(home).provider).toBeUndefined();
+    // A command provider is never taken from a backup, and the one this installation already had is kept.
+    expect(readConfig(home).provider?.type).toBe("command");
     expect(listReminders(home, { status: "all" })[0]?.status).toBe("cancelled");
     expect(restored.cancelledPastReminders).toBe(1);
     expect(fs.existsSync(path.join(restored.previous, "tasks.json"))).toBe(

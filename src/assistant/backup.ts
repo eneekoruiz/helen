@@ -300,6 +300,40 @@ export function createAssistantBackup(
   });
 }
 
+/**
+ * A backup carries preferences and data, not trust. Who may reach the assistant (channels, allow-lists, privacy),
+ * which program answers for it and the mail and reminder links stay as this installation has them, so a
+ * tampered or borrowed backup cannot add a chat, widen privacy or swap the model command.
+ */
+function restoredConfig(home: string, fromBackup: Backup["config"]) {
+  let local: Backup["config"] | undefined;
+  try {
+    local = readConfig(home);
+  } catch {
+    local = undefined;
+  }
+  const merged: Record<string, unknown> = { ...fromBackup };
+  for (const key of [
+    "channels",
+    "alexa",
+    "privacy",
+    "server",
+    "provider",
+    "capture",
+    "gmail",
+    "gmailAuth",
+    "gmailRedirectUri",
+    "recordatorios",
+  ]) {
+    const kept = (local as Record<string, unknown> | undefined)?.[key];
+    if (kept === undefined) delete merged[key];
+    else merged[key] = kept;
+  }
+  // A first restore on a bare installation has no local channels: start from the safe defaults.
+  if (merged.channels === undefined) merged.channels = {};
+  return AssistantConfigSchema.parse(merged);
+}
+
 export function restoreAssistantBackup(
   home: string,
   file: string,
@@ -348,7 +382,7 @@ export function restoreAssistantBackup(
         }));
         writePrivate(
           path.join(stage, "config.json"),
-          JSON.stringify(backup.config),
+          JSON.stringify(restoredConfig(home, backup.config)),
         );
         writePrivate(
           path.join(stage, "tasks.json"),

@@ -128,3 +128,32 @@ it("restores workflow progress while excluding Gmail state and executable connec
   for (const name of excluded)
     expect(fs.existsSync(path.join(home, name))).toBe(true);
 });
+
+it("keeps this installation's channels and links when a backup is restored over it", () => {
+  root = fs.mkdtempSync(path.join(os.tmpdir(), "helen-life-backup-trust-"));
+  const home = path.join(root, "source");
+  const target = path.join(root, "target");
+  const file = path.join(root, "backup.json");
+  const now = new Date("2026-10-24T08:00:00Z");
+  writeConfig(
+    { owner: "Test", locale: "es-ES", timezone: "Europe/Madrid" },
+    home,
+  );
+  writeConfig(
+    { owner: "Mine", locale: "es-ES", timezone: "Europe/Madrid" },
+    target,
+  );
+  createAssistantBackup(home, file, now);
+  // Someone edits the backup file to let their own chat in.
+  const tampered = JSON.parse(fs.readFileSync(file, "utf8"));
+  tampered.config.channels = {
+    telegram: { allowedChats: [666] },
+  };
+  tampered.config.owner = "Restored owner";
+  fs.writeFileSync(file, JSON.stringify(tampered));
+
+  restoreAssistantBackup(target, file, now);
+  const restored = readConfig(target);
+  expect(restored.owner).toBe("Restored owner");
+  expect(JSON.stringify(restored.channels)).not.toContain("666");
+});
