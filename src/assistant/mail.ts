@@ -115,7 +115,11 @@ export async function handleMailMessage(
   );
   if (ctx.signal?.aborted) cancelGmailDraft(ctx.home, draft.id);
   authorize(ctx);
-  if (/^(env|manda|send)/i.test(command[1]!)) {
+  // Only typed channels (terminal, the web chat) send in one step; voice and messaging channels show the preview first.
+  if (
+    (ctx.channel === "cli" || ctx.channel === "web") &&
+    /^(env|manda|send)/i.test(command[1]!)
+  ) {
     const sent = await sendGmailDraft(
       ctx.home,
       config,

@@ -771,7 +771,7 @@ export async function runTelegramBot(options: TelegramOptions): Promise<void> {
     } catch (error) {
       if (options.signal?.aborted) break;
       options.log?.(
-        `Telegram: ${(error as Error).message.replace(token, "<token>")}; retrying in ${Math.round(backoff / 1000)} s.`,
+        `Telegram: ${(error as Error).message.replaceAll(token, "<token>")}; retrying in ${Math.round(backoff / 1000)} s.`,
       );
       await new Promise<void>((resolve) => {
         const timer = setTimeout(resolve, backoff);

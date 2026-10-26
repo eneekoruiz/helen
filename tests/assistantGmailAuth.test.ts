@@ -283,3 +283,10 @@ describe("Gmail browser OAuth", () => {
     expect(readGmailConnection(home)).toBeUndefined();
   });
 });
+
+it("lets the owner disconnect even when the saved connection file is corrupt", async () => {
+  fs.writeFileSync(path.join(home, "gmail-auth.json"), "{bad");
+  const result = await disconnectGmail(home, { revoke: true }, mock());
+  expect(result).toEqual({ disconnected: true, revoked: false });
+  expect(fs.existsSync(path.join(home, "gmail-auth.json"))).toBe(false);
+});
