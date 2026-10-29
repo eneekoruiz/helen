@@ -85,7 +85,7 @@
   "author": "eneekoruiz",
   "license": "MIT",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.135.0",
+    "@anthropic-ai/sdk": "^1.3.0",
     "@clack/prompts": "^0.11.0",
     "cli-progress": "^3.12.0",
     "commander": "^12.1.0",
