@@ -83,6 +83,28 @@ Claude and Codex expose different plugin, agent and hook capabilities; configura
 - **6. Metadatos & SEO Técnico Automático**: Exporta siempre metadatos completos (`metadata` en Next.js App Router; `<meta name="viewport">`, `<meta charset="utf-8">` y `<title>` en HTML5).
 - **7. Limpieza de Formato e Importaciones**: Sigue estrictamente la jerarquía estándar de imports (1º core de React/Next, 2º librerías externas y componentes UI, 3º utilidades/hooks locales, 4º tipos TypeScript). Cero código muerto.
 
+## 11. Filosofía Ponytail & Minimalist Engineering (Lazy Senior Dev Mode)
+- **Always Active by Default**:
+  - **The Best Code is the Code Never Written**: Resuelve el problema completo con el menor código nuevo posible (el diff más conciso y legible gana). Cero código especulativo "para después".
+  - **Rung Ladder (Escalera de Decisión)**:
+    1. ¿Necesita existir? Omite abstracciones, wrappers, opciones o configuraciones no solicitadas.
+    2. ¿Existe ya en el codebase? Reutiliza helpers, componentes o patrones ya presentes.
+    3. ¿Lo resuelve la librería estándar o la plataforma nativa? Úsalo prioritariamente frente a utilidades externas.
+    4. ¿Existe una dependencia ya instalada? Úsala; jamás agregues una dependencia para unas pocas líneas.
+    5. Solo entonces escribe el mínimo código nuevo que funcione.
+  - **Límites Intocables**: NUNCA recortes validaciones en fronteras de confianza, gestión de errores que prevenga pérdida o corrupción de datos, seguridad ni accesibilidad.
+  - **Verificación**: Cada lógica no trivial (bifurcaciones, bucles, parsers, datos sensibles) debe acompañarse de un test pequeño o aserción de comprobación.
+  - **Skills Ponytail Proactivas**: Usa activamente `ponytail` (lite/full/ultra), `ponytail-review` (auditoría senior de cambios, llamadores externos y carga) y `ponytail-audit` (auditoría clasificada de repositorios).
+
+## 12. Orquestación Multi-Agente & Protocolo de Relevo con Orca (Always Active by Default)
+- **Sustrato Predeterminado**: Usa `orca` CLI (`orca status --json`, `orca dispatch`, `orca lanes`, `orca inspect`) para orquestar agentes (`claude`, `codex`, `agy`) en Git worktrees aislados sin pisarse ramas ni archivos.
+- **Protocolo de Relevo por Agotamiento de Cuota (Margen de Seguridad 3-5%)**:
+  - Ningún agente debe trabajar a ciegas hasta agotar la cuota o quedarse a medias.
+  - Al detectar que resta un **3% a 5%** de cuota o advertencia de límite de contexto:
+    1. **Commit de Estado Atómico**: Hacer commit inmediato en la rama/worktree (`git add -A && git commit -m "wip: handoff checkpoint before quota limit"`).
+    2. **Ficha de Relevo (`.orca-handoff.md`)**: Generar en la raíz un archivo breve con: (a) objetivo original, (b) cambios aplicados y tests pasados, (c) tareas pendientes exactas, y (d) comando de continuación para el siguiente agente.
+    3. **Pase de Testigo**: Despachar el relevo con `orca dispatch` hacia el siguiente agente disponible (`codex`, `claude` o `agy`), asegurando continuidad fluida sin pérdida de avance.
+
 ## Available Specialized Agents (ECC & Multi-Agent Network)
 
 | Agent | Purpose | When to Use |
@@ -163,6 +185,7 @@ Claude and Codex expose different plugin, agent and hook capabilities; configura
 - Build the least code that works: reuse the repo, stdlib and platform first. No unrequested features. Never skip validation, error handling, security or accessibility.
 - Read minimally: grep/glob and targeted line ranges, never whole files by default. Don't re-read files just edited. In a large or unfamiliar repo, query the graphify graph (graphify-out/) before searching files.
 - Before any task, check whether a matching skill or plugin exists and use it by default. Use relevant skills proactively without waiting for the user to name them:
+  - Ponytail & Minimalist Engineering (ALWAYS ACTIVE BY DEFAULT): Aplica la mentalidad Lazy Senior Dev en cada tarea. Reutiliza plataforma, repo y stdlib primero. Cero abstracciones o código muerto sin sacrificar validación ni seguridad. Usa 'ponytail', 'ponytail-review' y 'ponytail-audit'.
   - Diseño a Código (Figma, tldraw, Excalidraw, Canvas, Pencil): aplica fidelidad absoluta pixel-perfect, modularidad limpia, mínimo cambio, detección estricta de stack (React/Next vs HTML puro) y cero suposiciones de lógica.
   - Arquitectura Frontend & UI (Next.js, React, Tailwind, HTML5): boundaries Server/Client, layouts fluidos zero-overflow, dark mode nativo de primera clase, iconos lucide/SVG nativo y SEO técnico automático.
   - Pruebas y Calidad: genera tests unitarios/componentes con Vitest/Playwright para componentes interactivos clave; aplica CodeRabbit en diffs.
@@ -182,6 +205,7 @@ Claude and Codex expose different plugin, agent and hook capabilities; configura
   - Book or long document into reusable knowledge: book-to-skill.
   - Job search and CV: career-ops. Never invent or inflate facts about the CV.
   - Security testing (strix skills): only on targets the user owns or is authorized to test.
+  - Orquestación y Relevo Multi-Agente (ALWAYS ACTIVE BY DEFAULT): usa Orca CLI (`orca`). Al restar 3-5% de cuota/contexto, realiza commit atómico, genera `.orca-handoff.md` y despacha el relevo a Codex/Claude/Antigravity para garantizar cero trabajo inconcluso.
 - Output stays short: diffs over full rewrites, no restating the task, no list of changed files unless asked.
 - Ask before destructive or irreversible actions. Otherwise proceed without asking.
 <!-- kit-rules:end -->
