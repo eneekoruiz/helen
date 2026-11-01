@@ -72,7 +72,7 @@ jobs:
           cd "$TMP_DIR"
           npm create vite@latest sandbox -- --template react-ts --no-interactive
           cd sandbox
-          npm install
+          npm install --legacy-peer-deps
           
           # Run CLI health checks
           echo "Verifying CLI diagnostics and commands..."
@@ -140,7 +140,7 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8')); console.log('package.json is valid JSON!')"
           
           # Install generated dependencies and run each advertised quality gate.
-          npm install
+          npm install --legacy-peer-deps
           npm run lint
           npm run typecheck
           npm run test -- --maxWorkers=2

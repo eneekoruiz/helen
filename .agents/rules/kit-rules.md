@@ -25,7 +25,7 @@
   - Book or long document into reusable knowledge: book-to-skill.
   - Job search and CV: career-ops. Never invent or inflate facts about the CV.
   - Security testing (strix skills): only on targets the user owns or is authorized to test.
-  - Orquestación y Relevo Multi-Agente (ALWAYS ACTIVE BY DEFAULT): usa Orca CLI (`orca`). Al restar 3-5% de cuota/contexto, realiza commit atómico, genera `.orca-handoff.md` y despacha el relevo a Codex/Claude/Antigravity para garantizar cero trabajo inconcluso.
+  - Orquestación y Relevo Multi-Agente (ALWAYS ACTIVE BY DEFAULT): usa Orca CLI (`orca`). Al restar 3-5% de cuota/contexto, realiza commit atómico, genera `.orca-handoff.md` con recomendación justificada de IA y modelo exacto según trabajo y cuota, y despacha el relevo a Codex/Claude/Antigravity para garantizar cero trabajo inconcluso.
 - Output stays short: diffs over full rewrites, no restating the task, no list of changed files unless asked.
 - Ask before destructive or irreversible actions. Otherwise proceed without asking.
 <!-- HELEN:END -->

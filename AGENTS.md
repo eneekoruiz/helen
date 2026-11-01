@@ -101,8 +101,8 @@ Claude and Codex expose different plugin, agent and hook capabilities; configura
 - **Protocolo de Relevo por Agotamiento de Cuota (Margen de Seguridad 3-5%)**:
   - Ningún agente debe trabajar a ciegas hasta agotar la cuota o quedarse a medias.
   - Al detectar que resta un **3% a 5%** de cuota o advertencia de límite de contexto:
-    1. **Commit de Estado Atómico**: Hacer commit inmediato en la rama/worktree (`git add -A && git commit -m "wip: handoff checkpoint before quota limit"`).
-    2. **Ficha de Relevo (`.orca-handoff.md`)**: Generar en la raíz un archivo breve con: (a) objetivo original, (b) cambios aplicados y tests pasados, (c) tareas pendientes exactas, y (d) comando de continuación para el siguiente agente.
+    1. **Commit de Estado Atómico**: Hacer commit inmediato en la rama/worktree (`git add -A && git commit -m "chore(handoff): checkpoint before quota limit"`).
+    2. **Ficha de Relevo (`.orca-handoff.md`)**: Generar en la raíz un archivo breve con: (a) objetivo original, (b) cambios aplicados y tests pasados, (c) tareas pendientes exactas, (d) **Recomendación explícita de IA y Modelo exacto** (ej. Codex con `o3-mini` / `gpt-4o` para razonamiento complejo; Claude 3.7 Sonnet para UI/diseño; Antigravity con `Gemini 2.0 Flash` para tests y documentación) justificando la elección según la cuota disponible y la naturaleza del trabajo asignado, y (e) comando de continuación para el siguiente agente.
     3. **Pase de Testigo**: Despachar el relevo con `orca dispatch` hacia el siguiente agente disponible (`codex`, `claude` o `agy`), asegurando continuidad fluida sin pérdida de avance.
 
 ## Available Specialized Agents (ECC & Multi-Agent Network)
@@ -205,7 +205,7 @@ Claude and Codex expose different plugin, agent and hook capabilities; configura
   - Book or long document into reusable knowledge: book-to-skill.
   - Job search and CV: career-ops. Never invent or inflate facts about the CV.
   - Security testing (strix skills): only on targets the user owns or is authorized to test.
-  - Orquestación y Relevo Multi-Agente (ALWAYS ACTIVE BY DEFAULT): usa Orca CLI (`orca`). Al restar 3-5% de cuota/contexto, realiza commit atómico, genera `.orca-handoff.md` y despacha el relevo a Codex/Claude/Antigravity para garantizar cero trabajo inconcluso.
+  - Orquestación y Relevo Multi-Agente (ALWAYS ACTIVE BY DEFAULT): usa Orca CLI (`orca`). Al restar 3-5% de cuota/contexto, realiza commit atómico, genera `.orca-handoff.md` con recomendación justificada de IA y modelo exacto según trabajo y cuota, y despacha el relevo a Codex/Claude/Antigravity para garantizar cero trabajo inconcluso.
 - Output stays short: diffs over full rewrites, no restating the task, no list of changed files unless asked.
 - Ask before destructive or irreversible actions. Otherwise proceed without asking.
 <!-- kit-rules:end -->
