@@ -33,7 +33,7 @@ If you already have a working test setup with Jest or Vitest.
 
 ### Dependencies
 - **Runtime**: None
-- **Dev**: vitest, @testing-library/react, @testing-library/jest-dom, @testing-library/user-event, jsdom
+- **Dev**: vitest, @testing-library/react, @testing-library/dom, @testing-library/jest-dom, @testing-library/user-event, jsdom
 
 ### Requirements
 - React project

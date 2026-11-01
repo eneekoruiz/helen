@@ -392,6 +392,7 @@ function getDependencyVersion(dep: string): string {
     vitest: "^3.0.0",
     "@vitest/coverage-v8": "^3.0.0",
     "@testing-library/react": "^16.0.1",
+    "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/user-event": "^14.5.2",
     jsdom: "^26.1.0",
