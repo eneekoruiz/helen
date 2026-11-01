@@ -223,6 +223,10 @@ export function recordatoriosStatus(
 }
 export function disconnectRecordatoriosAuthorization(home: string): void {
   withHomeLock(home, () => {
+    writePrivate(
+      path.join(home, "recordatorios-auth-generation.json"),
+      JSON.stringify({ id: crypto.randomUUID() }),
+    );
     try {
       fs.unlinkSync(authPath(home));
     } catch (error) {
@@ -504,7 +508,7 @@ function applyRemote(
       if (index >= 0) tasks.splice(index, 1);
     } else if (
       !current &&
-      entry?.snapshot &&
+      (entry?.snapshot || (!rejected && sent?.get(row.id))) &&
       !(rejected && sent?.has(row.id) && sent.get(row.id) === undefined)
     ) {
       // A local deletion is still pending; do not resurrect it during a remote edit.
@@ -548,7 +552,7 @@ function applyRemote(
         done:
           status === "open"
             ? undefined
-            : current?.status === "done"
+            : current?.status === "done" && changes.status === "done"
               ? current.done
               : remote.done,
         created: current?.created ?? remote.created,
@@ -871,16 +875,39 @@ export function saveRecordatoriosAuthorization(
   config: RecordatoriosConfig,
   token: string,
   accountId?: string,
+  generation?: string,
 ): void {
   const cfg = RecordatoriosConfigSchema.parse(config);
   if (!accountId)
     throw new Error("Verify the Recordatorios account before connecting");
   const auth = AuthSchema.parse({ url: originOf(cfg), token, accountId });
   withHomeLock(home, () => {
+    if (
+      generation &&
+      z
+        .object({ id: z.string().uuid() })
+        .parse(
+          readPrivateJson(
+            path.join(home, "recordatorios-auth-generation.json"),
+            1024,
+          ),
+        ).id !== generation
+    )
+      throw new Error("Recordatorios connection was cancelled");
     assertRecordatoriosAccount(home, cfg, accountId);
     const state = loadState(home, cfg);
     state.accountId = accountId;
     saveState(home, state);
     writePrivate(authPath(home), JSON.stringify(auth));
+  });
+}
+export function beginRecordatoriosAuthorization(home: string): string {
+  return withHomeLock(home, () => {
+    const id = crypto.randomUUID();
+    writePrivate(
+      path.join(home, "recordatorios-auth-generation.json"),
+      JSON.stringify({ id }),
+    );
+    return id;
   });
 }

@@ -1,5 +1,11 @@
 import { withHomeLock } from "./home.js";
-import { TaskSchema, SHOPPING, listTasks, type Task } from "./tasks.js";
+import {
+  TaskSchema,
+  SHOPPING,
+  listTasks,
+  isTaskSensitive,
+  type Task,
+} from "./tasks.js";
 import { updateCollection } from "./store.js";
 import { fold } from "./text.js";
 
@@ -68,9 +74,11 @@ export function shoppingList(
   lang: "es" | "en" = "es",
   requestedPage = 0,
 ): { text: string; buttons: ShoppingButton[][]; page: number; pages: number } {
-  const tasks = groupShoppingItems(listTasks(home, { list: SHOPPING })).flatMap(
-    (group) => group.items,
-  );
+  const tasks = groupShoppingItems(
+    listTasks(home, { list: SHOPPING }).filter(
+      (task) => !isTaskSensitive(task),
+    ),
+  ).flatMap((group) => group.items);
   const pages = Math.max(1, Math.ceil(tasks.length / 10));
   const page = Math.min(
     pages - 1,
@@ -117,6 +125,9 @@ export function completeShoppingItem(
       if (task.status === "open") {
         task.status = "done";
         task.done = now.toISOString();
+        task.completions = [
+          ...new Set([...(task.completions ?? []), task.done]),
+        ].slice(-10000);
         task.updated = now.toISOString();
       }
       return { ...task };

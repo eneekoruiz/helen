@@ -5,6 +5,7 @@ import { deliveryStatus } from "./scheduler.js";
 import { isValidTimeZone } from "./time.js";
 import { readGmailConnection } from "./gmailAuth.js";
 import { listGmailDrafts } from "./gmail.js";
+import { recordatoriosStatus } from "./recordatorios.js";
 
 export interface AssistantDiagnostic {
   name: string;
@@ -55,6 +56,22 @@ export async function diagnoseAssistant(
     return checks;
   }
   const env = options.env ?? process.env;
+  try {
+    const status = recordatoriosStatus(home, config.recordatorios);
+    add(
+      "recordatorios",
+      status.connected ? "ok" : "warning",
+      status.connected
+        ? "Authorization saved; live Neon synchronization and phone delivery are not verified"
+        : "Connect Recordatorios from the private chat settings; database and VAPID configuration stay in the PWA",
+    );
+  } catch {
+    add(
+      "recordatorios",
+      "error",
+      "Recordatorios state is invalid; local tasks are preserved and synchronization requires review",
+    );
+  }
   try {
     const connection = readGmailConnection(home);
     add(

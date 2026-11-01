@@ -29,6 +29,7 @@ const meta: HelenModule["meta"] = {
     "vitest",
     "@vitest/coverage-v8",
     "@testing-library/react",
+    "@testing-library/dom",
     "@testing-library/jest-dom",
     "@testing-library/user-event",
     "jsdom",

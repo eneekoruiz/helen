@@ -5,6 +5,7 @@
 - Build the least code that works: reuse the repo, stdlib and platform first. No unrequested features. Never skip validation, error handling, security or accessibility.
 - Read minimally: grep/glob and targeted line ranges, never whole files by default. Don't re-read files just edited. In a large or unfamiliar repo, query the graphify graph (graphify-out/) before searching files.
 - Before any task, check whether a matching skill or plugin exists and use it by default. Use relevant skills proactively without waiting for the user to name them:
+  - Ponytail & Minimalist Engineering (ALWAYS ACTIVE BY DEFAULT): Aplica la mentalidad Lazy Senior Dev en cada tarea. Reutiliza plataforma, repo y stdlib primero. Cero abstracciones o código muerto sin sacrificar validación ni seguridad. Usa 'ponytail', 'ponytail-review' y 'ponytail-audit'.
   - Diseño a Código (Figma, tldraw, Excalidraw, Canvas, Pencil): aplica fidelidad absoluta pixel-perfect, modularidad limpia, mínimo cambio, detección estricta de stack (React/Next vs HTML puro) y cero suposiciones de lógica.
   - Arquitectura Frontend & UI (Next.js, React, Tailwind, HTML5): boundaries Server/Client, layouts fluidos zero-overflow, dark mode nativo de primera clase, iconos lucide/SVG nativo y SEO técnico automático.
   - Pruebas y Calidad: genera tests unitarios/componentes con Vitest/Playwright para componentes interactivos clave; aplica CodeRabbit en diffs.
@@ -24,6 +25,7 @@
   - Book or long document into reusable knowledge: book-to-skill.
   - Job search and CV: career-ops. Never invent or inflate facts about the CV.
   - Security testing (strix skills): only on targets the user owns or is authorized to test.
+  - Orquestación y Relevo Multi-Agente (ALWAYS ACTIVE BY DEFAULT): usa Orca CLI (`orca`). Al restar 3-5% de cuota/contexto, realiza commit atómico, genera `.orca-handoff.md` con recomendación justificada de IA y modelo exacto según trabajo y cuota, y despacha el relevo a Codex/Claude/Antigravity para garantizar cero trabajo inconcluso.
 - Output stays short: diffs over full rewrites, no restating the task, no list of changed files unless asked.
 - Ask before destructive or irreversible actions. Otherwise proceed without asking.
 <!-- HELEN:END -->
