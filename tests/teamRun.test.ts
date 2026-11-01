@@ -73,22 +73,29 @@ describe("command parsing", () => {
       "--sandbox",
       "read-only",
     ]);
-    expect(
-      presetCommand("codex", { readOnly: false } as typeof item),
-    ).toEqual(["codex", "exec", "--sandbox", "workspace-write"]);
+    expect(presetCommand("codex", { readOnly: false } as typeof item)).toEqual([
+      "codex",
+      "exec",
+      "--sandbox",
+      "workspace-write",
+    ]);
     expect(presetCommand("agy", item)).toEqual(["agy", "run", "--read-only"]);
-    expect(
-      presetCommand("agy", { readOnly: false } as typeof item),
-    ).toEqual(["agy", "run"]);
+    expect(presetCommand("agy", { readOnly: false } as typeof item)).toEqual([
+      "agy",
+      "run",
+    ]);
     expect(presetCommand("orca", item)).toEqual([
       "orca",
       "dispatch",
       "--agent",
       "claude",
     ]);
-    expect(
-      presetCommand("orca", { readOnly: false } as typeof item),
-    ).toEqual(["orca", "dispatch", "--agent", "codex"]);
+    expect(presetCommand("orca", { readOnly: false } as typeof item)).toEqual([
+      "orca",
+      "dispatch",
+      "--agent",
+      "codex",
+    ]);
     expect(() => presetCommand("nope", item)).toThrow(/Unknown agent preset/);
   });
 });

@@ -133,12 +133,7 @@ export function presetCommand(name: string, item: WorkItem): string[] {
     return item.readOnly ? ["agy", "run", "--read-only"] : ["agy", "run"];
   }
   if (name === "orca") {
-    return [
-      "orca",
-      "dispatch",
-      "--agent",
-      item.readOnly ? "claude" : "codex",
-    ];
+    return ["orca", "dispatch", "--agent", item.readOnly ? "claude" : "codex"];
   }
   throw new Error(
     `Unknown agent preset "${name}". Available: claude, codex, agy, orca. For any other agent pass --command "<program and arguments>".`,

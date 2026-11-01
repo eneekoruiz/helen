@@ -71,6 +71,7 @@ jobs:
           # Initialize Vite + React + TS project
           cd "$TMP_DIR"
           npm create vite@latest sandbox -- --template react-ts --no-interactive
+          npm --prefix "$TMP_DIR/sandbox" pkg set devDependencies.typescript="~5.8.2"
           cd sandbox
           npm install --legacy-peer-deps
           
