@@ -1,5 +1,6 @@
 import { z } from "zod";
 import crypto from "node:crypto";
+import { handleFinanceChat } from "./financeChat.js";
 import { findSecrets, looksSensitive, redact } from "../core/secrets.js";
 import { runAction, undoAction, clearActions } from "./actions.js";
 import { buildAgenda, formatAgenda, type AgendaRange } from "./agenda.js";
@@ -1197,6 +1198,19 @@ function json(value: unknown): string {
   return JSON.stringify(value);
 }
 
+function withoutFinanceTasks(ctx: Context, text: string): string {
+  for (const task of listTasks(ctx.home, { status: "all" })) {
+    if (task.source === "orchestrator")
+      text = text
+        .replaceAll(task.text, "(private financial task)")
+        .replaceAll(
+          JSON.stringify(task.text).slice(1, -1),
+          "(private financial task)",
+        );
+  }
+  return text;
+}
+
 function modelTools(ctx: Context): AssistantTool[] {
   const allowSensitive =
     ctx.showSensitive && ctx.config.provider?.allowSensitive === true;
@@ -1623,7 +1637,7 @@ function modelTools(ctx: Context): AssistantTool[] {
           (ctx.completedActions ??= []).push(label[ctx.lang === "es" ? 0 : 1]);
         return !allowSensitive && looksSensitive(output)
           ? json({ result: "private; view on an authorized private channel" })
-          : redact(output);
+          : withoutFinanceTasks(ctx, redact(output));
       },
     })),
     ...[
@@ -1647,7 +1661,7 @@ function modelTools(ctx: Context): AssistantTool[] {
           ].includes(tool.name)
         )
           (ctx.completedActions ??= []).push(tool.name);
-        return redact(output);
+        return withoutFinanceTasks(ctx, redact(output));
       },
     })),
   ];
@@ -1728,13 +1742,19 @@ async function askModel(ctx: Context, message: string): Promise<BrainReply> {
   try {
     const answer = await model.answer({
       system: redact(systemPrompt(ctx.config)),
-      user: contextBlock(ctx, message, !model.usesTools),
+      user: withoutFinanceTasks(
+        ctx,
+        contextBlock(ctx, message, !model.usesTools),
+      ),
       history: privateHistory(ctx.conversation.history ?? [])
         .filter(
           (turn) =>
             !turn.sensitive || (ctx.showSensitive && provider?.allowSensitive),
         )
-        .map(({ role, content }) => ({ role, content })),
+        .map(({ role, content }) => ({
+          role,
+          content: withoutFinanceTasks(ctx, content),
+        })),
       tools: model.usesTools ? modelTools(ctx) : [],
       timeoutMs: ctx.speaker
         ? (provider?.voiceTimeoutMs ?? 6_000)
@@ -2073,6 +2093,14 @@ function rememberTurn(
   result: BrainReply,
   correspondence = false,
 ): void {
+  if (
+    listTasks(ctx.home, { status: "all" }).some(
+      (task) =>
+        task.source === "orchestrator" &&
+        (input.includes(task.text) || result.text.includes(task.text)),
+    )
+  )
+    return;
   const sensitive =
     correspondence ||
     Boolean(ctx.privateAccess) ||
@@ -2281,6 +2309,23 @@ async function handleTurn(
   const control = fold(understood.cleaned)
     .replace(/[¿?!.]/g, "")
     .trim();
+  // Financial data uses a deterministic private route and is never added to model history.
+  try {
+    const financial = await handleFinanceChat(input, ctx);
+    if (financial !== null) {
+      saveConversation(ctx.home, ctx.conversation, now);
+      return reply(ctx, "pending", financial, {
+        speech: "Consulta el resultado financiero en tu canal privado.",
+      });
+    }
+  } catch {
+    saveConversation(ctx.home, ctx.conversation, now);
+    return reply(
+      ctx,
+      "pending",
+      "No se pudo confirmar la operación financiera. Revisa los datos, permisos y recibos locales; no des por completada una escritura sin su resultado.",
+    );
+  }
   try {
     const productivity = await handleProductivityMessage(
       understood.cleaned,

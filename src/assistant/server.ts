@@ -37,6 +37,12 @@ import type { LanguageModel } from "./llm.js";
 import { addMemory } from "./memory.js";
 import { addReminder, listReminders } from "./reminders.js";
 import { listTasks } from "./tasks.js";
+import {
+  importSavedLinks,
+  listSavedLinks,
+  parseSavedExport,
+  reviewSavedLink,
+} from "./saved.js";
 import { chatPage } from "./web.js";
 
 /**
@@ -312,6 +318,49 @@ export function createAssistantServer(options: ServerOptions): http.Server {
         throw new HttpError(400, "Invalid conversation identifier.");
       return `${channel}:${id}`;
     };
+    if (url.pathname === "/saved" && method === "GET") {
+      privateChannel(url.searchParams.get("speaker") === "true");
+      return send(200, {
+        items: listSavedLinks(
+          home,
+          url.searchParams.get("query") ?? "",
+          url.searchParams.get("category") ?? "",
+        ),
+      });
+    }
+    if (
+      (url.pathname === "/saved/import" || url.pathname === "/saved/review") &&
+      method === "POST"
+    ) {
+      privateChannel();
+      const body = jsonBody(
+        await readBody(
+          request,
+          url.pathname === "/saved/import" ? 10 * 1024 * 1024 : MAX_BODY,
+        ),
+      );
+      privateChannel(body.speaker);
+      if (url.pathname === "/saved/import") {
+        const input = z
+          .object({
+            data: z.unknown(),
+            categories: z.unknown().optional(),
+            speaker: z.boolean().optional(),
+          })
+          .strict()
+          .parse(body);
+        return send(
+          200,
+          importSavedLinks(
+            home,
+            parseSavedExport(input.data),
+            input.categories,
+          ),
+        );
+      }
+      const { speaker: _speaker, ...change } = body;
+      return send(200, { item: reviewSavedLink(home, change) });
+    }
     if (url.pathname === "/capture" && method === "POST") {
       privateChannel();
       const body = jsonBody(await readBody(request, 14 * 1024 * 1024));

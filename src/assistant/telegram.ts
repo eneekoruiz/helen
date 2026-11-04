@@ -16,6 +16,7 @@ import {
 import { completeShoppingItem, shoppingList } from "./shopping.js";
 import { updateCollection } from "./store.js";
 import { fold } from "./text.js";
+import { handleTelegramRecordatorios } from "./telegramRecordatorios.js";
 
 /**
  * Talk to HELEN from Telegram: a bot of your own (created with @BotFather) that long-polls Telegram, so the
@@ -631,6 +632,13 @@ export async function handleUpdate(
       lang === "es"
         ? "Las gestiones y los archivos personales solo se procesan en un chat privado autorizado."
         : "Personal requests and files are only processed in an authorized private chat.";
+  } else if (
+    message.text &&
+    /^\/recordatorios(?:\s|$)/i.test(message.text) &&
+    isForwarded(message)
+  ) {
+    text =
+      "Envía el comando de Recordatorios como mensaje propio, no reenviado. No se ha guardado ni ejecutado su contenido.";
   } else if (message.voice || message.photo?.length || message.document) {
     if (
       message.chat.type !== "private" ||
@@ -667,6 +675,18 @@ export async function handleUpdate(
           (error as Error).message.replaceAll(options.token, "<token>"),
         );
       }
+  } else if (/^\/recordatorios(?:\s|$)/i.test(message.text!)) {
+    text = await handleTelegramRecordatorios(
+      message.text!,
+      {
+        chat,
+        sender: message.from?.id,
+        type: message.chat.type,
+        updateId: update.update_id,
+        forwarded: isForwarded(message),
+      },
+      options,
+    );
   } else if (
     /^(?:que hay en la lista de la compra|what's on my shopping list|lista de la compra|shopping list)[.!?]?$/.test(
       fold(commandToText(message.text!, lang)),

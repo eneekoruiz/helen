@@ -270,9 +270,52 @@ export async function recordatoriosRequest(
     throw new Error(
       "Conecta Recordatorios desde los ajustes privados de HELEN.",
     );
-  const url = new URL(pathname, `${originOf(parsed)}/`);
-  if (url.origin !== originOf(parsed))
-    throw new Error("Invalid Recordatorios endpoint");
+  const { result, refreshed } = await recordatoriosRawRequest(
+    parsed.url,
+    token,
+    pathname,
+    body,
+    options,
+  );
+  if (typeof result.accountId === "string")
+    assertRecordatoriosAccount(home, parsed, result.accountId);
+  if (
+    refreshed &&
+    saved &&
+    typeof result.accountId === "string" &&
+    saved.accountId === result.accountId &&
+    saved.url === originOf(parsed) &&
+    !(options.env ?? process.env)[parsed.tokenEnv] &&
+    TokenSchema.safeParse(refreshed).success
+  )
+    withHomeLock(home, () => {
+      const current = readAuth(home);
+      if (
+        current?.url === saved.url &&
+        current.token === saved.token &&
+        current.accountId === saved.accountId
+      )
+        writePrivate(
+          authPath(home),
+          JSON.stringify({ ...current, token: refreshed }),
+        );
+    });
+  return result;
+}
+
+/** Bounded same-origin transport, without account state or JWT persistence. */
+export async function recordatoriosRawRequest(
+  origin: string,
+  token: string,
+  pathname: string,
+  body: unknown,
+  options: RecordatoriosOptions = {},
+): Promise<{ result: Record<string, unknown>; refreshed: string | null }> {
+  const base = new URL(RecordatoriosConfigSchema.shape.url.parse(origin))
+    .origin;
+  TokenSchema.parse(token);
+  const url = new URL(pathname, `${base}/`);
+  if (url.origin !== base) throw new Error("Invalid Recordatorios endpoint");
   const requestSignal = options.signal
     ? AbortSignal.any([options.signal, AbortSignal.timeout(15000)])
     : AbortSignal.timeout(15000);
@@ -321,31 +364,7 @@ export async function recordatoriosRequest(
         new TextDecoder("utf-8", { fatal: true }).decode(Buffer.concat(chunks)),
       ),
     );
-  if (typeof result.accountId === "string")
-    assertRecordatoriosAccount(home, parsed, result.accountId);
-  const refreshed = response.headers.get("X-Refreshed-Token");
-  if (
-    refreshed &&
-    saved &&
-    typeof result.accountId === "string" &&
-    saved.accountId === result.accountId &&
-    saved.url === originOf(parsed) &&
-    !(options.env ?? process.env)[parsed.tokenEnv] &&
-    TokenSchema.safeParse(refreshed).success
-  )
-    withHomeLock(home, () => {
-      const current = readAuth(home);
-      if (
-        current?.url === saved.url &&
-        current.token === saved.token &&
-        current.accountId === saved.accountId
-      )
-        writePrivate(
-          authPath(home),
-          JSON.stringify({ ...current, token: refreshed }),
-        );
-    });
-  return result;
+  return { result, refreshed: response.headers.get("X-Refreshed-Token") };
 }
 const fields = ["text", "list", "status", "priority", "due"] as const;
 const modeFields = (mode: z.infer<typeof ModeSchema>) => ModeSchema.parse(mode);

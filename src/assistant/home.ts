@@ -84,6 +84,17 @@ const ChannelsSchema = z
           .regex(/^[A-Z_][A-Z0-9_]*$/)
           .default("HELEN_TELEGRAM_TOKEN"),
         allowedChats: z.array(z.number().int()).default([]),
+        recordatoriosBridge: z
+          .object({
+            enabled: z.boolean().default(false),
+            url: z.lazy(() => RecordatoriosConfigSchema.shape.url),
+            secretEnv: z
+              .string()
+              .regex(/^[A-Z_][A-Z0-9_]*$/)
+              .default("HELEN_TELEGRAM_BRIDGE_SECRET"),
+          })
+          .strict()
+          .optional(),
       })
       .optional(),
   })
@@ -176,6 +187,17 @@ export const AssistantConfigSchema = z.object({
     .optional(),
   channels: ChannelsSchema,
   provider: ProviderSchema.optional(),
+  finance: z
+    .object({
+      source: z.string().min(1).max(4096),
+      directory: z.string().min(1).max(4096),
+      allowedChannels: z.array(z.enum(CHANNEL_NAMES)).default([]),
+      permissions: z
+        .array(z.enum(["finance:read", "finance:copy", "tasks:write"]))
+        .default([]),
+    })
+    .strict()
+    .optional(),
   assistance: z
     .object({
       detail: z.enum(["brief", "balanced", "detailed"]).default("balanced"),

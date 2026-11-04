@@ -35,6 +35,7 @@
     "scripts/review-specialty-rubric.mjs",
     "scripts/import-specialty-outcomes.mjs",
     "scripts/orca-handoff.mjs",
+    "scripts/finance-workbook.py",
     "!docs/ECC-LOCAL-SKILLS-*.json",
     "!docs/AUDIT-*.md",
     "!docs/CIERRE-*.md",
