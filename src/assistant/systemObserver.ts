@@ -170,6 +170,7 @@ export const ObserverRequestSchema = z
           Number(value.slice(0, -1)) * (value.endsWith("h") ? 60 : 1) <= 10080,
         "Choose a delay of at most seven days",
       ),
+    agent: z.enum(["codex", "claude", "orca", "antigravity"]).optional(),
   })
   .strict();
 
@@ -210,7 +211,7 @@ export async function requestSystemObserver(
     "-ProjectPath",
     config.projectRoot,
     "-Agent",
-    config.agent,
+    input.agent || config.agent,
     "-In",
     input.in,
     "-NoNotification",

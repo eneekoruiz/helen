@@ -5,7 +5,16 @@ import { execSync } from 'node:child_process';
 const HELEN_DIR = 'C:\\Users\\User\\Desktop\\ENEKO\\helen';
 const ARTIFACT_DIR = 'C:\\Users\\User\\.gemini\\antigravity\\brain\\dbc03471-87a1-482c-b843-e43d4c5a807e';
 const QUEUE_DIR = 'C:\\machine-profile\\ai-ecosystem\\orca_nightly_queue.json.jobs';
-const TASK_ID = 'task-8b230d42c6d24373ad326dc7df2d6364';
+function getActiveTaskId() {
+  try {
+    const queueData = JSON.parse(fs.readFileSync('C:\\machine-profile\\ai-ecosystem\\orca_nightly_queue.json', 'utf8'));
+    const active = queueData.tasks?.find(t => t.status === 'PENDING' || t.status === 'DISPATCHED' || t.status === 'RUNNING');
+    return active ? active.id : 'task-4e2b1bf7ffbf4345b4206189b4ff7129';
+  } catch {
+    return 'task-4e2b1bf7ffbf4345b4206189b4ff7129';
+  }
+}
+const TASK_ID = getActiveTaskId();
 
 const runningFile = path.join(QUEUE_DIR, `${TASK_ID}.md.running.json`);
 const completedFile = path.join(QUEUE_DIR, `${TASK_ID}.md.completed.json`);
@@ -18,7 +27,7 @@ console.log(`[Helen Watchdog] Supervisando tarea: ${TASK_ID}`);
 
 function getLiveQuota() {
   try {
-    const raw = execSync('node "C:\\machine-profile\\ai-ecosystem\\orca-quota-live.cjs"', { encoding: 'utf8' });
+    const raw = execSync('node "C:\\machine-profile\\ai-ecosystem\\orca-quota-live.cjs"', { encoding: 'utf8', timeout: 10000 });
     return JSON.parse(raw);
   } catch {
     return null;
@@ -33,7 +42,7 @@ function sendNotification(title, message) {
       Send-TelegramNotice '${title}' '${message}'
       Send-QuotaNotice '${title}' '${message}'
     `;
-    execSync(`powershell -NoProfile -Command "${psCmd.replace(/\n/g, '; ')}"`, { stdio: 'ignore' });
+    execSync(`powershell -NoProfile -Command "${psCmd.replace(/\n/g, '; ')}"`, { stdio: 'ignore', timeout: 10000 });
   } catch (e) {
     console.error('[Helen Watchdog] Error enviando notificaciones:', e.message);
   }

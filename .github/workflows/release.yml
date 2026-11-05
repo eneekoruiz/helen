@@ -73,6 +73,7 @@ jobs:
       - run: npm run build
       - run: node dist/cli.js lint
       - run: node scripts/check-pack.mjs
+      - run: node scripts/verify-package.mjs
       - run: npm audit --audit-level=high
       - name: Publish with provenance
         run: npm publish --provenance --access public

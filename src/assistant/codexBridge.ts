@@ -287,7 +287,7 @@ export function getLastAgentTurn(options?: {
 
     let lastGoal = "";
     let lastResponse = "";
-    let status = "DONE";
+    let status = "PENDING";
 
     for (let index = lines.length - 1; index >= 0; index--) {
       const line = lines[index]!;
@@ -303,6 +303,7 @@ export function getLastAgentTurn(options?: {
 
         if (
           !lastResponse &&
+          !lastGoal &&
           record.type === "PLANNER_RESPONSE" &&
           typeof record.content === "string" &&
           record.content.trim().length > 0
@@ -329,9 +330,9 @@ export function getLastAgentTurn(options?: {
               .replace(/<[^>]+>/g, "")
               .trim(),
           ).slice(0, 160);
+          // Delimitar el último turno: no cruzar a respuestas de turnos anteriores
+          break;
         }
-
-        if (lastGoal && lastResponse) break;
       } catch {
         /* Ignore malformed lines */
       }

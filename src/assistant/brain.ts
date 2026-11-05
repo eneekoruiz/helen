@@ -1943,7 +1943,11 @@ async function route(
         const queueResult = await requestSystemObserver(
           ctx.home,
           actor,
-          { goal: intent.goal, in: "1m" },
+          {
+            goal: intent.goal,
+            in: "1m",
+            ...(intent.agent ? { agent: intent.agent.toLowerCase() } : {}),
+          },
           false,
           ctx.signal,
         );

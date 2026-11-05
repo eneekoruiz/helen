@@ -156,3 +156,49 @@ it("getLastAgentTurn respects private authorization and conceals private text wh
   expect(denied.text).not.toContain("confidencial");
   expect(denied.speech).not.toContain("confidencial");
 });
+
+it("getLastAgentTurn does not cross turn boundaries when a new user input is pending without response", () => {
+  const root = path.join(directory, "brain");
+  const file = transcript("session-boundary", "Trabajo A");
+  fs.appendFileSync(
+    file,
+    JSON.stringify({
+      type: "PLANNER_RESPONSE",
+      status: "DONE",
+      content: "Terminado A",
+    }) + "\n",
+  );
+  fs.appendFileSync(
+    file,
+    JSON.stringify({
+      type: "USER_INPUT",
+      content: "Trabajo B pendiente",
+    }) + "\n",
+  );
+
+  const res = getLastAgentTurn({
+    brainDir: root,
+    authorized: true,
+    lang: "es",
+  });
+  expect(res.detail).toBeDefined();
+  expect(res.detail?.lastGoal).toContain("Trabajo B pendiente");
+  expect(res.detail?.lastResponse).toContain("En progreso");
+  expect(res.detail?.lastResponse).not.toContain("Terminado A");
+  expect(res.detail?.status).toBe("PENDING");
+});
+
+it("getLastAgentTurn marks status as PENDING when a single new user input has no response yet", () => {
+  const root = path.join(directory, "brain");
+  transcript("session-pending", "Trabajo nuevo sin respuesta");
+
+  const res = getLastAgentTurn({
+    brainDir: root,
+    authorized: true,
+    lang: "es",
+  });
+  expect(res.detail).toBeDefined();
+  expect(res.detail?.lastGoal).toContain("Trabajo nuevo sin respuesta");
+  expect(res.detail?.lastResponse).toContain("En progreso");
+  expect(res.detail?.status).toBe("PENDING");
+});
