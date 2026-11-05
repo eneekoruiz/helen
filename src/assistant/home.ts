@@ -152,6 +152,7 @@ export const CHANNEL_NAMES = [
   "http",
   "web",
   "telegram",
+  "whatsapp",
   "alexa",
   "mcp",
 ] as const;
@@ -364,16 +365,39 @@ export function configFile(home: string = helenHome()): string {
   return path.join(home, "config.json");
 }
 
+let configCache: {
+  file: string;
+  mtimeMs: number;
+  data: AssistantConfig;
+} | null = null;
+
 export function readConfig(home: string = helenHome()): AssistantConfig {
   const file = configFile(home);
-  const raw: unknown = fs.existsSync(file)
-    ? JSON.parse(fs.readFileSync(file, "utf8"))
-    : {};
+  let mtimeMs = 0;
+  try {
+    const stat = fs.statSync(file);
+    mtimeMs = stat.mtimeMs;
+    if (
+      configCache &&
+      configCache.file === file &&
+      configCache.mtimeMs === mtimeMs
+    ) {
+      return configCache.data;
+    }
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+      return AssistantConfigSchema.parse({});
+    }
+    throw err;
+  }
+
+  const raw: unknown = JSON.parse(fs.readFileSync(file, "utf8"));
   const parsed = AssistantConfigSchema.safeParse(raw);
   if (!parsed.success)
     throw new Error(
       `Invalid ${file}: ${parsed.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join("; ")}`,
     );
+  configCache = { file, mtimeMs, data: parsed.data };
   return parsed.data;
 }
 
@@ -386,6 +410,7 @@ export function writeConfig(
   withHomeLock(home, () =>
     writePrivate(configFile(home), `${JSON.stringify(parsed, null, 2)}\n`),
   );
+  configCache = null;
   return parsed;
 }
 

@@ -23,6 +23,8 @@ export type Intent =
   | { name: "day.shutdown" }
   | { name: "day.kickoff" }
   | { name: "codex.status"; query?: string }
+  | { name: "codex.reply" }
+  | { name: "codex.prompt"; goal: string; agent?: string }
   | { name: "agenda"; range: AgendaRange }
   | { name: "recall"; query: string }
   | { name: "time" }
@@ -250,6 +252,22 @@ const RULES: Rule[] = [
     pattern:
       /^(?:que\s+estabamos\s+haciendo\s+en\s+codex|que\s+dejamos\s+(?:a\s+medias\s+|pendiente\s+)?en\s+codex|sesion(?:es)?\s+de\s+codex|que\s+hay\s+pendiente\s+en\s+antigravity|que\s+estabamos\s+haciendo\s+en\s+antigravity|resumen\s+de\s+(?:la\s+)?sesion\s+de\s+antigravity|codex\s+status|antigravity\s+status)[.!?]?$/,
     build: (_g, o) => ({ name: "codex.status", query: o("query") }),
+  },
+  // Antigravity & Codex reply / summary
+  {
+    pattern:
+      /^(?:que\s+(?:ha\s+(?:respondido|dicho)|respondio|dijo)\s+(?:el\s+agente|codex|antigravity)|resumen\s+de\s+(?:la\s+)?(?:ultima\s+)?respuesta(?:\s+de\s+(?:codex|antigravity|agente))?|ultima\s+respuesta(?:\s+de\s+(?:codex|antigravity|agente))?|lee(?:me)?\s+la\s+respuesta|what\s+did\s+(?:codex|the\s+agent|antigravity)\s+reply|latest\s+agent\s+reply)[.!?]?$/,
+    build: () => ({ name: "codex.reply" }),
+  },
+  // Dispatch next prompt / task to Codex / Orca
+  {
+    pattern:
+      /^(?:m[aá]ndale\s+a\s+(?<agent>codex|orca|antigravity)|siguiente\s+prompt(?:\s+para\s+(?<agent2>codex|orca|antigravity))?|encola(?:r)?(?:\s+tarea)?(?:\s+en\s+orca)?|send\s+to\s+(?<agent3>codex|orca))\s*:\s*(?<goal>[\s\S]+)$/i,
+    build: (_g, o) => ({
+      name: "codex.prompt",
+      goal: (o("goal") ?? "").trim(),
+      agent: o("agent") ?? o("agent2") ?? o("agent3") ?? "codex",
+    }),
   },
   {
     pattern:

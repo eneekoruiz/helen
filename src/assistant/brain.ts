@@ -86,7 +86,7 @@ import {
   type UrgencyContext,
 } from "./tasks.js";
 import { runDailyKickoff, runDailyShutdown } from "./dailyRitual.js";
-import { summarizeCodexWork } from "./codexBridge.js";
+import { summarizeCodexWork, getLastAgentTurn } from "./codexBridge.js";
 import { formatCapabilities } from "./capabilities.js";
 import { getAppMode } from "./appMode.js";
 import {
@@ -1912,6 +1912,77 @@ async function route(
       return reply(ctx, "codex.status", result.text, {
         speech: result.speech,
       });
+    }
+    case "codex.reply": {
+      const result = getLastAgentTurn({
+        lang: ctx.lang,
+        authorized: ctx.ownerVerified && ctx.showSensitive && !ctx.speaker,
+      });
+      ctx.privateAccess = true;
+      return reply(ctx, "codex.reply", result.text, {
+        speech: result.speech,
+      });
+    }
+    case "codex.prompt": {
+      ctx.privateAccess = true;
+      if (!ctx.ownerVerified) {
+        const text = say(
+          ctx.lang,
+          "Solo el propietario verificado puede encolar tareas para los agentes.",
+          "Only the verified owner can enqueue agent tasks.",
+        );
+        return reply(ctx, "codex.prompt", text, { speech: text });
+      }
+      const actor = {
+        owner: ctx.config.owner,
+        verified: ctx.ownerVerified,
+        private: ctx.showSensitive && !ctx.speaker,
+        channel: ctx.channel,
+      };
+      try {
+        const queueResult = await requestSystemObserver(
+          ctx.home,
+          actor,
+          { goal: intent.goal, in: "1m" },
+          false,
+          ctx.signal,
+        );
+        if (queueResult.status === "queued") {
+          const text = say(
+            ctx.lang,
+            `✅ *Tarea encolada para ${intent.agent || "Codex"}*\n` +
+              `🎯 *Objetivo*: ${intent.goal}\n` +
+              `🆔 *ID*: \`${queueResult.id}\`\n` +
+              `⏰ *Programado*: ${queueResult.targetAt || "inmediato"}\n\n` +
+              `Centinela ejecutará la tarea en cuanto haya cuota disponible.`,
+            `✅ *Task queued for ${intent.agent || "Codex"}*\n` +
+              `🎯 *Goal*: ${intent.goal}\n` +
+              `🆔 *ID*: \`${queueResult.id}\`\n` +
+              `⏰ *Scheduled*: ${queueResult.targetAt || "immediate"}\n\n` +
+              `Centinela will dispatch it as soon as quota is available.`,
+          );
+          const speech = say(
+            ctx.lang,
+            `He encolado tu tarea para ${intent.agent || "Codex"}.`,
+            `I have queued your task for ${intent.agent || "Codex"}.`,
+          );
+          return reply(ctx, "codex.prompt", text, { speech });
+        } else {
+          const text = say(
+            ctx.lang,
+            `No se pudo confirmar el encolado de la tarea: ${queueResult.status}.`,
+            `Could not confirm task queuing: ${queueResult.status}.`,
+          );
+          return reply(ctx, "codex.prompt", text, { speech: text });
+        }
+      } catch (err) {
+        const text = say(
+          ctx.lang,
+          `Error al encolar la tarea: ${err instanceof Error ? err.message : String(err)}`,
+          `Error queuing task: ${err instanceof Error ? err.message : String(err)}`,
+        );
+        return reply(ctx, "codex.prompt", text, { speech: text });
+      }
     }
     case "agenda":
       return agenda(ctx, intent.range);

@@ -21,3 +21,5 @@ sandbox-qa.js
 *.weights
 __pycache__/
 .pytest_cache/
+whatsapp-qr.png
+auth_whatsapp/
