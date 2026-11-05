@@ -42,7 +42,7 @@ Pruebas: `npx vitest run tests/assistantOrchestrate.test.ts`, más las del adapt
 
 ## Sistema y Observer existente
 
-El chat de `helen assistant chat` admite `sistema estado`, `automatizaciones simular {"goal":"Revisar los tests del proyecto","in":"15m"}` y `automatizaciones proponer` con el mismo JSON. Solo el propietario verificado en un canal privado habilitado puede usarlos. La CLI representa al propietario local; los demás canales deben aportar su identidad autenticada. No son herramientas del modelo ni se guardan en su historial.
+El chat de `helen chat` admite `sistema estado`, `automatizaciones simular {"goal":"Revisar los tests del proyecto","in":"15m"}` y `automatizaciones proponer` con el mismo JSON. También puedes consultar `helen ask "sistema estado"`. Solo el propietario verificado en un canal privado habilitado puede usarlos. La CLI representa al propietario local; los demás canales deben aportar su identidad autenticada. No son herramientas del modelo ni se guardan en su historial.
 
 Configura localmente `observer` en el home de Helen: `profileRoot` (directorio absoluto del perfil con `system-observer.ps1`), `projectRoot` (directorio absoluto del proyecto), `agent` (`codex`, `claude` o `antigravity`), `allowedChannels` y `permissions`. Los permisos separados son `system:read` y `automation:queue`; los arrays vacíos deniegan acceso por defecto. Estas rutas y permisos nunca se aceptan desde el texto del chat. El canal debe estar también en `privacy.showSensitiveOn`.
 
