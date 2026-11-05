@@ -167,7 +167,9 @@ it("authenticates HTTP imports, rejects speaker/public channels and supports rev
     (await request("/saved/import", { data: exported, speaker: true })).status,
   ).toBe(403);
   expect((await request("/saved/import", { data: exported })).status).toBe(200);
-  const listing = await request("/saved?category=Programaci%C3%B3n");
+  const listing = await request(
+    "/saved" + "?" + new URLSearchParams({ category: "Programación" }),
+  );
   const { items } = (await listing.json()) as { items: Array<{ id: string }> };
   expect(items).toHaveLength(1);
   expect(
@@ -178,7 +180,10 @@ it("authenticates HTTP imports, rejects speaker/public channels and supports rev
       })
     ).status,
   ).toBe(200);
-  expect((await request("/saved?speaker=true")).status).toBe(403);
+  expect(
+    (await request("/saved" + "?" + new URLSearchParams({ speaker: "true" })))
+      .status,
+  ).toBe(403);
   expect((await request("/saved/import", { data: [] })).status).toBe(400);
   expect(listSavedLinks(home)).toHaveLength(1);
 });
