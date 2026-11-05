@@ -1,3 +1,4 @@
+import { queryGoogleCalendar, googleCalendarStatus } from "./googleCalendar.js";
 import { z } from "zod";
 import crypto from "node:crypto";
 import { handleFinanceChat } from "./financeChat.js";
@@ -2314,6 +2315,44 @@ async function handleTurn(
   const control = fold(understood.cleaned)
     .replace(/[¿?!.]/g, "")
     .trim();
+  // Deterministic private route: calendar contents never enter model tools or history.
+  if (/^calendario google\b/i.test(input.trim())) {
+    const actor = {
+      owner: config.owner,
+      verified: ctx.ownerVerified,
+      private: ctx.showSensitive && !ctx.speaker,
+      channel: ctx.channel,
+    };
+    try {
+      let result: unknown;
+      if (/^calendario google estado\s*$/i.test(input.trim()))
+        result = googleCalendarStatus(ctx.home, actor);
+      else {
+        const command =
+          /^calendario google (eventos|disponibilidad)\s+([\s\S]+)$/i.exec(
+            input.trim(),
+          );
+        if (!command) throw new Error("Unsupported Calendar command");
+        result = await queryGoogleCalendar(
+          ctx.home,
+          actor,
+          command[1]!.toLowerCase() === "eventos" ? "events" : "busy",
+          { timeZone: config.timezone, ...JSON.parse(command[2]!) },
+          { fetch: ctx.fetcher, signal: ctx.signal },
+        );
+      }
+      return reply(ctx, "pending", JSON.stringify(result, null, 2), {
+        speech: "Consulta tu calendario en el canal privado.",
+      });
+    } catch {
+      return reply(
+        ctx,
+        "pending",
+        "No se pudo verificar Google Calendar. Revisa cuenta, permiso de lectura, canal privado y ventana con offsets explícitos. No interpretes el fallo como agenda libre; esta integración solo consulta.",
+        { speech: "Consulta el resultado en tu canal privado." },
+      );
+    }
+  }
   // Observer requests are explicit private operations, never model tools or chat history.
   if (
     ctx.conversation.pending?.kind === "observer" ||

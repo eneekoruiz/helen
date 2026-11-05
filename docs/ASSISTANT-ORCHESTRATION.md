@@ -53,3 +53,5 @@ El estado lee una cola JSON de hasta 2 MiB y 10000 tareas, rechaza enlaces dentr
 Pruebas: `npx vitest run tests/assistantSystemObserver.test.ts --maxWorkers=1`. Incluyen permisos, privacidad, argumentos literales, fallos ambiguos, aprobación/caducidad/replay y una fixture PowerShell temporal sin tareas reales ni llamadas a IA.
 
 Se rechazan credenciales y datos financieros reconocibles (cuentas bancarias, importes, libros XLSX o peticiones de leer extractos). Es una validación acotada, no un detector universal: revisa el objetivo antes de aprobarlo y no incluyas datos personales financieros. Auditar código como `finanzas.ts` sigue permitido. El proyecto debe ser un directorio específico existente; no se admite el home ni la raíz del disco.
+
+Google Calendar dispone de [conexión OAuth y consultas privadas de solo lectura](ASSISTANT-GOOGLE-CALENDAR.md), con cuenta y grant separados de Gmail. No escribe citas ni sincroniza ICS; la autorización de la cuenta real queda pendiente hasta completar el consentimiento en esa instalación.

@@ -157,7 +157,24 @@ export const CHANNEL_NAMES = [
 ] as const;
 export type ChannelName = (typeof CHANNEL_NAMES)[number];
 
+export const GoogleCalendarConfigSchema = z
+  .object({
+    account: z.email().max(254),
+    calendarId: z
+      .string()
+      .trim()
+      .min(1)
+      .max(1024)
+      .regex(/^[^\r\n]+$/)
+      .default("primary"),
+    redirectUri: z.string().url().optional(),
+    allowedChannels: z.array(z.enum(CHANNEL_NAMES)).default([]),
+    permissions: z.array(z.literal("calendar:read")).default([]),
+  })
+  .strict();
+
 export const AssistantConfigSchema = z.object({
+  googleCalendar: GoogleCalendarConfigSchema.optional(),
   owner: z
     .string()
     .min(1)

@@ -97,6 +97,35 @@ export async function diagnoseAssistant(
       "Google authorization or delivery state is invalid; reconnect or reconcile before sending",
     );
   }
+  try {
+    const connection = readGmailConnection(home, "calendar");
+    const calendar = config.googleCalendar;
+    const ready =
+      calendar &&
+      connection &&
+      calendar.account.toLowerCase() === connection.account.toLowerCase() &&
+      connection.scopes.length === 1 &&
+      connection.scopes[0] ===
+        "https://www.googleapis.com/auth/calendar.readonly" &&
+      calendar.permissions.includes("calendar:read") &&
+      calendar.allowedChannels.some((channel) =>
+        config.privacy.showSensitiveOn.includes(channel),
+      ) &&
+      (connection.refreshable || connection.expiresAt > Date.now());
+    add(
+      "google-calendar",
+      ready ? "ok" : "warning",
+      ready
+        ? "Separate readonly Calendar grant saved; live queries and account/device access are not tested"
+        : "Use assistant google-calendar connect for a separate readonly grant and enable a private calendar:read channel",
+    );
+  } catch {
+    add(
+      "google-calendar",
+      "error",
+      "Calendar credential state is invalid; reconnect Calendar without changing Gmail authorization",
+    );
+  }
   add(
     "capture",
     config.capture?.extractor ? "ok" : "warning",

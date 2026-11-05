@@ -2,7 +2,7 @@
 
 Besides orchestrating coding agents, HELEN can be your own assistant and long-term memory: it keeps notes, reminders, lists and your agenda, reminds you on its own, and answers on the terminal, a chat page, Telegram and an Amazon Echo.
 
-Everything lives in `~/.helen` (or the folder in `HELEN_HOME`), with permissions only you can read. Nothing goes into a project repository, and nothing leaves your machine unless you connect an external channel or model, authorize Gmail, or enable browser dictation that uses its provider's service (see [Privacy](#privacy)).
+Everything lives in `~/.helen` (or the folder in `HELEN_HOME`), with permissions only you can read. Nothing goes into a project repository, and nothing leaves your machine unless you connect an external channel or model, authorize Gmail or Google Calendar, or enable browser dictation that uses its provider's service (see [Privacy](#privacy)).
 
 For the day-to-day flows, see [chat, voice and personal workflows](ASSISTANT-LIFE.md), [reviewed capture](ASSISTANT-CAPTURE.md), [preparation and capacity planning](ASSISTANT-WORKFLOWS.md), [Gmail setup and sending](ASSISTANT-GMAIL.md), and [reply checks and follow-up](ASSISTANT-GMAIL-WATCH.md).
 
@@ -183,6 +183,10 @@ Use `delivery resolve <key> sent` only after verifying receipt; `retry --accept-
 Backups exclude credentials, executable provider/webhook configuration and temporary conversations/undo. They contain personal data and must stay private. Restore requires the scheduler to be stopped, retains a private copy of the previous data, and cancels overdue restored reminders to prevent historical notification replay. Reconfigure omitted connections after moving machines.
 
 The portable snapshot carries sanitized delivery identities. Restore merges them without turning a completed or uncertain send back into a retry. If a restore is interrupted, a durable transaction marker blocks ordinary changes until `restore-recover` rolls back the interrupted swap. Recovery retains the replacement files for inspection and invalidates pre-restore chat/undo context.
+
+## Google Calendar API
+
+The separate [readonly Google Calendar connector](ASSISTANT-GOOGLE-CALENDAR.md) queries events and availability with its own OAuth grant, verified account and private read permission. It does not write events or synchronize the local ICS agenda. A stored grant is not proof of live account/device access.
 
 ## Calendar files
 

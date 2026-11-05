@@ -1,3 +1,8 @@
+import {
+  startGoogleCalendarConnection,
+  readGoogleCalendarConnection,
+  disconnectGoogleCalendarConnection,
+} from "../assistant/googleCalendarAuth.js";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -687,6 +692,89 @@ function registerAssistantAdmin(program: Command): void {
     .description(
       "Set up and run HELEN as your personal assistant (server, Telegram, Alexa, notifications)",
     );
+
+  const googleCalendar = assistant
+    .command("google-calendar")
+    .description(
+      "Connect a separate readonly Google Calendar grant for the local owner",
+    );
+  googleCalendar
+    .command("connect")
+    .requiredOption("--account <email>", "Exact account to authorize")
+    .requiredOption(
+      "--client-id-env <name>",
+      "Local environment reference for a separate Calendar OAuth client ID",
+    )
+    .option(
+      "--client-secret-env <name>",
+      "Local environment reference for its OAuth client secret",
+    )
+    .option(
+      "--redirect-uri <uri>",
+      "Registered callback served by HELEN",
+      "http://127.0.0.1:8787/google-calendar/callback",
+    )
+    .action(
+      (opts: {
+        account: string;
+        clientIdEnv: string;
+        clientSecretEnv?: string;
+        redirectUri: string;
+      }) =>
+        handle(
+          "google-calendar-connect",
+          () =>
+            startGoogleCalendarConnection(
+              home(),
+              {
+                owner: config().owner,
+                verified: true,
+                private: true,
+                channel: "cli",
+              },
+              opts,
+            ),
+          (value) => console.log(JSON.stringify(value, null, 2)),
+        ),
+    );
+  googleCalendar.command("status").action(() =>
+    handle(
+      "google-calendar-status",
+      () => ({
+        configured: Boolean(config().googleCalendar),
+        connection: readGoogleCalendarConnection(home()) ?? null,
+        verification: "stored grant only; remote access not checked",
+      }),
+      (value) => console.log(JSON.stringify(value, null, 2)),
+    ),
+  );
+  googleCalendar
+    .command("disconnect")
+    .option(
+      "--revoke",
+      "Also ask Google to revoke this grant; may affect grants sharing its client ID",
+      false,
+    )
+    .action(async (opts: { revoke: boolean }) => {
+      try {
+        const result = await disconnectGoogleCalendarConnection(
+          home(),
+          {
+            owner: config().owner,
+            verified: true,
+            private: true,
+            channel: "cli",
+          },
+          opts.revoke,
+        );
+        if (isJsonMode())
+          printJsonAndExit("google-calendar-disconnect", result);
+        else console.log(JSON.stringify(result, null, 2));
+      } catch {
+        logger.error("Calendar disconnect could not be confirmed.");
+        process.exitCode = 1;
+      }
+    });
 
   assistant
     .command("sale-and-task <file>")

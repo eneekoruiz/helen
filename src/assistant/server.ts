@@ -1,3 +1,4 @@
+import { completeGoogleCalendarConnection } from "./googleCalendarAuth.js";
 import crypto from "node:crypto";
 import http from "node:http";
 import { z } from "zod";
@@ -14,6 +15,7 @@ import {
 import { handleMessage } from "./brain.js";
 import {
   AssistantConfigSchema,
+  readConfig,
   writeConfig,
   type AssistantConfig,
 } from "./home.js";
@@ -271,6 +273,49 @@ export function createAssistantServer(options: ServerOptions): http.Server {
 
     const channel =
       request.headers["x-helen-client"] === "web" ? "web" : "http";
+    if (url.pathname === "/google-calendar/callback" && method === "GET") {
+      try {
+        if (url.searchParams.has("error")) throw new Error("Consent cancelled");
+        const connection = await completeGoogleCalendarConnection(
+          options.home,
+          {
+            state: url.searchParams.get("state") ?? "",
+            code: url.searchParams.get("code") ?? "",
+            redirectUri:
+              readConfig(options.home).googleCalendar?.redirectUri ??
+              "http://127.0.0.1:" +
+                request.socket.localPort +
+                "/google-calendar/callback",
+          },
+          { ...(options.fetcher ? { fetch: options.fetcher } : {}) },
+        );
+        response.writeHead(200, {
+          "Content-Type": "application/json; charset=utf-8",
+          "Cache-Control": "no-store",
+          "X-Content-Type-Options": "nosniff",
+        });
+        response.end(
+          JSON.stringify({
+            connected: true,
+            account: connection.account,
+            readOnly: true,
+          }),
+        );
+      } catch {
+        response.writeHead(400, {
+          "Content-Type": "application/json; charset=utf-8",
+          "Cache-Control": "no-store",
+          "X-Content-Type-Options": "nosniff",
+        });
+        response.end(
+          JSON.stringify({
+            error:
+              "Calendar connection was not verified; start a new connection.",
+          }),
+        );
+      }
+      return;
+    }
     if (url.pathname === "/gmail/callback") {
       if (
         await handleGmailRequest(
