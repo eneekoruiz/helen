@@ -187,6 +187,30 @@ export const AssistantConfigSchema = z.object({
     .optional(),
   channels: ChannelsSchema,
   provider: ProviderSchema.optional(),
+  observer: z
+    .object({
+      profileRoot: z
+        .string()
+        .min(1)
+        .max(4096)
+        .refine(
+          (value) => path.isAbsolute(value) && !/^(?:\\\\|\/\/)/.test(value),
+        ),
+      projectRoot: z
+        .string()
+        .min(1)
+        .max(4096)
+        .refine(
+          (value) => path.isAbsolute(value) && !/^(?:\\\\|\/\/)/.test(value),
+        ),
+      agent: z.enum(["codex", "claude", "antigravity"]).default("codex"),
+      allowedChannels: z.array(z.enum(CHANNEL_NAMES)).default([]),
+      permissions: z
+        .array(z.enum(["system:read", "automation:queue"]))
+        .default([]),
+    })
+    .strict()
+    .optional(),
   finance: z
     .object({
       source: z.string().min(1).max(4096),

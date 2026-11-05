@@ -19,6 +19,7 @@ const PendingSchema = z.object({
     "workflow",
     "gmail",
     "finance",
+    "observer",
   ]),
   text: z.string().max(20_000).optional(),
   id: z.string().max(40).optional(),

@@ -36,6 +36,20 @@ La tarea se guarda en la bandeja de Helen. Su resultado declara `remoteSync:not-
 
 El chat privado dispone de propuesta y aprobación exacta con hash, revisión del libro, caducidad y permisos locales separados; véase [ASSISTANT-FINANCE.md](ASSISTANT-FINANCE.md). La frase natural solo propone y pide datos: nunca autoriza por sí sola una escritura. La operación aprobada reporta cada resultado independientemente.
 
-Pendiente: reglas contables completas para deudas/transferencias, confirmar entrega remota, conectar el bridge de mensajería mediante credenciales propias, adaptadores de sistema y Orca con permisos separados y métricas con proveedores reales.
+Pendiente: reglas contables completas para deudas/transferencias, confirmar entrega remota, conectar el bridge de mensajería mediante credenciales propias, métricas con proveedores reales.
 
 Pruebas: `npx vitest run tests/assistantOrchestrate.test.ts`, más las del adaptador financiero. Se comprueban identidad, permisos, errores parciales, recuperación y deduplicación.
+
+## Sistema y Observer existente
+
+El chat de `helen assistant chat` admite `sistema estado`, `automatizaciones simular {"goal":"Revisar los tests del proyecto","in":"15m"}` y `automatizaciones proponer` con el mismo JSON. Solo el propietario verificado en un canal privado habilitado puede usarlos. La CLI representa al propietario local; los demás canales deben aportar su identidad autenticada. No son herramientas del modelo ni se guardan en su historial.
+
+Configura localmente `observer` en el home de Helen: `profileRoot` (directorio absoluto del perfil con `system-observer.ps1`), `projectRoot` (directorio absoluto del proyecto), `agent` (`codex`, `claude` o `antigravity`), `allowedChannels` y `permissions`. Los permisos separados son `system:read` y `automation:queue`; los arrays vacíos deniegan acceso por defecto. Estas rutas y permisos nunca se aceptan desde el texto del chat. El canal debe estar también en `privacy.showSensitiveOn`.
+
+La propuesta usa `-DryRun` sin crear tareas, muestra el objetivo y pide `confirmar <sha256>` exacto. Caduca a los diez minutos; cambiar la configuración invalida la aprobación. La confirmación se consume antes de llamar al Observer. No se reintenta una escritura ambigua: inspecciona primero la cola. Los argumentos se pasan literalmente a PowerShell con ventana oculta, timeout de quince segundos y salida limitada. El planificador y los proveedores siguen siendo responsabilidad del Observer existente; Helen no llama `-RunDue`, no crea otro scheduler y no promete deshacer trabajos enviados.
+
+El estado lee una cola JSON de hasta 2 MiB y 10000 tareas, rechaza enlaces dentro del perfil y devuelve solo conteos y fechas. No ejecuta `-List` (que podría reconciliar recibos), no expone objetivos, rutas ni credenciales. `queued` acredita solo un registro nuevo y pendiente en la cola: no confirma ejecución, entrega a proveedor ni registro de Windows. `DISPATCHED` sigue siendo distinto de `COMPLETED`.
+
+Pruebas: `npx vitest run tests/assistantSystemObserver.test.ts --maxWorkers=1`. Incluyen permisos, privacidad, argumentos literales, fallos ambiguos, aprobación/caducidad/replay y una fixture PowerShell temporal sin tareas reales ni llamadas a IA.
+
+Se rechazan credenciales y datos financieros reconocibles (cuentas bancarias, importes, libros XLSX o peticiones de leer extractos). Es una validación acotada, no un detector universal: revisa el objetivo antes de aprobarlo y no incluyas datos personales financieros. Auditar código como `finanzas.ts` sigue permitido. El proyecto debe ser un directorio específico existente; no se admite el home ni la raíz del disco.

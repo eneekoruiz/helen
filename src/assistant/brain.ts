@@ -1,6 +1,11 @@
 import { z } from "zod";
 import crypto from "node:crypto";
 import { handleFinanceChat } from "./financeChat.js";
+import {
+  ObserverRequestSchema,
+  readSystemObserver,
+  requestSystemObserver,
+} from "./systemObserver.js";
 import { findSecrets, looksSensitive, redact } from "../core/secrets.js";
 import { runAction, undoAction, clearActions } from "./actions.js";
 import { buildAgenda, formatAgenda, type AgendaRange } from "./agenda.js";
@@ -2309,6 +2314,124 @@ async function handleTurn(
   const control = fold(understood.cleaned)
     .replace(/[¿?!.]/g, "")
     .trim();
+  // Observer requests are explicit private operations, never model tools or chat history.
+  if (
+    ctx.conversation.pending?.kind === "observer" ||
+    /^(?:sistema estado|automatizaciones (?:simular|proponer))\b/i.test(
+      input.trim(),
+    )
+  ) {
+    try {
+      const actor = {
+        owner: config.owner,
+        verified: ctx.ownerVerified,
+        private: ctx.showSensitive && !ctx.speaker,
+        channel: ctx.channel,
+      };
+      const local = readConfig(ctx.home);
+      if (
+        !actor.verified ||
+        !actor.private ||
+        actor.owner !== local.owner ||
+        !local.observer?.allowedChannels.includes(actor.channel)
+      )
+        throw new Error(
+          "El Observer requiere el propietario y un canal privado habilitado.",
+        );
+      const pending = ctx.conversation.pending;
+      let text: string;
+      if (pending?.kind === "observer") {
+        const draft = JSON.parse(pending.text!);
+        const approved = {
+          owner: local.owner,
+          settings: local.observer,
+          request: ObserverRequestSchema.parse(draft.request),
+        };
+        const hash = crypto
+          .createHash("sha256")
+          .update(JSON.stringify(approved))
+          .digest("hex");
+        if (/^(?:no|cancelar|cancela)$/i.test(input.trim())) {
+          delete ctx.conversation.pending;
+          text = "Propuesta de automatización cancelada.";
+        } else if (draft.hash !== hash) {
+          delete ctx.conversation.pending;
+          text =
+            "La configuración o propuesta ha cambiado; genera otra vista previa.";
+        } else if (input.trim() !== `confirmar ${hash}`)
+          text = `Para aprobar la solicitud exacta escribe confirmar ${hash}; para descartarla, cancelar.`;
+        else {
+          // Consume durably before the non-idempotent external queue call: ambiguous failures require inspection.
+          delete ctx.conversation.pending;
+          saveConversation(ctx.home, ctx.conversation, now);
+          text = JSON.stringify(
+            await requestSystemObserver(
+              ctx.home,
+              actor,
+              approved.request,
+              false,
+              ctx.signal,
+            ),
+            null,
+            2,
+          );
+        }
+      } else if (/^sistema estado\s*$/i.test(input.trim()))
+        text = JSON.stringify(readSystemObserver(ctx.home, actor), null, 2);
+      else {
+        const command =
+          /^automatizaciones (simular|proponer)\s+([\s\S]+)$/i.exec(
+            input.trim(),
+          );
+        if (!command)
+          throw new Error(
+            "Usa automatizaciones simular/proponer seguido de JSON con goal e in.",
+          );
+        const request = ObserverRequestSchema.parse(JSON.parse(command[2]!));
+        const preview = await requestSystemObserver(
+          ctx.home,
+          actor,
+          request,
+          true,
+          ctx.signal,
+        );
+        if (preview.status !== "preview") text = JSON.stringify(preview);
+        else if (command[1]!.toLowerCase() === "simular")
+          text = JSON.stringify(preview, null, 2);
+        else {
+          if (!local.observer?.permissions.includes("automation:queue"))
+            throw new Error("Falta permiso local para encolar.");
+          const hash = crypto
+            .createHash("sha256")
+            .update(
+              JSON.stringify({
+                owner: local.owner,
+                settings: local.observer,
+                request,
+              }),
+            )
+            .digest("hex");
+          ctx.conversation.pending = pendingFor(
+            "observer",
+            { text: JSON.stringify({ request, hash }) },
+            now,
+          );
+          text = `Vista previa, sin encolar:\n${JSON.stringify({ request, preview }, null, 2)}\nPara aprobar exactamente esta solicitud: confirmar ${hash}. Para descartarla: cancelar.`;
+        }
+      }
+      saveConversation(ctx.home, ctx.conversation, now);
+      return reply(ctx, "pending", text, {
+        speech: "Consulta el estado o la propuesta en tu canal privado.",
+      });
+    } catch {
+      saveConversation(ctx.home, ctx.conversation, now);
+      return reply(
+        ctx,
+        "pending",
+        "No se confirmó la operación del Observer. Revisa configuración, permisos y cola local antes de aprobar otra solicitud; no se ha creado un planificador alternativo.",
+      );
+    }
+  }
   // Financial data uses a deterministic private route and is never added to model history.
   try {
     const financial = await handleFinanceChat(input, ctx);
