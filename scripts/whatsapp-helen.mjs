@@ -1,173 +1,280 @@
-import makeWASocketPkg, { Browsers, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion } from "@whiskeysockets/baileys";
-import QRCode from "qrcode";
-import pino from "pino";
-import path from "node:path";
 import fs from "node:fs";
-import { handleMessage } from "../dist/assistant/brain.js";
-import { helenHome } from "../dist/assistant/home.js";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const makeWASocket = makeWASocketPkg.default || makeWASocketPkg;
-
-const ARTIFACT_DIR = "C:\\Users\\User\\.gemini\\antigravity\\brain\\dbc03471-87a1-482c-b843-e43d4c5a807e";
-const ARTIFACT_QR_PATH = path.join(ARTIFACT_DIR, "whatsapp-qr.png");
-const LOCAL_QR_PATH = path.resolve("whatsapp-qr.png");
-const PAIRING_CODE_PATH = path.join(ARTIFACT_DIR, "whatsapp-pairing-code.txt");
-
-const authDir = path.join(helenHome(), "whatsapp-auth");
-if (!fs.existsSync(authDir)) {
-  fs.mkdirSync(authDir, { recursive: true });
+export function normalizeOwnerJid(value) {
+  const match = /^(\d{5,20})(?::\d+)?@(s\.whatsapp\.net|lid)$/.exec(
+    String(value ?? ""),
+  );
+  return match ? match[1] + "@" + match[2] : null;
 }
 
-// Extraer teléfono si se pasa por CLI, variable de entorno o archivo
-let phoneNumber = process.env.WHATSAPP_PHONE ? process.env.WHATSAPP_PHONE.replace(/\D/g, "") : null;
-const phoneIdx = process.argv.findIndex((a) => a === "--phone" || a === "-p");
-if (phoneIdx !== -1 && process.argv[phoneIdx + 1]) {
-  phoneNumber = process.argv[phoneIdx + 1].replace(/\D/g, "");
-}
-if (!phoneNumber) {
-  const phoneFile = path.join(helenHome(), "whatsapp-phone.txt");
-  if (fs.existsSync(phoneFile)) {
-    phoneNumber = fs.readFileSync(phoneFile, "utf8").trim().replace(/\D/g, "");
-  }
-}
-
-let sock = null;
-
-async function startWhatsApp() {
-  console.log(`[WhatsApp] Inicializando sesión con auth en ${authDir}...`);
-  const { state, saveCreds } = await useMultiFileAuthState(authDir);
-  const { version, isLatest } = await fetchLatestBaileysVersion();
-  console.log(`[WhatsApp] Usando versión oficial de WhatsApp Web: ${version.join(".")} (isLatest: ${isLatest})`);
-
-  sock = makeWASocket({
-    version,
-    auth: state,
-    logger: pino({ level: "silent" }),
-    printQRInTerminal: false,
-    browser: Browsers.windows("Desktop"),
-    syncFullHistory: false,
-    connectTimeoutMs: 60_000,
-    defaultQueryTimeoutMs: 60_000,
-    keepAliveIntervalMs: 25_000,
-  });
-
-  sock.ev.on("creds.update", saveCreds);
-
-  // Si hay número de teléfono configurado y no está registrado aún, solicitar código de emparejamiento
-  if (phoneNumber && !sock.authState.creds.registered) {
-    setTimeout(async () => {
-      try {
-        console.log(`[WhatsApp] Solicitando código de vinculación para +${phoneNumber}...`);
-        const code = await sock.requestPairingCode(phoneNumber);
-        console.log(`\n========================================`);
-        console.log(`👉 CÓDIGO DE VINCULACIÓN: ${code}`);
-        console.log(`========================================\n`);
-        fs.writeFileSync(PAIRING_CODE_PATH, code, "utf8");
-      } catch (err) {
-        console.error("[WhatsApp] Error solicitando código de vinculación:", err);
-      }
-    }, 3000);
-  }
-
-  sock.ev.on("connection.update", async (update) => {
-    const { connection, lastDisconnect, qr } = update;
-
-    if (qr && !phoneNumber) {
-      console.log("[WhatsApp] ¡Nuevo código QR recibido (firma Ubuntu Chrome)!");
-      try {
-        const asciiQR = await QRCode.toString(qr, { type: 'terminal', small: true });
-        console.log("\n" + asciiQR + "\n");
-        await QRCode.toFile(ARTIFACT_QR_PATH, qr, {
-          scale: 10,
-          margin: 3,
-          color: { dark: "#0f172a", light: "#ffffff" },
-        });
-        await QRCode.toFile(LOCAL_QR_PATH, qr, {
-          scale: 10,
-          margin: 3,
-          color: { dark: "#0f172a", light: "#ffffff" },
-        });
-        console.log(`[WhatsApp] QR guardado exitosamente en:\n  - ${ARTIFACT_QR_PATH}\n  - ${LOCAL_QR_PATH}`);
-      } catch (err) {
-        console.error("[WhatsApp] Error generando PNG del QR:", err);
-      }
-    }
-
-    if (connection === "close") {
-      const statusCode = lastDisconnect?.error?.output?.statusCode;
-      const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-      console.log(`[WhatsApp] Conexión cerrada (status ${statusCode}). Reconectar: ${shouldReconnect}`);
-
-      if (statusCode === DisconnectReason.loggedOut) {
-        console.log("[WhatsApp] Sesión cerrada/desvinculada. Limpiando credenciales para nuevo intento...");
-        try {
-          fs.rmSync(authDir, { recursive: true, force: true });
-          fs.mkdirSync(authDir, { recursive: true });
-        } catch (e) {
-          console.error("Error al limpiar credenciales:", e);
-        }
-      }
-
-      if (shouldReconnect || statusCode === DisconnectReason.loggedOut) {
-        console.log("[WhatsApp] Reiniciando conexión en 4 segundos...");
-        setTimeout(startWhatsApp, 4000);
-      }
-    } else if (connection === "open") {
-      console.log(`[WhatsApp] ¡CONECTADO CON ÉXITO! Helen vinculada como: ${sock.user?.id || sock.user?.name || "Asistente"}`);
-      try {
-        const statusPath = path.join(helenHome(), "whatsapp-status.json");
-        fs.writeFileSync(statusPath, JSON.stringify({
-          status: "CONNECTED",
-          user: sock.user,
-          connectedAt: new Date().toISOString()
-        }, null, 2), "utf8");
-      } catch {
-        /* ignore status save errors */
-      }
-    }
-  });
-
-  sock.ev.on("messages.upsert", async ({ messages }) => {
+/** Only an explicitly configured self-chat matching the linked account can act as owner. */
+export function createOwnerMessageHandler({
+  ownerJid,
+  linkedJid,
+  handleMessage,
+  sendMessage,
+  home,
+  log = () => {},
+}) {
+  const owner = normalizeOwnerJid(ownerJid);
+  if (!owner) throw new Error("Configure the exact owner JID locally");
+  const seen = new Set();
+  return async ({ messages, type }) => {
+    if (
+      type !== "notify" ||
+      normalizeOwnerJid(linkedJid()) !== owner ||
+      !Array.isArray(messages)
+    )
+      return;
     for (const msg of messages) {
-      if (!msg.message || msg.key.fromMe) continue;
-      const remoteJid = msg.key.remoteJid;
-      if (!remoteJid || remoteJid.endsWith("@broadcast")) continue;
-
+      const remote = msg?.key?.remoteJid;
       const text =
-        msg.message.conversation ||
-        msg.message.extendedTextMessage?.text ||
-        "";
-      if (!text.trim()) continue;
-
-      console.log(`[WhatsApp Recibido] [${remoteJid}]: ${text}`);
-
+        msg?.message?.conversation ?? msg?.message?.extendedTextMessage?.text;
+      const id = msg?.key?.id;
+      if (
+        normalizeOwnerJid(remote) !== owner ||
+        msg.key.participant ||
+        typeof text !== "string" ||
+        !text.trim() ||
+        text.length > 4000 ||
+        text.startsWith("Helen: ") ||
+        typeof id !== "string" ||
+        seen.has(id)
+      )
+        continue;
+      seen.add(id);
+      if (seen.size > 2000) seen.delete(seen.values().next().value);
       try {
         const reply = await handleMessage(text, {
-          home: helenHome(),
+          home,
           channel: "whatsapp",
-          conversation: remoteJid,
+          conversation: owner,
           ownerVerified: true,
+          requestId: id,
         });
-
-        if (reply && reply.text) {
-          await sock.sendMessage(remoteJid, { text: reply.text });
-          console.log(`[WhatsApp Enviado] [${remoteJid}]: ${reply.text}`);
-        }
-      } catch (err) {
-        console.error(`[WhatsApp Error] al responder a ${remoteJid}:`, err);
-        try {
-          await sock.sendMessage(remoteJid, {
-            text: "Error interno de Helen: " + (err.message || String(err)),
-          });
-        } catch {
-          /* ignore send failure */
-        }
+        if (reply?.text)
+          await sendMessage(remote, { text: "Helen: " + reply.text });
+        log(
+          "Owner message processed; remote delivery is not independently verified.",
+        );
+      } catch {
+        log("Owner message or delivery unconfirmed; no automatic retry.");
       }
     }
-  });
+  };
 }
 
-startWhatsApp().catch((err) => {
-  console.error("[WhatsApp Fatal]", err);
-  process.exit(1);
-});
+async function main() {
+  if (!process.argv.includes("--connect") || process.argv.includes("--help")) {
+    console.log(
+      "Experimental Baileys/WhatsApp Web adapter (not Meta Cloud API). Manual use: set WHATSAPP_OWNER_JID to the exact linked self-chat JID; node scripts/whatsapp-helen.mjs --connect. Initial pairing additionally requires --allow-pairing in a private terminal. Nothing connects by default.",
+    );
+    return;
+  }
+  const owner = normalizeOwnerJid(process.env.WHATSAPP_OWNER_JID);
+  if (!owner) throw new Error("Missing explicit owner identity");
+  const allowPairing = process.argv.includes("--allow-pairing");
+  if (allowPairing && !process.stdout.isTTY)
+    throw new Error("Pairing requires a private interactive terminal");
+  const [
+    {
+      default: makeWASocketPkg,
+      Browsers,
+      DisconnectReason,
+      useMultiFileAuthState,
+      fetchLatestBaileysVersion,
+    },
+    { default: QRCode },
+    { default: pino },
+    { handleMessage },
+    { helenHome, readConfig, writePrivate },
+  ] = await Promise.all([
+    import("@whiskeysockets/baileys"),
+    import("qrcode"),
+    import("pino"),
+    import("../dist/assistant/brain.js"),
+    import("../dist/assistant/home.js"),
+  ]);
+  const home = helenHome();
+  if (!readConfig(home).privacy.showSensitiveOn.includes("whatsapp"))
+    throw new Error(
+      "Enable the private WhatsApp channel locally before connecting",
+    );
+  process.umask(0o077);
+  const authDir = path.join(home, "whatsapp-auth");
+  if (fs.existsSync(authDir) && fs.lstatSync(authDir).isSymbolicLink())
+    throw new Error("Unsafe credential directory");
+  fs.mkdirSync(authDir, { recursive: true, mode: 0o700 });
+  const makeWASocket = makeWASocketPkg.default || makeWASocketPkg;
+  let retries = 0,
+    stopped = false,
+    socket,
+    retryTimer,
+    pairingTimer;
+  const stop = () => {
+    stopped = true;
+    clearTimeout(retryTimer);
+    clearTimeout(pairingTimer);
+    socket?.end(new Error("Stopped locally"));
+  };
+  process.once("SIGINT", stop);
+  process.once("SIGTERM", stop);
+  async function start() {
+    const { state, saveCreds } = await useMultiFileAuthState(authDir);
+    if (!state.creds.registered && !allowPairing)
+      throw new Error("Initial pairing is not enabled");
+    let timer;
+    const metadata = await Promise.race([
+      fetchLatestBaileysVersion(),
+      new Promise((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error("Version metadata timeout")),
+          15000,
+        );
+      }),
+    ]).finally(() => clearTimeout(timer));
+    if (
+      !Array.isArray(metadata.version) ||
+      metadata.version.length !== 3 ||
+      !metadata.version.every(
+        (value) => Number.isSafeInteger(value) && value >= 0,
+      )
+    )
+      throw new Error("Invalid compatibility version");
+    console.log(
+      "Baileys compatibility version selected; this is not an official Meta client.",
+    );
+    socket = makeWASocket({
+      version: metadata.version,
+      auth: state,
+      logger: pino({ level: "silent" }),
+      printQRInTerminal: false,
+      browser: Browsers.windows("Desktop"),
+      syncFullHistory: false,
+      connectTimeoutMs: 60000,
+      defaultQueryTimeoutMs: 60000,
+      keepAliveIntervalMs: 25000,
+    });
+    socket.ev.on("creds.update", async () => {
+      try {
+        await saveCreds();
+      } catch {
+        stop();
+        console.error(
+          "Private credential persistence failed; adapter stopped.",
+        );
+      }
+    });
+    if (!state.creds.registered && allowPairing && process.env.WHATSAPP_PHONE) {
+      const phone = process.env.WHATSAPP_PHONE.replace(/\D/g, "");
+      if (!/^\d{10,15}$/.test(phone))
+        throw new Error("Invalid local pairing phone");
+      pairingTimer = setTimeout(async () => {
+        try {
+          console.log(
+            "Local pairing code: " + (await socket.requestPairingCode(phone)),
+          );
+        } catch {
+          console.error(
+            "Pairing was not confirmed; inspect the private terminal.",
+          );
+        }
+      }, 3000);
+    }
+    socket.ev.on(
+      "connection.update",
+      async ({ connection, lastDisconnect, qr }) => {
+        if (qr && !state.creds.registered && !process.env.WHATSAPP_PHONE) {
+          if (!allowPairing || !process.stdout.isTTY) {
+            stop();
+            return;
+          }
+          try {
+            console.log(
+              await QRCode.toString(qr, { type: "terminal", small: true }),
+            );
+          } catch {
+            console.error("Could not display pairing QR locally.");
+            stop();
+          }
+        }
+        if (connection === "open") {
+          if (normalizeOwnerJid(socket.user?.id) !== owner) {
+            stop();
+            console.error(
+              "Linked account does not match the configured owner.",
+            );
+            return;
+          }
+          retries = 0;
+          writePrivate(
+            path.join(home, "whatsapp-status.json"),
+            JSON.stringify({
+              status: "SOCKET_CONNECTED",
+              delivery: "not-verified",
+              connectedAt: new Date().toISOString(),
+            }),
+          );
+          console.log(
+            "Owner socket connected; remote delivery is not independently verified.",
+          );
+        } else if (connection === "close") {
+          clearTimeout(pairingTimer);
+          writePrivate(
+            path.join(home, "whatsapp-status.json"),
+            JSON.stringify({
+              status: "DISCONNECTED",
+              delivery: "not-verified",
+              updatedAt: new Date().toISOString(),
+            }),
+          );
+          if (
+            stopped ||
+            lastDisconnect?.error?.output?.statusCode ===
+              DisconnectReason.loggedOut ||
+            ++retries > 3
+          ) {
+            stopped = true;
+            console.log(
+              "Adapter disconnected; credentials retained, manual review required.",
+            );
+            return;
+          }
+          retryTimer = setTimeout(
+            () =>
+              start().catch(() => {
+                stop();
+                console.error("Reconnect failed; manual review required.");
+              }),
+            retries * 4000,
+          );
+        }
+      },
+    );
+    socket.ev.on(
+      "messages.upsert",
+      createOwnerMessageHandler({
+        ownerJid: owner,
+        linkedJid: () => socket.user?.id,
+        handleMessage,
+        sendMessage: (jid, content) => socket.sendMessage(jid, content),
+        home,
+        log: (message) => console.log(message),
+      }),
+    );
+  }
+  await start();
+}
+
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+)
+  main().catch(() => {
+    console.error(
+      "WhatsApp adapter was not activated or lost its verified state. Review dependencies, private configuration and explicit pairing locally; no credentials are displayed.",
+    );
+    process.exit(1);
+  });

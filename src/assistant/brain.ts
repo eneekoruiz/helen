@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import { handleFinanceChat } from "./financeChat.js";
 import {
   ObserverRequestSchema,
+  observerScheduleRequest,
   readSystemObserver,
   requestSystemObserver,
 } from "./systemObserver.js";
@@ -1988,94 +1989,13 @@ async function route(
         return reply(ctx, "codex.prompt", text, { speech: text });
       }
     }
-    case "agent.schedule": {
-      ctx.privateAccess = true;
-      if (!ctx.ownerVerified) {
-        const text = say(
-          ctx.lang,
-          "Solo el propietario verificado puede programar tareas para los agentes.",
-          "Only the verified owner can schedule agent tasks.",
-        );
-        return reply(ctx, "agent.schedule", text, { speech: text });
-      }
-      const actor = {
-        owner: ctx.config.owner,
-        verified: ctx.ownerVerified,
-        private: ctx.showSensitive && !ctx.speaker,
-        channel: ctx.channel,
-      };
-      try {
-        const parsedTime = (intent.scheduledTime || "").trim();
-        let atParam: string | undefined;
-        let inParam: string | undefined;
-        if (/^\d{1,2}:\d{2}$/.test(parsedTime)) {
-          atParam = parsedTime.padStart(5, "0");
-        } else if (/^\d{1,2}$/.test(parsedTime)) {
-          atParam = `${parsedTime.padStart(2, "0")}:00`;
-        } else if (/^\d+[mh]$/i.test(parsedTime)) {
-          inParam = parsedTime.toLowerCase();
-        } else {
-          const m = parsedTime.match(/(\d{1,2})(?:[h:](\d{2}))?/i);
-          if (m) {
-            atParam = `${m[1]!.padStart(2, "0")}:${(m[2] ?? "00").padStart(2, "0")}`;
-          } else {
-            inParam = "1m";
-          }
-        }
-        const queueResult = await requestSystemObserver(
-          ctx.home,
-          actor,
-          {
-            goal: intent.goal || "Continuar tarea",
-            ...(atParam ? { at: atParam } : { in: inParam ?? "1m" }),
-            agent: intent.agent.toLowerCase() as "codex" | "claude" | "antigravity",
-            ...(intent.conversationId ? { conversationId: intent.conversationId } : {}),
-            ...(intent.attachments && intent.attachments.length > 0 ? { attachments: intent.attachments } : {}),
-            executionBackend: "provider-cli",
-          },
-          false,
-          ctx.signal,
-        );
-        if (queueResult.status === "queued") {
-          const targetStr = queueResult.targetAt || atParam || inParam || "programado";
-          const resumeStr = intent.conversationId ? ` (reanudando ${intent.conversationId.slice(0, 8)}...)` : "";
-          const attachStr = intent.attachments && intent.attachments.length > 0 ? `\n📎 *Adjuntos*: ${intent.attachments.join(", ")}` : "";
-          const text = say(
-            ctx.lang,
-            `✅ *Tarea programada para ${intent.agent}*${resumeStr}\n` +
-              `🎯 *Objetivo*: ${intent.goal}\n` +
-              `🆔 *ID*: \`${queueResult.id}\`\n` +
-              `⏰ *Hora*: ${targetStr}${attachStr}\n\n` +
-              `El ejecutor provider-cli lo lanzara puntualmente.`,
-            `✅ *Task scheduled for ${intent.agent}*${resumeStr}\n` +
-              `🎯 *Goal*: ${intent.goal}\n` +
-              `🆔 *ID*: \`${queueResult.id}\`\n` +
-              `⏰ *Time*: ${targetStr}${attachStr}\n\n` +
-              `The provider-cli executor will dispatch it on schedule.`,
-          );
-          const speech = say(
-            ctx.lang,
-            `He programado tu tarea para ${intent.agent} a las ${atParam || targetStr}.`,
-            `I have scheduled your task for ${intent.agent} at ${atParam || targetStr}.`,
-          );
-          return reply(ctx, "agent.schedule", text, { speech });
-        } else {
-          const text = say(
-            ctx.lang,
-            `No se pudo programar la tarea: ${queueResult.status}.`,
-            `Could not schedule task: ${queueResult.status}.`,
-          );
-          return reply(ctx, "agent.schedule", text, { speech: text });
-        }
-      } catch (err) {
-        const text = say(
-          ctx.lang,
-          `Error al programar la tarea: ${err instanceof Error ? err.message : String(err)}`,
-          `Error scheduling task: ${err instanceof Error ? err.message : String(err)}`,
-        );
-        return reply(ctx, "agent.schedule", text, { speech: text });
-      }
-    }
+    case "agent.schedule":
+      return reply(
+        ctx,
+        "agent.schedule",
+        "La programación requiere una propuesta privada y la confirmación exacta de su hash.",
+        { speech: "Revisa la propuesta en tu canal privado." },
+      );
     case "agenda":
       return agenda(ctx, intent.range);
     case "recall":
@@ -2478,6 +2398,21 @@ async function handleTurn(
   const control = fold(understood.cleaned)
     .replace(/[¿?!.]/g, "")
     .trim();
+  // Natural-language scheduling uses the same private preview and exact approval as JSON.
+  if (understood.intent.name === "agent.schedule") {
+    try {
+      input =
+        "automatizaciones proponer " +
+        JSON.stringify(observerScheduleRequest(understood.intent));
+    } catch {
+      return reply(
+        ctx,
+        "agent.schedule",
+        "Indica un objetivo explícito y una hora HH:mm (próxima ocurrencia local) o en 15m. No interpreto mañana ni horas ambiguas por suposición; no se ha encolado nada.",
+        { speech: "Revisa la hora y el objetivo en tu canal privado." },
+      );
+    }
+  }
   // Deterministic private route: calendar contents never enter model tools or history.
   if (/^calendario google\b/i.test(input.trim())) {
     const actor = {
@@ -2540,6 +2475,11 @@ async function handleTurn(
         throw new Error(
           "El Observer requiere el propietario y un canal privado habilitado.",
         );
+      if (
+        /^automatizaciones (?:simular|proponer)\b/i.test(input.trim()) &&
+        ctx.conversation.pending?.kind === "observer"
+      )
+        delete ctx.conversation.pending;
       const pending = ctx.conversation.pending;
       let text: string;
       if (pending?.kind === "observer") {
@@ -2556,6 +2496,13 @@ async function handleTurn(
         if (/^(?:no|cancelar|cancela)$/i.test(input.trim())) {
           delete ctx.conversation.pending;
           text = "Propuesta de automatización cancelada.";
+        } else if (
+          draft.request.at &&
+          Date.parse(draft.targetAt) <= now.getTime()
+        ) {
+          delete ctx.conversation.pending;
+          text =
+            "La hora prevista ha pasado; genera otra vista previa para no moverla al día siguiente por suposición.";
         } else if (draft.hash !== hash) {
           delete ctx.conversation.pending;
           text =
@@ -2600,6 +2547,9 @@ async function handleTurn(
         if (preview.status !== "preview") text = JSON.stringify(preview);
         else if (command[1]!.toLowerCase() === "simular")
           text = JSON.stringify(preview, null, 2);
+        else if (request.attachments?.length)
+          text =
+            "Vista previa de adjuntos únicamente. No se autoriza encolarlos hasta poder vincular los bytes aprobados con la ejecución; no se ha creado ninguna tarea.";
         else {
           if (!local.observer?.permissions.includes("automation:queue"))
             throw new Error("Falta permiso local para encolar.");
@@ -2615,7 +2565,13 @@ async function handleTurn(
             .digest("hex");
           ctx.conversation.pending = pendingFor(
             "observer",
-            { text: JSON.stringify({ request, hash }) },
+            {
+              text: JSON.stringify({
+                request,
+                hash,
+                targetAt: preview.targetAt,
+              }),
+            },
             now,
           );
           text = `Vista previa, sin encolar:\n${JSON.stringify({ request, preview }, null, 2)}\nPara aprobar exactamente esta solicitud: confirmar ${hash}. Para descartarla: cancelar.`;

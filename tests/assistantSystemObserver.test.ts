@@ -8,6 +8,8 @@ import { getConversation } from "../src/assistant/conversation.js";
 import { readConfig, writeConfig } from "../src/assistant/home.js";
 import {
   readSystemObserver,
+  ObserverRequestSchema,
+  observerScheduleRequest,
   requestSystemObserver,
 } from "../src/assistant/systemObserver.js";
 
@@ -47,6 +49,7 @@ beforeEach(() => {
         profileRoot: profile,
         projectRoot: path.join(home, "project"),
         agent: "codex",
+        executionBackend: "provider-cli",
         allowedChannels: ["cli"],
         permissions: ["system:read", "automation:queue"],
       },
@@ -63,23 +66,52 @@ beforeEach(() => {
         stdout: string,
         stderr: string,
       ) => void;
-      const goal = argv[argv.indexOf("-Goal") + 1];
-      if (!argv.includes("-DryRun"))
-        saveQueue([
-          {
-            id,
-            goal,
-            projectPath: path.join(home, "project"),
-            agent: "codex",
-            status: "PENDING",
-            targetIso: target,
-          },
-        ]);
-      callback(
-        null,
-        JSON.stringify({ scheduled: false, targetIso: target }),
-        "",
-      );
+      const finish = (payload: {
+        goal: string;
+        agent?: string;
+        dryRun?: boolean;
+        conversationId?: string;
+        executionBackend?: string;
+        attachments?: string[];
+      }) => {
+        if (!payload.dryRun)
+          saveQueue([
+            {
+              id,
+              goal: payload.goal,
+              projectPath: path.join(home, "project"),
+              agent:
+                payload.agent === "antigravity"
+                  ? "agy"
+                  : (payload.agent ?? "codex"),
+              status: "PENDING",
+              targetIso: target,
+              ...(payload.conversationId
+                ? { conversationId: payload.conversationId }
+                : {}),
+              ...(payload.executionBackend
+                ? { executionBackend: payload.executionBackend }
+                : {}),
+              ...(payload.attachments
+                ? { attachments: payload.attachments }
+                : {}),
+            },
+          ]);
+        callback(
+          null,
+          JSON.stringify({ scheduled: false, targetIso: target }),
+          "",
+        );
+      };
+      const value = (flag: string) =>
+        argv.includes(flag) ? argv[argv.indexOf(flag) + 1] : undefined;
+      finish({
+        goal: value("-Goal")!,
+        agent: value("-Agent"),
+        dryRun: argv.includes("-DryRun"),
+        conversationId: value("-ConversationId"),
+        executionBackend: value("-ExecutionBackend"),
+      });
       return {} as ChildProcess;
     }) as typeof execFile);
 });
@@ -177,6 +209,7 @@ it("requires private owner and separate permissions; rejects routing/path overri
 it("confirms a durable queued item only, never provider execution or Windows schedule registration", async () => {
   expect(await requestSystemObserver(home, actor, request, false)).toEqual({
     status: "queued",
+    executionBackend: "provider-cli",
     id,
     targetAt: "2026-11-04T17:00:00.000Z",
     execution: "not-verified",
@@ -272,12 +305,12 @@ it.skipIf(process.platform !== "win32")(
     vi.mocked(execFile).mockImplementation(actual.execFile);
     fs.writeFileSync(
       path.join(profile, "system-observer.ps1"),
-      `param([string]$Goal,[string]$ProjectPath,[string]$Agent,[string]$In,[switch]$NoNotification,[switch]$DryRun)
+      `param([string]$Goal,[string]$ProjectPath,[string]$Agent,[string]$In,[string]$ExecutionBackend,[string[]]$Attachments,[switch]$NoNotification,[switch]$DryRun)
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
 $target = '2026-11-05T04:00:00+01:00'
 if ($DryRun) { @{ scheduled=$false; targetIso=$target } | ConvertTo-Json -Compress; exit 0 }
-$task = @{ id='task-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'; goal=$Goal; projectPath=$ProjectPath; agent=$Agent; targetIso=$target; status='PENDING' }
+$task = @{ id='task-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'; goal=$Goal; projectPath=$ProjectPath; agent=$Agent; targetIso=$target; status='PENDING'; executionBackend=$ExecutionBackend; attachments=@($Attachments) }
 @{ tasks=@($task) } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $env:ORCA_QUEUE_PATH -Encoding UTF8
 `,
       "utf8",
@@ -339,4 +372,150 @@ it("keeps rejected financial objectives out of models, history and pending while
     home,
   );
   expect(() => readSystemObserver(home, actor)).toThrow();
+});
+
+it("natural scheduling reuses preview/exact approval before any model/history and preserves provider/session/backend", async () => {
+  const answer = vi.fn();
+  const model = { kind: "command" as const, usesTools: false, answer };
+  const uuid = "12345678-1234-4234-8234-123456789abc";
+  const now = new Date("2026-11-04T15:00:00Z");
+  const preview = await ask(
+    "programa claude a las 5pm reanuda " + uuid + " Revisar los tests",
+    { model, now },
+  );
+  expect(preview.text).toContain('"at": "17:00"');
+  expect(preview.text).toContain('"agent": "claude"');
+  expect(preview.text).toContain(uuid);
+  expect(JSON.parse(fs.readFileSync(queueFile, "utf8")).tasks).toHaveLength(0);
+  const confirm = /confirmar [a-f0-9]{64}/.exec(preview.text)![0];
+  await ask("sí", { model, now });
+  expect(vi.mocked(execFile).mock.calls).toHaveLength(1);
+  expect((await ask(confirm, { model, now })).text).toContain(
+    '"status": "queued"',
+  );
+  const task = JSON.parse(fs.readFileSync(queueFile, "utf8")).tasks[0];
+  expect(task).toMatchObject({
+    agent: "claude",
+    conversationId: uuid,
+    executionBackend: "provider-cli",
+  });
+  expect(answer).not.toHaveBeenCalled();
+  expect(getConversation(home, "cli:default", now).history).toBeUndefined();
+});
+it("asks instead of guessing tomorrow, invalid clocks, missing goals or unverified scheduling", async () => {
+  const answer = vi.fn();
+  const model = { kind: "command" as const, usesTools: false, answer };
+  for (const text of [
+    "programa codex mañana Revisar tests",
+    "programa codex a las 99:99 Revisar tests",
+    "programa codex a las 9",
+    "programa codex a las 9 Enviar 20 euros",
+  ])
+    await ask(text, { model });
+  await ask("programa codex a las 9 Revisar tests", {
+    model,
+    ownerVerified: false,
+  });
+  await ask("programa codex a las 9 Revisar tests", { model, speaker: true });
+  expect(execFile).not.toHaveBeenCalled();
+  expect(answer).not.toHaveBeenCalled();
+  expect(getConversation(home, "cli:default").history).toBeUndefined();
+});
+it("requires exactly one explicit time and normalizes AM/PM and relative minutes without defaults", () => {
+  for (const invalid of [{ goal: request.goal }, { ...request, at: "09:00" }])
+    expect(() => ObserverRequestSchema.parse(invalid)).toThrow();
+  const intent = {
+    name: "agent.schedule" as const,
+    agent: "codex",
+    goal: request.goal,
+  };
+  expect(
+    observerScheduleRequest({ ...intent, scheduledTime: "12am" }),
+  ).toMatchObject({ at: "00:00" });
+  expect(
+    observerScheduleRequest({ ...intent, scheduledTime: "12pm" }),
+  ).toMatchObject({ at: "12:00" });
+  expect(
+    observerScheduleRequest({ ...intent, scheduledTime: "en 15m" }),
+  ).toMatchObject({ in: "15m" });
+  expect(() =>
+    observerScheduleRequest({ ...intent, scheduledTime: "mañana" }),
+  ).toThrow();
+});
+it("previews attachments but fails closed on enqueue until bytes can be pinned through dispatch", async () => {
+  const file = path.join(home, "project", "review.txt");
+  fs.writeFileSync(file, "synthetic source");
+  const input = { ...request, attachments: [file] };
+  const preview = await ask(
+    "automatizaciones proponer " + JSON.stringify(input),
+  );
+  expect(preview.text).toContain("Vista previa de adjuntos únicamente");
+  expect(getConversation(home, "cli:default").pending).toBeUndefined();
+  await expect(
+    requestSystemObserver(home, actor, input, false),
+  ).rejects.toThrow(/disabled/);
+  expect(vi.mocked(execFile).mock.calls).toHaveLength(1);
+  for (const fileName of [
+    "../outside.txt",
+    ".env",
+    "auth.json",
+    "finance.xlsx",
+  ]) {
+    await expect(
+      requestSystemObserver(
+        home,
+        actor,
+        { ...request, attachments: [fileName] },
+        true,
+      ),
+    ).rejects.toThrow();
+  }
+});
+
+it("requires an explicit backend and never silently inherits Orca", async () => {
+  const config = readConfig(home);
+  writeConfig(
+    {
+      ...config,
+      observer: { ...config.observer!, executionBackend: undefined },
+    },
+    home,
+  );
+  await expect(
+    requestSystemObserver(home, actor, request, true),
+  ).rejects.toThrow();
+  expect(execFile).not.toHaveBeenCalled();
+  expect(
+    await requestSystemObserver(
+      home,
+      actor,
+      { ...request, executionBackend: "provider-cli" },
+      true,
+    ),
+  ).toMatchObject({ executionBackend: "provider-cli" });
+  expect(vi.mocked(execFile).mock.calls[0]![1]).toContain("-ExecutionBackend");
+});
+it("does not silently move an approved local clock to tomorrow after that clock passed", async () => {
+  const now = new Date("2026-11-04T16:59:00Z");
+  const preview = await ask("programa codex a las 18 Revisar tests", { now });
+  const confirm = /confirmar [a-f0-9]{64}/.exec(preview.text)![0];
+  expect(
+    (await ask(confirm, { now: new Date("2026-11-04T17:01:00Z") })).text,
+  ).toContain("hora prevista ha pasado");
+  expect(vi.mocked(execFile).mock.calls).toHaveLength(1);
+});
+
+it("replaces a stale proposal with the new explicit goal rather than offering its old approval hash", async () => {
+  const first = await ask("programa codex en 15m Revisar primer proyecto");
+  const old = /confirmar [a-f0-9]{64}/.exec(first.text)![0];
+  const second = await ask("programa claude en 20m Revisar segundo proyecto");
+  const fresh = /confirmar [a-f0-9]{64}/.exec(second.text)![0];
+  expect(fresh).not.toBe(old);
+  expect(second.text).toContain("segundo proyecto");
+  await ask(old);
+  expect(vi.mocked(execFile).mock.calls).toHaveLength(2);
+  expect((await ask(fresh)).text).toContain('"status": "queued"');
+  expect(JSON.parse(fs.readFileSync(queueFile, "utf8")).tasks[0]).toMatchObject(
+    { agent: "claude", goal: "Revisar segundo proyecto" },
+  );
 });

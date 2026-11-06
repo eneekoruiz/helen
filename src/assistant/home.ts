@@ -222,6 +222,7 @@ export const AssistantConfigSchema = z.object({
           (value) => path.isAbsolute(value) && !/^(?:\\\\|\/\/)/.test(value),
         ),
       agent: z.enum(["codex", "claude", "antigravity"]).default("codex"),
+      executionBackend: z.enum(["orca", "provider-cli"]).optional(),
       allowedChannels: z.array(z.enum(CHANNEL_NAMES)).default([]),
       permissions: z
         .array(z.enum(["system:read", "automation:queue"]))

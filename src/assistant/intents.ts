@@ -25,7 +25,14 @@ export type Intent =
   | { name: "codex.status"; query?: string }
   | { name: "codex.reply" }
   | { name: "codex.prompt"; goal: string; agent?: string }
-  | { name: "agent.schedule"; goal: string; agent: string; scheduledTime: string; conversationId?: string; attachments?: string[] }
+  | {
+      name: "agent.schedule";
+      goal: string;
+      agent: string;
+      scheduledTime: string;
+      conversationId?: string;
+      attachments?: string[];
+    }
   | { name: "agenda"; range: AgendaRange }
   | { name: "recall"; query: string }
   | { name: "time" }
@@ -263,7 +270,7 @@ const RULES: Rule[] = [
   // Schedule a task for a specific agent at a specific time (with optional session resume + attachments)
   {
     pattern:
-      /^(?:programa(?:me)?|agenda(?:me)?|encola(?:r)?|schedule|planifica(?:me)?)(?:\s+(?:una?\s+)?(?:tarea|task|prompt|sesion))?(?:\s+(?:para|en|con|a|with|for|to))?\s+(?<agent>codex|claude|antigravity)(?:\s+(?:para|a|at|for))?\s+(?:las?\s+)?(?<time>\d{1,2}(?::\d{2})?\s*(?:am|pm|h)?|\d{1,2}h\d{2}|manana(?:\s+a\s+las?\s+\d{1,2}(?::\d{2})?)?)(?:\s+(?:con\s+id|reanuda(?:ndo)?|resume|resuming|retomando|conversacion|session|id))?\s*(?<convId>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?(?:\s*[,.]?\s*(?<goal>.+))?$/i,
+      /^(?:programa(?:me)?|agenda(?:me)?|encola(?:r)?|schedule|planifica(?:me)?)(?:\s+(?:una?\s+)?(?:tarea|task|prompt|sesion))?(?:\s+(?:para|en|con|a|with|for|to))?\s+(?<agent>codex|claude|antigravity)(?:\s+(?:para|a|at|for))?\s+(?:las?\s+)?(?<time>(?:en|in)\s+[1-9]\d{0,3}[mh]|[1-9]\d{0,3}m|\d{1,2}h\d{2}|\d{1,2}(?::\d{2})?\s*(?:am|pm|h)?|manana(?:\s+a\s+las?\s+\d{1,2}(?::\d{2})?)?)(?=\s|[,:.]|$)(?:\s+(?:con\s+id|reanuda(?:ndo)?|resume|resuming|retomando|conversacion|session|id))?\s*(?<convId>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?(?:\s*[,.]?\s*(?<goal>.+))?$/i,
     build: (_g, o) => ({
       name: "agent.schedule" as const,
       agent: (o("agent") ?? "codex").toLowerCase(),

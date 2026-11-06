@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+import type { Intent } from "./intents.js";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -22,6 +24,7 @@ function settings(
   if (
     !actor.verified ||
     !actor.private ||
+    !config.privacy.showSensitiveOn.includes(actor.channel) ||
     actor.owner !== config.owner ||
     !config.observer?.allowedChannels.includes(actor.channel) ||
     !config.observer.permissions.includes(permission)
@@ -135,6 +138,9 @@ export function readSystemObserver(home: string, actor: Actor) {
   const script = path.join(config.profileRoot, "system-observer.ps1");
   return {
     queueExists: snapshot.exists,
+    configuredAgent: config.agent,
+    configuredExecutionBackend: config.executionBackend ?? null,
+    canQueue: config.permissions.includes("automation:queue"),
     total: snapshot.tasks.length,
     counts,
     lastQueuedAt: queued.at(-1) ?? null,
@@ -178,12 +184,109 @@ export const ObserverRequestSchema = z
     agent: z.enum(["codex", "claude", "orca", "antigravity"]).optional(),
     conversationId: z
       .string()
-      .regex(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)
+      .regex(
+        /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+      )
       .optional(),
     attachments: z.array(z.string().min(1).max(1024)).max(10).optional(),
     executionBackend: z.enum(["orca", "provider-cli"]).optional(),
   })
-  .strict();
+  .strict()
+  .refine(
+    (value) => Boolean(value.in) !== Boolean(value.at),
+    "Choose exactly one delay or local clock time",
+  )
+  .refine(
+    (value) => !value.conversationId || value.agent !== "antigravity",
+    "Session resume is only verified for Codex and Claude CLI",
+  );
+
+export function observerScheduleRequest(
+  intent: Extract<Intent, { name: "agent.schedule" }>,
+) {
+  if (intent.attachments?.length)
+    throw new Error(
+      "Natural-language attachments require the explicit reviewed file flow",
+    );
+  const time = intent.scheduledTime.trim().toLowerCase();
+  const delay =
+    /^(?:(?:en|in)\s+)?([1-9]\d{0,3}m)$|^(?:en|in)\s+([1-9]\d{0,3}h)$/.exec(
+      time,
+    );
+  let when: { in: string } | { at: string };
+  if (delay) when = { in: delay[1] ?? delay[2]! };
+  else {
+    const clock = /^(\d{1,2})(?::(\d{2})|h(\d{2}))?\s*(am|pm|h)?$/.exec(time);
+    if (!clock) throw new Error("Ambiguous schedule time");
+    let hour = Number(clock[1]);
+    const minute = clock[2] ?? clock[3] ?? "00";
+    if (clock[4] === "am" || clock[4] === "pm") {
+      if (hour < 1 || hour > 12) throw new Error("Invalid twelve-hour clock");
+      hour = (hour % 12) + (clock[4] === "pm" ? 12 : 0);
+    }
+    when = { at: String(hour).padStart(2, "0") + ":" + minute };
+  }
+  return ObserverRequestSchema.parse({
+    goal: intent.goal,
+    agent: intent.agent,
+    ...when,
+    ...(intent.conversationId ? { conversationId: intent.conversationId } : {}),
+    ...(intent.attachments?.length ? { attachments: intent.attachments } : {}),
+    executionBackend: "provider-cli",
+  });
+}
+
+export function observerAttachmentState(
+  home: string,
+  actor: Actor,
+  raw: unknown,
+) {
+  const config = settings(home, actor, "system:read");
+  const input = ObserverRequestSchema.parse(raw);
+  let total = 0;
+  return (input.attachments ?? []).map((value) => {
+    const file = path.resolve(config.projectRoot, value);
+    const relative = path.relative(config.projectRoot, file);
+    if (
+      !isSafeProjectPath(config.projectRoot, file) ||
+      relative
+        .split(path.sep)
+        .some((part) =>
+          /^(?:\.git|node_modules|\.helen)$|^\.env(?:\.|$)|^(?:auth|credentials?|secrets?|tokens?)(?:\.|$)/i.test(
+            part,
+          ),
+        ) ||
+      /\.(?:key|pem|p12|pfx|xlsx?|csv|joblib|pth|pt|bin|weights)$/i.test(file)
+    )
+      throw new Error("Attachment path is not authorized");
+    const stat = fs.statSync(file);
+    if (
+      !stat.isFile() ||
+      stat.size > 5 * 1024 * 1024 ||
+      (total += stat.size) > 10 * 1024 * 1024
+    )
+      throw new Error("Attachment exceeds its file limits");
+    const bytes = fs.readFileSync(file);
+    if (/\.(?:json|txt|md|yaml|yml|[cm]?[jt]sx?|py|ps1)$/i.test(file)) {
+      const text = bytes.toString("utf8");
+      if (
+        findSecrets(text).length ||
+        /\b[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]{4}){3,7}\b|\b\d+(?:[.,]\d+)?\s*(?:euros?|EUR|USD)\b|[€$]\s*\d/.test(
+          text,
+        )
+      )
+        throw new Error(
+          "Attachment contains sensitive financial or credential data",
+        );
+    } else if (!/\.(?:png|jpg|jpeg|webp)$/i.test(file))
+      throw new Error("Attachment format is not reviewed");
+    return {
+      path: file,
+      size: bytes.length,
+      sha256: createHash("sha256").update(bytes).digest("hex"),
+    };
+  });
+}
 
 /** Explicit approved request only; the existing Observer owns scheduling and provider execution. */
 export async function requestSystemObserver(
@@ -199,6 +302,19 @@ export async function requestSystemObserver(
     dryRun ? "system:read" : "automation:queue",
   );
   const input = ObserverRequestSchema.parse(raw);
+  const files = observerAttachmentState(home, actor, input);
+  if (!dryRun && files.length)
+    throw new Error(
+      "Attachment enqueue is disabled until approval bytes can be pinned through dispatch",
+    );
+  const backend = z
+    .enum(["orca", "provider-cli"])
+    .parse(input.executionBackend ?? config.executionBackend);
+  const selectedAgent = z
+    .enum(["codex", "claude", "antigravity"])
+    .parse(input.agent || config.agent);
+  if (input.conversationId && selectedAgent === "antigravity")
+    throw new Error("Antigravity session resume is not verified");
   signal?.throwIfAborted();
   if (os.platform() !== "win32")
     throw new Error("Observer execution requires Windows.");
@@ -229,10 +345,7 @@ export async function requestSystemObserver(
   if (input.in) args.push("-In", input.in);
   if (input.at) args.push("-At", input.at);
   if (input.conversationId) args.push("-ConversationId", input.conversationId);
-  if (input.executionBackend) args.push("-ExecutionBackend", input.executionBackend);
-  if (input.attachments && input.attachments.length > 0) {
-    args.push("-Attachments", input.attachments.join(","));
-  }
+  args.push("-ExecutionBackend", backend);
   const command = path.join(
     process.env.SystemRoot || "C:\\Windows",
     "System32",
@@ -277,7 +390,10 @@ export async function requestSystemObserver(
       status: "preview",
       scheduled: false,
       targetAt: preview.targetIso,
-      agent: config.agent,
+      agent: input.agent || config.agent,
+      executionBackend: backend,
+      attachments: files,
+      attachmentEnqueue: "disabled-until-byte-pin-contract",
     };
   }
   const targetAgent = input.agent || config.agent;
@@ -290,6 +406,16 @@ export async function requestSystemObserver(
       path.resolve(task.projectPath).toLowerCase() ===
         path.resolve(config.projectRoot).toLowerCase() &&
       task.agent === expectedAgent &&
+      (!input.conversationId ||
+        (typeof task.conversationId === "string" &&
+          task.conversationId.toLowerCase() ===
+            input.conversationId.toLowerCase())) &&
+      task.executionBackend === backend &&
+      (!files.length ||
+        (Array.isArray(task.attachments) &&
+          JSON.stringify(task.attachments) ===
+            JSON.stringify(files.map((file) => file.path)))) &&
+      Boolean(iso(task.targetIso)) &&
       task.status === "PENDING" &&
       typeof task.id === "string" &&
       /^task-[a-f0-9]{32}$/.test(task.id),
@@ -302,6 +428,7 @@ export async function requestSystemObserver(
     };
   return {
     status: "queued",
+    executionBackend: backend,
     id: added[0]!.id,
     targetAt: iso(added[0]!.targetIso) ?? null,
     execution: "not-verified",
