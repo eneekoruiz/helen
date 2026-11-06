@@ -25,6 +25,7 @@ export type Intent =
   | { name: "codex.status"; query?: string }
   | { name: "codex.reply" }
   | { name: "codex.prompt"; goal: string; agent?: string }
+  | { name: "agent.schedule"; goal: string; agent: string; scheduledTime: string; conversationId?: string; attachments?: string[] }
   | { name: "agenda"; range: AgendaRange }
   | { name: "recall"; query: string }
   | { name: "time" }
@@ -258,6 +259,30 @@ const RULES: Rule[] = [
     pattern:
       /^(?:que\s+(?:ha\s+(?:respondido|dicho)|respondio|dijo)\s+(?:el\s+agente|codex|antigravity)|resumen\s+de\s+(?:la\s+)?(?:ultima\s+)?respuesta(?:\s+de\s+(?:codex|antigravity|agente))?|ultima\s+respuesta(?:\s+de\s+(?:codex|antigravity|agente))?|lee(?:me)?\s+la\s+respuesta|what\s+did\s+(?:codex|the\s+agent|antigravity)\s+reply|latest\s+agent\s+reply)[.!?]?$/,
     build: () => ({ name: "codex.reply" }),
+  },
+  // Schedule a task for a specific agent at a specific time (with optional session resume + attachments)
+  {
+    pattern:
+      /^(?:programa(?:me)?|agenda(?:me)?|encola(?:r)?|schedule|planifica(?:me)?)(?:\s+(?:una?\s+)?(?:tarea|task|prompt|sesion))?(?:\s+(?:para|en|con|a|with|for|to))?\s+(?<agent>codex|claude|antigravity)(?:\s+(?:para|a|at|for))?\s+(?:las?\s+)?(?<time>\d{1,2}(?::\d{2})?\s*(?:am|pm|h)?|\d{1,2}h\d{2}|manana(?:\s+a\s+las?\s+\d{1,2}(?::\d{2})?)?)(?:\s+(?:con\s+id|reanuda(?:ndo)?|resume|resuming|retomando|conversacion|session|id))?\s*(?<convId>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?(?:\s*[,.]?\s*(?<goal>.+))?$/i,
+    build: (_g, o) => ({
+      name: "agent.schedule" as const,
+      agent: (o("agent") ?? "codex").toLowerCase(),
+      scheduledTime: o("time") ?? "",
+      conversationId: o("convId"),
+      goal: (o("goal") ?? "").trim(),
+      attachments: [],
+    }),
+  },
+  {
+    pattern:
+      /^(?<agent>codex|claude|antigravity)(?:\s+a\s+las?\s+|\s+at\s+)(?<time>\d{1,2}(?::\d{2})?\s*(?:am|pm|h)?)[:\s]+(?<goal>.+)$/i,
+    build: (_g, o) => ({
+      name: "agent.schedule" as const,
+      agent: (o("agent") ?? "codex").toLowerCase(),
+      scheduledTime: o("time") ?? "",
+      goal: (o("goal") ?? "").trim(),
+      attachments: [],
+    }),
   },
   // Dispatch next prompt / task to Codex / Orca
   {

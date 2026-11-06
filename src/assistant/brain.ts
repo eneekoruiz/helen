@@ -1988,6 +1988,94 @@ async function route(
         return reply(ctx, "codex.prompt", text, { speech: text });
       }
     }
+    case "agent.schedule": {
+      ctx.privateAccess = true;
+      if (!ctx.ownerVerified) {
+        const text = say(
+          ctx.lang,
+          "Solo el propietario verificado puede programar tareas para los agentes.",
+          "Only the verified owner can schedule agent tasks.",
+        );
+        return reply(ctx, "agent.schedule", text, { speech: text });
+      }
+      const actor = {
+        owner: ctx.config.owner,
+        verified: ctx.ownerVerified,
+        private: ctx.showSensitive && !ctx.speaker,
+        channel: ctx.channel,
+      };
+      try {
+        const parsedTime = (intent.scheduledTime || "").trim();
+        let atParam: string | undefined;
+        let inParam: string | undefined;
+        if (/^\d{1,2}:\d{2}$/.test(parsedTime)) {
+          atParam = parsedTime.padStart(5, "0");
+        } else if (/^\d{1,2}$/.test(parsedTime)) {
+          atParam = `${parsedTime.padStart(2, "0")}:00`;
+        } else if (/^\d+[mh]$/i.test(parsedTime)) {
+          inParam = parsedTime.toLowerCase();
+        } else {
+          const m = parsedTime.match(/(\d{1,2})(?:[h:](\d{2}))?/i);
+          if (m) {
+            atParam = `${m[1]!.padStart(2, "0")}:${(m[2] ?? "00").padStart(2, "0")}`;
+          } else {
+            inParam = "1m";
+          }
+        }
+        const queueResult = await requestSystemObserver(
+          ctx.home,
+          actor,
+          {
+            goal: intent.goal || "Continuar tarea",
+            ...(atParam ? { at: atParam } : { in: inParam ?? "1m" }),
+            agent: intent.agent.toLowerCase() as "codex" | "claude" | "antigravity",
+            ...(intent.conversationId ? { conversationId: intent.conversationId } : {}),
+            ...(intent.attachments && intent.attachments.length > 0 ? { attachments: intent.attachments } : {}),
+            executionBackend: "provider-cli",
+          },
+          false,
+          ctx.signal,
+        );
+        if (queueResult.status === "queued") {
+          const targetStr = queueResult.targetAt || atParam || inParam || "programado";
+          const resumeStr = intent.conversationId ? ` (reanudando ${intent.conversationId.slice(0, 8)}...)` : "";
+          const attachStr = intent.attachments && intent.attachments.length > 0 ? `\n📎 *Adjuntos*: ${intent.attachments.join(", ")}` : "";
+          const text = say(
+            ctx.lang,
+            `✅ *Tarea programada para ${intent.agent}*${resumeStr}\n` +
+              `🎯 *Objetivo*: ${intent.goal}\n` +
+              `🆔 *ID*: \`${queueResult.id}\`\n` +
+              `⏰ *Hora*: ${targetStr}${attachStr}\n\n` +
+              `El ejecutor provider-cli lo lanzara puntualmente.`,
+            `✅ *Task scheduled for ${intent.agent}*${resumeStr}\n` +
+              `🎯 *Goal*: ${intent.goal}\n` +
+              `🆔 *ID*: \`${queueResult.id}\`\n` +
+              `⏰ *Time*: ${targetStr}${attachStr}\n\n` +
+              `The provider-cli executor will dispatch it on schedule.`,
+          );
+          const speech = say(
+            ctx.lang,
+            `He programado tu tarea para ${intent.agent} a las ${atParam || targetStr}.`,
+            `I have scheduled your task for ${intent.agent} at ${atParam || targetStr}.`,
+          );
+          return reply(ctx, "agent.schedule", text, { speech });
+        } else {
+          const text = say(
+            ctx.lang,
+            `No se pudo programar la tarea: ${queueResult.status}.`,
+            `Could not schedule task: ${queueResult.status}.`,
+          );
+          return reply(ctx, "agent.schedule", text, { speech: text });
+        }
+      } catch (err) {
+        const text = say(
+          ctx.lang,
+          `Error al programar la tarea: ${err instanceof Error ? err.message : String(err)}`,
+          `Error scheduling task: ${err instanceof Error ? err.message : String(err)}`,
+        );
+        return reply(ctx, "agent.schedule", text, { speech: text });
+      }
+    }
     case "agenda":
       return agenda(ctx, intent.range);
     case "recall":

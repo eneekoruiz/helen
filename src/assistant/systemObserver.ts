@@ -169,8 +169,19 @@ export const ObserverRequestSchema = z
         (value) =>
           Number(value.slice(0, -1)) * (value.endsWith("h") ? 60 : 1) <= 10080,
         "Choose a delay of at most seven days",
-      ),
+      )
+      .optional(),
+    at: z
+      .string()
+      .regex(/^(?:[01]?\d|2[0-3]):[0-5]\d$/)
+      .optional(),
     agent: z.enum(["codex", "claude", "orca", "antigravity"]).optional(),
+    conversationId: z
+      .string()
+      .regex(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)
+      .optional(),
+    attachments: z.array(z.string().min(1).max(1024)).max(10).optional(),
+    executionBackend: z.enum(["orca", "provider-cli"]).optional(),
   })
   .strict();
 
@@ -212,11 +223,16 @@ export async function requestSystemObserver(
     config.projectRoot,
     "-Agent",
     input.agent || config.agent,
-    "-In",
-    input.in,
     "-NoNotification",
     ...(dryRun ? ["-DryRun"] : []),
   ];
+  if (input.in) args.push("-In", input.in);
+  if (input.at) args.push("-At", input.at);
+  if (input.conversationId) args.push("-ConversationId", input.conversationId);
+  if (input.executionBackend) args.push("-ExecutionBackend", input.executionBackend);
+  if (input.attachments && input.attachments.length > 0) {
+    args.push("-Attachments", input.attachments.join(","));
+  }
   const command = path.join(
     process.env.SystemRoot || "C:\\Windows",
     "System32",
@@ -264,6 +280,8 @@ export async function requestSystemObserver(
       agent: config.agent,
     };
   }
+  const targetAgent = input.agent || config.agent;
+  const expectedAgent = targetAgent === "antigravity" ? "agy" : targetAgent;
   const added = queue(config.profileRoot).tasks.filter(
     (task) =>
       !oldIds.has(task.id) &&
@@ -271,7 +289,7 @@ export async function requestSystemObserver(
       typeof task.projectPath === "string" &&
       path.resolve(task.projectPath).toLowerCase() ===
         path.resolve(config.projectRoot).toLowerCase() &&
-      task.agent === config.agent &&
+      task.agent === expectedAgent &&
       task.status === "PENDING" &&
       typeof task.id === "string" &&
       /^task-[a-f0-9]{32}$/.test(task.id),
