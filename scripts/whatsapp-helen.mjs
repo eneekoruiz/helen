@@ -1,4 +1,4 @@
-import makeWASocketPkg, { Browsers, DisconnectReason, useMultiFileAuthState } from "@whiskeysockets/baileys";
+import makeWASocketPkg, { Browsers, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion } from "@whiskeysockets/baileys";
 import QRCode from "qrcode";
 import pino from "pino";
 import path from "node:path";
@@ -36,13 +36,19 @@ let sock = null;
 async function startWhatsApp() {
   console.log(`[WhatsApp] Inicializando sesión con auth en ${authDir}...`);
   const { state, saveCreds } = await useMultiFileAuthState(authDir);
+  const { version, isLatest } = await fetchLatestBaileysVersion();
+  console.log(`[WhatsApp] Usando versión oficial de WhatsApp Web: ${version.join(".")} (isLatest: ${isLatest})`);
 
   sock = makeWASocket({
+    version,
     auth: state,
     logger: pino({ level: "silent" }),
     printQRInTerminal: false,
-    // Usar firma oficial Ubuntu Chrome para evitar rechazo de conexión por WhatsApp
-    browser: Browsers.ubuntu("Chrome"),
+    browser: Browsers.windows("Desktop"),
+    syncFullHistory: false,
+    connectTimeoutMs: 60_000,
+    defaultQueryTimeoutMs: 60_000,
+    keepAliveIntervalMs: 25_000,
   });
 
   sock.ev.on("creds.update", saveCreds);
@@ -69,6 +75,8 @@ async function startWhatsApp() {
     if (qr && !phoneNumber) {
       console.log("[WhatsApp] ¡Nuevo código QR recibido (firma Ubuntu Chrome)!");
       try {
+        const asciiQR = await QRCode.toString(qr, { type: 'terminal', small: true });
+        console.log("\n" + asciiQR + "\n");
         await QRCode.toFile(ARTIFACT_QR_PATH, qr, {
           scale: 10,
           margin: 3,
