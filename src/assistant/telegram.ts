@@ -160,6 +160,11 @@ export function commandToText(text: string, lang: "es" | "en"): string {
       return es ? "qué puedo hacer en este hueco" : "what can i do now";
     case "codex":
       return es ? "qué estábamos haciendo en codex" : "codex status";
+    case "cola":
+    case "queue":
+      return es ? "estado de la cola" : "queue status";
+    case "cancelar":
+      return rest ? `cancela la tarea ${rest}` : "estado de la cola";
     case "paso":
     case "step":
       return rest

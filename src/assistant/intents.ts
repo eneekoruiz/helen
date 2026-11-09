@@ -22,6 +22,14 @@ export type Intent =
   | { name: "task.next_free" }
   | { name: "day.shutdown" }
   | { name: "day.kickoff" }
+  | { name: "automation.status"; provider?: string }
+  | { name: "automation.cancel"; id: string }
+  | {
+      name: "automation.queue";
+      agent: "claude" | "codex";
+      when: string;
+      goal: string;
+    }
   | { name: "codex.status"; query?: string }
   | { name: "agenda"; range: AgendaRange }
   | { name: "recall"; query: string }
@@ -246,6 +254,27 @@ const RULES: Rule[] = [
     build: () => ({ name: "task.next_free" }),
   },
   // Antigravity & Codex session status.
+  // Automations (Orca queue). Before the generic cancel/task rules so ids and queue words win.
+  {
+    pattern:
+      /^(?:cancela|cancelar|borra|elimina|quita|cancel|delete|remove)\s+(?:la\s+|the\s+)?(?:tarea|automatizacion|task|automation)\s+(?:programada\s+|queued\s+)?(?:task-)?(?<id>[0-9a-f]{6,32})$/,
+    build: (g) => ({ name: "automation.cancel", id: g.id as string }),
+  },
+  {
+    pattern:
+      /^(?:programa|encola|agenda|queue|schedule)\s+(?:en\s+|in\s+|on\s+)?(?<agent>claude|codex)\s+(?<when>.+?)\s*:\s+(?<goal>.+)$/,
+    build: (g, o) => ({
+      name: "automation.queue",
+      agent: g.agent as "claude" | "codex",
+      when: (g.when as string).trim(),
+      goal: o("goal") ?? (g.goal as string),
+    }),
+  },
+  {
+    pattern:
+      /^(?:que\s+(?:hay|tengo|queda)\s+(?:pendiente\s+)?(?:en\s+)?(?:la\s+)?(?:cola|automatizaciones|orca)|(?:estado\s+de\s+)?(?:la\s+)?(?:cola|automatizaciones|orca)(?:\s+de\s+tareas)?|tareas\s+programadas|que\s+(?:tareas\s+)?(?:hay\s+)?programad[oa]s?|(?:automations?|queue)(?:\s+status)?|what(?:'s| is)\s+(?:in\s+)?(?:the\s+)?(?:queue|automations?)|cuotas?(?:\s+de\s+(?:la\s+)?ia)?|quota)(?:\s+(?:en|de|in|for)\s+(?<provider>claude|codex|antigravity))?$/,
+    build: (g) => ({ name: "automation.status", provider: g.provider }),
+  },
   {
     pattern:
       /^(?:que\s+estabamos\s+haciendo\s+en\s+codex|que\s+dejamos\s+(?:a\s+medias\s+|pendiente\s+)?en\s+codex|sesion(?:es)?\s+de\s+codex|que\s+hay\s+pendiente\s+en\s+antigravity|que\s+estabamos\s+haciendo\s+en\s+antigravity|resumen\s+de\s+(?:la\s+)?sesion\s+de\s+antigravity|codex\s+status|antigravity\s+status)[.!?]?$/,

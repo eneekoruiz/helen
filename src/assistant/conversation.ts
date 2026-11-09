@@ -18,6 +18,8 @@ const PendingSchema = z.object({
     "capture",
     "workflow",
     "gmail",
+    "orca.cancel",
+    "orca.queue",
   ]),
   text: z.string().max(20_000).optional(),
   id: z.string().max(40).optional(),

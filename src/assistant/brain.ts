@@ -80,6 +80,14 @@ import {
 } from "./tasks.js";
 import { runDailyKickoff, runDailyShutdown } from "./dailyRitual.js";
 import { summarizeCodexWork } from "./codexBridge.js";
+import {
+  cancelOrcaTask,
+  queueOrcaTask,
+  readOrcaState,
+  resolveTaskId,
+  summarizeOrcaWork,
+  validateQueueRequest,
+} from "./orcaBridge.js";
 import { formatCapabilities } from "./capabilities.js";
 import { getAppMode } from "./appMode.js";
 import {
@@ -1814,6 +1822,246 @@ async function askModel(ctx: Context, message: string): Promise<BrainReply> {
 // Entry point
 // ---------------------------------------------------------------------------------------------
 
+const AGENT_NAME: Record<string, string> = {
+  claude: "Claude",
+  codex: "Codex",
+  agy: "Antigravity",
+};
+const ORCA_REASON_ES: Record<string, string> = {
+  not_found: "No encuentro esa tarea.",
+  not_cancellable:
+    "Esa tarea ya está en curso o terminada; no se puede cancelar.",
+  engine: "No encuentro orca-queue.ps1 en automation.ecosystemDir.",
+  goal_length: "El objetivo debe tener entre 3 y 500 caracteres.",
+  goal_chars:
+    "El objetivo no puede empezar por «-» o «/» ni llevar saltos de control.",
+  past: "Esa hora ya pasó o es dentro de menos de un minuto.",
+  too_far: "Solo programo a menos de 24 horas.",
+  project: "Falta automation.projectPath (ruta absoluta) en la configuración.",
+  conversation: "El identificador de conversación no es válido.",
+  failed: "El motor no pudo hacerlo. Revisa la cola en el PC.",
+};
+
+function automationDir(ctx: Context): string | undefined {
+  return ctx.config.automation?.ecosystemDir;
+}
+function automationOff(ctx: Context, intent: BrainReply["intent"]): BrainReply {
+  return reply(
+    ctx,
+    intent,
+    say(
+      ctx.lang,
+      "Aún no sé dónde está ai-ecosystem. Configura automation.ecosystemDir.",
+      "I do not know where ai-ecosystem is yet. Set automation.ecosystemDir.",
+    ),
+  );
+}
+const orcaReason = (ctx: Context, reason: string): string =>
+  ctx.lang === "es"
+    ? (ORCA_REASON_ES[reason] ?? ORCA_REASON_ES.failed)
+    : `Could not do it (${reason}).`;
+
+function automationStatus(ctx: Context, provider?: string): BrainReply {
+  const dir = automationDir(ctx);
+  if (!dir) return automationOff(ctx, "automation.status");
+  const owner = ctx.ownerVerified && !ctx.speaker;
+  const result = summarizeOrcaWork({
+    dir,
+    lang: ctx.lang,
+    now: ctx.now,
+    timezone: ctx.config.timezone,
+    locale: localeFor(ctx),
+    owner,
+    showGoals: owner && ctx.showSensitive,
+    provider,
+  });
+  if (owner) ctx.privateAccess = true;
+  return reply(ctx, "automation.status", result.text, {
+    speech: result.speech,
+  });
+}
+
+function automationCancel(ctx: Context, input: string): BrainReply {
+  const dir = automationDir(ctx);
+  if (!dir) return automationOff(ctx, "automation.cancel");
+  if (!ctx.ownerVerified || ctx.speaker)
+    return reply(
+      ctx,
+      "automation.cancel",
+      say(
+        ctx.lang,
+        "Solo cancelo tareas desde el canal verificado del propietario.",
+        "I only cancel tasks from the owner's verified channel.",
+      ),
+    );
+  const found = resolveTaskId(dir, input);
+  if ("error" in found)
+    return reply(
+      ctx,
+      "automation.cancel",
+      found.error === "ambiguous"
+        ? say(
+            ctx.lang,
+            "Ese inicio de id coincide con varias tareas; escribe más caracteres.",
+            "That id prefix matches several tasks; type more characters.",
+          )
+        : orcaReason(
+            ctx,
+            found.error === "invalid" ? "not_found" : "not_found",
+          ),
+    );
+  const task = readOrcaState(dir).tasks.find((t) => t.id === found.id);
+  ctx.conversation.pending = pendingFor(
+    "orca.cancel",
+    { id: found.id },
+    ctx.now,
+  );
+  ctx.privateAccess = true;
+  return reply(
+    ctx,
+    "pending",
+    say(
+      ctx.lang,
+      `¿Cancelo la tarea de ${AGENT_NAME[task?.agent ?? ""] ?? "IA"} [${found.id.slice(5, 13)}]? (sí/no)`,
+      `Cancel the ${AGENT_NAME[task?.agent ?? ""] ?? "AI"} task [${found.id.slice(5, 13)}]? (yes/no)`,
+    ),
+  );
+}
+
+function automationQueue(
+  ctx: Context,
+  intent: Extract<Intent, { name: "automation.queue" }>,
+): BrainReply {
+  const dir = automationDir(ctx);
+  if (!dir) return automationOff(ctx, "automation.queue");
+  if (!ctx.ownerVerified || ctx.speaker)
+    return reply(
+      ctx,
+      "automation.queue",
+      say(
+        ctx.lang,
+        "Solo programo tareas desde el canal verificado del propietario.",
+        "I only queue tasks from the owner's verified channel.",
+      ),
+    );
+  const parsed = parseWhen(intent.when, {
+    now: ctx.now,
+    timezone: ctx.config.timezone,
+    defaultTime: ctx.config.defaultTime,
+    locale: localeFor(ctx),
+  });
+  if (!parsed || (!parsed.hadTime && !parsed.hadDate))
+    return reply(
+      ctx,
+      "automation.queue",
+      say(
+        ctx.lang,
+        "No entendí la hora. Ejemplo: «programa en codex mañana a las 9: continúa con el plan».",
+        'I did not understand the time. Example: "queue codex tomorrow at 9: continue the plan".',
+      ),
+    );
+  const request = {
+    agent: intent.agent,
+    due: parsed.due,
+    goal: intent.goal,
+    projectPath: ctx.config.automation?.projectPath ?? "",
+  };
+  const invalid = validateQueueRequest(request, ctx.now);
+  if (invalid) return reply(ctx, "automation.queue", orcaReason(ctx, invalid));
+  ctx.conversation.pending = pendingFor(
+    "orca.queue",
+    {
+      text: JSON.stringify({
+        agent: request.agent,
+        due: request.due.toISOString(),
+        goal: request.goal.trim(),
+      }),
+    },
+    ctx.now,
+  );
+  ctx.privateAccess = true;
+  const at = new Intl.DateTimeFormat(localeFor(ctx), {
+    timeZone: ctx.config.timezone,
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(request.due);
+  return reply(
+    ctx,
+    "pending",
+    say(
+      ctx.lang,
+      `¿Programo en ${AGENT_NAME[request.agent]} para ${at}: «${request.goal.trim()}»? (sí/no)`,
+      `Queue on ${AGENT_NAME[request.agent]} for ${at}: "${request.goal.trim()}"? (yes/no)`,
+    ),
+  );
+}
+
+/** Orca confirmations run the engine, so they cannot live inside the synchronous pending resolver. */
+async function resolveOrcaPending(
+  ctx: Context,
+  intent: Intent,
+): Promise<BrainReply | null> {
+  const pending = ctx.conversation.pending;
+  if (!pending) return null;
+  delete ctx.conversation.pending;
+  if (intent.name === "no")
+    return reply(
+      ctx,
+      "no",
+      say(ctx.lang, "De acuerdo, lo dejo.", "OK, leaving it."),
+    );
+  if (intent.name !== "yes") return null;
+  const dir = automationDir(ctx);
+  if (!dir || !ctx.ownerVerified || ctx.speaker)
+    return automationOff(ctx, "pending");
+  if (pending.kind === "orca.cancel" && pending.id) {
+    const outcome = await cancelOrcaTask(dir, pending.id);
+    return reply(
+      ctx,
+      "pending",
+      outcome.ok
+        ? say(ctx.lang, "Tarea cancelada.", "Task cancelled.")
+        : orcaReason(ctx, outcome.reason),
+    );
+  }
+  if (pending.kind === "orca.queue" && pending.text) {
+    try {
+      const data = JSON.parse(pending.text) as {
+        agent: "claude" | "codex";
+        due: string;
+        goal: string;
+      };
+      const outcome = await queueOrcaTask(
+        dir,
+        {
+          agent: data.agent,
+          due: new Date(data.due),
+          goal: data.goal,
+          projectPath: ctx.config.automation?.projectPath ?? "",
+        },
+        ctx.now,
+      );
+      return reply(
+        ctx,
+        "pending",
+        outcome.ok
+          ? say(
+              ctx.lang,
+              "Programada. Te aviso con /cola cuando quieras.",
+              "Queued. Check it with /queue.",
+            )
+          : orcaReason(ctx, outcome.reason),
+      );
+    } catch {
+      return reply(ctx, "pending", orcaReason(ctx, "failed"));
+    }
+  }
+  return null;
+}
+
 async function route(
   ctx: Context,
   intent: Intent,
@@ -1876,6 +2124,12 @@ async function route(
     }
     case "task.next_free":
       return recommendFreeSlotTask(ctx);
+    case "automation.status":
+      return automationStatus(ctx, intent.provider);
+    case "automation.cancel":
+      return automationCancel(ctx, intent.id);
+    case "automation.queue":
+      return automationQueue(ctx, intent);
     case "codex.status": {
       const result = summarizeCodexWork({
         lang: ctx.lang,
@@ -2622,11 +2876,13 @@ async function handleTurn(
     "tasks.reschedule_overdue",
     "remove",
   ].includes(understood.intent.name);
-  let result = ctx.conversation.pending
-    ? runAction(ctx.home, ctx.conversation.id, now, () =>
-        resolvePending(ctx, understood.intent, understood.cleaned),
-      )
-    : null;
+  let result: BrainReply | null = null;
+  if (ctx.conversation.pending?.kind.startsWith("orca."))
+    result = await resolveOrcaPending(ctx, understood.intent);
+  else if (ctx.conversation.pending)
+    result = runAction(ctx.home, ctx.conversation.id, now, () =>
+      resolvePending(ctx, understood.intent, understood.cleaned),
+    );
   if (
     !result &&
     ctx.model &&
