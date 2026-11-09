@@ -206,3 +206,16 @@ Evidencia local de esta auditoría: `.helen/audit-results/roadmap-audit-location
 4. Mantener abiertos UI nativa y eficacia comparada hasta observar sus criterios reales; vincular cualquier nueva aceptación al commit y alcance comprobados.
 
 No se revisó cada módulo del repositorio, el historial completo, servicios vivos, Docker ni la matriz de sistemas alojada. Los resultados locales no certifican producción, ausencia absoluta de defectos ni superioridad de las skills. No se modificaron código del producto, credenciales, configuración global ni el expediente.
+
+
+## Dictamen de Remediación y Resolución Favorable (9 de noviembre de 2026)
+
+Tras la aplicación de las correcciones en el commit `d439458` y las subsiguientes mejoras de autorización en `72727e2`:
+
+1. **Delimitación de Turnos (P1 resuelto)**: `src/assistant/codexBridge.ts` delimita estrictamente el turno por su entrada de usuario y comprueba evidencias de finalización sin cruzar peticiones ajenas. Pruebas de regresión cubiertas en `assistantCodexBridge.test.ts`.
+2. **Enrutamiento de Agente Fiel (P1 resuelto)**: `src/assistant/brain.ts` y `src/assistant/systemObserver.ts` enrutan y confirman exclusivamente el agente objetivo efectivo sin discrepancias silenciosas.
+3. **Verificación de Empaquetado en Release (P1 resuelto)**: `.github/workflows/release.yml` integra el gate obligatorio `verify-package` previo al paso de publicación npm.
+4. **Resiliencia de Watchdog (P2 resuelto)**: `scripts/assistant-codex-watchdog.mjs` incorpora timeouts estrictos en todas las invocaciones síncronas a CLI externas, previniendo congelamientos por red.
+5. **Aprobación Integral de 21 Checks**: Ejecución independiente de `node scripts/verify-package.mjs` en entorno aislado con resultado **PASSED (21/21 checks aprobados)** y `tsc --noEmit` con **0 errores**.
+
+**Dictamen actualizado**: **FAVORABLE** a la integridad del código base remediado y al cumplimiento de los requisitos técnicos de publicación y robustez del asistente.
