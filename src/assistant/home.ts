@@ -283,6 +283,14 @@ export const AssistantConfigSchema = z.object({
         .optional(),
     })
     .prefault({}),
+  /** Where ai-ecosystem (Orca queue) lives, so HELEN can report and manage automations. Off until set. */
+  automation: z
+    .object({
+      ecosystemDir: z.string().min(1).max(260),
+      /** Project that queued tasks run in. Without it HELEN reports but never queues. */
+      projectPath: z.string().min(1).max(260).optional(),
+    })
+    .optional(),
   /** Expose all memory to MCP clients, not just items shared with agents. Off by default. */
   shareAllMemoryWithAgents: z.boolean().default(false),
 });
