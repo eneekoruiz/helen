@@ -5,8 +5,8 @@ HELEN can tell you what is queued in [ai-ecosystem](https://github.com/eneekorui
 ## Configure
 
 ```powershell
-helen assistant config set automation.ecosystemDir "C:\machine-profile\ai-ecosystem"
-helen assistant config set automation.projectPath "C:\Users\User\Desktop\ENEKO\helen"   # only needed to queue
+helen assistant config set automation.ecosystemDir "<ruta\a\ai-ecosystem>"
+helen assistant config set automation.projectPath "<ruta\al\proyecto>"   # only needed to queue
 ```
 
 Without `automation.ecosystemDir` HELEN says it is not configured and does nothing. Without `automation.projectPath` it reports and cancels but never queues.
