@@ -52,6 +52,8 @@
     "typecheck": "tsc --noEmit",
     "pretest": "tsc",
     "test": "vitest run",
+    "test:changed": "vitest run --changed --passWithNoTests",
+    "test:all": "vitest run",
     "test:watch": "vitest",
     "test:json": "vitest run --reporter=json --outputFile=test-results.json",
     "lint": "eslint src/ tests/ scripts/",
