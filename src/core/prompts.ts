@@ -98,15 +98,31 @@ function titleFrom(body: string, fallback: string): string {
   return /^#\s+(.+)$/m.exec(body)?.[1]?.trim() ?? fallback;
 }
 
+const metadataCache = new Map<
+  string,
+  { version: string; parsed: ReturnType<typeof parseFrontmatter> }
+>();
+
+function promptMetadata(file: string): ReturnType<typeof parseFrontmatter> {
+  const stat = fs.statSync(file, { bigint: true });
+  const version = `${stat.ino}:${stat.size}:${stat.mtimeNs}:${stat.ctimeNs}`;
+  const cached = metadataCache.get(file);
+  if (cached?.version === version) return cached.parsed;
+  const parsed = parseFrontmatter(fs.readFileSync(file, "utf-8"));
+  // Bound custom library retention; every lookup still checks current file metadata.
+  if (metadataCache.size >= 512)
+    metadataCache.delete(metadataCache.keys().next().value!);
+  metadataCache.set(file, { version, parsed });
+  return parsed;
+}
+
 function toEntry(
   root: string,
   absolutePath: string,
   id: string,
   kind: PromptKind,
 ): PromptEntry {
-  const { data, body } = parseFrontmatter(
-    fs.readFileSync(absolutePath, "utf-8"),
-  );
+  const { data, body } = promptMetadata(absolutePath);
   const aliases = Array.isArray(data.aliases) ? data.aliases : [];
   return {
     id,
@@ -115,7 +131,7 @@ function toEntry(
     summary: typeof data.summary === "string" ? data.summary : "",
     action: typeof data.action === "string" ? data.action : undefined,
     phase: typeof data.phase === "string" ? data.phase : undefined,
-    aliases,
+    aliases: [...aliases],
     relativePath: toPosix(path.relative(root, absolutePath)),
     absolutePath,
     repeatable:

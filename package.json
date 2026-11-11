@@ -35,6 +35,7 @@
     "scripts/review-specialty-rubric.mjs",
     "scripts/import-specialty-outcomes.mjs",
     "scripts/orca-handoff.mjs",
+    "scripts/finance-workbook.py",
     "!docs/ECC-LOCAL-SKILLS-*.json",
     "!docs/AUDIT-*.md",
     "!docs/CIERRE-*.md",
@@ -48,9 +49,13 @@
   "scripts": {
     "dev": "tsx src/cli.ts",
     "build": "tsc",
+    "web:dev": "npm run dev --prefix web",
+    "web:build": "npm run build --prefix web",
     "typecheck": "tsc --noEmit",
     "pretest": "tsc",
     "test": "vitest run",
+    "test:changed": "vitest run --changed --passWithNoTests",
+    "test:all": "vitest run",
     "test:watch": "vitest",
     "test:json": "vitest run --reporter=json --outputFile=test-results.json",
     "lint": "eslint src/ tests/ scripts/",
@@ -89,13 +94,14 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",
     "@clack/prompts": "^0.11.0",
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
     "cli-progress": "^3.12.0",
     "commander": "^12.1.0",
     "fs-extra": "^11.4.1",
-    "glob": "^11.0.0",
     "handlebars": "^4.7.10",
     "ora": "^9.4.1",
     "picocolors": "^1.1.1",
+    "qrcode": "^1.5.4",
     "zod": "^4.6.7"
   },
   "devDependencies": {

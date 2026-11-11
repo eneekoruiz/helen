@@ -4,7 +4,13 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const SKIP_DIRS = new Set([".git", ".npm-cache", "dist", "node_modules"]);
+const SKIP_DIRS = new Set([
+  ".git",
+  ".helen",
+  ".npm-cache",
+  "dist",
+  "node_modules",
+]);
 const TEXT_EXTENSIONS = new Set([
   ".json",
   ".md",

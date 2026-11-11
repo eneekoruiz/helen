@@ -1,0 +1,632 @@
+﻿[
+    {
+        "name":  "CONTRACT",
+        "file":  "CONTRACT.md",
+        "phase":  "prompts",
+        "path":  "docs\\prompts\\CONTRACT.md"
+    },
+    {
+        "name":  "RULES",
+        "file":  "RULES.md",
+        "phase":  "prompts",
+        "path":  "docs\\prompts\\RULES.md"
+    },
+    {
+        "name":  "AUDIT-project-risk-and-architecture",
+        "file":  "AUDIT-project-risk-and-architecture.md",
+        "phase":  "01-start-project",
+        "path":  "docs\\prompts\\01-start-project\\audit\\AUDIT-project-risk-and-architecture.md"
+    },
+    {
+        "name":  "INIT-architecture-and-scaffold",
+        "file":  "INIT-architecture-and-scaffold.md",
+        "phase":  "01-start-project",
+        "path":  "docs\\prompts\\01-start-project\\init\\INIT-architecture-and-scaffold.md"
+    },
+    {
+        "name":  "INIT-business-core",
+        "file":  "INIT-business-core.md",
+        "phase":  "01-start-project",
+        "path":  "docs\\prompts\\01-start-project\\init\\INIT-business-core.md"
+    },
+    {
+        "name":  "INIT-creative-direction-and-design-md",
+        "file":  "INIT-creative-direction-and-design-md.md",
+        "phase":  "01-start-project",
+        "path":  "docs\\prompts\\01-start-project\\init\\INIT-creative-direction-and-design-md.md"
+    },
+    {
+        "name":  "GENERATE-competitive-advantage",
+        "file":  "GENERATE-competitive-advantage.md",
+        "phase":  "01-start-project",
+        "path":  "docs\\prompts\\01-start-project\\market\\GENERATE-competitive-advantage.md"
+    },
+    {
+        "name":  "RESEARCH-competitive-benchmark",
+        "file":  "RESEARCH-competitive-benchmark.md",
+        "phase":  "01-start-project",
+        "path":  "docs\\prompts\\01-start-project\\market\\RESEARCH-competitive-benchmark.md"
+    },
+    {
+        "name":  "RESEARCH-market-analysis-flow",
+        "file":  "RESEARCH-market-analysis-flow.md",
+        "phase":  "01-start-project",
+        "path":  "docs\\prompts\\01-start-project\\market\\RESEARCH-market-analysis-flow.md"
+    },
+    {
+        "name":  "INIT-repo-in-10-minutes",
+        "file":  "INIT-repo-in-10-minutes.md",
+        "phase":  "01-start-project",
+        "path":  "docs\\prompts\\01-start-project\\onboarding\\INIT-repo-in-10-minutes.md"
+    },
+    {
+        "name":  "PLAN-roadmap-roi-prioritization",
+        "file":  "PLAN-roadmap-roi-prioritization.md",
+        "phase":  "01-start-project",
+        "path":  "docs\\prompts\\01-start-project\\strategy\\PLAN-roadmap-roi-prioritization.md"
+    },
+    {
+        "name":  "PLAN-technology-lifecycle-strategy",
+        "file":  "PLAN-technology-lifecycle-strategy.md",
+        "phase":  "01-start-project",
+        "path":  "docs\\prompts\\01-start-project\\strategy\\PLAN-technology-lifecycle-strategy.md"
+    },
+    {
+        "name":  "AUDIT-automation-and-scripts",
+        "file":  "AUDIT-automation-and-scripts.md",
+        "phase":  "02-building",
+        "path":  "docs\\prompts\\02-building\\automation\\AUDIT-automation-and-scripts.md"
+    },
+    {
+        "name":  "PLAN-agentic-loop-and-spec-driven-workflow",
+        "file":  "PLAN-agentic-loop-and-spec-driven-workflow.md",
+        "phase":  "02-building",
+        "path":  "docs\\prompts\\02-building\\automation\\PLAN-agentic-loop-and-spec-driven-workflow.md"
+    },
+    {
+        "name":  "AUDIT-quality-gates-checkpoint",
+        "file":  "AUDIT-quality-gates-checkpoint.md",
+        "phase":  "02-building",
+        "path":  "docs\\prompts\\02-building\\checkpoint\\AUDIT-quality-gates-checkpoint.md"
+    },
+    {
+        "name":  "APPLY-clean-code-pass-flow",
+        "file":  "APPLY-clean-code-pass-flow.md",
+        "phase":  "02-building",
+        "path":  "docs\\prompts\\02-building\\clean-code\\APPLY-clean-code-pass-flow.md"
+    },
+    {
+        "name":  "APPLY-cms-editable-content-conversion-flow",
+        "file":  "APPLY-cms-editable-content-conversion-flow.md",
+        "phase":  "02-building",
+        "path":  "docs\\prompts\\02-building\\cms\\APPLY-cms-editable-content-conversion-flow.md"
+    },
+    {
+        "name":  "AUDIT-content-model-and-editorial-workflow",
+        "file":  "AUDIT-content-model-and-editorial-workflow.md",
+        "phase":  "02-building",
+        "path":  "docs\\prompts\\02-building\\cms\\AUDIT-content-model-and-editorial-workflow.md"
+    },
+    {
+        "name":  "GENERATE-visual-cms-wysiwyg-i18n",
+        "file":  "GENERATE-visual-cms-wysiwyg-i18n.md",
+        "phase":  "02-building",
+        "path":  "docs\\prompts\\02-building\\cms\\GENERATE-visual-cms-wysiwyg-i18n.md"
+    },
+    {
+        "name":  "AUDIT-data-and-api-contracts",
+        "file":  "AUDIT-data-and-api-contracts.md",
+        "phase":  "02-building",
+        "path":  "docs\\prompts\\02-building\\data-api\\AUDIT-data-and-api-contracts.md"
+    },
+    {
+        "name":  "APPLY-security-hardening-flow",
+        "file":  "APPLY-security-hardening-flow.md",
+        "phase":  "02-building",
+        "path":  "docs\\prompts\\02-building\\security\\APPLY-security-hardening-flow.md"
+    },
+    {
+        "name":  "ENHANCE-3d-scene-polish",
+        "file":  "ENHANCE-3d-scene-polish.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\3d\\ENHANCE-3d-scene-polish.md"
+    },
+    {
+        "name":  "GENERATE-3d-experience-component",
+        "file":  "GENERATE-3d-experience-component.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\3d\\GENERATE-3d-experience-component.md"
+    },
+    {
+        "name":  "GENERATE-3d-foundation",
+        "file":  "GENERATE-3d-foundation.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\3d\\GENERATE-3d-foundation.md"
+    },
+    {
+        "name":  "APPLY-autonomous-implementation-flow",
+        "file":  "APPLY-autonomous-implementation-flow.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\flow\\APPLY-autonomous-implementation-flow.md"
+    },
+    {
+        "name":  "APPLY-cinematic-visual-flow",
+        "file":  "APPLY-cinematic-visual-flow.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\flow\\APPLY-cinematic-visual-flow.md"
+    },
+    {
+        "name":  "APPLY-full-polish-flow",
+        "file":  "APPLY-full-polish-flow.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\flow\\APPLY-full-polish-flow.md"
+    },
+    {
+        "name":  "APPLY-premium-site-stack-flow",
+        "file":  "APPLY-premium-site-stack-flow.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\flow\\APPLY-premium-site-stack-flow.md"
+    },
+    {
+        "name":  "AUDIT-visual-ux-regression-checkpoint",
+        "file":  "AUDIT-visual-ux-regression-checkpoint.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\flow\\AUDIT-visual-ux-regression-checkpoint.md"
+    },
+    {
+        "name":  "ENHANCE-editorial-typography",
+        "file":  "ENHANCE-editorial-typography.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\graphics\\ENHANCE-editorial-typography.md"
+    },
+    {
+        "name":  "GENERATE-marketing-canvas-exports",
+        "file":  "GENERATE-marketing-canvas-exports.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\graphics\\GENERATE-marketing-canvas-exports.md"
+    },
+    {
+        "name":  "GENERATE-shader-experience",
+        "file":  "GENERATE-shader-experience.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\graphics\\GENERATE-shader-experience.md"
+    },
+    {
+        "name":  "ENHANCE-motion-polish-and-transitions",
+        "file":  "ENHANCE-motion-polish-and-transitions.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\motion\\ENHANCE-motion-polish-and-transitions.md"
+    },
+    {
+        "name":  "ENHANCE-view-transitions",
+        "file":  "ENHANCE-view-transitions.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\motion\\ENHANCE-view-transitions.md"
+    },
+    {
+        "name":  "GENERATE-scroll-driven-sequences",
+        "file":  "GENERATE-scroll-driven-sequences.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\motion\\GENERATE-scroll-driven-sequences.md"
+    },
+    {
+        "name":  "APPLY-basic-accessibility-pass",
+        "file":  "APPLY-basic-accessibility-pass.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\performance\\APPLY-basic-accessibility-pass.md"
+    },
+    {
+        "name":  "APPLY-basic-performance-pass",
+        "file":  "APPLY-basic-performance-pass.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\performance\\APPLY-basic-performance-pass.md"
+    },
+    {
+        "name":  "AUDIT-motion-and-3d-performance",
+        "file":  "AUDIT-motion-and-3d-performance.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\performance\\AUDIT-motion-and-3d-performance.md"
+    },
+    {
+        "name":  "GENERATE-ted-style-presentation",
+        "file":  "GENERATE-ted-style-presentation.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\presentation\\GENERATE-ted-style-presentation.md"
+    },
+    {
+        "name":  "APPLY-empty-states-errors-and-microcopy",
+        "file":  "APPLY-empty-states-errors-and-microcopy.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\ux\\APPLY-empty-states-errors-and-microcopy.md"
+    },
+    {
+        "name":  "AUDIT-product-ux",
+        "file":  "AUDIT-product-ux.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\ux\\AUDIT-product-ux.md"
+    },
+    {
+        "name":  "APPLY-premium-visual-polish",
+        "file":  "APPLY-premium-visual-polish.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\visual\\APPLY-premium-visual-polish.md"
+    },
+    {
+        "name":  "APPLY-responsive-pass",
+        "file":  "APPLY-responsive-pass.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\visual\\APPLY-responsive-pass.md"
+    },
+    {
+        "name":  "AUDIT-ai-trace-erasure-and-human-craft",
+        "file":  "AUDIT-ai-trace-erasure-and-human-craft.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\visual\\AUDIT-ai-trace-erasure-and-human-craft.md"
+    },
+    {
+        "name":  "AUDIT-design-excellence",
+        "file":  "AUDIT-design-excellence.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\visual\\AUDIT-design-excellence.md"
+    },
+    {
+        "name":  "ENHANCE-copy-and-conversion",
+        "file":  "ENHANCE-copy-and-conversion.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\visual\\ENHANCE-copy-and-conversion.md"
+    },
+    {
+        "name":  "ENHANCE-microinteraction-sensory-detail-pass",
+        "file":  "ENHANCE-microinteraction-sensory-detail-pass.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\visual\\ENHANCE-microinteraction-sensory-detail-pass.md"
+    },
+    {
+        "name":  "ENHANCE-taste-and-art-direction",
+        "file":  "ENHANCE-taste-and-art-direction.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\visual\\ENHANCE-taste-and-art-direction.md"
+    },
+    {
+        "name":  "GENERATE-component-library-integration",
+        "file":  "GENERATE-component-library-integration.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\visual\\GENERATE-component-library-integration.md"
+    },
+    {
+        "name":  "GENERATE-conversion-led-hero-system",
+        "file":  "GENERATE-conversion-led-hero-system.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\visual\\GENERATE-conversion-led-hero-system.md"
+    },
+    {
+        "name":  "GENERATE-immersive-product-configurator",
+        "file":  "GENERATE-immersive-product-configurator.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\visual\\GENERATE-immersive-product-configurator.md"
+    },
+    {
+        "name":  "GENERATE-personalized-landing",
+        "file":  "GENERATE-personalized-landing.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\visual\\GENERATE-personalized-landing.md"
+    },
+    {
+        "name":  "GENERATE-portfolio-layout-patterns",
+        "file":  "GENERATE-portfolio-layout-patterns.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\visual\\GENERATE-portfolio-layout-patterns.md"
+    },
+    {
+        "name":  "GENERATE-premium-mockups",
+        "file":  "GENERATE-premium-mockups.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\visual\\GENERATE-premium-mockups.md"
+    },
+    {
+        "name":  "GENERATE-premium-web-artifacts",
+        "file":  "GENERATE-premium-web-artifacts.md",
+        "phase":  "03-finish-features",
+        "path":  "docs\\prompts\\03-finish-features\\visual\\GENERATE-premium-web-artifacts.md"
+    },
+    {
+        "name":  "AUDIT-final-seo",
+        "file":  "AUDIT-final-seo.md",
+        "phase":  "04-before-production",
+        "path":  "docs\\prompts\\04-before-production\\compliance\\AUDIT-final-seo.md"
+    },
+    {
+        "name":  "ENHANCE-privacy-and-legal-readiness",
+        "file":  "ENHANCE-privacy-and-legal-readiness.md",
+        "phase":  "04-before-production",
+        "path":  "docs\\prompts\\04-before-production\\compliance\\ENHANCE-privacy-and-legal-readiness.md"
+    },
+    {
+        "name":  "APPLY-prefinal-hardening-flow",
+        "file":  "APPLY-prefinal-hardening-flow.md",
+        "phase":  "04-before-production",
+        "path":  "docs\\prompts\\04-before-production\\flow\\APPLY-prefinal-hardening-flow.md"
+    },
+    {
+        "name":  "AUDIT-security-risk-checkpoint",
+        "file":  "AUDIT-security-risk-checkpoint.md",
+        "phase":  "04-before-production",
+        "path":  "docs\\prompts\\04-before-production\\flow\\AUDIT-security-risk-checkpoint.md"
+    },
+    {
+        "name":  "AUDIT-observability-instrumentation",
+        "file":  "AUDIT-observability-instrumentation.md",
+        "phase":  "04-before-production",
+        "path":  "docs\\prompts\\04-before-production\\observability\\AUDIT-observability-instrumentation.md"
+    },
+    {
+        "name":  "AUDIT-adversarial-qa-and-edge-cases",
+        "file":  "AUDIT-adversarial-qa-and-edge-cases.md",
+        "phase":  "04-before-production",
+        "path":  "docs\\prompts\\04-before-production\\qa\\AUDIT-adversarial-qa-and-edge-cases.md"
+    },
+    {
+        "name":  "AUDIT-stress-scale-and-cost",
+        "file":  "AUDIT-stress-scale-and-cost.md",
+        "phase":  "04-before-production",
+        "path":  "docs\\prompts\\04-before-production\\qa\\AUDIT-stress-scale-and-cost.md"
+    },
+    {
+        "name":  "AUDIT-prompt-injection-review",
+        "file":  "AUDIT-prompt-injection-review.md",
+        "phase":  "04-before-production",
+        "path":  "docs\\prompts\\04-before-production\\security\\AUDIT-prompt-injection-review.md"
+    },
+    {
+        "name":  "AUDIT-apple-standard-impeccable",
+        "file":  "AUDIT-apple-standard-impeccable.md",
+        "phase":  "05-final-audit",
+        "path":  "docs\\prompts\\05-final-audit\\code\\AUDIT-apple-standard-impeccable.md"
+    },
+    {
+        "name":  "AUDIT-automated-code-review-setup",
+        "file":  "AUDIT-automated-code-review-setup.md",
+        "phase":  "05-final-audit",
+        "path":  "docs\\prompts\\05-final-audit\\code\\AUDIT-automated-code-review-setup.md"
+    },
+    {
+        "name":  "AUDIT-code-quality",
+        "file":  "AUDIT-code-quality.md",
+        "phase":  "05-final-audit",
+        "path":  "docs\\prompts\\05-final-audit\\code\\AUDIT-code-quality.md"
+    },
+    {
+        "name":  "AUDIT-i18n",
+        "file":  "AUDIT-i18n.md",
+        "phase":  "05-final-audit",
+        "path":  "docs\\prompts\\05-final-audit\\code\\AUDIT-i18n.md"
+    },
+    {
+        "name":  "AUDIT-documentation",
+        "file":  "AUDIT-documentation.md",
+        "phase":  "05-final-audit",
+        "path":  "docs\\prompts\\05-final-audit\\operations\\AUDIT-documentation.md"
+    },
+    {
+        "name":  "AUDIT-final-audit-flow",
+        "file":  "AUDIT-final-audit-flow.md",
+        "phase":  "05-final-audit",
+        "path":  "docs\\prompts\\05-final-audit\\operations\\AUDIT-final-audit-flow.md"
+    },
+    {
+        "name":  "AUDIT-anti-ai-slop-bespoke",
+        "file":  "AUDIT-anti-ai-slop-bespoke.md",
+        "phase":  "05-final-audit",
+        "path":  "docs\\prompts\\05-final-audit\\presentation\\AUDIT-anti-ai-slop-bespoke.md"
+    },
+    {
+        "name":  "AUDIT-public-presentation",
+        "file":  "AUDIT-public-presentation.md",
+        "phase":  "05-final-audit",
+        "path":  "docs\\prompts\\05-final-audit\\presentation\\AUDIT-public-presentation.md"
+    },
+    {
+        "name":  "AUDIT-holistic-improvements-scanner",
+        "file":  "AUDIT-holistic-improvements-scanner.md",
+        "phase":  "05-final-audit",
+        "path":  "docs\\prompts\\05-final-audit\\quality\\AUDIT-holistic-improvements-scanner.md"
+    },
+    {
+        "name":  "AUDIT-technical-debt-backlog",
+        "file":  "AUDIT-technical-debt-backlog.md",
+        "phase":  "05-final-audit",
+        "path":  "docs\\prompts\\05-final-audit\\quality\\AUDIT-technical-debt-backlog.md"
+    },
+    {
+        "name":  "ENHANCE-simplify-document",
+        "file":  "ENHANCE-simplify-document.md",
+        "phase":  "05-final-audit",
+        "path":  "docs\\prompts\\05-final-audit\\quality\\ENHANCE-simplify-document.md"
+    },
+    {
+        "name":  "APPLY-deploy-github-and-hosting",
+        "file":  "APPLY-deploy-github-and-hosting.md",
+        "phase":  "06-release",
+        "path":  "docs\\prompts\\06-release\\deploy\\APPLY-deploy-github-and-hosting.md"
+    },
+    {
+        "name":  "APPLY-release-candidate-flow",
+        "file":  "APPLY-release-candidate-flow.md",
+        "phase":  "06-release",
+        "path":  "docs\\prompts\\06-release\\flow\\APPLY-release-candidate-flow.md"
+    },
+    {
+        "name":  "AUDIT-release-readiness-checkpoint",
+        "file":  "AUDIT-release-readiness-checkpoint.md",
+        "phase":  "06-release",
+        "path":  "docs\\prompts\\06-release\\flow\\AUDIT-release-readiness-checkpoint.md"
+    },
+    {
+        "name":  "APPLY-automated-release-and-changelog-workflows",
+        "file":  "APPLY-automated-release-and-changelog-workflows.md",
+        "phase":  "06-release",
+        "path":  "docs\\prompts\\06-release\\notes\\APPLY-automated-release-and-changelog-workflows.md"
+    },
+    {
+        "name":  "GENERATE-release-notes-changelog-and-demo-package",
+        "file":  "GENERATE-release-notes-changelog-and-demo-package.md",
+        "phase":  "06-release",
+        "path":  "docs\\prompts\\06-release\\notes\\GENERATE-release-notes-changelog-and-demo-package.md"
+    },
+    {
+        "name":  "APPLY-client-delivery-flow",
+        "file":  "APPLY-client-delivery-flow.md",
+        "phase":  "07-client-handoff",
+        "path":  "docs\\prompts\\07-client-handoff\\delivery\\APPLY-client-delivery-flow.md"
+    },
+    {
+        "name":  "AUDIT-client-handoff-and-support-readiness",
+        "file":  "AUDIT-client-handoff-and-support-readiness.md",
+        "phase":  "07-client-handoff",
+        "path":  "docs\\prompts\\07-client-handoff\\delivery\\AUDIT-client-handoff-and-support-readiness.md"
+    },
+    {
+        "name":  "AUDIT-content-copy-brand-and-claims",
+        "file":  "AUDIT-content-copy-brand-and-claims.md",
+        "phase":  "07-client-handoff",
+        "path":  "docs\\prompts\\07-client-handoff\\marketing\\AUDIT-content-copy-brand-and-claims.md"
+    },
+    {
+        "name":  "AUDIT-links-forms-ctas-and-conversion-paths",
+        "file":  "AUDIT-links-forms-ctas-and-conversion-paths.md",
+        "phase":  "07-client-handoff",
+        "path":  "docs\\prompts\\07-client-handoff\\marketing\\AUDIT-links-forms-ctas-and-conversion-paths.md"
+    },
+    {
+        "name":  "AUDIT-browser-smoke-test-and-demo-readiness",
+        "file":  "AUDIT-browser-smoke-test-and-demo-readiness.md",
+        "phase":  "07-client-handoff",
+        "path":  "docs\\prompts\\07-client-handoff\\verification\\AUDIT-browser-smoke-test-and-demo-readiness.md"
+    },
+    {
+        "name":  "AUDIT-media-assets-alt-text-and-performance",
+        "file":  "AUDIT-media-assets-alt-text-and-performance.md",
+        "phase":  "07-client-handoff",
+        "path":  "docs\\prompts\\07-client-handoff\\verification\\AUDIT-media-assets-alt-text-and-performance.md"
+    },
+    {
+        "name":  "APPLY-professional-presence",
+        "file":  "APPLY-professional-presence.md",
+        "phase":  "08-maintenance",
+        "path":  "docs\\prompts\\08-maintenance\\branding\\APPLY-professional-presence.md"
+    },
+    {
+        "name":  "AUDIT-yearly-professional-presence-review",
+        "file":  "AUDIT-yearly-professional-presence-review.md",
+        "phase":  "08-maintenance",
+        "path":  "docs\\prompts\\08-maintenance\\branding\\AUDIT-yearly-professional-presence-review.md"
+    },
+    {
+        "name":  "AUDIT-growth-and-metrics",
+        "file":  "AUDIT-growth-and-metrics.md",
+        "phase":  "08-maintenance",
+        "path":  "docs\\prompts\\08-maintenance\\growth\\AUDIT-growth-and-metrics.md"
+    },
+    {
+        "name":  "AUDIT-offline-first-sync-and-routing",
+        "file":  "AUDIT-offline-first-sync-and-routing.md",
+        "phase":  "08-maintenance",
+        "path":  "docs\\prompts\\08-maintenance\\growth\\AUDIT-offline-first-sync-and-routing.md"
+    },
+    {
+        "name":  "AUDIT-programmatic-seo-and-content",
+        "file":  "AUDIT-programmatic-seo-and-content.md",
+        "phase":  "08-maintenance",
+        "path":  "docs\\prompts\\08-maintenance\\growth\\AUDIT-programmatic-seo-and-content.md"
+    },
+    {
+        "name":  "APPLY-prompt-library-maintenance-flow",
+        "file":  "APPLY-prompt-library-maintenance-flow.md",
+        "phase":  "08-maintenance",
+        "path":  "docs\\prompts\\08-maintenance\\meta\\APPLY-prompt-library-maintenance-flow.md"
+    },
+    {
+        "name":  "AUDIT-cross-audit-synthesis",
+        "file":  "AUDIT-cross-audit-synthesis.md",
+        "phase":  "08-maintenance",
+        "path":  "docs\\prompts\\08-maintenance\\meta\\AUDIT-cross-audit-synthesis.md"
+    },
+    {
+        "name":  "GENERATE-agent-brief-builder",
+        "file":  "GENERATE-agent-brief-builder.md",
+        "phase":  "08-maintenance",
+        "path":  "docs\\prompts\\08-maintenance\\meta\\GENERATE-agent-brief-builder.md"
+    },
+    {
+        "name":  "PLAN-quality-operating-system",
+        "file":  "PLAN-quality-operating-system.md",
+        "phase":  "08-maintenance",
+        "path":  "docs\\prompts\\08-maintenance\\meta\\PLAN-quality-operating-system.md"
+    },
+    {
+        "name":  "APPLY-dependabot-and-auto-maintenance",
+        "file":  "APPLY-dependabot-and-auto-maintenance.md",
+        "phase":  "08-maintenance",
+        "path":  "docs\\prompts\\08-maintenance\\ops\\APPLY-dependabot-and-auto-maintenance.md"
+    },
+    {
+        "name":  "AUDIT-data-lifecycle-and-portability",
+        "file":  "AUDIT-data-lifecycle-and-portability.md",
+        "phase":  "08-maintenance",
+        "path":  "docs\\prompts\\08-maintenance\\ops\\AUDIT-data-lifecycle-and-portability.md"
+    },
+    {
+        "name":  "AUDIT-repository-governance-and-compliance",
+        "file":  "AUDIT-repository-governance-and-compliance.md",
+        "phase":  "08-maintenance",
+        "path":  "docs\\prompts\\08-maintenance\\ops\\AUDIT-repository-governance-and-compliance.md"
+    },
+    {
+        "name":  "AUDIT-third-party-tools-and-mcp",
+        "file":  "AUDIT-third-party-tools-and-mcp.md",
+        "phase":  "08-maintenance",
+        "path":  "docs\\prompts\\08-maintenance\\ops\\AUDIT-third-party-tools-and-mcp.md"
+    },
+    {
+        "name":  "AUDIT-bus-factor-and-ownership",
+        "file":  "AUDIT-bus-factor-and-ownership.md",
+        "phase":  "09-future-knowledge",
+        "path":  "docs\\prompts\\09-future-knowledge\\continuity\\AUDIT-bus-factor-and-ownership.md"
+    },
+    {
+        "name":  "AUDIT-developer-onboarding-and-knowledge-gaps",
+        "file":  "AUDIT-developer-onboarding-and-knowledge-gaps.md",
+        "phase":  "09-future-knowledge",
+        "path":  "docs\\prompts\\09-future-knowledge\\continuity\\AUDIT-developer-onboarding-and-knowledge-gaps.md"
+    },
+    {
+        "name":  "APPLY-knowledge-snapshot",
+        "file":  "APPLY-knowledge-snapshot.md",
+        "phase":  "09-future-knowledge",
+        "path":  "docs\\prompts\\09-future-knowledge\\docs\\APPLY-knowledge-snapshot.md"
+    },
+    {
+        "name":  "GENERATE-ai-context",
+        "file":  "GENERATE-ai-context.md",
+        "phase":  "09-future-knowledge",
+        "path":  "docs\\prompts\\09-future-knowledge\\docs\\GENERATE-ai-context.md"
+    },
+    {
+        "name":  "GENERATE-decision-log",
+        "file":  "GENERATE-decision-log.md",
+        "phase":  "09-future-knowledge",
+        "path":  "docs\\prompts\\09-future-knowledge\\docs\\GENERATE-decision-log.md"
+    },
+    {
+        "name":  "GENERATE-operations-runbook",
+        "file":  "GENERATE-operations-runbook.md",
+        "phase":  "09-future-knowledge",
+        "path":  "docs\\prompts\\09-future-knowledge\\docs\\GENERATE-operations-runbook.md"
+    },
+    {
+        "name":  "AUDIT-resilience-and-upgradeability",
+        "file":  "AUDIT-resilience-and-upgradeability.md",
+        "phase":  "09-future-knowledge",
+        "path":  "docs\\prompts\\09-future-knowledge\\preservation\\AUDIT-resilience-and-upgradeability.md"
+    }
+]

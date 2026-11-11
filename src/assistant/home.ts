@@ -84,6 +84,17 @@ const ChannelsSchema = z
           .regex(/^[A-Z_][A-Z0-9_]*$/)
           .default("HELEN_TELEGRAM_TOKEN"),
         allowedChats: z.array(z.number().int()).default([]),
+        recordatoriosBridge: z
+          .object({
+            enabled: z.boolean().default(false),
+            url: z.lazy(() => RecordatoriosConfigSchema.shape.url),
+            secretEnv: z
+              .string()
+              .regex(/^[A-Z_][A-Z0-9_]*$/)
+              .default("HELEN_TELEGRAM_BRIDGE_SECRET"),
+          })
+          .strict()
+          .optional(),
       })
       .optional(),
   })
@@ -141,12 +152,30 @@ export const CHANNEL_NAMES = [
   "http",
   "web",
   "telegram",
+  "whatsapp",
   "alexa",
   "mcp",
 ] as const;
 export type ChannelName = (typeof CHANNEL_NAMES)[number];
 
+export const GoogleCalendarConfigSchema = z
+  .object({
+    account: z.email().max(254),
+    calendarId: z
+      .string()
+      .trim()
+      .min(1)
+      .max(1024)
+      .regex(/^[^\r\n]+$/)
+      .default("primary"),
+    redirectUri: z.string().url().optional(),
+    allowedChannels: z.array(z.enum(CHANNEL_NAMES)).default([]),
+    permissions: z.array(z.literal("calendar:read")).default([]),
+  })
+  .strict();
+
 export const AssistantConfigSchema = z.object({
+  googleCalendar: GoogleCalendarConfigSchema.optional(),
   owner: z
     .string()
     .min(1)
@@ -176,6 +205,42 @@ export const AssistantConfigSchema = z.object({
     .optional(),
   channels: ChannelsSchema,
   provider: ProviderSchema.optional(),
+  observer: z
+    .object({
+      profileRoot: z
+        .string()
+        .min(1)
+        .max(4096)
+        .refine(
+          (value) => path.isAbsolute(value) && !/^(?:\\\\|\/\/)/.test(value),
+        ),
+      projectRoot: z
+        .string()
+        .min(1)
+        .max(4096)
+        .refine(
+          (value) => path.isAbsolute(value) && !/^(?:\\\\|\/\/)/.test(value),
+        ),
+      agent: z.enum(["codex", "claude", "antigravity"]).default("codex"),
+      executionBackend: z.enum(["orca", "provider-cli"]).optional(),
+      allowedChannels: z.array(z.enum(CHANNEL_NAMES)).default([]),
+      permissions: z
+        .array(z.enum(["system:read", "automation:queue"]))
+        .default([]),
+    })
+    .strict()
+    .optional(),
+  finance: z
+    .object({
+      source: z.string().min(1).max(4096),
+      directory: z.string().min(1).max(4096),
+      allowedChannels: z.array(z.enum(CHANNEL_NAMES)).default([]),
+      permissions: z
+        .array(z.enum(["finance:read", "finance:copy", "tasks:write"]))
+        .default([]),
+    })
+    .strict()
+    .optional(),
   assistance: z
     .object({
       detail: z.enum(["brief", "balanced", "detailed"]).default("balanced"),
@@ -301,16 +366,39 @@ export function configFile(home: string = helenHome()): string {
   return path.join(home, "config.json");
 }
 
+let configCache: {
+  file: string;
+  mtimeMs: number;
+  data: AssistantConfig;
+} | null = null;
+
 export function readConfig(home: string = helenHome()): AssistantConfig {
   const file = configFile(home);
-  const raw: unknown = fs.existsSync(file)
-    ? JSON.parse(fs.readFileSync(file, "utf8"))
-    : {};
+  let mtimeMs = 0;
+  try {
+    const stat = fs.statSync(file);
+    mtimeMs = stat.mtimeMs;
+    if (
+      configCache &&
+      configCache.file === file &&
+      configCache.mtimeMs === mtimeMs
+    ) {
+      return configCache.data;
+    }
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+      return AssistantConfigSchema.parse({});
+    }
+    throw err;
+  }
+
+  const raw: unknown = JSON.parse(fs.readFileSync(file, "utf8"));
   const parsed = AssistantConfigSchema.safeParse(raw);
   if (!parsed.success)
     throw new Error(
       `Invalid ${file}: ${parsed.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join("; ")}`,
     );
+  configCache = { file, mtimeMs, data: parsed.data };
   return parsed.data;
 }
 
@@ -323,6 +411,7 @@ export function writeConfig(
   withHomeLock(home, () =>
     writePrivate(configFile(home), `${JSON.stringify(parsed, null, 2)}\n`),
   );
+  configCache = null;
   return parsed;
 }
 

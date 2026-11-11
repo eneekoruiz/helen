@@ -19,6 +19,26 @@ export const GMAIL_SCOPES = [
   "https://www.googleapis.com/auth/gmail.compose",
   "https://www.googleapis.com/auth/gmail.readonly",
 ] as const;
+export const GOOGLE_CALENDAR_SCOPES = [
+  "https://www.googleapis.com/auth/calendar.readonly",
+] as const;
+type GoogleService = "gmail" | "calendar";
+const servicePolicy = (service: GoogleService = "gmail") => ({
+  scopes: service === "gmail" ? GMAIL_SCOPES : GOOGLE_CALENDAR_SCOPES,
+  env:
+    service === "gmail"
+      ? GMAIL_AUTH_ENV
+      : {
+          clientId: "HELEN_CALENDAR_CLIENT_ID",
+          clientSecret: "HELEN_CALENDAR_CLIENT_SECRET",
+          refreshToken: "HELEN_CALENDAR_REFRESH_TOKEN",
+          accessToken: "HELEN_CALENDAR_ACCESS_TOKEN",
+        },
+  profileUrl:
+    service === "gmail"
+      ? "https://gmail.googleapis.com/gmail/v1/users/me/profile"
+      : "https://www.googleapis.com/calendar/v3/users/me/calendarList/primary",
+});
 const secret = z
   .string()
   .min(1)
@@ -31,6 +51,7 @@ const PendingSchema = z.object({
   clientSecret: secret.optional(),
   redirectUri: z.string(),
   owner: z.string().min(1).max(256),
+  expectedAccount: z.email().optional(),
   expiresAt: z.number(),
   consumed: z.boolean().default(false),
 });
@@ -45,6 +66,7 @@ const ConnectionSchema = z.object({
   connectedAt: z.string(),
 });
 export interface GmailAuthOptions {
+  service?: GoogleService;
   fetch?: typeof fetch;
   now?: () => number;
 }
@@ -53,10 +75,12 @@ export interface GmailAuthStart {
   clientSecret?: string;
   redirectUri: string;
   owner: string;
+  expectedAccount?: string;
 }
-const pendingFile = (home: string) =>
-  path.join(home, "gmail-oauth-pending.json");
-const authFile = (home: string) => path.join(home, "gmail-auth.json");
+const pendingFile = (home: string, service: GoogleService = "gmail") =>
+  path.join(home, `${service}-oauth-pending.json`);
+const authFile = (home: string, service: GoogleService = "gmail") =>
+  path.join(home, `${service}-auth.json`);
 function load<T>(file: string, schema: z.ZodType<T>): T | undefined {
   if (!fs.existsSync(file)) return undefined;
   let descriptor: number | undefined;
@@ -165,13 +189,15 @@ export function startGmailAuth(
     verifier,
     expiresAt: (options.now?.() ?? Date.now()) + 10 * 60_000,
   });
-  withHomeLock(home, () => persist(pendingFile(home), pending));
+  withHomeLock(home, () =>
+    persist(pendingFile(home, options.service), pending),
+  );
   const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   url.search = new URLSearchParams({
     client_id: pending.clientId,
     redirect_uri: pending.redirectUri,
     response_type: "code",
-    scope: GMAIL_SCOPES.join(" "),
+    scope: servicePolicy(options.service).scopes.join(" "),
     state,
     code_challenge: createHash("sha256").update(verifier).digest("base64url"),
     code_challenge_method: "S256",
@@ -181,7 +207,10 @@ export function startGmailAuth(
   return { url: url.href, state, expiresAt: pending.expiresAt };
 }
 
-export function readGmailConnection(home: string):
+export function readGmailConnection(
+  home: string,
+  service: GoogleService = "gmail",
+):
   | {
       account: string;
       scopes: string[];
@@ -190,7 +219,7 @@ export function readGmailConnection(home: string):
       refreshable: boolean;
     }
   | undefined {
-  const connection = load(authFile(home), ConnectionSchema);
+  const connection = load(authFile(home, service), ConnectionSchema);
   if (!connection) return undefined;
   return {
     account: connection.account,
@@ -203,35 +232,41 @@ export function readGmailConnection(home: string):
 export function gmailAuthEnvironment(
   home: string,
   now = Date.now(),
+  service: GoogleService = "gmail",
 ): NodeJS.ProcessEnv {
-  const connection = load(authFile(home), ConnectionSchema);
+  const env = servicePolicy(service).env;
+  const connection = load(authFile(home, service), ConnectionSchema);
   if (!connection) return {};
   if (connection.refreshToken)
     return {
-      [GMAIL_AUTH_ENV.clientId]: connection.clientId,
+      [env.clientId]: connection.clientId,
       ...(connection.clientSecret
-        ? { [GMAIL_AUTH_ENV.clientSecret]: connection.clientSecret }
+        ? { [env.clientSecret]: connection.clientSecret }
         : {}),
-      [GMAIL_AUTH_ENV.refreshToken]: connection.refreshToken,
+      [env.refreshToken]: connection.refreshToken,
     };
   if (connection.expiresAt <= now)
     throw new Error("Gmail authorization expired; reconnect Gmail");
-  return { [GMAIL_AUTH_ENV.accessToken]: connection.accessToken };
+  return { [env.accessToken]: connection.accessToken };
 }
-export function savedGmailConfig(home: string): GmailConfig | undefined {
-  const connection = load(authFile(home), ConnectionSchema);
+export function savedGmailConfig(
+  home: string,
+  service: GoogleService = "gmail",
+): GmailConfig | undefined {
+  const env = servicePolicy(service).env;
+  const connection = load(authFile(home, service), ConnectionSchema);
   if (!connection) return undefined;
   return GmailConfigSchema.parse({
     account: connection.account,
     ...(connection.refreshToken
       ? {
-          clientIdEnv: GMAIL_AUTH_ENV.clientId,
+          clientIdEnv: env.clientId,
           ...(connection.clientSecret
-            ? { clientSecretEnv: GMAIL_AUTH_ENV.clientSecret }
+            ? { clientSecretEnv: env.clientSecret }
             : {}),
-          refreshTokenEnv: GMAIL_AUTH_ENV.refreshToken,
+          refreshTokenEnv: env.refreshToken,
         }
-      : { accessTokenEnv: GMAIL_AUTH_ENV.accessToken }),
+      : { accessTokenEnv: env.accessToken }),
   });
 }
 export async function completeGmailAuth(
@@ -242,7 +277,7 @@ export async function completeGmailAuth(
   const code = secret.parse(input.code);
   const now = options.now?.() ?? Date.now();
   const pending = withHomeLock(home, () => {
-    const value = load(pendingFile(home), PendingSchema);
+    const value = load(pendingFile(home, options.service), PendingSchema);
     if (
       !value ||
       value.consumed ||
@@ -254,7 +289,7 @@ export async function completeGmailAuth(
         "Gmail OAuth state is invalid, expired or already consumed",
       );
     // Persist consumption before exchanging the code, including after a process restart.
-    persist(pendingFile(home), { ...value, consumed: true });
+    persist(pendingFile(home, options.service), { ...value, consumed: true });
     return value;
   });
   try {
@@ -277,16 +312,26 @@ export async function completeGmailAuth(
       options,
     );
     const accessToken = secret.parse(token.access_token);
-    const scopes = z.string().parse(token.scope).split(/\s+/);
-    if (!GMAIL_SCOPES.every((scope) => scopes.includes(scope)))
+    const scopes = z.string().parse(token.scope).trim().split(/\s+/);
+    if (
+      !servicePolicy(options.service).scopes.every((scope) =>
+        scopes.includes(scope),
+      )
+    )
       throw new Error();
+    if (
+      options.service === "calendar" &&
+      (scopes.length !== 1 || scopes[0] !== GOOGLE_CALENDAR_SCOPES[0])
+    )
+      throw new Error("Calendar requires a separate readonly grant");
     const profile = await request(
-      "https://gmail.googleapis.com/gmail/v1/users/me/profile",
+      servicePolicy(options.service).profileUrl,
       { headers: { Authorization: `Bearer ${accessToken}` } },
       options,
     );
     const connection = ConnectionSchema.parse({
-      account: profile.emailAddress,
+      account:
+        options.service === "calendar" ? profile.id : profile.emailAddress,
       clientId: pending.clientId,
       clientSecret: pending.clientSecret,
       accessToken,
@@ -297,14 +342,22 @@ export async function completeGmailAuth(
         z.number().int().min(1).max(86_400).parse(token.expires_in) * 1000,
       connectedAt: new Date(now).toISOString(),
     });
+    if (
+      (options.service === "calendar" &&
+        (profile.primary !== true || profile.accessRole !== "owner")) ||
+      (pending.expectedAccount &&
+        connection.account.toLowerCase() !==
+          pending.expectedAccount.toLowerCase())
+    )
+      throw new Error("Google account mismatch");
     withHomeLock(home, () => {
-      const current = load(pendingFile(home), PendingSchema);
+      const current = load(pendingFile(home, options.service), PendingSchema);
       if (!current || current.state !== pending.state || !current.consumed)
         throw new Error();
-      persist(authFile(home), connection);
-      fs.rmSync(pendingFile(home), { force: true });
+      persist(authFile(home, options.service), connection);
+      fs.rmSync(pendingFile(home, options.service), { force: true });
     });
-    return readGmailConnection(home)!;
+    return readGmailConnection(home, options.service)!;
   } catch {
     throw new Error(
       "Gmail connection could not be verified; reconnect from HELEN. No credentials were displayed.",
@@ -318,9 +371,9 @@ export async function disconnectGmail(
 ): Promise<{ disconnected: true; revoked: boolean }> {
   const connection = withHomeLock(home, () => {
     clearGmailTokenCache();
-    const saved = load(authFile(home), ConnectionSchema);
-    fs.rmSync(authFile(home), { force: true });
-    fs.rmSync(pendingFile(home), { force: true });
+    const saved = load(authFile(home, options.service), ConnectionSchema);
+    fs.rmSync(authFile(home, options.service), { force: true });
+    fs.rmSync(pendingFile(home, options.service), { force: true });
     return saved;
   });
   let revoked = false;

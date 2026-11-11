@@ -24,7 +24,11 @@ import {
   type Progress,
   type TrackedStep,
 } from "./progress.js";
-import { resolvePromptEntry } from "./prompts.js";
+import {
+  listPromptEntries,
+  resolvePromptEntry,
+  type PromptEntry,
+} from "./prompts.js";
 import { listSkills } from "./skills.js";
 
 export {
@@ -98,7 +102,10 @@ interface StepFacts {
 }
 
 /** What a step is allowed to do, read from the prompt's own frontmatter. */
-function stepFacts(step: TrackedStep): StepFacts {
+function stepFacts(
+  step: TrackedStep,
+  entries: readonly PromptEntry[],
+): StepFacts {
   if (step.kind === "checkpoint")
     return { readOnly: false, role: "verifier", needsApproval: false };
   if (step.kind === "skill")
@@ -106,7 +113,7 @@ function stepFacts(step: TrackedStep): StepFacts {
   if (step.kind === "external")
     return { readOnly: false, role: "implementer", needsApproval: true };
   try {
-    const entry = resolvePromptEntry(step.ref);
+    const entry = resolvePromptEntry(step.ref, undefined, entries);
     const data = parseFrontmatter(
       fs.readFileSync(entry.absolutePath, "utf8"),
     ).data;
@@ -148,9 +155,21 @@ export function buildWorkGraph(
   );
 
   const waves: string[][] = [];
+  let entries: PromptEntry[] = [];
+  if (
+    progress.steps.some(
+      (step) => step.kind === "prompt" || step.kind === "flow",
+    )
+  ) {
+    try {
+      entries = listPromptEntries();
+    } catch {
+      // Unreadable prompt metadata keeps the same conservative writer fallback as an unknown reference.
+    }
+  }
   let currentReadOnly = false;
   const items: WorkItem[] = progress.steps.map((step, index) => {
-    const facts = stepFacts(step);
+    const facts = stepFacts(step, entries);
     const id = itemId(index, step.ref);
     if (facts.readOnly && currentReadOnly && waves.length > 0) {
       waves[waves.length - 1]!.push(id);

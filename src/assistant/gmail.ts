@@ -263,7 +263,11 @@ async function accountHeaders(
     throw new Error("Gmail OAuth account does not match configured sender");
   return headers;
 }
-export { request as gmailRequest, accountHeaders as gmailAccountHeaders };
+export {
+  request as gmailRequest,
+  accountHeaders as gmailAccountHeaders,
+  authorization as googleOAuthHeaders,
+};
 function mime(
   draft: Pick<GmailDraft, "id" | "account" | "to" | "subject" | "body">,
 ): string {

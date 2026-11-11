@@ -11,7 +11,11 @@ import {
   runChecks,
   startProgress,
 } from "../src/core/progress.js";
-import { presetCommand, runTeam, splitCommand } from "../src/core/teamRun.js";
+import {
+  presetCommand,
+  runTeam as executeTeam,
+  splitCommand,
+} from "../src/core/teamRun.js";
 
 function plan(steps: PlaybookStep[]): ApplyPlan {
   return {
@@ -102,14 +106,32 @@ describe("command parsing", () => {
 
 describe("helen team run", () => {
   let tmp: string;
+  let controller: AbortController;
+  const running = new Set<ReturnType<typeof executeTeam>>();
+  const runTeam = (options: Parameters<typeof executeTeam>[0]) => {
+    const run = executeTeam({ ...options, signal: controller.signal });
+    running.add(run);
+    void run.finally(() => running.delete(run)).catch(() => undefined);
+    return run;
+  };
   beforeEach(() => {
+    controller = new AbortController();
     tmp = fs.mkdtempSync(path.join(os.tmpdir(), "helen-run-"));
     fs.writeFileSync(
       path.join(tmp, "package.json"),
       JSON.stringify({ name: "demo", scripts: { test: "echo test" } }),
     );
   });
-  afterEach(() => fs.rmSync(tmp, { recursive: true, force: true }));
+  afterEach(async () => {
+    controller.abort();
+    await Promise.allSettled([...running]);
+    fs.rmSync(tmp, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 100,
+    });
+  });
 
   const steps: PlaybookStep[] = [
     {

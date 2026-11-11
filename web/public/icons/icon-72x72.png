@@ -1,0 +1,5 @@
+<!-- Placeholder SVG content (named .png to match manifest); replace with real PNG files for production -->
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72">
+  <rect width="100%" height="100%" fill="#0f172a" />
+  <text x="50%" y="50%" font-size="20" fill="#fff" text-anchor="middle" dominant-baseline="central">72</text>
+</svg>

@@ -1,5 +1,13 @@
+import { queryGoogleCalendar, googleCalendarStatus } from "./googleCalendar.js";
 import { z } from "zod";
 import crypto from "node:crypto";
+import { handleFinanceChat } from "./financeChat.js";
+import {
+  ObserverRequestSchema,
+  observerScheduleRequest,
+  readSystemObserver,
+  requestSystemObserver,
+} from "./systemObserver.js";
 import { findSecrets, looksSensitive, redact } from "../core/secrets.js";
 import { runAction, undoAction, clearActions } from "./actions.js";
 import { buildAgenda, formatAgenda, type AgendaRange } from "./agenda.js";
@@ -79,7 +87,7 @@ import {
   type UrgencyContext,
 } from "./tasks.js";
 import { runDailyKickoff, runDailyShutdown } from "./dailyRitual.js";
-import { summarizeCodexWork } from "./codexBridge.js";
+import { summarizeCodexWork, getLastAgentTurn } from "./codexBridge.js";
 import { formatCapabilities } from "./capabilities.js";
 import { getAppMode } from "./appMode.js";
 import {
@@ -1197,6 +1205,19 @@ function json(value: unknown): string {
   return JSON.stringify(value);
 }
 
+function withoutFinanceTasks(ctx: Context, text: string): string {
+  for (const task of listTasks(ctx.home, { status: "all" })) {
+    if (task.source === "orchestrator")
+      text = text
+        .replaceAll(task.text, "(private financial task)")
+        .replaceAll(
+          JSON.stringify(task.text).slice(1, -1),
+          "(private financial task)",
+        );
+  }
+  return text;
+}
+
 function modelTools(ctx: Context): AssistantTool[] {
   const allowSensitive =
     ctx.showSensitive && ctx.config.provider?.allowSensitive === true;
@@ -1623,7 +1644,7 @@ function modelTools(ctx: Context): AssistantTool[] {
           (ctx.completedActions ??= []).push(label[ctx.lang === "es" ? 0 : 1]);
         return !allowSensitive && looksSensitive(output)
           ? json({ result: "private; view on an authorized private channel" })
-          : redact(output);
+          : withoutFinanceTasks(ctx, redact(output));
       },
     })),
     ...[
@@ -1647,7 +1668,7 @@ function modelTools(ctx: Context): AssistantTool[] {
           ].includes(tool.name)
         )
           (ctx.completedActions ??= []).push(tool.name);
-        return redact(output);
+        return withoutFinanceTasks(ctx, redact(output));
       },
     })),
   ];
@@ -1728,13 +1749,19 @@ async function askModel(ctx: Context, message: string): Promise<BrainReply> {
   try {
     const answer = await model.answer({
       system: redact(systemPrompt(ctx.config)),
-      user: contextBlock(ctx, message, !model.usesTools),
+      user: withoutFinanceTasks(
+        ctx,
+        contextBlock(ctx, message, !model.usesTools),
+      ),
       history: privateHistory(ctx.conversation.history ?? [])
         .filter(
           (turn) =>
             !turn.sensitive || (ctx.showSensitive && provider?.allowSensitive),
         )
-        .map(({ role, content }) => ({ role, content })),
+        .map(({ role, content }) => ({
+          role,
+          content: withoutFinanceTasks(ctx, content),
+        })),
       tools: model.usesTools ? modelTools(ctx) : [],
       timeoutMs: ctx.speaker
         ? (provider?.voiceTimeoutMs ?? 6_000)
@@ -1887,6 +1914,88 @@ async function route(
         speech: result.speech,
       });
     }
+    case "codex.reply": {
+      const result = getLastAgentTurn({
+        lang: ctx.lang,
+        authorized: ctx.ownerVerified && ctx.showSensitive && !ctx.speaker,
+      });
+      ctx.privateAccess = true;
+      return reply(ctx, "codex.reply", result.text, {
+        speech: result.speech,
+      });
+    }
+    case "codex.prompt": {
+      ctx.privateAccess = true;
+      if (!ctx.ownerVerified) {
+        const text = say(
+          ctx.lang,
+          "Solo el propietario verificado puede encolar tareas para los agentes.",
+          "Only the verified owner can enqueue agent tasks.",
+        );
+        return reply(ctx, "codex.prompt", text, { speech: text });
+      }
+      const actor = {
+        owner: ctx.config.owner,
+        verified: ctx.ownerVerified,
+        private: ctx.showSensitive && !ctx.speaker,
+        channel: ctx.channel,
+      };
+      try {
+        const queueResult = await requestSystemObserver(
+          ctx.home,
+          actor,
+          {
+            goal: intent.goal,
+            in: "1m",
+            ...(intent.agent ? { agent: intent.agent.toLowerCase() } : {}),
+          },
+          false,
+          ctx.signal,
+        );
+        if (queueResult.status === "queued") {
+          const text = say(
+            ctx.lang,
+            `✅ *Tarea encolada para ${intent.agent || "Codex"}*\n` +
+              `🎯 *Objetivo*: ${intent.goal}\n` +
+              `🆔 *ID*: \`${queueResult.id}\`\n` +
+              `⏰ *Programado*: ${queueResult.targetAt || "inmediato"}\n\n` +
+              `Centinela ejecutará la tarea en cuanto haya cuota disponible.`,
+            `✅ *Task queued for ${intent.agent || "Codex"}*\n` +
+              `🎯 *Goal*: ${intent.goal}\n` +
+              `🆔 *ID*: \`${queueResult.id}\`\n` +
+              `⏰ *Scheduled*: ${queueResult.targetAt || "immediate"}\n\n` +
+              `Centinela will dispatch it as soon as quota is available.`,
+          );
+          const speech = say(
+            ctx.lang,
+            `He encolado tu tarea para ${intent.agent || "Codex"}.`,
+            `I have queued your task for ${intent.agent || "Codex"}.`,
+          );
+          return reply(ctx, "codex.prompt", text, { speech });
+        } else {
+          const text = say(
+            ctx.lang,
+            `No se pudo confirmar el encolado de la tarea: ${queueResult.status}.`,
+            `Could not confirm task queuing: ${queueResult.status}.`,
+          );
+          return reply(ctx, "codex.prompt", text, { speech: text });
+        }
+      } catch (err) {
+        const text = say(
+          ctx.lang,
+          `Error al encolar la tarea: ${err instanceof Error ? err.message : String(err)}`,
+          `Error queuing task: ${err instanceof Error ? err.message : String(err)}`,
+        );
+        return reply(ctx, "codex.prompt", text, { speech: text });
+      }
+    }
+    case "agent.schedule":
+      return reply(
+        ctx,
+        "agent.schedule",
+        "La programación requiere una propuesta privada y la confirmación exacta de su hash.",
+        { speech: "Revisa la propuesta en tu canal privado." },
+      );
     case "agenda":
       return agenda(ctx, intent.range);
     case "recall":
@@ -2073,6 +2182,14 @@ function rememberTurn(
   result: BrainReply,
   correspondence = false,
 ): void {
+  if (
+    listTasks(ctx.home, { status: "all" }).some(
+      (task) =>
+        task.source === "orchestrator" &&
+        (input.includes(task.text) || result.text.includes(task.text)),
+    )
+  )
+    return;
   const sensitive =
     correspondence ||
     Boolean(ctx.privateAccess) ||
@@ -2281,6 +2398,215 @@ async function handleTurn(
   const control = fold(understood.cleaned)
     .replace(/[¿?!.]/g, "")
     .trim();
+  // Natural-language scheduling uses the same private preview and exact approval as JSON.
+  if (understood.intent.name === "agent.schedule") {
+    try {
+      input =
+        "automatizaciones proponer " +
+        JSON.stringify(observerScheduleRequest(understood.intent));
+    } catch {
+      return reply(
+        ctx,
+        "agent.schedule",
+        "Indica un objetivo explícito y una hora HH:mm (próxima ocurrencia local) o en 15m. No interpreto mañana ni horas ambiguas por suposición; no se ha encolado nada.",
+        { speech: "Revisa la hora y el objetivo en tu canal privado." },
+      );
+    }
+  }
+  // Deterministic private route: calendar contents never enter model tools or history.
+  if (/^calendario google\b/i.test(input.trim())) {
+    const actor = {
+      owner: config.owner,
+      verified: ctx.ownerVerified,
+      private: ctx.showSensitive && !ctx.speaker,
+      channel: ctx.channel,
+    };
+    try {
+      let result: unknown;
+      if (/^calendario google estado\s*$/i.test(input.trim()))
+        result = googleCalendarStatus(ctx.home, actor);
+      else {
+        const command =
+          /^calendario google (eventos|disponibilidad)\s+([\s\S]+)$/i.exec(
+            input.trim(),
+          );
+        if (!command) throw new Error("Unsupported Calendar command");
+        result = await queryGoogleCalendar(
+          ctx.home,
+          actor,
+          command[1]!.toLowerCase() === "eventos" ? "events" : "busy",
+          { timeZone: config.timezone, ...JSON.parse(command[2]!) },
+          { fetch: ctx.fetcher, signal: ctx.signal },
+        );
+      }
+      return reply(ctx, "pending", JSON.stringify(result, null, 2), {
+        speech: "Consulta tu calendario en el canal privado.",
+      });
+    } catch {
+      return reply(
+        ctx,
+        "pending",
+        "No se pudo verificar Google Calendar. Revisa cuenta, permiso de lectura, canal privado y ventana con offsets explícitos. No interpretes el fallo como agenda libre; esta integración solo consulta.",
+        { speech: "Consulta el resultado en tu canal privado." },
+      );
+    }
+  }
+  // Observer requests are explicit private operations, never model tools or chat history.
+  if (
+    ctx.conversation.pending?.kind === "observer" ||
+    /^(?:sistema estado|automatizaciones (?:simular|proponer))\b/i.test(
+      input.trim(),
+    )
+  ) {
+    try {
+      const actor = {
+        owner: config.owner,
+        verified: ctx.ownerVerified,
+        private: ctx.showSensitive && !ctx.speaker,
+        channel: ctx.channel,
+      };
+      const local = readConfig(ctx.home);
+      if (
+        !actor.verified ||
+        !actor.private ||
+        actor.owner !== local.owner ||
+        !local.observer?.allowedChannels.includes(actor.channel)
+      )
+        throw new Error(
+          "El Observer requiere el propietario y un canal privado habilitado.",
+        );
+      if (
+        /^automatizaciones (?:simular|proponer)\b/i.test(input.trim()) &&
+        ctx.conversation.pending?.kind === "observer"
+      )
+        delete ctx.conversation.pending;
+      const pending = ctx.conversation.pending;
+      let text: string;
+      if (pending?.kind === "observer") {
+        const draft = JSON.parse(pending.text!);
+        const approved = {
+          owner: local.owner,
+          settings: local.observer,
+          request: ObserverRequestSchema.parse(draft.request),
+        };
+        const hash = crypto
+          .createHash("sha256")
+          .update(JSON.stringify(approved))
+          .digest("hex");
+        if (/^(?:no|cancelar|cancela)$/i.test(input.trim())) {
+          delete ctx.conversation.pending;
+          text = "Propuesta de automatización cancelada.";
+        } else if (
+          draft.request.at &&
+          Date.parse(draft.targetAt) <= now.getTime()
+        ) {
+          delete ctx.conversation.pending;
+          text =
+            "La hora prevista ha pasado; genera otra vista previa para no moverla al día siguiente por suposición.";
+        } else if (draft.hash !== hash) {
+          delete ctx.conversation.pending;
+          text =
+            "La configuración o propuesta ha cambiado; genera otra vista previa.";
+        } else if (input.trim() !== `confirmar ${hash}`)
+          text = `Para aprobar la solicitud exacta escribe confirmar ${hash}; para descartarla, cancelar.`;
+        else {
+          // Consume durably before the non-idempotent external queue call: ambiguous failures require inspection.
+          delete ctx.conversation.pending;
+          saveConversation(ctx.home, ctx.conversation, now);
+          text = JSON.stringify(
+            await requestSystemObserver(
+              ctx.home,
+              actor,
+              approved.request,
+              false,
+              ctx.signal,
+            ),
+            null,
+            2,
+          );
+        }
+      } else if (/^sistema estado\s*$/i.test(input.trim()))
+        text = JSON.stringify(readSystemObserver(ctx.home, actor), null, 2);
+      else {
+        const command =
+          /^automatizaciones (simular|proponer)\s+([\s\S]+)$/i.exec(
+            input.trim(),
+          );
+        if (!command)
+          throw new Error(
+            "Usa automatizaciones simular/proponer seguido de JSON con goal e in.",
+          );
+        const request = ObserverRequestSchema.parse(JSON.parse(command[2]!));
+        const preview = await requestSystemObserver(
+          ctx.home,
+          actor,
+          request,
+          true,
+          ctx.signal,
+        );
+        if (preview.status !== "preview") text = JSON.stringify(preview);
+        else if (command[1]!.toLowerCase() === "simular")
+          text = JSON.stringify(preview, null, 2);
+        else if (request.attachments?.length)
+          text =
+            "Vista previa de adjuntos únicamente. No se autoriza encolarlos hasta poder vincular los bytes aprobados con la ejecución; no se ha creado ninguna tarea.";
+        else {
+          if (!local.observer?.permissions.includes("automation:queue"))
+            throw new Error("Falta permiso local para encolar.");
+          const hash = crypto
+            .createHash("sha256")
+            .update(
+              JSON.stringify({
+                owner: local.owner,
+                settings: local.observer,
+                request,
+              }),
+            )
+            .digest("hex");
+          ctx.conversation.pending = pendingFor(
+            "observer",
+            {
+              text: JSON.stringify({
+                request,
+                hash,
+                targetAt: preview.targetAt,
+              }),
+            },
+            now,
+          );
+          text = `Vista previa, sin encolar:\n${JSON.stringify({ request, preview }, null, 2)}\nPara aprobar exactamente esta solicitud: confirmar ${hash}. Para descartarla: cancelar.`;
+        }
+      }
+      saveConversation(ctx.home, ctx.conversation, now);
+      return reply(ctx, "pending", text, {
+        speech: "Consulta el estado o la propuesta en tu canal privado.",
+      });
+    } catch {
+      saveConversation(ctx.home, ctx.conversation, now);
+      return reply(
+        ctx,
+        "pending",
+        "No se confirmó la operación del Observer. Revisa configuración, permisos y cola local antes de aprobar otra solicitud; no se ha creado un planificador alternativo.",
+      );
+    }
+  }
+  // Financial data uses a deterministic private route and is never added to model history.
+  try {
+    const financial = await handleFinanceChat(input, ctx);
+    if (financial !== null) {
+      saveConversation(ctx.home, ctx.conversation, now);
+      return reply(ctx, "pending", financial, {
+        speech: "Consulta el resultado financiero en tu canal privado.",
+      });
+    }
+  } catch {
+    saveConversation(ctx.home, ctx.conversation, now);
+    return reply(
+      ctx,
+      "pending",
+      "No se pudo confirmar la operación financiera. Revisa los datos, permisos y recibos locales; no des por completada una escritura sin su resultado.",
+    );
+  }
   try {
     const productivity = await handleProductivityMessage(
       understood.cleaned,

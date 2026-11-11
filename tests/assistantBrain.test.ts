@@ -647,4 +647,10 @@ describe("a local command as the model", () => {
       }),
     ).rejects.toThrow(/was not found/);
   });
+
+  it("routes 'que respondio el agente' to codex.reply intent", async () => {
+    const res = await ask("que respondio el agente", { ownerVerified: true });
+    expect(res.intent).toBe("codex.reply");
+    expect(res.text).toBeDefined();
+  });
 });

@@ -1,3 +1,4 @@
+import { completeGoogleCalendarConnection } from "./googleCalendarAuth.js";
 import crypto from "node:crypto";
 import http from "node:http";
 import { z } from "zod";
@@ -14,6 +15,7 @@ import {
 import { handleMessage } from "./brain.js";
 import {
   AssistantConfigSchema,
+  readConfig,
   writeConfig,
   type AssistantConfig,
 } from "./home.js";
@@ -37,6 +39,12 @@ import type { LanguageModel } from "./llm.js";
 import { addMemory } from "./memory.js";
 import { addReminder, listReminders } from "./reminders.js";
 import { listTasks } from "./tasks.js";
+import {
+  importSavedLinks,
+  listSavedLinks,
+  parseSavedExport,
+  reviewSavedLink,
+} from "./saved.js";
 import { chatPage } from "./web.js";
 
 /**
@@ -265,6 +273,49 @@ export function createAssistantServer(options: ServerOptions): http.Server {
 
     const channel =
       request.headers["x-helen-client"] === "web" ? "web" : "http";
+    if (url.pathname === "/google-calendar/callback" && method === "GET") {
+      try {
+        if (url.searchParams.has("error")) throw new Error("Consent cancelled");
+        const connection = await completeGoogleCalendarConnection(
+          options.home,
+          {
+            state: url.searchParams.get("state") ?? "",
+            code: url.searchParams.get("code") ?? "",
+            redirectUri:
+              readConfig(options.home).googleCalendar?.redirectUri ??
+              "http://127.0.0.1:" +
+                request.socket.localPort +
+                "/google-calendar/callback",
+          },
+          { ...(options.fetcher ? { fetch: options.fetcher } : {}) },
+        );
+        response.writeHead(200, {
+          "Content-Type": "application/json; charset=utf-8",
+          "Cache-Control": "no-store",
+          "X-Content-Type-Options": "nosniff",
+        });
+        response.end(
+          JSON.stringify({
+            connected: true,
+            account: connection.account,
+            readOnly: true,
+          }),
+        );
+      } catch {
+        response.writeHead(400, {
+          "Content-Type": "application/json; charset=utf-8",
+          "Cache-Control": "no-store",
+          "X-Content-Type-Options": "nosniff",
+        });
+        response.end(
+          JSON.stringify({
+            error:
+              "Calendar connection was not verified; start a new connection.",
+          }),
+        );
+      }
+      return;
+    }
     if (url.pathname === "/gmail/callback") {
       if (
         await handleGmailRequest(
@@ -312,6 +363,49 @@ export function createAssistantServer(options: ServerOptions): http.Server {
         throw new HttpError(400, "Invalid conversation identifier.");
       return `${channel}:${id}`;
     };
+    if (url.pathname === "/saved" && method === "GET") {
+      privateChannel(url.searchParams.get("speaker") === "true");
+      return send(200, {
+        items: listSavedLinks(
+          home,
+          url.searchParams.get("query") ?? "",
+          url.searchParams.get("category") ?? "",
+        ),
+      });
+    }
+    if (
+      (url.pathname === "/saved/import" || url.pathname === "/saved/review") &&
+      method === "POST"
+    ) {
+      privateChannel();
+      const body = jsonBody(
+        await readBody(
+          request,
+          url.pathname === "/saved/import" ? 10 * 1024 * 1024 : MAX_BODY,
+        ),
+      );
+      privateChannel(body.speaker);
+      if (url.pathname === "/saved/import") {
+        const input = z
+          .object({
+            data: z.unknown(),
+            categories: z.unknown().optional(),
+            speaker: z.boolean().optional(),
+          })
+          .strict()
+          .parse(body);
+        return send(
+          200,
+          importSavedLinks(
+            home,
+            parseSavedExport(input.data),
+            input.categories,
+          ),
+        );
+      }
+      const { speaker: _speaker, ...change } = body;
+      return send(200, { item: reviewSavedLink(home, change) });
+    }
     if (url.pathname === "/capture" && method === "POST") {
       privateChannel();
       const body = jsonBody(await readBody(request, 14 * 1024 * 1024));

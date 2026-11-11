@@ -5,6 +5,7 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import {
   listRecentCodexSessions,
   summarizeCodexWork,
+  getLastAgentTurn,
 } from "../src/assistant/codexBridge.js";
 import {
   findCapability,
@@ -116,4 +117,88 @@ it("capability descriptions acknowledge integration limits and public informatio
   const memory = formatCapabilities({ topic: "memory", lang: "en" }).text;
   expect(memory).toContain("configured model");
   expect(memory).not.toContain("autonomously");
+});
+
+it("getLastAgentTurn extracts the most recent goal and assistant planner response safely", () => {
+  const root = path.join(directory, "brain");
+  const file = transcript("session-reply", "Refactorizar modulo de pagos");
+  fs.appendFileSync(
+    file,
+    JSON.stringify({
+      type: "PLANNER_RESPONSE",
+      status: "DONE",
+      content: "He completado la refactorizacion con todos los tests pasando.",
+    }) + "\n",
+  );
+
+  const res = getLastAgentTurn({
+    brainDir: root,
+    authorized: true,
+    lang: "es",
+  });
+  expect(res.detail).toBeDefined();
+  expect(res.detail?.lastGoal).toContain("Refactorizar modulo de pagos");
+  expect(res.detail?.lastResponse).toContain(
+    "He completado la refactorizacion",
+  );
+  expect(res.detail?.status).toBe("DONE");
+  expect(res.text).toContain("Refactorizar modulo de pagos");
+  expect(res.text).toContain("He completado la refactorizacion");
+  expect(res.speech).toContain("Refactorizar modulo de pagos");
+});
+
+it("getLastAgentTurn respects private authorization and conceals private text when unauthorized", () => {
+  const root = path.join(directory, "brain");
+  transcript("session-secret", "Misión privada confidencial");
+
+  const denied = getLastAgentTurn({ brainDir: root, authorized: false });
+  expect(denied.detail).toBeUndefined();
+  expect(denied.text).not.toContain("confidencial");
+  expect(denied.speech).not.toContain("confidencial");
+});
+
+it("getLastAgentTurn does not cross turn boundaries when a new user input is pending without response", () => {
+  const root = path.join(directory, "brain");
+  const file = transcript("session-boundary", "Trabajo A");
+  fs.appendFileSync(
+    file,
+    JSON.stringify({
+      type: "PLANNER_RESPONSE",
+      status: "DONE",
+      content: "Terminado A",
+    }) + "\n",
+  );
+  fs.appendFileSync(
+    file,
+    JSON.stringify({
+      type: "USER_INPUT",
+      content: "Trabajo B pendiente",
+    }) + "\n",
+  );
+
+  const res = getLastAgentTurn({
+    brainDir: root,
+    authorized: true,
+    lang: "es",
+  });
+  expect(res.detail).toBeDefined();
+  expect(res.detail?.lastGoal).toContain("Trabajo B pendiente");
+  expect(res.detail?.lastResponse).toContain("En progreso");
+  expect(res.detail?.lastResponse).not.toContain("Terminado A");
+  expect(res.detail?.status).toBe("PENDING");
+});
+
+it("getLastAgentTurn marks status as PENDING when a single new user input has no response yet", () => {
+  const root = path.join(directory, "brain");
+  transcript("session-pending", "Trabajo nuevo sin respuesta");
+
+  const res = getLastAgentTurn({
+    brainDir: root,
+    authorized: true,
+    lang: "es",
+  });
+  expect(res.detail).toBeDefined();
+  expect(res.detail?.lastGoal).toContain("Trabajo nuevo sin respuesta");
+  expect(res.detail?.lastResponse).toContain("En progreso");
+  expect(res.detail?.status).toBe("PENDING");
 });

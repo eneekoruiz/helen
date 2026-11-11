@@ -1,8 +1,19 @@
+import {
+  startGoogleCalendarConnection,
+  readGoogleCalendarConnection,
+  disconnectGoogleCalendarConnection,
+} from "../assistant/googleCalendarAuth.js";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import readline from "node:readline";
+import {
+  previewFinanceMessage,
+  queryFinance,
+  writeFinanceCopy,
+} from "../assistant/finance.js";
 import { Command } from "commander";
+import { executeSaleAndTask } from "../assistant/orchestrate.js";
 import { createAlexaVerifier, interactionModel } from "../assistant/alexa.js";
 import {
   buildAgenda,
@@ -69,6 +80,12 @@ import {
   removeTask,
 } from "../assistant/tasks.js";
 import { runTelegramBot } from "../assistant/telegram.js";
+import {
+  importSavedLinks,
+  listSavedLinks,
+  parseSavedExport,
+  reviewSavedLink,
+} from "../assistant/saved.js";
 import { isValidTimeZone } from "../assistant/time.js";
 import { parseWhen } from "../assistant/when.js";
 import { isJsonMode, printJsonAndExit } from "../core/jsonOutput.js";
@@ -674,6 +691,265 @@ function registerAssistantAdmin(program: Command): void {
     .command("assistant")
     .description(
       "Set up and run HELEN as your personal assistant (server, Telegram, Alexa, notifications)",
+    );
+
+  const googleCalendar = assistant
+    .command("google-calendar")
+    .description(
+      "Connect a separate readonly Google Calendar grant for the local owner",
+    );
+  googleCalendar
+    .command("connect")
+    .requiredOption("--account <email>", "Exact account to authorize")
+    .requiredOption(
+      "--client-id-env <name>",
+      "Local environment reference for a separate Calendar OAuth client ID",
+    )
+    .option(
+      "--client-secret-env <name>",
+      "Local environment reference for its OAuth client secret",
+    )
+    .option(
+      "--redirect-uri <uri>",
+      "Registered callback served by HELEN",
+      "http://127.0.0.1:8787/google-calendar/callback",
+    )
+    .action(
+      (opts: {
+        account: string;
+        clientIdEnv: string;
+        clientSecretEnv?: string;
+        redirectUri: string;
+      }) =>
+        handle(
+          "google-calendar-connect",
+          () =>
+            startGoogleCalendarConnection(
+              home(),
+              {
+                owner: config().owner,
+                verified: true,
+                private: true,
+                channel: "cli",
+              },
+              opts,
+            ),
+          (value) => console.log(JSON.stringify(value, null, 2)),
+        ),
+    );
+  googleCalendar.command("status").action(() =>
+    handle(
+      "google-calendar-status",
+      () => ({
+        configured: Boolean(config().googleCalendar),
+        connection: readGoogleCalendarConnection(home()) ?? null,
+        verification: "stored grant only; remote access not checked",
+      }),
+      (value) => console.log(JSON.stringify(value, null, 2)),
+    ),
+  );
+  googleCalendar
+    .command("disconnect")
+    .option(
+      "--revoke",
+      "Also ask Google to revoke this grant; may affect grants sharing its client ID",
+      false,
+    )
+    .action(async (opts: { revoke: boolean }) => {
+      try {
+        const result = await disconnectGoogleCalendarConnection(
+          home(),
+          {
+            owner: config().owner,
+            verified: true,
+            private: true,
+            channel: "cli",
+          },
+          opts.revoke,
+        );
+        if (isJsonMode())
+          printJsonAndExit("google-calendar-disconnect", result);
+        else console.log(JSON.stringify(result, null, 2));
+      } catch {
+        logger.error("Calendar disconnect could not be confirmed.");
+        process.exitCode = 1;
+      }
+    });
+
+  assistant
+    .command("sale-and-task <file>")
+    .description(
+      "Execute a reviewed sale copy and task; report each result independently",
+    )
+    .action(async (file: string) => {
+      try {
+        if (fs.statSync(file).size > 65536)
+          throw new Error("Operation request exceeds 64 KB.");
+        const result = await executeSaleAndTask(
+          home(),
+          JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "")),
+          {
+            owner: config().owner,
+            verified: true,
+            permissions: ["finance:copy", "tasks:write"],
+          },
+        );
+        handle(
+          "assistant sale-and-task",
+          () => result,
+          (data) => console.log(JSON.stringify(data, null, 2)),
+        );
+        if (result.status !== "succeeded") process.exitCode = 1;
+      } catch (error) {
+        handle(
+          "assistant sale-and-task",
+          () => {
+            throw error;
+          },
+          () => {},
+        );
+      }
+    });
+
+  const finance = assistant
+    .command("finance")
+    .description("Offline financial proposals and verified XLSX copies");
+  finance
+    .command("recent <source>")
+    .option("--limit <number>", "Maximum recent movements", "10")
+    .action(async (source: string, options: { limit: string }) => {
+      try {
+        console.log(
+          JSON.stringify(
+            await queryFinance({ source, limit: Number(options.limit) }),
+            null,
+            2,
+          ),
+        );
+      } catch {
+        console.error(
+          "Finance query failed; inspect the local workbook mapping and revision.",
+        );
+        process.exitCode = 1;
+      }
+    });
+  finance
+    .command("month <source> <month>")
+    .action(async (source: string, month: string) => {
+      try {
+        console.log(
+          JSON.stringify(await queryFinance({ source, month }), null, 2),
+        );
+      } catch {
+        console.error(
+          "Finance query failed; inspect the local workbook mapping and revision.",
+        );
+        process.exitCode = 1;
+      }
+    });
+  finance
+    .command("preview <text>")
+    .description(
+      "Propose a sale without recording it; report missing accounting details",
+    )
+    .action((text: string) =>
+      handle(
+        "assistant finance preview",
+        () => previewFinanceMessage(text),
+        (data) => console.log(JSON.stringify(data, null, 2)),
+      ),
+    );
+  finance
+    .command("record <file>")
+    .description(
+      "Record an explicitly reviewed JSON movement in a new XLSX copy; never replaces the source",
+    )
+    .action(async (file: string) => {
+      try {
+        if (fs.statSync(file).size > 65536)
+          throw new Error("Movement request exceeds 64 KB.");
+        const result = await writeFinanceCopy(
+          JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "")),
+        );
+        handle(
+          "assistant finance record",
+          () => result,
+          (data) => console.log(JSON.stringify(data, null, 2)),
+        );
+      } catch (error) {
+        handle(
+          "assistant finance record",
+          () => {
+            throw error;
+          },
+          () => {},
+        );
+      }
+    });
+
+  const saved = assistant
+    .command("saved")
+    .description(
+      "Private offline library of exported Instagram posts and reels",
+    );
+  saved
+    .command("import <file>")
+    .option("--categories <file>", "JSON category rules")
+    .action((file: string, opts: { categories?: string }) =>
+      handle(
+        "assistant saved import",
+        () => {
+          if (fs.statSync(file).size > 10 * 1024 * 1024)
+            throw new Error("Export exceeds 10 MB.");
+          const entries = parseSavedExport(
+            JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "")),
+          );
+          if (opts.categories && fs.statSync(opts.categories).size > 65536)
+            throw new Error("Category rules exceed 64 KB.");
+          const rules = opts.categories
+            ? JSON.parse(fs.readFileSync(opts.categories, "utf8"))
+            : undefined;
+          return importSavedLinks(home(), entries, rules);
+        },
+        (data) => console.log(JSON.stringify(data, null, 2)),
+      ),
+    );
+  saved
+    .command("list")
+    .option("--query <text>", "Search title, categories or tags", "")
+    .option("--category <name>", "Exact category", "")
+    .action((opts: { query: string; category: string }) =>
+      handle(
+        "assistant saved list",
+        () => ({ items: listSavedLinks(home(), opts.query, opts.category) }),
+        (data) => console.log(JSON.stringify(data, null, 2)),
+      ),
+    );
+  saved
+    .command("review <id>")
+    .requiredOption("--categories <names>", "Comma-separated categories")
+    .option("--tags <names>", "Comma-separated tags")
+    .action((id: string, opts: { categories: string; tags?: string }) =>
+      handle(
+        "assistant saved review",
+        () =>
+          reviewSavedLink(home(), {
+            id,
+            categories: opts.categories
+              .split(",")
+              .map((value) => value.trim())
+              .filter(Boolean),
+            ...(opts.tags !== undefined
+              ? {
+                  tags: opts.tags
+                    .split(",")
+                    .map((value) => value.trim())
+                    .filter(Boolean),
+                }
+              : {}),
+          }),
+        (data) => console.log(JSON.stringify(data, null, 2)),
+      ),
     );
 
   assistant
