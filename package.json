@@ -49,6 +49,8 @@
   "scripts": {
     "dev": "tsx src/cli.ts",
     "build": "tsc",
+    "web:dev": "npm run dev --prefix web",
+    "web:build": "npm run build --prefix web",
     "typecheck": "tsc --noEmit",
     "pretest": "tsc",
     "test": "vitest run",

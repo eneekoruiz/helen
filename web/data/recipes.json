@@ -1,0 +1,67 @@
+[
+  {
+    "id": "receta-1",
+    "name": "Pollo con Arroz y Verduras al Vapor",
+    "category": "Almuerzo",
+    "total_kcal": 650,
+    "total_protein": 52,
+    "total_carbs": 75,
+    "total_fats": 12,
+    "ingredients": [
+      { "name": "Pechuga de pollo", "amount": 200, "unit": "g", "kcal": 330, "protein": 62, "carbs": 0, "fats": 8 },
+      { "name": "Arroz blanco o integral", "amount": 80, "unit": "g", "kcal": 280, "protein": 6, "carbs": 62, "fats": 1 },
+      { "name": "Brócoli y zanahoria", "amount": 150, "unit": "g", "kcal": 40, "protein": 3, "carbs": 8, "fats": 0 }
+    ],
+    "instructions": "1. Cocer el arroz con una pizca de sal. 2. Cocinar la pechuga de pollo a la plancha con especias al gusto. 3. Saltear o cocinar las verduras al vapor. 4. Emplatar combinando los tres elementos.",
+    "tags": ["Alta proteína", "Fácil", "Comida limpia"]
+  },
+  {
+    "id": "receta-2",
+    "name": "Tortilla de Huevos con Avena y Plátano",
+    "category": "Desayuno",
+    "total_kcal": 510,
+    "total_protein": 32,
+    "total_carbs": 64,
+    "total_fats": 14,
+    "ingredients": [
+      { "name": "Huevos enteros", "amount": 2, "unit": "unidad", "kcal": 155, "protein": 13, "carbs": 1, "fats": 11 },
+      { "name": "Claras de huevo", "amount": 100, "unit": "ml", "kcal": 52, "protein": 11, "carbs": 1, "fats": 0 },
+      { "name": "Copos de avena", "amount": 50, "unit": "g", "kcal": 195, "protein": 8, "carbs": 33, "fats": 3 },
+      { "name": "Plátano maduro", "amount": 1, "unit": "unidad", "kcal": 108, "protein": 1, "carbs": 28, "fats": 0 }
+    ],
+    "instructions": "1. Triturar o mezclar la avena con las claras, los huevos y medio plátano. 2. Verter en sartén caliente antiadherente. 3. Servir con el resto del plátano en rodajas por encima.",
+    "tags": ["Desayuno", "Energía", "Avena"]
+  },
+  {
+    "id": "receta-3",
+    "name": "Pescado al Horno con Patata Asada",
+    "category": "Cena",
+    "total_kcal": 480,
+    "total_protein": 42,
+    "total_carbs": 48,
+    "total_fats": 11,
+    "ingredients": [
+      { "name": "Merluza o Dorada", "amount": 200, "unit": "g", "kcal": 180, "protein": 36, "carbs": 0, "fats": 4 },
+      { "name": "Patata mediana", "amount": 200, "unit": "g", "kcal": 160, "protein": 4, "carbs": 36, "fats": 0 },
+      { "name": "Aceite de oliva virgen extra", "amount": 10, "unit": "ml", "kcal": 90, "protein": 0, "carbs": 0, "fats": 10 }
+    ],
+    "instructions": "1. Cortar las patatas en rodajas finas y hornear a 190°C durante 20 min. 2. Añadir el pescado con un chorrito de AOVE, sal y limón. 3. Hornear 12-15 min adicionales.",
+    "tags": ["Cena ligera", "Bajo en grasa", "Fácil"]
+  },
+  {
+    "id": "receta-4",
+    "name": "Bol de Yogur Griego con Frutos Rojos y Nueces",
+    "category": "Snack",
+    "total_kcal": 280,
+    "total_protein": 22,
+    "total_carbs": 18,
+    "total_fats": 12,
+    "ingredients": [
+      { "name": "Yogur griego natural (o 0%)", "amount": 200, "unit": "g", "kcal": 130, "protein": 18, "carbs": 8, "fats": 4 },
+      { "name": "Arándanos o frambuesas", "amount": 80, "unit": "g", "kcal": 45, "protein": 1, "carbs": 10, "fats": 0 },
+      { "name": "Nueces picadas", "amount": 15, "unit": "g", "kcal": 105, "protein": 3, "carbs": 2, "fats": 10 }
+    ],
+    "instructions": "1. Servir el yogur en un bol. 2. Lavar y añadir los frutos rojos. 3. Espolvorear las nueces por encima y canela opcional.",
+    "tags": ["Snack", "Rápido", "Antioxidantes"]
+  }
+]
