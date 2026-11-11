@@ -92,7 +92,7 @@
   "author": "eneekoruiz",
   "license": "MIT",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.135.0",
+    "@anthropic-ai/sdk": "^1.6.0",
     "@clack/prompts": "^0.11.0",
     "@whiskeysockets/baileys": "^7.0.0-rc14",
     "cli-progress": "^3.12.0",
