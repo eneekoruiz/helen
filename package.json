@@ -1,6 +1,6 @@
 {
   "name": "helen-cli",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "HELEN — AI agent workflow kit: phase prompts, agent skills, playbooks and a vetted tool catalog, plus React + Vite + TypeScript scaffolding.",
   "type": "module",
   "bin": {
