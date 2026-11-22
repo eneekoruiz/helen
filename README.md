@@ -1,39 +1,50 @@
 # HELEN
 
-Herramienta de línea de comandos en Node.js y TypeScript para la gestión estructurada de flujos de trabajo de ingeniería, dossiers técnicos y optimización de contexto para agentes y desarrolladores.
+Command-line interface for structured engineering task tracking, context extraction, and workflow evaluation.
 
-## Características principales
+## Tech Stack
 
-- **Gestión de tareas (`helen work`):** Creación, planificación y verificación de dossiers técnicos con requisitos explícitos, exclusiones y criterios de aceptación.
-- **Preparación de contexto (`helen context`):** Extracción acotada de contexto de código relevante para tareas específicas, reduciendo consumo de tokens.
-- **Base de conocimiento (`helen knowledge`):** Búsqueda y reutilización de soluciones arquitectónicas y patrones técnicos documentados.
-- **Auditoría y calidad (`helen audit`):** Verificación automatizada de consistencia y preparación para entrega.
+- **Runtime & Language:** Node.js 18+, TypeScript
+- **CLI Framework:** Commander.js, `@clack/prompts`, Picocolors, Ora
+- **Validation & Templating:** Zod, Handlebars, `@anthropic-ai/sdk`
+- **Testing & Quality:** Vitest, ESLint, Prettier
 
-## Stack técnico
+## Architecture & Key Decisions
 
-- **Runtime:** Node.js 18+ / TypeScript.
-- **Librerías principales:** Commander.js, `@anthropic-ai/sdk`, `@clack/prompts`, Zod.
+- **Structured Task Records (`helen work`):** Manages explicit technical dossiers containing requirements, exclusions, and acceptance criteria in localized Markdown files.
+- **Context Filtering (`helen context`):** Extracts targeted code slices and dependencies for specific tasks to minimize token consumption in agentic workflows.
+- **Knowledge Catalog (`helen knowledge`):** Searchable index of architectural decision records and reusable engineering patterns.
+- **Evaluation Runner:** Automates prompt and skill evaluation suites against defined test cases with structured JSON test output.
 
-## Instalación y uso local
+## Local Setup
 
-1. Instalar dependencias:
-   ```bash
-   npm install
-   ```
+### Prerequisites
 
-2. Compilar el proyecto:
-   ```bash
-   npm run build
-   ```
+- Node.js 18+
 
-3. Ejecutar la CLI:
-   ```bash
-   node dist/index.js --help
-   ```
-
-Para enlazar el comando globalmente en desarrollo:
+### Installation & Build
 
 ```bash
+git clone https://github.com/eneekoruiz/helen.git
+cd helen
+npm install
+npm run build
+```
+
+### Usage
+
+```bash
+# Execute CLI directly
+node dist/index.js --help
+
+# Link globally for development
 npm link
 helen --help
+```
+
+### Verification
+
+```bash
+# Run type check, linter, formatting check, and unit tests
+npm run validate
 ```
