@@ -1,50 +1,57 @@
-# HELEN
+# HELEN · CLI de Flujos de Ingeniería y Optimización de Contexto
 
-Command-line interface for structured engineering task tracking, context extraction, and workflow evaluation.
+Herramienta de línea de comandos en Node.js y TypeScript diseñada para la gestión estructurada de flujos de trabajo de ingeniería, definición de dossiers técnicos y optimización de contexto de código para agentes de IA y desarrolladores.
 
-## Tech Stack
+- **Documentación de arquitectura:** [DeepWiki - helen](https://deepwiki.com/eneekoruiz/helen)
 
-- **Runtime & Language:** Node.js 18+, TypeScript
-- **CLI Framework:** Commander.js, `@clack/prompts`, Picocolors, Ora
-- **Validation & Templating:** Zod, Handlebars, `@anthropic-ai/sdk`
-- **Testing & Quality:** Vitest, ESLint, Prettier
+## Propósito y Valor Técnico
 
-## Architecture & Key Decisions
+HELEN proporciona una metodología rigurosa para estructurar el trabajo técnico, minimizando la ambigüedad en implementaciones de software complejas y optimizando el consumo de tokens al alimentar modelos de lenguaje con contexto de código estrictamente acotado.
 
-- **Structured Task Records (`helen work`):** Manages explicit technical dossiers containing requirements, exclusions, and acceptance criteria in localized Markdown files.
-- **Context Filtering (`helen context`):** Extracts targeted code slices and dependencies for specific tasks to minimize token consumption in agentic workflows.
-- **Knowledge Catalog (`helen knowledge`):** Searchable index of architectural decision records and reusable engineering patterns.
-- **Evaluation Runner:** Automates prompt and skill evaluation suites against defined test cases with structured JSON test output.
+- **Dossiers Técnicos Estructurados (`helen work`):** Creación y seguimiento de expedientes técnicos en archivos Markdown locales, definiendo de forma obligatoria requisitos explícitos, exclusiones deliberadas y criterios de aceptación medibles antes de picar código.
+- **Extracción Acotada de Contexto (`helen context`):** Algoritmos de filtrado e inspección de árbol sintáctico (AST) que extraen únicamente los fragmentos y dependencias de código relevantes para una tarea, reduciendo drásticamente el coste y la saturación de tokens en flujos agentic.
+- **Catálogo de Conocimiento y ADRs (`helen knowledge`):** Registro e indexación de decisiones arquitectónicas (Architectural Decision Records), patrones de diseño documentados y guías de buenas prácticas reutilizables.
+- **Ejecutor de Evaluaciones de Habilidades:** Suite automatizada para evaluar la precisión y coherencia de prompts y habilidades técnicas frente a casos de prueba definidos, con generadores de informes en formato JSON.
 
-## Local Setup
+## Stack Técnico
 
-### Prerequisites
+- **Runtime & Lenguaje:** Node.js 18+, TypeScript
+- **Framework CLI & Prompts:** Commander.js, `@clack/prompts`, Picocolors, Ora, `cli-progress`
+- **Validación & Plantillas:** Zod (validación de esquemas en tiempo de ejecución), Handlebars
+- **Integraciones:** `@anthropic-ai/sdk`
+- **Testing & Tooling:** Vitest (ejecutor de pruebas unitarias y cobertura), ESLint, Prettier
+
+## Puesta en Marcha Local
+
+### Prerrequisitos
 
 - Node.js 18+
 
-### Installation & Build
+### Instalación y Compilación
 
 ```bash
 git clone https://github.com/eneekoruiz/helen.git
 cd helen
 npm install
+
+# Compilar TypeScript a JavaScript ejecutable
 npm run build
 ```
 
-### Usage
+### Uso de la CLI
 
 ```bash
-# Execute CLI directly
+# Ejecución directa desde el binario compilado
 node dist/index.js --help
 
-# Link globally for development
+# Enlazar comando globalmente en el entorno local
 npm link
 helen --help
 ```
 
-### Verification
+### Verificación de Calidad
 
 ```bash
-# Run type check, linter, formatting check, and unit tests
+# Comprobación de tipos, linter, formateo y tests unitarios
 npm run validate
 ```
